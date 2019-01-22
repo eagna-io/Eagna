@@ -1,38 +1,53 @@
 import os
+import secrets
 import psycopg2
 
 class DB:
-    conn = None
+  conn = None
 
-    def __init__(self, conn):
-        self.conn = conn
+  def __init__(self, conn):
+    self.conn = conn
 
-    @classmethod
-    def init_with_env(cls):
-        uri = os.environ.get('DATABASE_URL')
-        return DB.init_with_uri(uri)
+  @classmethod
+  def init_with_env(cls):
+    uri = os.environ.get('DATABASE_URL')
+    return DB.init_with_uri(uri)
 
-    @classmethod
-    def init_with_uri(cls, uri):
-        return DB(psycopg2.connect(uri))
+  @classmethod
+  def init_with_uri(cls, uri):
+    return DB(psycopg2.connect(uri))
 
-    def commit(self):
-        self.conn.commit()
+  def commit(self):
+    self.conn.commit()
 
-    def query_users(self):
-        with self.conn.cursor() as cur:
-            cur.execute('SELECT * FROM users')
-            return [UserModel(user_id, name, hold_coin)
-                for (user_id, name, _, hold_coin)
-                in cur.fetchall()]
+  def query_users(self):
+    with self.conn.cursor() as cur:
+      cur.execute('SELECT * FROM users')
+      return [UserModel(name, hold_coin)
+      for (name, _, hold_coin)
+        in cur.fetchall()]
 
-    def update_user_hold_coins(self, users):
-        with self.conn.cursor() as cur:
-            for user in users:
-                cur.execute('UPDATE users SET hold_coin = %s where id = %s', (user.hold_coin, user.user_id))
+  def update_user_hold_coins(self, users):
+    with self.conn.cursor() as cur:
+      for user in users:
+        cur.execute('UPDATE users SET hold_coin = %s where name = %s', (user.hold_coin, user.name))
+
+  def check_login(self, user, hashedPass):
+    with self.conn.cursor() as cur:
+      cur.execute('SELECT name FROM users WHERE name = %s AND hashed_pass = %s', (user, hashedPass))
+      name = cur.fetchone()
+      if name == None:
+        return False
+      else:
+        return True
+
+  def create_access_token(self, name, now):
+    token = secrets.token_hex(8)
+    with self.conn.cursor() as cur:
+      cur.execute('INSERT INTO access_tokens (token, user_name, is_valid, created_at) VALUES (%s, %s, %s, %s)', (token, name, True, now))
+    return token
 
 class UserModel:
-    def __init__(self, user_id, name, hold_coin):
-        self.user_id = user_id
+    def __init__(self, name, hold_coin):
         self.name = name
         self.hold_coin = hold_coin

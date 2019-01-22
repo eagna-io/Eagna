@@ -43,3 +43,6 @@ prepare-test:
 
 test:
 	DATABASE_URL=$(PG_URI) python3 -m unittest discover tests
+
+run:
+	DATABASE_URL=$(PG_URI) python3 main.py
