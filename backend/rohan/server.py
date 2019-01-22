@@ -37,6 +37,10 @@ def failure(result):
     "result": result,
   }
 
+class CORSMiddleware():
+  def process_request(self, req, resp):
+    resp.set_header('Access-Control-Allow-Origin', '*')
+
 class Server():
   def __init__(self, db, url, port):
     self.db = db
@@ -44,7 +48,7 @@ class Server():
     self.port = port
 
   def serve_forever(self):
-    app = falcon.API()
+    app = falcon.API(middleware=[CORSMiddleware()])
     app.add_route("/login", LoginResource(self.db))
     httpd = simple_server.make_server(self.url, self.port, app)
     httpd.serve_forever()
