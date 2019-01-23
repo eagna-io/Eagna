@@ -1,7 +1,7 @@
 import json
 from rohan.market import Market
 from rohan.db import DB
-from rohan.server import Server
+from rohan.api.server import Server
 
 f = open('market_def.json', 'r')
 market_defs = json.load(f)
