@@ -1,7 +1,4 @@
 from datetime import datetime, timezone
-from wsgiref import simple_server
-import falcon
-import json
 from . import response
 
 class LoginResource():
@@ -21,6 +18,7 @@ class LoginResource():
 
     now = int(datetime.now(timezone.utc).timestamp())
     access_token = self.db.create_access_token(user_name, now)
+    self.db.commit()
 
     resp.body = response.success(access_token)
     return
