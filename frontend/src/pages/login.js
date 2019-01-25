@@ -2,6 +2,9 @@ import React from 'react';
 import sha256 from 'js-sha256';
 import css from './login.css';
 
+/*
+ * onLoginSuccess
+ */
 export default class LoginPage extends React.Component {
   constructor(props) {
     super(props);
@@ -9,7 +12,7 @@ export default class LoginPage extends React.Component {
     this.onPressLogin = this.onPressLogin.bind(this);
     this.handleApiResponse = this.handleApiResponse.bind(this);
     this.state = {
-      userName: "hoge",
+      userName: "",
       password: "",
     };
   }
@@ -42,7 +45,8 @@ export default class LoginPage extends React.Component {
       alert("Login failed")
       return
     }
-    alert("login success!!!!!")
+    const token = res.result
+    this.props.onLoginSuccess(token)
   }
 
   render() {
