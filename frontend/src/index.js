@@ -8,6 +8,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.onLoginSuccess = this.onLoginSuccess.bind(this);
+    this.fetchMyInfo = this.fetchMyInfo.bind(this);
+    this.setMyInfo = this.setMyInfo.bind(this);
     this.state = {
       accessToken: props.accessToken,
     };
@@ -18,17 +20,17 @@ class App extends React.Component {
     this.setState({
       accessToken: accessToken,
     });
-    this.fetchUserInfo()
+    this.fetchMyInfo()
   }
 
-  fetchUserInfo() {
+  fetchMyInfo() {
     if (this.state.accessToken === undefined) {
       return;
     }
-    fetch("http://localhost:8099/users?access_token="+this.state.accessToken)
+    fetch("http://localhost:8099/me?access_token="+this.state.accessToken)
       .then(res => res.json())
       .then(
-        this.setUserInfo,
+        this.setMyInfo,
         err => {
           console.log("Failed to fetch user data")
           alert("something went wrong")
@@ -36,17 +38,17 @@ class App extends React.Component {
       )
   }
 
-  setUserInfo(res) {
+  setMyInfo(res) {
     if (res.success == false) {
       console.log("Failed to fetch user data")
       alert("something went wrong")
       return;
     }
-    const user = res.result.user
+    const user = res.result
     this.setState({
       user: {
         name: user.name,
-        holdCoin: user.holdCoin,
+        coins: user.hold_coin,
       },
     });
   }
