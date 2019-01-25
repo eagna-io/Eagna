@@ -1,6 +1,6 @@
 from . import response
 
-class UserResource():
+class MeResource():
   def __init__(self, db):
     self.db = db
 
