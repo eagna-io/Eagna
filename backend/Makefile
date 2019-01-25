@@ -23,11 +23,8 @@ run-sql-on-db:
 initialize-db:
 	$(MAKE) run-sql-on-db SQL=initialize.sql
 
-feed-data-to-db: demo_data.sql
-	$(MAKE) run-sql-on-db SQL=demo_data.sql
-
-demo_data.sql: demo_data.csv
-	./csv2sql.sh demo_data.csv > demo_data.sql
+tests/data/demo_data.sql: tests/data/demo_data.csv
+	tests/data/csv2sql.sh $< > $@
 
 connect-db:
 	docker run -it --rm -e PGPASSWORD=$(PG_PASS) --link $(DOCKER_PG_NAME):$(DOCKER_PG_NAME) postgres psql -h $(DOCKER_PG_NAME) -U $(PG_USER) -d $(PG_DATA)
@@ -35,11 +32,11 @@ connect-db:
 echo-db-uri:
 	echo $(PG_URI)
 
-prepare-test:
+prepare-test: tests/data/demo_data.sql
 	$(MAKE) restart-db
 	sleep 5
 	$(MAKE) initialize-db
-	$(MAKE) feed-data-to-db
+	$(MAKE) run-sql-on-db SQL=$<
 
 test:
 	DATABASE_URL=$(PG_URI) python3 -m unittest discover tests
