@@ -23,7 +23,7 @@ run-sql-on-db:
 initialize-db:
 	$(MAKE) run-sql-on-db SQL=initialize.sql
 
-tests/data/demo_data.sql: tests/data/demo_data.csv
+tests/data/test_data.sql: tests/data/test_data.csv
 	tests/data/csv2sql.sh $< > $@
 
 connect-db:
@@ -32,7 +32,7 @@ connect-db:
 echo-db-uri:
 	echo $(PG_URI)
 
-prepare-test: tests/data/demo_data.sql
+prepare-test: tests/data/test_data.sql
 	$(MAKE) restart-db
 	sleep 5
 	$(MAKE) initialize-db
