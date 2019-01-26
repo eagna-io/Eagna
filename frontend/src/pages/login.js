@@ -1,16 +1,16 @@
 import React from 'react';
-import sha256 from 'js-sha256';
+import { connect } from 'react-redux';
+import { requestLogin } from '../actions';
 import css from './login.css';
 
 /*
  * onLoginSuccess
  */
-export default class LoginPage extends React.Component {
+class LoginPage extends React.Component {
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.onPressLogin = this.onPressLogin.bind(this);
-    this.handleApiResponse = this.handleApiResponse.bind(this);
     this.state = {
       userName: "",
       password: "",
@@ -27,17 +27,8 @@ export default class LoginPage extends React.Component {
   onPressLogin(event) {
     event.preventDefault(); 
     const name = this.state.userName;
-    const pass = sha256(this.state.password);
-    console.log(this.state)
-    fetch("http://localhost:8099/login?user="+name+"&pass="+pass)
-      .then(res => res.json())
-      .then(
-        this.handleApiResponse, // on success
-        err => {
-          console.err("Login error : " + err)
-          alert("something went wrong")
-        }
-      )
+    const rawPass = this.state.password;
+    this.props.requestLogin(name, rawPass);
   }
 
   handleApiResponse(res) {
@@ -50,25 +41,48 @@ export default class LoginPage extends React.Component {
   }
 
   render() {
-    return (
-      <div className={css.container}>
-        <div className={css.title}>ROHAN MARKET</div>
-        <input
-          className={css.input}
-          type="text"
-          name="userName"
-          placeholder="User Name"
-          onChange={this.handleChange} />
-        <input
-          className={css.input}
-          type="text"
-          name="password"
-          placeholder="Password"
-          onChange={this.handleChange} />
-        <button
-          className={css.button}
-          onClick={this.onPressLogin}>Login</button>
-      </div>
-    );
+    if (this.props.isRequesting) {
+      return <h3>Requesting...</h3>
+    } else {
+      return (
+        <div className={css.container}>
+          <div className={css.title}>ROHAN MARKET</div>
+          <input
+            className={css.input}
+            type="text"
+            name="userName"
+            placeholder="User Name"
+            onChange={this.handleChange} />
+          <input
+            className={css.input}
+            type="text"
+            name="password"
+            placeholder="Password"
+            onChange={this.handleChange} />
+          <button
+            className={css.button}
+            onClick={this.onPressLogin}>Login</button>
+        </div>
+      );
+    }
   }
 }
+
+function mapStateToProps(state) {
+  return {
+    isRequesting: state.login.isRequesting,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    requestLogin: (name, rawPass) => {
+      dispatch(requestLogin(name, rawPass))
+    }
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LoginPage)

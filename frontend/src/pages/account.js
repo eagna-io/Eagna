@@ -1,11 +1,19 @@
 import React from 'react';
+import { connect } from 'react-redux';
+
+import { requestMe } from '../actions';
 import css from './account.css';
 
-export default class AccountPage extends React.Component {
+class AccountPage extends React.Component {
+  constructor(props) {
+    super(props);
+    const token = this.props.token;
+    this.props.requestMe(token);
+  }
+
   render() {
-    const user = this.props.user;
-    const name = user === undefined ? "-" : user.name;
-    const coins = user === undefined ? "-" : user.coins;
+    const name = this.props.name;
+    const coins = this.props.coins;
     return (
       <div className={css.container}>
         <div className={css.row}>
@@ -37,3 +45,23 @@ export default class AccountPage extends React.Component {
     );
   }
 }
+
+function mapStateToProps(state) {
+  return {
+    token: state.login.accessToken,
+    name: state.me.name,
+    coins: state.me.coins,
+    markets: state.me.markets,
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    requestMe: token => dispatch(requestMe(token))
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AccountPage)
