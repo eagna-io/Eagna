@@ -7,7 +7,7 @@ export const REQUEST_ME = "RequestMe";
 export const RECEIVE_ME_FAILED = "ReceiveMe";
 export const RECEIVE_ME_SUCCESS = "ReceiveMeSuccess";
 
-const apiBase = 'http://localhost:8099/';
+const apiBase = process.env.API_BASE;
 
 export function requestLogin(name, rawPass) {
   const action = {
