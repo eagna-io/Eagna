@@ -21,5 +21,5 @@ class MeResource():
 def user_to_response(user):
   return {
     "name": user.name,
-    "hold_coin": user.hold_coin,
+    "coins": user.coins,
   }

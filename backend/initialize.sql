@@ -1,7 +1,7 @@
 CREATE TABLE users (
   name        text UNIQUE NOT NULL,
   hashed_pass text NOT NULL,
-  hold_coin   integer DEFAULT 0
+  coins       integer DEFAULT 0
 );
 
 CREATE TABLE access_tokens (

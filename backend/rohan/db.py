@@ -24,13 +24,13 @@ class DB:
   def query_users(self):
     with self.conn.cursor() as cur:
       cur.execute('SELECT * FROM users')
-      return [UserModel(name, hold_coin)
-      for (name, _, hold_coin)
+      return [UserModel(name, coins)
+      for (name, _, coins)
         in cur.fetchall()]
 
-  def update_user_hold_coin(self, user):
+  def update_user_coins(self, user):
     with self.conn.cursor() as cur:
-      cur.execute('UPDATE users SET hold_coin = %s where name = %s', (user.hold_coin, user.name))
+      cur.execute('UPDATE users SET coins = %s where name = %s', (user.coins, user.name))
 
   def check_login(self, user, hashedPass):
     with self.conn.cursor() as cur:
@@ -51,15 +51,15 @@ class DB:
     now = int(datetime.now(timezone.utc).timestamp())
     expired_time = now - (60 * 60)
     with self.conn.cursor() as cur:
-      cur.execute('SELECT users.name, users.hold_coin FROM users INNER JOIN access_tokens ON users.name = access_tokens.user_name WHERE access_tokens.token = %s AND access_tokens.is_valid = True AND access_tokens.created_at > %s', (token, expired_time))
+      cur.execute('SELECT users.name, users.coins FROM users INNER JOIN access_tokens ON users.name = access_tokens.user_name WHERE access_tokens.token = %s AND access_tokens.is_valid = True AND access_tokens.created_at > %s', (token, expired_time))
       res = cur.fetchone()
       if res == None:
         return None
       else:
-        (name, hold_coin) = res
-        return UserModel(name, hold_coin)
+        (name, coins) = res
+        return UserModel(name, coins)
 
 class UserModel:
-    def __init__(self, name, hold_coin):
+    def __init__(self, name, coins):
         self.name = name
-        self.hold_coin = hold_coin
+        self.coins = coins

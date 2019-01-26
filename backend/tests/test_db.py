@@ -9,18 +9,18 @@ class TestDB(TestCase):
     res = db.query_users()
     self.assertEqual(len(res), 2)
 
-  def test_update_user_hold_coins(self):
+  def test_update_user_coins(self):
     db = DB.init_with_env()
     users = db.query_users()
 
-    users[0].hold_coin = 50
-    users[1].hold_coin = 100
+    users[0].coins = 50
+    users[1].coins = 100
     for user in users:
-      db.update_user_hold_coin(user)
+      db.update_user_coins(user)
 
     res = db.query_users()
-    self.assertEqual(res[0].hold_coin, 50)
-    self.assertEqual(res[1].hold_coin, 100)
+    self.assertEqual(res[0].coins, 50)
+    self.assertEqual(res[1].coins, 100)
 
   def test_check_login(self):
     db = DB.init_with_env()

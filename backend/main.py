@@ -21,8 +21,8 @@ db = DB.init_with_env()
 users = db.query_users()
 coin_per_user = market.initial_coin_issue / len(users)
 for user in users:
-  user.hold_coin = coin_per_user
-  db.update_user_hold_coin(user)
+  user.coins = coin_per_user
+  db.update_user_coins(user)
 
 # API server の起動
 server = Server(db, "127.0.0.1", 8099)
