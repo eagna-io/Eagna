@@ -8,17 +8,17 @@ import css from './account.css';
 class AccountPage extends React.Component {
   constructor(props) {
     super(props);
-    if (this.props.token !== undefined) {
+    if (this.props.token != null) {
       this.props.requestMe(this.props.token);
     }
   }
 
   render() {
-    if (this.props.token === undefined) {
+    if (this.props.token == null) {
       return <Redirect to="/login" />
     }
-    const name = this.props.name === undefined ? "-" : this.props.name;
-    const coins = this.props.coins === undefined ? 0 : this.props.coins;
+    const name = this.props.name == null ? "-" : this.props.name;
+    const coins = this.props.coins == null ? 0 : this.props.coins;
     return (
       <div className={css.container}>
         <div className={css.row}>
@@ -53,7 +53,8 @@ class AccountPage extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    token: state.login.accessToken,
+    isRequesting: state.pages.me.isRequesting,
+    token: state.me.accessToken,
     name: state.me.name,
     coins: state.me.coins,
     markets: state.me.markets,

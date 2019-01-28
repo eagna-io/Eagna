@@ -44,7 +44,7 @@ class LoginPage extends React.Component {
   }
 
   render() {
-    if (this.props.accessToken !== undefined) {
+    if (this.props.accessToken != null) {
       return <Redirect to="/me" />
     }
     if (this.props.isRequesting) {
@@ -77,8 +77,8 @@ class LoginPage extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    isRequesting: state.login.isRequesting,
-    accessToken: state.login.accessToken,
+    isRequesting: state.pages.login.isRequesting,
+    accessToken: state.me.accessToken,
   }
 }
 

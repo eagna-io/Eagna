@@ -16,6 +16,7 @@ const loggerMiddleware = createLogger();
 const persistConfig = {
   key: 'root',
   storage,
+  blacklist: ['pages'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

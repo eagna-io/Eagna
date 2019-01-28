@@ -8,60 +8,36 @@ import {
   RECEIVE_ME_SUCCESS
 } from './actions';
 
-const initialLoginState = {
-  isRequesting: false,
-  accessToken: undefined,
-};
 
-/* { isRequesting : bool
- * , accessToken : string
- * , }
- */
-function login(state = initialLoginState, action) {
-  switch (action.type) {
-    case REQUEST_LOGIN:
-      return {
-        isRequesting: true,
-        accessToken: undefined,
-      };
-    case RECEIVE_LOGIN_FAILED:
-      return {
-        isRequesting: false,
-        accessToken: undefined,
-      }
-    case RECEIVE_LOGIN_SUCCESS:
-      return {
-        isRequesting: false,
-        accessToken: action.payload.accessToken,
-      }
-    default:
-      return state;
-  }
-}
+/* --------- My Info -------- */
 
 const initialMeState = {
-  isRequesting: false,
-  name: undefined,
-  coins: undefined,
-  markets: undefined,
+  accessToken: null,
+  name: null,
+  coins: null,
+  markets: null,
 };
 
 function me(state = initialMeState, action) {
   switch (action.type) {
-    case REQUEST_ME:
+    case REQUEST_LOGIN:
       return {
         ...state,
-        isRequesting: true,
+        accessToken: null,
       };
+    case RECEIVE_LOGIN_SUCCESS:
+      return {
+        ...state,
+        accessToken: action.payload.accessToken,
+      }
     case RECEIVE_ME_FAILED:
       return {
         ...state,
-        isRequesting: false,
+        accessToken: null,
       };
     case RECEIVE_ME_SUCCESS:
       return {
         ...state,
-        isRequesting: false,
         name: action.payload.name,
         coins: action.payload.coins,
         markets: action.payload.markets,
@@ -71,7 +47,65 @@ function me(state = initialMeState, action) {
   }
 }
 
+
+/* --------- Login Page -------- */
+
+const initialLoginPageState = {
+  isRequesting: false,
+};
+
+function loginPage(state = initialLoginPageState, action) {
+  switch (action.type) {
+    case REQUEST_LOGIN:
+      return {
+        isRequesting: true,
+      };
+    case RECEIVE_LOGIN_FAILED:
+      return {
+        isRequesting: false,
+      }
+    case RECEIVE_LOGIN_SUCCESS:
+      return {
+        isRequesting: false,
+      }
+    default:
+      return state;
+  }
+}
+
+
+/* --------- Me Page -------- */
+
+const initialMePageState = {
+  isRequesting: false,
+};
+
+function mePage(state = initialMePageState, action) {
+  switch (action.type) {
+    case REQUEST_ME:
+      return {
+        isRequesting: true,
+      };
+    case RECEIVE_ME_FAILED:
+      return {
+        isRequesting: false,
+      }
+    case RECEIVE_ME_SUCCESS:
+      return {
+        isRequesting: false,
+      }
+    default:
+      return state;
+  }
+}
+
+
+/* ------------- Root ------------- */
+
 export const rootReducer = combineReducers({
-  login,
-  me
+  me: me,
+  pages: combineReducers({
+    login: loginPage,
+    me: mePage,
+  })
 })
