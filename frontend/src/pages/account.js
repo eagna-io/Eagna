@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Redirect } from 'react-router-dom';
 
 import { requestMe } from '../actions';
 import css from './account.css';
@@ -7,13 +8,17 @@ import css from './account.css';
 class AccountPage extends React.Component {
   constructor(props) {
     super(props);
-    const token = this.props.token;
-    this.props.requestMe(token);
+    if (this.props.token !== undefined) {
+      this.props.requestMe(this.props.token);
+    }
   }
 
   render() {
-    const name = this.props.name;
-    const coins = this.props.coins;
+    if (this.props.token === undefined) {
+      return <Redirect to="/login" />
+    }
+    const name = this.props.name === undefined ? "-" : this.props.name;
+    const coins = this.props.coins === undefined ? 0 : this.props.coins;
     return (
       <div className={css.container}>
         <div className={css.row}>

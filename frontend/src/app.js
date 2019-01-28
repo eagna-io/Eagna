@@ -1,4 +1,10 @@
 import React from 'react';
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect
+} from "react-router-dom";
 import { connect } from 'react-redux';
 
 import LoginPage from './pages/login';
@@ -7,29 +13,18 @@ import css from './app.css';
 
 class App extends React.Component {
   render() {
-    if (this.props.needLogin) {
-      return (
-        <div id={css.app}>
-          <LoginPage />
-        </div>
-      );
-    } else {
-      return (
-        <div id={css.app}>
-          <AccountPage />
-        </div>
-      );
-    }
-  }
-}
-
-function mapStateToProps(state) {
-  return {
-    needLogin: state.login.accessToken == "",
+    return (
+      <Router>
+        <Switch>
+          <Route path="/login" component={LoginPage} />
+          <Route path="/me" component={AccountPage} />
+        </Switch>
+      </Router>
+    )
   }
 }
 
 export default connect(
-  mapStateToProps,
+  null,
   null,
 )(App)

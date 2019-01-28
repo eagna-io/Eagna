@@ -10,7 +10,7 @@ import {
 
 const initialLoginState = {
   isRequesting: false,
-  accessToken: "",
+  accessToken: undefined,
 };
 
 /* { isRequesting : bool
@@ -22,12 +22,12 @@ function login(state = initialLoginState, action) {
     case REQUEST_LOGIN:
       return {
         isRequesting: true,
-        accessToken: "",
+        accessToken: undefined,
       };
     case RECEIVE_LOGIN_FAILED:
       return {
         isRequesting: false,
-        accessToken: "",
+        accessToken: undefined,
       }
     case RECEIVE_LOGIN_SUCCESS:
       return {
@@ -41,9 +41,9 @@ function login(state = initialLoginState, action) {
 
 const initialMeState = {
   isRequesting: false,
-  name: "-",
-  coins: 0,
-  markets: [],
+  name: undefined,
+  coins: undefined,
+  markets: undefined,
 };
 
 function me(state = initialMeState, action) {
