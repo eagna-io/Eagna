@@ -11,7 +11,8 @@ import css from './login.css';
 class LoginPage extends React.Component {
   constructor(props) {
     super(props);
-    this.handleChange = this.handleChange.bind(this);
+    this.onChange = this.onChange.bind(this);
+    this.onKeyPress = this.onKeyPress.bind(this);
     this.onPressLogin = this.onPressLogin.bind(this);
     this.state = {
       userName: "",
@@ -19,11 +20,20 @@ class LoginPage extends React.Component {
     };
   }
 
-  handleChange(event) {
+  onChange(event) {
     const target = event.target;
     this.setState({
       [target.name]: target.value
     })
+  }
+
+  onKeyPress(event) {
+    if (event.which == 13) {
+      event.preventDefault();
+      const name = this.state.userName;
+      const rawPass = this.state.password;
+      this.props.requestLogin(name, rawPass);
+    }
   }
 
   onPressLogin(event) {
@@ -48,13 +58,15 @@ class LoginPage extends React.Component {
           type="text"
           name="userName"
           placeholder="User Name"
-          onChange={this.handleChange} />
+          onChange={this.onChange} 
+          onKeyPress={this.onKeyPress} />
         <input
           className={css.input}
           type="text"
           name="password"
           placeholder="Password"
-          onChange={this.handleChange} />
+          onChange={this.onChange}
+          onKeyPress={this.onKeyPress} />
         <button
           className={css.button}
           onClick={this.onPressLogin}>Login</button>
