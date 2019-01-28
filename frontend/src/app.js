@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 import LoginPage from './pages/login';
 import AccountPage from './pages/account';
-import css from './index.css';
+import css from './app.css';
 
 class App extends React.Component {
   render() {
