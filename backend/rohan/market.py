@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict
 
 class Market():
@@ -30,6 +30,15 @@ class Market():
       initial_coin_issue = int(json["coin_info"]["initial_coin_issue"])
     )
 
+  def status(self):
+    now = datetime.now(timezone.utc)
+    if now < self.opening_time:
+      return "Preparing"
+    elif now < self.closing_time:
+      return "Open"
+    else:
+      return "Closed"
+
   def __str__(self):
     return str(self.toDict())
 
@@ -40,5 +49,6 @@ class Market():
           "opening_time":         str(self.opening_time),
           "closing_time":         str(self.closing_time),
           "outcomes":             self.outcomes,
-          "initial_coin_issue":   self.initial_coin_issue
+          "initial_coin_issue":   self.initial_coin_issue,
+          "status":               self.status(),
       }
