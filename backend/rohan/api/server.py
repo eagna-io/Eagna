@@ -4,6 +4,7 @@ import falcon
 import json
 from .login import LoginResource
 from .me import MeResource
+from .market import MarketResource
 
 class CORSMiddleware():
   def process_request(self, req, resp):
@@ -20,5 +21,6 @@ class Server():
     app = falcon.API(middleware=[CORSMiddleware()])
     app.add_route("/login", LoginResource(self.db))
     app.add_route("/me", MeResource(self.db, self.market))
+    app.add_route("/market", MarketResource(self.market))
     httpd = simple_server.make_server(self.url, self.port, app)
     httpd.serve_forever()
