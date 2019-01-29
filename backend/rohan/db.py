@@ -32,9 +32,9 @@ class DB:
     with self.conn.cursor() as cur:
       cur.execute('UPDATE users SET coins = %s where name = %s', (user.coins, user.name))
 
-  def check_login(self, user, hashedPass):
+  def check_login(self, user, hashed_pass):
     with self.conn.cursor() as cur:
-      cur.execute('SELECT name FROM users WHERE name = %s AND hashed_pass = %s', (user, hashedPass))
+      cur.execute('SELECT name FROM users WHERE name = %s AND hashed_pass = %s', (user, hashed_pass))
       name = cur.fetchone()
       if name == None:
         return False

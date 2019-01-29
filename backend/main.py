@@ -7,14 +7,7 @@ from rohan.api.server import Server
 # Market情報の読み込み
 f = open('market_def.json', 'r')
 market_defs = json.load(f)
-market = Market(
-    title = market_defs["title"],
-    desc = market_defs["desc"],
-    opening_time = market_defs["opening_time"],
-    closing_time = market_defs["closing_time"],
-    outcomes = market_defs["outcomes"],
-    initial_coin_issue = market_defs["coin_info"]["initial_coin_issue"]
-)
+market = Market.init_with_json(market_defs)
 
 db = DB.init_with_env()
 
