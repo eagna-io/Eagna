@@ -1,8 +1,9 @@
 from . import response
 
 class MeResource():
-  def __init__(self, db):
+  def __init__(self, db, market):
     self.db = db
+    self.market = market
 
   def on_get(self, req, resp):
     access_token = req.params.get("access_token")
@@ -15,11 +16,12 @@ class MeResource():
       resp.body = response.failure("invalid access token")
       return
 
-    resp.body = response.success(user_to_response(user))
+    resp.body = response.success(user_to_response(user, self.market))
     return
 
-def user_to_response(user):
+def user_to_response(user, market):
   return {
     "name": user.name,
     "coins": user.coins,
+    "markets": [market.toDict()],
   }

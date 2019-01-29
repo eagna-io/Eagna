@@ -29,5 +29,5 @@ for user in users:
 bind_host = os.getenv('BIND_HOST', '127.0.0.1')
 bind_port = os.getenv('BIND_PORT', 8000)
 print(f"Server start on {bind_host}:{bind_port}")
-server = Server(db, bind_host, bind_port)
+server = Server(db, market, bind_host, bind_port)
 server.serve_forever()
