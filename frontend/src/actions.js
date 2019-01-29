@@ -65,10 +65,7 @@ export function receiveMe(json) {
   } else {
     return {
       type: RECEIVE_ME_SUCCESS,
-      payload: {
-        name: json.result.name,
-        coins: json.result.coins,
-      }
+      payload: json.result,
     };
   }
 }

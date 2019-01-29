@@ -19,6 +19,7 @@ class AccountPage extends React.Component {
     }
     const name = this.props.name == null ? "-" : this.props.name;
     const coins = this.props.coins == null ? 0 : this.props.coins;
+    const markets = this.props.markets == null ? [] : this.props.markets;
     return (
       <div className={css.container}>
         <div className={css.row}>
@@ -39,12 +40,14 @@ class AccountPage extends React.Component {
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
+          {markets.map(market =>
+          <tbody key={market.title}>
             <tr>
-              <td>Who will win the Tennis Australian Open 2018?</td>
-              <td>Opened</td>
+              <td>{market.title}</td>
+              <td>{market.status}</td>
             </tr>
           </tbody>
+          )}
         </table>
       </div>
     );
