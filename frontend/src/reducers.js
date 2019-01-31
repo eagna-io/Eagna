@@ -52,6 +52,7 @@ function me(state = initialMeState, action) {
 
 const initialLoginPageState = {
   isRequesting: false,
+  showFailed: false,
 };
 
 function loginPage(state = initialLoginPageState, action) {
@@ -59,14 +60,17 @@ function loginPage(state = initialLoginPageState, action) {
     case REQUEST_LOGIN:
       return {
         isRequesting: true,
+        showFailed: false,
       };
     case RECEIVE_LOGIN_FAILED:
       return {
         isRequesting: false,
+        showFailed: true,
       }
     case RECEIVE_LOGIN_SUCCESS:
       return {
         isRequesting: false,
+        showFailed: false,
       }
     default:
       return state;

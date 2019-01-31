@@ -50,9 +50,11 @@ class LoginPage extends React.Component {
     if (this.props.isRequesting) {
       return <h3>Requesting...</h3>
     }
+    const failedMessage = this.props.showFailed ? <h3>username or password is incorrect</h3> : null
     return (
       <div className={css.container}>
         <div className={css.title}>ROHAN MARKET</div>
+        { failedMessage }
         <input
           className={css.input}
           type="text"
@@ -78,6 +80,7 @@ class LoginPage extends React.Component {
 function mapStateToProps(state) {
   return {
     isRequesting: state.pages.login.isRequesting,
+    showFailed: state.pages.login.showFailed,
     accessToken: state.me.accessToken,
   }
 }
