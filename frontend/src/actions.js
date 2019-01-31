@@ -4,24 +4,25 @@ export const REQUEST_LOGIN = "RequestLogin";
 export const RECEIVE_LOGIN_FAILED = "ReceiveLoginFailed";
 export const RECEIVE_LOGIN_SUCCESS = "ReceiveLoginSuccess";
 export const REQUEST_ME = "RequestMe";
-export const RECEIVE_ME_FAILED = "ReceiveMe";
+export const RECEIVE_ME_FAILED = "ReceiveMeFailed";
 export const RECEIVE_ME_SUCCESS = "ReceiveMeSuccess";
 
 const apiBase = process.env.API_BASE;
 
 export function requestLogin(name, rawPass) {
-  const action = {
-    type: REQUEST_LOGIN
-  };
   return function(dispatch) {
-    dispatch(action);
+    dispatch({
+      type: REQUEST_LOGIN
+    });
     const hashedPass = sha256(rawPass);
     return fetch(`${apiBase}/login?user=${name}&pass=${hashedPass}`)
-      .then(
-        res => res.json(),
-        err => console.log('Error while request login', err)
-      )
+      .then(res => res.json())
       .then(json => dispatch(receiveLogin(json)))
+      .catch(err => dispatch({
+          type: RECEIVE_LOGIN_FAILED,
+          payload: "Connection is refused",
+        })
+      )
   }
 }
 
@@ -42,17 +43,18 @@ export function receiveLogin(json) {
 }
 
 export function requestMe(token) {
-  const action = {
-    type: REQUEST_ME
-  };
   return function(dispatch) {
-    dispatch(action);
+    dispatch({
+      type: REQUEST_ME
+    });
     return fetch(`${apiBase}/me?access_token=${token}`)
-      .then(
-        res => res.json(),
-        err => console.log('Error while request me.', err)
-      )
+      .then(res => res.json())
       .then(json => dispatch(receiveMe(json)))
+      .catch(err => dispatch({
+          type: RECEIVE_ME_FAILED,
+          payload: "Connection is refused",
+        })
+      )
   }
 }
 
