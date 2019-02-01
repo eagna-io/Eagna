@@ -6,10 +6,10 @@ import {
   Redirect
 } from "react-router-dom";
 import { connect } from 'react-redux';
+import styled from 'styled-components';
 
 import LoginPage from './pages/login';
 import AccountPage from './pages/account';
-import css from './app.css';
 
 class App extends React.Component {
   render() {

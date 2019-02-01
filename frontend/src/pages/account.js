@@ -1,9 +1,62 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { requestMe } from '../actions';
-import css from './account.css';
+
+const Container = styled.div`
+  width: 40vw;
+  margin-left: 30vw;
+  margin-top: 20vh;
+`;
+
+const Item = styled.div`
+  height: 50px;
+  border-bottom: solid 3px #84B6F9;
+  margin-top: 60px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: flex-end;
+`;
+
+const Key = styled.div`
+  display: inline-block;
+  text-align: left;
+  color: #84B6F9;
+  font-size: 20px;
+  font-weight: bold;
+`;
+
+const Val = styled.div`
+  display: inline-block;
+  text-align: right;
+  color: gray;
+  font-size: 30px;
+  font-weight: bold;
+`;
+
+const SmallText = styled.span`
+  font-size: 20px;
+  margin-left: 10px;
+  font-weight: normal;
+`;
+
+const MarketList = styled.table`
+  margin-top: 5px;
+`;
+
+const MarketListHeader = styled.th`
+  width: 100%;
+  background-color: #E0E0E0;
+  color: gray;
+`;
+
+const MarketListItem = styled.td`
+  padding: 5px;
+  font-weight: bold;
+`;
 
 class AccountPage extends React.Component {
   constructor(props) {
@@ -21,35 +74,35 @@ class AccountPage extends React.Component {
     const coins = this.props.coins == null ? 0 : this.props.coins;
     const markets = this.props.markets == null ? [] : this.props.markets;
     return (
-      <div className={css.container}>
-        <div className={css.row}>
-          <div className={css.key}>Name</div>
-          <div className={css.val}>{name}</div>
-        </div>
-        <div className={css.row}>
-          <div className={css.key}>Coins</div>
-          <div className={css.val}>{coins}<span className={css.coins}>coins</span></div>
-        </div>
-        <div className={css.row}>
-          <div className={css.key}>Activities</div>
-        </div>
-        <table className={css.markets}>
+      <Container>
+        <Item>
+          <Key>Name</Key>
+          <Val>{name}</Val>
+        </Item>
+        <Item>
+          <Key>Coins</Key>
+          <Val>{coins}<SmallText>coins</SmallText></Val>
+        </Item>
+        <Item>
+          <Key>Activities</Key>
+        </Item>
+        <MarketList>
           <thead>
             <tr>
-              <th>Market</th>
-              <th>Status</th>
+              <MarketListHeader>Market</MarketListHeader>
+              <MarketListHeader>Status</MarketListHeader>
             </tr>
           </thead>
           {markets.map(market =>
           <tbody key={market.title}>
             <tr>
-              <td>{market.title}</td>
-              <td>{market.status}</td>
+              <MarketListItem>{market.title}</MarketListItem>
+              <MarketListItem>{market.status}</MarketListItem>
             </tr>
           </tbody>
           )}
-        </table>
-      </div>
+        </MarketList>
+      </Container>
     );
   }
 }

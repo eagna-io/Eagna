@@ -1,9 +1,39 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { requestLogin } from '../actions';
-import css from './login.css';
+
+const Container = styled.div`
+  margin-top: 30vh;
+  margin-left: 30vw;
+  width: 40vw;
+`;
+
+const Title = styled.div`
+  color: #84B6F9;
+  margin-left: 30vw;
+  width: 40vw;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  height: 40px;
+  margin-top: 20px;
+  font-size: 20px;
+  padding-left: 10px;
+`;
+
+const SubmitButton = styled.button`
+  width: 100%;
+  height: 50px;
+  margin-top: 20px;
+  background-color: #84B6F9;
+  color: white;
+  font-size: 20px;
+  font-family: "Arial";
+`;
 
 /*
  * onLoginSuccess
@@ -52,27 +82,26 @@ class LoginPage extends React.Component {
     }
     const failedMessage = this.props.showFailed ? <h3>username or password is incorrect</h3> : null
     return (
-      <div className={css.container}>
-        <div className={css.title}>ROHAN MARKET</div>
+      <Container>
+        <Title>ROHAN MARKET</Title>
         { failedMessage }
-        <input
-          className={css.input}
+        <Input
           type="text"
           name="userName"
           placeholder="User Name"
           onChange={this.onChange} 
           onKeyPress={this.onKeyPress} />
-        <input
-          className={css.input}
+        <Input
           type="text"
           name="password"
           placeholder="Password"
           onChange={this.onChange}
           onKeyPress={this.onKeyPress} />
-        <button
-          className={css.button}
-          onClick={this.onPressLogin}>Login</button>
-      </div>
+        <SubmitButton
+          onClick={this.onPressLogin}>
+            Login
+        </SubmitButton>
+      </Container>
     );
   }
 }
