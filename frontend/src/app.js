@@ -10,6 +10,7 @@ import styled from 'styled-components';
 
 import LoginPage from './pages/login';
 import AccountPage from './pages/account';
+import MarketPage from './pages/market';
 
 class App extends React.Component {
   render() {
@@ -18,6 +19,7 @@ class App extends React.Component {
         <Switch>
           <Route path="/login" component={LoginPage} />
           <Route path="/me" component={AccountPage} />
+          <Route path="/market" component={MarketPage} />
         </Switch>
       </Router>
     )
