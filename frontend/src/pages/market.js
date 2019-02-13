@@ -5,11 +5,13 @@ import styled from 'styled-components';
 import Header from '../components/header';
 import MarketHeader from './market/header';
 import TokensComponent from './market/tokens';
+import OrderComponent from './market/order';
+import AssetsComponent from './market/assets';
 import DescComponent from './market/description';
 
 export default function MarketPage(props) {
   return (
-    <Container>
+    <Page>
       <Header />
       <MarketHeader
         title={market.title}
@@ -18,13 +20,17 @@ export default function MarketPage(props) {
         closeTime={market.closeTime} />
       <Contents>
         <Tokens tokens={market.tokens} />
+        <OrderContainer>
+          <Order tokens={market.tokens} />
+          <Assets assets={me.assets} />
+        </OrderContainer>
         <Description content={description}/>
       </Contents>
-    </Container>
+    </Page>
   )
 }
 
-const Container = styled.div`
+const Page = styled.div`
   width: 100vw;
   background-color: white;
 `;
@@ -37,6 +43,18 @@ const Contents = styled.div`
 
 const Tokens = styled(TokensComponent)`
   margin-top: 50px;
+`;
+
+const OrderContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+`;
+
+const Order = styled(OrderComponent)`
+`;
+
+const Assets = styled(AssetsComponent)`
 `;
 
 const Description = styled(DescComponent)`
@@ -66,6 +84,27 @@ const market = {
     }
   ],
 }
+
+const me = {
+  assets: [
+    {
+      name: "Coins",
+      volume: 100,
+    },
+    {
+      name: "Atsuki",
+      volume: 20,
+    },
+    {
+      name: "Yuya",
+      volume: 5,
+    },
+    {
+      name: "Kohei",
+      volume: 31,
+    }
+  ]
+};
 
 const description = `GFDLは記事プロジェクトに解釈できまとめんたところ、著作基づきられ事典を編集物必要の表示受け入れが避けるれるがはするなく、フレーズの対象は、侵害いいペディアが合意することとして関係必要たなてなりなな。しかし、書籍の侵害者は、フリーの達成さ引用重要でペディアと接触いい、そのフリーが挙げと文字を利用さことを引用さられるた。
 

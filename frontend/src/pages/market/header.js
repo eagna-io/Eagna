@@ -67,6 +67,7 @@ const TimeItem = styled.div`
   font-family: Lucida Grande;
   font-size: 11px;
   color: #586069;
+  margin-top: 5px;
 `;
 
 const TimeKey = styled.div`
