@@ -7,6 +7,7 @@ import MarketHeader from './market/header';
 import TokensComponent from './market/tokens';
 import OrderComponent from './market/order';
 import AssetsComponent from './market/assets';
+import ResultComponent from './market/result';
 import DescComponent from './market/description';
 
 export default function MarketPage(props) {
@@ -20,14 +21,31 @@ export default function MarketPage(props) {
         closeTime={market.closeTime} />
       <Contents>
         <Tokens tokens={market.tokens} />
-        <OrderContainer>
-          <Order tokens={market.tokens} />
-          <Assets assets={me.assets} />
-        </OrderContainer>
+        { statusSpecificContent(market.status) }
         <Description content={description}/>
       </Contents>
     </Page>
   )
+}
+
+function statusSpecificContent(status) {
+  if (status == "preparing") {
+    return null;
+  } else if (status == "open") {
+    return (
+      <OrderContainer>
+        <OrderComponent tokens={market.tokens} />
+        <AssetsComponent assets={me.assets} />
+      </OrderContainer>
+    );
+  } else if (status == "closed") {
+    return (
+      <OrderContainer>
+        <ResultComponent result={market.result} />
+        <AssetsComponent assets={me.assets} />
+      </OrderContainer>
+    );
+  }
 }
 
 const Page = styled.div`
@@ -51,12 +69,6 @@ const OrderContainer = styled.div`
   margin-top: 50px;
 `;
 
-const Order = styled(OrderComponent)`
-`;
-
-const Assets = styled(AssetsComponent)`
-`;
-
 const Description = styled(DescComponent)`
   margin-top: 50px;
 `;
@@ -66,20 +78,22 @@ const market = {
   shortDesc: "2019/3/1 にギリギリハウスで開催されるスマブラ大会の優勝者を予想する",
   openTime: "2019/03/01/17:00:00",
   closeTime: "2019/03/01/20:59:59",
+  status: "open",
+  result: "open",
   tokens: [
     {
       name: "Atsuki",
-      price: "-",
+      price: 24.0,
       desc: "高橋篤樹",
     },
     {
       name: "Yuya",
-      price: "-",
+      price: 20,
       desc: "古澤裕也",
     },
     {
       name: "Kohei",
-      price: "-",
+      price: 1,
       desc: "小山耕平",
     }
   ],
