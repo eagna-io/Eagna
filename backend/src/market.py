@@ -33,11 +33,11 @@ class Market():
   def status(self):
     now = datetime.now(timezone.utc)
     if now < self.opening_time:
-      return "Preparing"
+      return "preparing"
     elif now < self.closing_time:
-      return "Open"
+      return "open"
     else:
-      return "Closed"
+      return "closed"
 
   def __str__(self):
     return str(self.toDict())

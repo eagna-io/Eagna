@@ -1,6 +1,6 @@
 from unittest import TestCase
 from datetime import datetime, timezone
-from rohan.db import DB
+from src.db import DB
 
 class TestDB(TestCase):
 

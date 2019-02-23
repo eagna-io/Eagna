@@ -1,8 +1,8 @@
 import json
 import os
-from rohan.market import Market
-from rohan.db import DB
-from rohan.api.server import Server
+from market import Market
+from db import DB
+from api.server import Server
 
 # Market情報の読み込み
 f = open('market_def.json', 'r')
