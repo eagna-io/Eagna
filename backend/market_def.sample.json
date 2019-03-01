@@ -1,14 +1,17 @@
-{
-	"title" : "hogehoge",
-	"organizer" : "aaaa",
-	"desc" : "unko",
-	"opening_time" : "2019-01-01T02:40:00Z",
-	"closing_time" : "2019-01-01T03:40:00Z",
-	"outcomes" : ["hoge1", "hoge2"],
-	"coin_info" : {
-		"initial_coin_issue" : 10000
-	},
-	"token_info" : {
-		"initial_price" : [0.5, 0.5]
-	}
-}
+[
+  {
+    "id": 1,
+    "title" : "hogehoge",
+    "organizer" : "aaaa",
+    "desc" : "unko",
+    "opening_time" : "2019-01-01T02:40:00Z",
+    "closing_time" : "2019-01-01T03:40:00Z",
+    "outcomes" : ["hoge1", "hoge2"],
+    "coin_info" : {
+      "initial_coin_issue" : 10000
+    },
+    "token_info" : {
+      "initial_price" : [0.5, 0.5]
+    }
+  }
+]

@@ -1,24 +1,33 @@
 from datetime import datetime, timezone
-from . import response
+import db
+from access_token import create_access_token
+import api.response
 
 class LoginResource():
-  def __init__(self, db):
-    self.db = db
-
   def on_get(self, req, resp):
-    user_name = req.params.get("user")
+    email = req.params.get("email")
     hashed_pass = req.params.get("pass")
     if user_name == None or hashed_pass == None:
       resp.body = response.failure("parameter is not enough")
       return
 
-    if self.db.check_login(user_name, hashed_pass) == False:
-      resp.body = response.failure("invalid user or password")
+    with db.connect_with_env() as conn:
+      user_id = check_password(email, hashed_pass, conn)
+      if user_id == None:
+        resp.body = response.failure("invalid email or password")
+        return
+
+      # AccessToken の発行
+      access_token = create_access_token(user_id, conn)
+
+      resp.body = response.success(access_token)
       return
 
-    now = int(datetime.now(timezone.utc).timestamp())
-    access_token = self.db.create_access_token(user_name, now)
-    self.db.commit()
-
-    resp.body = response.success(access_token)
-    return
+# Return "user_id" if success, or None
+def check_password(email, hashed_pass, conn):
+  sql = (
+    "SELECT id FROM users "
+    "WHERE email = %s "
+    " AND hashed_pass = %s"
+  )
+  return db.query_one(conn, sql, (email, hashed_pass))
