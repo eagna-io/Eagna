@@ -123,10 +123,10 @@ function marketPage(state = initialMarketPageState, action) {
   switch (action.type) {
     case REQUEST_MARKET:
       return {
+        ...state,
         isRequesting: true,
         needLogin: false,
         showFailed: false,
-        market: null,
       };
     case RECEIVE_MARKET_FAILED:
       return {

@@ -99,7 +99,7 @@ export default class  Order extends React.Component {
             placeholder="Quantity"
             onChange={this.onQuantityChange}/>
           <Price>
-            { this.currentCost() }
+            { Math.abs(this.currentCost()) }
             <PriceUnit>coins</PriceUnit>
           </Price>
         </PriceContainer>

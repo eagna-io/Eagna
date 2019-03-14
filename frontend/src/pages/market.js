@@ -47,51 +47,51 @@ class MarketPage extends React.Component {
     if (this.props.needLogin) {
       return <Redirect to="/login" />
     }
-    if (this.props.market == null) {
-      return (
-        <Page>
-          <Header />
-          <h2>Requesting...</h2>
-        </Page>
-      )
-    }
+
     const market = this.props.market
+    const marketHeaderDom = market == null ? null : (
+      <MarketHeader
+        title={market.title}
+        shortDesc={market.short_desc}
+        openTs={market.open_ts}
+        closeTs={market.close_ts}
+        status={market.status} />
+    );
+    const marketContentsDom = market == null ? null : (
+      <Contents>
+        <Tokens tokens={market.tokens} />
+        {
+          market.status === "open" ? (
+            <OrderContainer>
+              <OrderComponent
+                tokens={market.tokens}
+                accessToken={this.props.accessToken}
+                marketId={this.props.market.id}
+                requestOrder={this.props.requestOrder} />
+              <AssetsComponent
+                tokens={market.tokens}
+                assets={market.me.tokens}
+                coins={market.me.coins} />
+            </OrderContainer>
+          ) : market.status === "closed" ? (
+            <OrderContainer>
+              <ResultComponent result={market.result} />
+              <AssetsComponent
+                tokens={market.tokens}
+                assets={market.me.tokens}
+                coins={market.me.coins} />
+            </OrderContainer>
+          ) : null
+        }
+        <Description content={market.desc}/>
+      </Contents>
+    );
+
     return (
       <Page>
         <Header />
-        <MarketHeader
-          title={market.title}
-          shortDesc={market.short_desc}
-          openTs={market.open_ts}
-          closeTs={market.close_ts}
-          status={market.status} />
-        <Contents>
-          <Tokens tokens={market.tokens} />
-          {
-            market.status === "open" ? (
-              <OrderContainer>
-                <OrderComponent
-                  tokens={market.tokens}
-                  accessToken={this.props.accessToken}
-                  marketId={this.props.market.id}
-                  requestOrder={this.props.requestOrder} />
-                <AssetsComponent
-                  tokens={market.tokens}
-                  assets={market.me.tokens}
-                  coins={market.me.coins} />
-              </OrderContainer>
-            ) : market.status === "closed" ? (
-              <OrderContainer>
-                <ResultComponent result={market.result} />
-                <AssetsComponent
-                  tokens={market.tokens}
-                  assets={market.me.tokens}
-                  coins={market.me.coins} />
-              </OrderContainer>
-            ) : null
-          }
-          <Description content={market.desc}/>
-        </Contents>
+        { marketHeaderDom }
+        { marketContentsDom }
       </Page>
     )
   }
