@@ -2,7 +2,9 @@
   "name": "rohanmarket-web",
   "version": "0.0.0",
   "description": "web server of rohanmarket",
-  "dependencies": {},
+  "dependencies": {
+    "react-markdown": "^4.0.6"
+  },
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",

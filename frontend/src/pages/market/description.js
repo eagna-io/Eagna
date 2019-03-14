@@ -1,11 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
+import ReactMarkdown from 'react-markdown';
 
 export default function Description(props) {
   return (
     <Container className={props.className}>
       <Header>Description</Header>
-      <Content>{props.content}</Content>
+      <Content>
+        <ReactMarkdown source={props.content} />
+      </Content>
     </Container>
   );
 }
