@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 export default function Assets(props) {
+  let tokens = props.tokens;
+  let assets = props.assets;
   return (
     <Container className={props.className}>
       <thead>
@@ -11,13 +13,20 @@ export default function Assets(props) {
         </Header>
       </thead>
       <tbody>
+        <AssetItem filled={false} key={"coin"}>
+          <AssetLabel coin={true}>{"Coin"}</AssetLabel>
+          <ItemVolume>{props.coins}</ItemVolume>
+        </AssetItem>
         {
-          props.assets.map((asset, idx) => (
-          <Item filled={idx % 2 == 1} key={asset.name}>
-            <ItemAsset>{asset.name}</ItemAsset>
-            <ItemVolume>{asset.volume}</ItemVolume>
-          </Item>
-          ))
+          assets.map((asset, idx) => {
+            const token = tokens.find(t => t.id === asset.token_id);
+            return (
+              <AssetItem filled={idx % 2 == 0} key={token.id}>
+                <AssetLabel coin={false}>{token.name}</AssetLabel>
+                <ItemVolume>{asset.amount}</ItemVolume>
+              </AssetItem>
+            )
+          })
         }
       </tbody>
     </Container>
@@ -54,17 +63,17 @@ const HeaderVolume = styled.th`
   padding-right: 75px;
 `;
 
-const Item = styled.tr`
+const AssetItem = styled.tr`
   height: 50px;
   border-top: 1px solid #D1D5DA;
   background-color: ${props => props.filled ? "#F9F9F9" : "white" };
 `;
 
-const ItemAsset = styled.td`
+const AssetLabel = styled.td`
   color: #37474F;
-  font-size: 14px;
+  font-size: ${props => props.coin ? "16px" : "14px"};
   font-family: Lucida Grande;
-  font-weight: normal;
+  font-weight: ${props => props.coin ? "bold" : "normal"};
   padding-left: 75px;
 `;
 

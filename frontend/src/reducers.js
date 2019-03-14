@@ -5,41 +5,40 @@ import {
   RECEIVE_LOGIN_SUCCESS,
   REQUEST_ME,
   RECEIVE_ME_FAILED,
-  RECEIVE_ME_SUCCESS
+  RECEIVE_ME_SUCCESS,
+  REQUEST_MARKET,
+  RECEIVE_MARKET_FAILED,
+  RECEIVE_MARKET_SUCCESS
 } from './actions';
 
 
-/* --------- My Info -------- */
+/* --------- Me ---------------- */
 
 const initialMeState = {
   accessToken: null,
   name: null,
-  coins: null,
+  email: null,
   markets: null,
 };
 
 function me(state = initialMeState, action) {
   switch (action.type) {
     case REQUEST_LOGIN:
-      return {
-        ...state,
-        accessToken: null,
-      };
+    case RECEIVE_LOGIN_FAILED:
+      return initialMeState;
     case RECEIVE_LOGIN_SUCCESS:
       return {
         ...state,
         accessToken: action.payload.accessToken,
       }
+      return initialAccountPageState;
     case RECEIVE_ME_FAILED:
-      return {
-        ...state,
-        accessToken: null,
-      };
+      return initialMeState;
     case RECEIVE_ME_SUCCESS:
       return {
         ...state,
         name: action.payload.name,
-        coins: action.payload.coins,
+        email: action.payload.email,
         markets: action.payload.markets,
       };
     default:
@@ -59,16 +58,19 @@ function loginPage(state = initialLoginPageState, action) {
   switch (action.type) {
     case REQUEST_LOGIN:
       return {
+        accessToken: null,
         isRequesting: true,
         showFailed: false,
       };
     case RECEIVE_LOGIN_FAILED:
       return {
+        accessToken: null,
         isRequesting: false,
         showFailed: true,
       }
     case RECEIVE_LOGIN_SUCCESS:
       return {
+        accessToken: action.payload.accessToken,
         isRequesting: false,
         showFailed: false,
       }
@@ -78,26 +80,67 @@ function loginPage(state = initialLoginPageState, action) {
 }
 
 
-/* --------- Me Page -------- */
+/* --------- Account Page -------- */
 
-const initialMePageState = {
+const initialAccountPageState = {
   isRequesting: false,
+  showError: false,
 };
 
-function mePage(state = initialMePageState, action) {
+function accountPage(state = initialAccountPageState, action) {
   switch (action.type) {
     case REQUEST_ME:
       return {
         isRequesting: true,
-      };
+        showError: false,
+      }
     case RECEIVE_ME_FAILED:
       return {
         isRequesting: false,
+        showError: true,
       }
     case RECEIVE_ME_SUCCESS:
       return {
         isRequesting: false,
-      }
+        showError: false,
+      };
+    default:
+      return state;
+  }
+}
+
+
+/* --------- Market Page -------- */
+
+const initialMarketPageState = {
+  isRequesting: false,
+  needLogin: false,
+  showFailed: false,
+  market: null,
+};
+
+function marketPage(state = initialMarketPageState, action) {
+  switch (action.type) {
+    case REQUEST_MARKET:
+      return {
+        isRequesting: true,
+        needLogin: false,
+        showFailed: false,
+        market: null,
+      };
+    case RECEIVE_MARKET_FAILED:
+      return {
+        isRequesting: false,
+        needLogin: true,
+        showFailed: true,
+        market: null,
+      };
+    case RECEIVE_MARKET_SUCCESS:
+      return {
+        isRequesting: false,
+        showFailed: true,
+        market: action.payload,
+      };
     default:
       return state;
   }
@@ -110,6 +153,7 @@ export const rootReducer = combineReducers({
   me: me,
   pages: combineReducers({
     login: loginPage,
-    me: mePage,
+    account: accountPage,
+    market: marketPage,
   })
 })

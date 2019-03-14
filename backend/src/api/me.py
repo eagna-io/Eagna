@@ -1,5 +1,6 @@
-import api.response
+from api import response
 from access_token import check_access_token
+import db
 
 class MeResource():
   def on_get(self, req, resp):
@@ -14,18 +15,39 @@ class MeResource():
         resp.body = response.failure("invalid access token")
         return
 
-      user = query_user(user_id, conn)
-      resp.body = response.success(user_to_response(user))
+      me = query_user(conn, user_id)
+      me["markets"] = query_markets(conn, user_id)
+
+      resp.body = response.success(me)
       return
 
 # Return tuple of user information.
-def query_user(user_id, conn):
-  return db.query_one(conn, 'SELECT * FROM users WHERE id = %s', (user_id,))
-
-def user_to_response(user):
-  (id, name, email) = user
+def query_user(conn, user_id):
+  sql = (
+    "SELECT id, name, email FROM users "
+    "WHERE id = %s"
+  )
+  (id, name, email) = db.query_one(conn, sql, (user_id,))
   return {
     "id": id,
-    "name": user.name,
+    "name": name,
     "email": email,
   }
+
+def query_markets(conn, user_id):
+  sql = (
+    "SELECT markets.id, markets.title, markets.status FROM markets "
+    "INNER JOIN orders "
+    " ON markets.id = orders.market_id "
+    "  AND orders.type = 'initial_supply'"
+    "  AND orders.user_id = %s"
+  )
+  return [
+    {
+      "id": id,
+      "title": title,
+      "status": status,
+    }
+    for (id, title, status)
+    in db.query_all(conn, sql, (user_id,))
+  ]

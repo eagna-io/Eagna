@@ -4,7 +4,6 @@ import db
 
 def observe_market():
   while True:
-    print("Check markets...")
     check_open_markets()
     check_close_markets()
     sleep_until_next_minite()
@@ -28,13 +27,12 @@ def check_open_markets():
 
 
 def query_new_open_markets(conn):
-  cur_ts = current_ts()
   sql = (
     "SELECT id, initial_coin_issue FROM markets "
-    "WHERE open_ts <= %s"
+    "WHERE open_time <= now()"
     " AND status = 'preparing'"
   )
-  return db.query_all(conn, sql, (cur_ts,))
+  return db.query_all(conn, sql)
 
 
 def query_users(conn):
@@ -71,13 +69,12 @@ def check_close_markets():
 
 
 def query_new_close_markets(conn):
-  cur_ts = current_ts()
   sql = (
     "SELECT id FROM markets "
-    "WHERE close_ts <= %s "
+    "WHERE close_time <= now() "
     " AND status = 'open'"
   )
-  return db.query_all(conn, sql, (cur_ts,))
+  return db.query_all(conn, sql)
 
 
 def close_market(market_id, conn):
@@ -86,10 +83,6 @@ def close_market(market_id, conn):
 
 
 def sleep_until_next_minite():
-  cur_ts = current_ts()
-  next_ts = ((cur_ts / 60) + 1) * 60
+  cur_ts = int(datetime.now(timezone.utc).timestamp())
+  next_ts = (int(cur_ts / 60) + 1) * 60
   sleep(next_ts - cur_ts)
-
-
-def current_ts():
-  return int(datetime.now(timezone.utc).timestamp())

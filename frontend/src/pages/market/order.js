@@ -1,5 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
+import * as lmsr from 'src/lmsr';
+
+const MAX_QUANTITY = 100;
+const MICRO_COIN = 1000000;
 
 export default class  Order extends React.Component {
   constructor(props) {
@@ -7,13 +11,12 @@ export default class  Order extends React.Component {
     this.onTokenChange = this.onTokenChange.bind(this);
     this.onTypeChange = this.onTypeChange.bind(this);
     this.onQuantityChange = this.onQuantityChange.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
+    this.currentCost = this.currentCost.bind(this);
     this.state = {
-      token: {
-        name: "",
-        price: "-",
-      },
+      token: null,
       type: "buy",
-      quantity: "",
+      quantity: null,
     };
   }
 
@@ -32,21 +35,54 @@ export default class  Order extends React.Component {
   onQuantityChange(e) {
     if (e.target.value == "") {
       this.setState({
-        quantity: "",
+        quantity: null,
       });
       return;
     }
 
     const n = parseInt(e.target.value);
-    if (!Number.isNaN(n)) {
+    if (!Number.isNaN(n) && n < MAX_QUANTITY) {
       this.setState({
         quantity: n,
       });
     }
   }
 
+  onSubmit(e) {
+    if (this.state.token === null || this.state.quantity === null) {
+      return;
+    }
+    this.props.requestOrder(
+      this.state.token.id,
+      this.state.type === "buy" ? this.state.quantity : -this.state.quantity,
+      -this.currentCost(), // 100 のコストであれば、持ちコインが100 減る
+      this.props.marketId,
+      this.props.accessToken,
+    )
+  }
+
+  currentCost() {
+    if (this.state.token === null || this.state.quantity === null) {
+      return 0;
+    }
+
+    const baseCost = lmsr.cost(this.props.tokens.map(t => t.amount));
+    const newCost = lmsr.cost(this.props.tokens.map(t => {
+      if (t.id === this.state.token.id) {
+        if (this.state.type === "buy") {
+          return t.amount + this.state.quantity;
+        } else {
+          return t.amount - this.state.quantity;
+        }
+      } else {
+        return t.amount 
+      }
+    }));
+    return newCost - baseCost;
+  }
+
   render() {
-    const price = this.state.token.price == "-" ? "0.0" : this.state.token.price * this.state.quantity;
+    
     return (
       <Container className={this.props.className}>
         <TokenSelect
@@ -59,16 +95,16 @@ export default class  Order extends React.Component {
         <PriceContainer>
           <QuantityInput
             type="text"
-            value={this.state.quantity}
+            value={this.state.quantity || ""}
             placeholder="Quantity"
             onChange={this.onQuantityChange}/>
           <Price>
-            { price }
+            { this.currentCost() }
             <PriceUnit>coins</PriceUnit>
           </Price>
         </PriceContainer>
         <Separator />
-        <OrderButton>Order</OrderButton>
+        <OrderButton onClick={this.onSubmit}>Order</OrderButton>
       </Container>
     );
   }
@@ -130,10 +166,11 @@ const OrderButton = styled.button`
 `;
 
 function TokenSelect(props) {
+  const value = props.selected === null ? "" : props.selected.name;
   return (
-    <Select name="token" value={props.selected.name} onChange={props.onChange}>
+    <Select name="token" value={value} onChange={props.onChange}>
       {
-        props.selected.name == ""
+        props.selected === null
         ? (<Placeholder value="" disabled>Select Token</Placeholder>)
         : null
       }

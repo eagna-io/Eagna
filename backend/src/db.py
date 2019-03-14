@@ -22,6 +22,11 @@ def insert(conn, sql, args=()):
   with conn.cursor() as cur:
     cur.execute(sql, args)
 
+def insert_and_fetch(conn, sql, args=()):
+  with conn.cursor() as cur:
+    cur.execute(sql, args)
+    return cur.fetchone()
+
 def update(conn, sql, args=()):
   with conn.cursor() as cur:
     cur.execute(sql, args)

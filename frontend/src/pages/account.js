@@ -5,6 +5,59 @@ import styled from 'styled-components';
 
 import { requestMe } from '../actions';
 
+class AccountPage extends React.Component {
+  constructor(props) {
+    super(props);
+    if (this.props.accessToken) {
+      this.props.requestMe(this.props.accessToken);
+    }
+  }
+
+  render() {
+    if (!this.props.accessToken) {
+      return <Redirect to="/login" />
+    }
+    const name = this.props.name || "-";
+    const email = this.props.email || ""
+    const coins = this.props.coins || 0;
+    const markets = this.props.markets || [];
+    return (
+      <Container>
+        <Item>
+          <Key>Name</Key>
+          <Val>{name}</Val>
+        </Item>
+        <Item>
+          <Key>Coins</Key>
+          <Val>{coins}<SmallText>coins</SmallText></Val>
+        </Item>
+        <Item>
+          <Key>Activities</Key>
+        </Item>
+        <MarketList>
+          <thead>
+            <tr>
+              <MarketListHeader>Market</MarketListHeader>
+              <MarketListHeader>Status</MarketListHeader>
+            </tr>
+          </thead>
+          {markets.map(market =>
+          <tbody key={market.title}>
+            <tr>
+              <MarketListItem>
+                <a href={"/market/" + market.id}>{market.title}</a>
+              </MarketListItem>
+              <MarketListItem>{market.status}</MarketListItem>
+            </tr>
+          </tbody>
+          )}
+        </MarketList>
+      </Container>
+    );
+  }
+}
+
+
 const Container = styled.div`
   width: 40vw;
   margin-left: 30vw;
@@ -58,62 +111,14 @@ const MarketListItem = styled.td`
   font-weight: bold;
 `;
 
-class AccountPage extends React.Component {
-  constructor(props) {
-    super(props);
-    if (this.props.token != null) {
-      this.props.requestMe(this.props.token);
-    }
-  }
-
-  render() {
-    if (this.props.token == null) {
-      return <Redirect to="/login" />
-    }
-    const name = this.props.name == null ? "-" : this.props.name;
-    const coins = this.props.coins == null ? 0 : this.props.coins;
-    const markets = this.props.markets == null ? [] : this.props.markets;
-    return (
-      <Container>
-        <Item>
-          <Key>Name</Key>
-          <Val>{name}</Val>
-        </Item>
-        <Item>
-          <Key>Coins</Key>
-          <Val>{coins}<SmallText>coins</SmallText></Val>
-        </Item>
-        <Item>
-          <Key>Activities</Key>
-        </Item>
-        <MarketList>
-          <thead>
-            <tr>
-              <MarketListHeader>Market</MarketListHeader>
-              <MarketListHeader>Status</MarketListHeader>
-            </tr>
-          </thead>
-          {markets.map(market =>
-          <tbody key={market.title}>
-            <tr>
-              <MarketListItem>{market.title}</MarketListItem>
-              <MarketListItem>{market.status}</MarketListItem>
-            </tr>
-          </tbody>
-          )}
-        </MarketList>
-      </Container>
-    );
-  }
-}
 
 function mapStateToProps(state) {
   return {
-    isRequesting: state.pages.me.isRequesting,
-    token: state.me.accessToken,
+    ...state.pages.account,
     name: state.me.name,
-    coins: state.me.coins,
+    email: state.me.email,
     markets: state.me.markets,
+    accessToken: state.me.accessToken,
   }
 }
 

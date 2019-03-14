@@ -1,13 +1,13 @@
 from datetime import datetime, timezone
 import db
 from access_token import create_access_token
-import api.response
+from api import response
 
 class LoginResource():
   def on_get(self, req, resp):
     email = req.params.get("email")
     hashed_pass = req.params.get("pass")
-    if user_name == None or hashed_pass == None:
+    if email == None or hashed_pass == None:
       resp.body = response.failure("parameter is not enough")
       return
 

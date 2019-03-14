@@ -1,6 +1,7 @@
-from math import floor
 from api import response
-from market import query_current_distribution
+from market import query_current_distribution, query_user_coins
+from lmsr import cost
+from access_token import check_access_token
 import db
 
 class OrderResource():
@@ -22,14 +23,14 @@ class OrderResource():
         return
 
       # token_id からmarket を取得
-      market_id = query_market_id(token_id, conn)
+      market_id = query_market_id(conn, token_id)
       if market_id == None:
         resp.body = response.failure("token_id is invalid")
         return
 
       # 各トークンの現在の流通量を取得
       # Never error
-      cur_tokens = query_current_distribution(market_id, conn)
+      cur_tokens = query_current_distribution(conn, market_id)
 
       new_distribution = [
         amount_token + amount if id == token_id else amount
@@ -38,19 +39,20 @@ class OrderResource():
       ]
       cur_distribution = [amount for (id, amount) in cur_tokens]
 
-      # 対象のトークンが売却できるだけ流通しているかチェック
-      if min(new_distribution) < 0:
-        resp.body = response.failure("the token is not distributed enough")
+      # 対象のトークンを売却できるだけ保持しているかチェック
+      target_user_token = query_target_user_token(conn, token_id, user_id)
+      if target_user_token + amount_token < 0:
+        resp.body = response.failure("you dont have the token enough")
         return
 
       # 対象のトークンを購入できるだけ資金を持っているかチェック
-      user_coins = query_user_coins(user_id, market_id, conn)
-      if user_coins < amount_coin:
+      user_coins = query_user_coins(conn, market_id, user_id)
+      if user_coins + amount_coin < 0:
         resp.body = response.failure("you don't have enough coin")
         return
 
       # amount_coin が適切かチェック
-      expected_amount_coin = floor(cost(new_distribution) - cost(cur_distribution))
+      expected_amount_coin = cost(cur_distribution) - cost(new_distribution)
       if amount_coin != expected_amount_coin:
         resp.body = response.failure("amount_coin is not valid")
         return
@@ -61,9 +63,16 @@ class OrderResource():
       resp.body = response.success("success")
 
 
-def query_market_id(token_id, db):
-  return db.query_one('SELECT market_id FROM market_outcomes WHERE id = %s', (token_id,))
+def query_market_id(conn, token_id):
+  return db.query_one(conn, 'SELECT market_id FROM market_tokens WHERE id = %s', (token_id,))
 
+
+def query_target_user_token(conn, token_id, user_id):
+  sql = (
+    "SELECT COALESCE(SUM(amount_token), 0) FROM orders "
+    "WHERE token_id = %s and user_id = %s"
+  )
+  return db.query_one(conn, sql, (token_id, user_id))[0]
 
 # Return True if success, otherwise False
 def save_order(user_id, market_id, token_id, amount_token, amount_coin, conn):

@@ -1,27 +1,52 @@
 import React from 'react';
 import styled from 'styled-components';
 
+/*
+ market : {
+   title      : string,
+   desc       : string,
+   open_time  : int,
+   close_time : int,
+   status     : string,
+ }
+ */
+
 export default function MarketHeader(props) {
   return (
     <Container className={props.className}>
       <Contents>
-        <TitleAndDesc>
-          <Title>{props.title}</Title>
-          <Desc>{props.desc}</Desc>
-        </TitleAndDesc>
-        <TimeContents>
-          <TimeItem>
-            <TimeKey>Open</TimeKey>
-            <TimeVal>{props.openTime}</TimeVal>
-          </TimeItem>
-          <TimeItem>
-            <TimeKey>Close</TimeKey>
-            <TimeVal>{props.closeTime}</TimeVal>
-          </TimeItem>
-        </TimeContents>
+        <LeftContents>
+          <Title>{props.market.title}</Title>
+          <Desc>{props.market.short_desc}</Desc>
+        </LeftContents>
+        <RightContents>
+          <Status>{props.market.status}</Status>
+          <TimeContents>
+            <TimeItem>
+              <TimeKey>Open</TimeKey>
+              <TimeVal>{timestampToStr(props.market.open_ts)}</TimeVal>
+            </TimeItem>
+            <TimeItem>
+              <TimeKey>Close</TimeKey>
+              <TimeVal>{timestampToStr(props.market.close_ts)}</TimeVal>
+            </TimeItem>
+          </TimeContents>
+        </RightContents>
       </Contents>
     </Container>
   );
+}
+
+function timestampToStr(ts) {
+  const tokyo_ts = ts + (60 * 60 * 9);
+  const date = new Date(tokyo_ts * 1000);
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const hour = ('0' + date.getHours()).slice(-2);
+  const min = ('0' + date.getMinutes()).slice(-2);
+  const sec = ('0' + date.getSeconds()).slice(-2);
+  return `${year}-${month}-${day} ${hour}:${min}:${sec}`;
 }
 
 const Container = styled.div`
@@ -32,13 +57,22 @@ const Container = styled.div`
 `;
 
 const Contents = styled.div`
-  width: 980px;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  max-width: 980px;
   margin: 0 auto;
 `;
 
-const TitleAndDesc = styled.div`
-  display: inline-block;
-  width: 800px;
+const LeftContents = styled.div`
+  width: 100%;
+  max-width: 800px;
+`;
+
+const RightContents = styled.div`
+  width: 100%;
+  max-width: 180px;
 `;
 
 const Title = styled.div`
@@ -57,9 +91,16 @@ const Desc = styled.div`
   margin-top: 18px;
 `;
 
+const Status = styled.div`
+  font-size: 17px;
+  color: #24292E;
+  font-family: Hiragino Sans;
+  font-weight: bold;
+  margin-top: 30px;
+`;
+
 const TimeContents = styled.div`
-  display: inline-block;
-  width: 180px;
+  margin-top: 20px;
 `;
 
 const TimeItem = styled.div`

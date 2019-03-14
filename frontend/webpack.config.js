@@ -1,7 +1,9 @@
 const webpack = require('webpack');
+const path = require('path')
 
 module.exports = {
-  entry: './src/index.js',
+  context: path.resolve(__dirname, 'src'),
+  entry: './index.js',
   module: {
     rules: [
       {
@@ -12,10 +14,11 @@ module.exports = {
     ]
   },
   resolve: {
+    modules: [__dirname, 'node_modules'],
     extensions: ['*', '.js', '.jsx']
   },
   output: {
-    path: __dirname + '/public/js',
+    path: path.resolve(__dirname, './public/js'),
     publicPath: '/js',
     filename: 'bundle.js'
   },
@@ -24,7 +27,8 @@ module.exports = {
     new webpack.EnvironmentPlugin(['API_BASE']),
   ],
   devServer: {
-    contentBase: './public',
-    hot: true
+    contentBase: path.resolve(__dirname, './public'),
+    hot: true,
+    historyApiFallback: true,
   }
 };

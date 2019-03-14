@@ -9,7 +9,7 @@ CREATE TABLE access_tokens (
   token         text UNIQUE NOT NULL,
   user_id       integer NOT NULL,
   force_expired boolean NOT NULL DEFAULT False,
-  created_at    integer NOT NULL,
+  created_at    timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT access_token_user_fkey FOREIGN KEY(user_id)
     REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
@@ -27,8 +27,8 @@ CREATE TABLE markets (
   organizer           text NOT NULL,
   short_desc          text NOT NULL,
   description         text NOT NULL,
-  open_ts             integer NOT NULL,
-  close_ts            integer NOT NULL,
+  open_time           timestamptz NOT NULL,
+  close_time          timestamptz NOT NULL,
   initial_coin_issue  integer NOT NULL,
   status              market_status NOT NULL DEFAULT 'preparing'
 );
@@ -36,6 +36,7 @@ CREATE TABLE markets (
 CREATE TABLE market_tokens (
   id                  serial PRIMARY KEY,
   name                text NOT NULL,
+  description         text NOT NULL,
   market_id           integer NOT NULL,
   initial_price       integer NOT NULL,
   is_settlement_token boolean,
@@ -57,6 +58,7 @@ CREATE TABLE orders (
   amount_token  integer NOT NULL,
   amount_coin   integer NOT NULL,
   type          order_type NOT NULL DEFAULT 'normal',
+  time          timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT order_user_fkey FOREIGN KEY(user_id)
     REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT order_market_fkey FOREIGN KEY(market_id)

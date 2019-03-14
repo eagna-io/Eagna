@@ -35,11 +35,11 @@ connect-db:
 echo-db-uri:
 	echo $(PG_URI)
 
-prepare-test: tests/data/test_data.sql
+prepare-demo: demo/data.py
 	$(MAKE) restart-db
-	sleep 5
+	sleep 2
 	$(MAKE) initialize-db
-	$(MAKE) run-sql-on-db SQL=$<
+	PYTHONPATH=${CURDIR}/tests/data:$(CURDIR)/src DATABASE_URL=${PG_URI} python3 demo/prepare.py
 
 test:
 	DATABASE_URL=$(PG_URI) python3 -m unittest discover tests
