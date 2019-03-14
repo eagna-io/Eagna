@@ -87,9 +87,9 @@ const ProfileHeader = styled.h3`
   height: 40px;
   background-color: #F6F8FA;
   margin: 0;
-  padding-left: 40px;
+  padding-left: 20px;
   font-size: 14px;
-  font-weight: bold;
+  color: #586069;
   line-height: 40px;
   border-bottom: 1px solid #D1D5DA;
   text-align: left;
@@ -132,10 +132,10 @@ const MarketListHeader = styled.h3`
   width: 100%;
   height: 40px;
   font-size: 14px;
-  font-weight: bold;
+  color: #586069;
   background-color: #F6F8FA;
   line-height: 40px;
-  padding-left: 40px;
+  padding-left: 20px;
   margin: 0px;
   border-bottom: 1px solid #D1D5DA;
 `;
