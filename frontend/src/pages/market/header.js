@@ -2,13 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 
 /*
- market : {
-   title      : string,
-   desc       : string,
-   open_time  : int,
-   close_time : int,
-   status     : string,
- }
+ title      : string,
+ shortDesc  : string,
+ openTs     : int,
+ closeTs    : int,
+ status     : string,
  */
 
 export default function MarketHeader(props) {
@@ -16,19 +14,19 @@ export default function MarketHeader(props) {
     <Container className={props.className}>
       <Contents>
         <LeftContents>
-          <Title>{props.market.title}</Title>
-          <Desc>{props.market.short_desc}</Desc>
+          <Title>{props.title}</Title>
+          <Desc>{props.shortDesc}</Desc>
         </LeftContents>
         <RightContents>
-          <Status>{props.market.status}</Status>
+          <Status>{props.status}</Status>
           <TimeContents>
             <TimeItem>
               <TimeKey>Open</TimeKey>
-              <TimeVal>{timestampToStr(props.market.open_ts)}</TimeVal>
+              <TimeVal>{timestampToStr(props.openTs)}</TimeVal>
             </TimeItem>
             <TimeItem>
               <TimeKey>Close</TimeKey>
-              <TimeVal>{timestampToStr(props.market.close_ts)}</TimeVal>
+              <TimeVal>{timestampToStr(props.closeTs)}</TimeVal>
             </TimeItem>
           </TimeContents>
         </RightContents>

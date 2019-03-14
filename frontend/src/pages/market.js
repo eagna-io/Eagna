@@ -59,7 +59,12 @@ class MarketPage extends React.Component {
     return (
       <Page>
         <Header />
-        <MarketHeader market={market} />
+        <MarketHeader
+          title={market.title}
+          shortDesc={market.short_desc}
+          openTs={market.open_ts}
+          closeTs={market.close_ts}
+          status={market.status} />
         <Contents>
           <Tokens tokens={market.tokens} />
           {
