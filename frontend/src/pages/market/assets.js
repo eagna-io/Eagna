@@ -2,8 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 export default function Assets(props) {
-  let tokens = props.tokens;
-  let assets = props.assets;
+  const tokens = props.tokens;
+  const assets = props.assets;
   return (
     <Container className={props.className}>
       <thead>

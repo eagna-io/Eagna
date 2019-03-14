@@ -5,7 +5,7 @@ export default function Header(props) {
   return (
     <Container className={props.className}>
       <Title>Rohan Market</Title>
-      <Profile></Profile>
+      <Profile href="/me"></Profile>
     </Container>
   );
 }
@@ -28,7 +28,7 @@ const Title = styled.div`
   margin-left: 30px;
 `;
 
-const Profile = styled.div`
+const Profile = styled.a`
   display: inline-block;
   position: absolute;
   top: 16px;
