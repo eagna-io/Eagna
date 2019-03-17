@@ -6,10 +6,10 @@ import db
 
 class OrderResource():
   def on_post(self, req, resp):
-    access_token = req.media.get("access_token")
-    token_id = req.media.get("token_id")
-    amount_token = req.media.get("amount_token")
-    amount_coin = req.media.get("amount_coin")
+    access_token = req.media.get("accessToken")
+    token_id = req.media.get("tokenId")
+    amount_token = req.media.get("amountToken")
+    amount_coin = req.media.get("amountCoin")
 
     if access_token == None or token_id == None or amount_token == None or amount_coin == None:
       resp.body = response.failure("parameter is not enough")
@@ -19,13 +19,13 @@ class OrderResource():
       # access_token を検証
       user_id = check_access_token(access_token, conn)
       if user_id == None:
-        resp.body = response.failure("access_token is invalid")
+        resp.body = response.failure("access token is invalid")
         return
 
       # token_id からmarket を取得
       market_id = query_market_id(conn, token_id)
       if market_id == None:
-        resp.body = response.failure("token_id is invalid")
+        resp.body = response.failure("token id is invalid")
         return
 
       # 各トークンの現在の流通量を取得
@@ -54,7 +54,7 @@ class OrderResource():
       # amount_coin が適切かチェック
       expected_amount_coin = cost(cur_distribution) - cost(new_distribution)
       if amount_coin != expected_amount_coin:
-        resp.body = response.failure("amount_coin is not valid")
+        resp.body = response.failure("amount coin is invalid")
         return
 
       # DB にorder を記録

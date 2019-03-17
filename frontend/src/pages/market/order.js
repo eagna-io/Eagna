@@ -5,110 +5,110 @@ import * as lmsr from 'src/lmsr';
 const MAX_QUANTITY = 100;
 const MICRO_COIN = 1000000;
 
-export default class  Order extends React.Component {
-  constructor(props) {
-    super(props);
-    this.onTokenChange = this.onTokenChange.bind(this);
-    this.onTypeChange = this.onTypeChange.bind(this);
-    this.onQuantityChange = this.onQuantityChange.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
-    this.currentCost = this.currentCost.bind(this);
-    this.state = {
-      token: null,
-      type: "buy",
-      quantity: null,
-    };
-  }
+export default function  Order(props) {
+  const {tokens, marketId, setErrMsg, setMarket } = props;
+  const accessToken = useContext(AccessTokenContext).token;
+  const [selectedToken, setSelectedToken] = useState(null);
+  const [orderType, setOrderType] = useState("buy");
+  const [amountToken, setAmountToken] = useState(null);
 
-  onTokenChange(e) {
-    this.setState({
-      token: this.props.tokens.find(t => t.name == e.target.value),
-    });
-  }
+  const cost = currentCost(selectedToken, amountToken, tokens, orderType);
 
-  onTypeChange(orderType) {
-    this.setState({
-      type: orderType,
-    });
-  }
-
-  onQuantityChange(e) {
-    if (e.target.value == "") {
-      this.setState({
-        quantity: null,
-      });
+  const requestOrder = () => {
+    if (selectedToken === null) {
+      setErrMsg("Please select the token");
       return;
     }
-
-    const n = parseInt(e.target.value);
-    if (!Number.isNaN(n) && n < MAX_QUANTITY) {
-      this.setState({
-        quantity: n,
-      });
-    }
-  }
-
-  onSubmit(e) {
-    if (this.state.token === null || this.state.quantity === null) {
+    if (amountToken === null) {
+      setErrMsg("Please input amount of the token");
       return;
     }
-    this.props.requestOrder(
-      this.state.token.id,
-      this.state.type === "buy" ? this.state.quantity : -this.state.quantity,
-      -this.currentCost(), // 100 のコストであれば、持ちコインが100 減る
-      this.props.marketId,
-      this.props.accessToken,
+    postOrder(
+      selectedToken.id,
+      orderType === "buy" ? amountToken : -amountToken, // buy なら tokenは増える
+      -cost, // Coin の増量は cost の逆
+      accessToken
     )
-  }
-
-  currentCost() {
-    if (this.state.token === null || this.state.quantity === null) {
-      return 0;
-    }
-
-    const baseCost = lmsr.cost(this.props.tokens.map(t => t.amount));
-    const newCost = lmsr.cost(this.props.tokens.map(t => {
-      if (t.id === this.state.token.id) {
-        if (this.state.type === "buy") {
-          return t.amount + this.state.quantity;
-        } else {
-          return t.amount - this.state.quantity;
+      .catch(err => {
+        switch(err) {
+          case InvalidAccessTokenError:
+            setToken(null);
+            setErrMsg("You need to login");
+            break;
+          case TokenPriceIsMovedError:
+            setErrMsg("Price of the token is changed");
+            break;
         }
-      } else {
-        return t.amount 
-      }
-    }));
-    return newCost - baseCost;
-  }
+      })
+      // Error が検知された場合も market 情報を取得し直す
+      .then(() => getMarket(marketId, accessToken))
+      .then(market => setMarket(market))
+  };
 
-  render() {
-    
-    return (
-      <Container className={this.props.className}>
-        <TokenSelect
-          selected={this.state.token}
-          tokens={this.props.tokens}
-          onChange={this.onTokenChange}/>
-        <OrderTypeSwitch
-          selected={this.state.type}
-          onChange={this.onTypeChange}/>
-        <PriceContainer>
-          <QuantityInput
-            type="text"
-            value={this.state.quantity || ""}
-            placeholder="Quantity"
-            onChange={this.onQuantityChange}/>
-          <Price>
-            { Math.abs(this.currentCost()) }
-            <PriceUnit>coins</PriceUnit>
-          </Price>
-        </PriceContainer>
-        <Separator />
-        <OrderButton onClick={this.onSubmit}>Order</OrderButton>
-      </Container>
-    );
+  return (
+    <Container className={this.props.className}>
+      <TokenSelect
+        selected={selectedToken}
+        tokens={props.tokens}
+        onChange={e => {
+          const token = tokens.find(t => t.name === e.target.value);
+          setSelectedToken(token);
+        }} />
+      <OrderTypeSwitch
+        selected={orderType}
+        onChange={type => setOrderType(type)} />
+      <PriceContainer>
+        <QuantityInput
+          type="text"
+          value={amountToken || ""}
+          placeholder="Quantity"
+          onChange={e => {
+            setAmountToken(validateAmountToken(e.target.value));
+          }}/>
+        <Price>
+          { Math.abs(cost) }
+          <PriceUnit>coins</PriceUnit>
+        </Price>
+      </PriceContainer>
+      <Separator />
+      <OrderButton onClick={(e) => {
+        e.preventDefault();
+        requestOrder();
+      }}>
+        Order
+      </OrderButton>
+    </Container>
+  );
+}
+
+function validateAmountToken(input) {
+  if (input === "") {
+    return null;
+  }
+  const n = parseInt(input);
+  if (!Number.isNaN(n) && n < MAX_QUANTITY){
+    return n;
+  } else {
+    return null;
   }
 }
+
+function currentCost(token, amountToken, tokens, orderType) {
+  const baseCost = lmsr.cost(tokens.map(t => t.amount));
+  const newCost = lmsr.cost(tokens.map(t => {
+    if (t.id === token.id) {
+      if (orderType === "buy") {
+        return t.amount + amountToken;
+      } else {
+        return t.amount - amountToken;
+      }
+    } else {
+      return t.amount 
+    }
+  }));
+  return newCost - baseCost;
+}
+
 
 const Container = styled.div`
   width: 530px;

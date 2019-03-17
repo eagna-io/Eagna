@@ -1,5 +1,4 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect, useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -11,63 +10,61 @@ import AssetsComponent from './market/assets';
 import ResultComponent from './market/result';
 import DescComponent from './market/description';
 
-import { requestMarket, requestOrder } from '../actions';
+import { AccessTokenContext } from 'src/context';
+import { getMarket, InvalidAccessTokenError, MarketNotFoundError } from 'src/api';
 
-/*
- market : {
-   id         : int,
-   title      : string,
-   short_desc : string,
-   desc       : string,
-   open_ts    : int,
-   close_ts   : int,
-   status     : string,
-   tokens     : [{
-     id : int,
-     name : string,
-     desc : string,
-     amount : int,
-   }],
-   me : {
-     coins : int,
-     tokens : [{
-       token_id : int,
-       amount : int,
-     }],
-   }
- }
- */
-class MarketPage extends React.Component {
-  constructor(props) {
-    super(props)
-    this.props.requestMarket(props.match.params.id, this.props.accessToken)
-  }
 
-  render() {
-    if (this.props.needLogin) {
-      return <Redirect to="/login" />
-    }
+export default function MarketPage(props) {
+  const marketId = props.match.params.id;
+  const {token, setToken} = useContext(AccessTokenContext);
+  const [market, setMarket] = useState(null);
+  const [errMsg, setErrMsg] = useState(null);
 
-    const market = this.props.market
-    const marketHeaderDom = market == null ? null : (
-      <MarketHeader
-        title={market.title}
-        shortDesc={market.short_desc}
-        openTs={market.open_ts}
-        closeTs={market.close_ts}
-        status={market.status} />
-    );
-    const marketContentsDom = market == null ? null : (
-      <Contents>
-        <Tokens tokens={market.tokens} />
-        {
+  useEffect(() => {
+    getMarket(marketId, token)
+      .then(market => setMarket(market))
+      .catch(err => {
+        switch(err) {
+          case InvalidAccessTokenError:
+            setToken(null);
+            setMarket(null);
+            break;
+          case MarketNotFoundError:
+            setErrMsg("Market not found");
+            setMarket(null);
+            break;
+        }
+      });
+  }, [marketId, token]);
+
+  return (
+    <Page>
+      <Header />
+      { errMsg ? <h3>{errMsg}</h3> : null }
+      { market ? MarketContents(market) : null }
+    </Page>
+  )
+}
+
+function MarketContents(market) {
+  return (
+    <>
+    <MarketHeader
+      title={market.title}
+      shortDesc={market.shortDesc}
+      openTs={market.openTs}
+      closeTs={market.closeTs}
+      status={market.status} />
+    <Contents>
+      <Tokens tokens={market.tokens} />
+      { market.me !== undefined ?
           market.status === "open" ? (
             <OrderContainer>
               <OrderComponent
                 tokens={market.tokens}
-                accessToken={this.props.accessToken}
-                marketId={this.props.market.id}
-                requestOrder={this.props.requestOrder} />
+                marketId={marketId}
+                setErrMsg={setErrMsg}
+                setMarket={setMarket} />
               <AssetsComponent
                 tokens={market.tokens}
                 assets={market.me.tokens}
@@ -82,19 +79,12 @@ class MarketPage extends React.Component {
                 coins={market.me.coins} />
             </OrderContainer>
           ) : null
-        }
-        <Description content={market.desc}/>
-      </Contents>
-    );
-
-    return (
-      <Page>
-        <Header />
-        { marketHeaderDom }
-        { marketContentsDom }
-      </Page>
-    )
-  }
+        : null
+      }
+      <Description content={market.desc}/>
+    </Contents>
+    </>
+  );
 }
 
 
@@ -122,25 +112,3 @@ const OrderContainer = styled.div`
 const Description = styled(DescComponent)`
   margin-top: 50px;
 `;
-
-
-function mapStateToProps(state) {
-  return {
-    ...state.pages.market,
-    accessToken: state.me.accessToken,
-  }
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    requestMarket: (marketId, accessToken) =>
-      dispatch(requestMarket(marketId, accessToken)),
-    requestOrder: (marketId, tokenId, amountToken, amountCoin, accessToken) =>
-      dispatch(requestOrder(marketId, tokenId, amountToken, amountCoin, accessToken)),
-  }
-}
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(MarketPage)

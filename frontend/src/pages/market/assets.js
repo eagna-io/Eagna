@@ -4,6 +4,7 @@ import styled from 'styled-components';
 export default function Assets(props) {
   const tokens = props.tokens;
   const assets = props.assets;
+
   return (
     <Container className={props.className}>
       <thead>
@@ -19,7 +20,7 @@ export default function Assets(props) {
         </AssetItem>
         {
           assets.map((asset, idx) => {
-            const token = tokens.find(t => t.id === asset.token_id);
+            const token = tokens.find(t => t.id === asset.id);
             return (
               <AssetItem filled={idx % 2 == 0} key={token.id}>
                 <AssetLabel coin={false}>{token.name}</AssetLabel>

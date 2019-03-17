@@ -16,7 +16,7 @@ class MarketResource():
       res_data["tokens"] = query_tokens(conn, market_id)
 
       if res_data["status"] == "settled":
-        settlemment_token_id = query_settlement_token(conn, market_id)
+        res_data["settlemmentTokenId"] = query_settlement_token(conn, market_id)
 
       # access_token が指定されていない場合、一般的な情報のみ返す
       access_token = req.params.get("access_token")
@@ -27,7 +27,7 @@ class MarketResource():
       # access_token が指定されていた場合、ユーザー固有の情報も返す
       user_id = check_access_token(access_token, conn)
       if user_id == None:
-        resp.body = response.failure("invalid access_token")
+        resp.body = response.failure("invalid access token")
         return
 
       me_data = get_user_specific_data(conn, market_id, user_id)
@@ -56,11 +56,11 @@ def market_to_dict(market):
     "id": id,
     "title": title,
     "organizer": organizer,
-    "short_desc": short_desc,
+    "shortDesc": short_desc,
     "desc": description,
-    "open_ts": open_ts,
-    "close_ts": close_ts,
-    "initial_coin_issue": initial_coin_issue,
+    "openTs": open_ts,
+    "closeTs": close_ts,
+    "initialCoinIssue": initial_coin_issue,
     "status": status,
   }
 
@@ -98,7 +98,7 @@ def token_to_dict(token):
 def distribution_to_dict(distribution):
   (token_id, amount) = distribution
   return {
-    "token_id": token_id,
+    "tokenId": token_id,
     "amount": amount,
   }
 
@@ -107,7 +107,7 @@ def get_user_specific_data(conn, market_id, user_id):
   coins = query_user_coins(conn, market_id, user_id)
   tokens = [
     {
-      "token_id": id,
+      "id": id,
       "amount": amount,
     }
     for (id, amount)

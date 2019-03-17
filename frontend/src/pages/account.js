@@ -1,63 +1,83 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect, useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
 import Header from 'src/components/header';
-import { requestMe } from '../actions';
+import { getMe, InvalidAccessTokenError, NetworkError } from 'src/api';
+import { AccessTokenContext } from 'src/context';
 
-class AccountPage extends React.Component {
-  constructor(props) {
-    super(props);
-    if (this.props.accessToken) {
-      this.props.requestMe(this.props.accessToken);
-    }
+export default function AccountPage(props) {
+  const {token, setToken} = useContext(AccessTokenContext);
+  const [me, setMe] = useState(null);
+  const [errMsg, setErrMsg] = useState(null);
+
+  useEffect(() => {
+    getMe(token)
+      .then(me => setMe(me))
+      .catch(err => {
+        switch(err) {
+          case InvalidAccessTokenError:
+            setToken(null);
+            break;
+          case NetworkError:
+          default:
+            setErrMsg("Network error is detected");
+            break;
+        }
+      });
+  }, [token])
+
+  if (!token) {
+    return <Redirect to="/login" />
   }
 
-  render() {
-    if (!this.props.accessToken) {
-      return <Redirect to="/login" />
-    }
+  return (
+    <Page>
+      <Header />
+      <Container>
+        { errMsg ? <h3>{errMsg}</h3> : null }
+        { me ? MeContents(me) : null }
+      </Container>
+    </Page>
+  );
+}
 
-    const name = this.props.name || "-";
-    const email = this.props.email || ""
-    const markets = this.props.markets || [];
-    return (
-      <Page>
-        <Header />
-        <Container>
-          <Profile>
-            <ProfileHeader>Profile</ProfileHeader>
-            <ProfileItems>
-              <ProfileItem>
-                <ProfileItemKey>Name</ProfileItemKey>
-                <ProfileItemVal>{name}</ProfileItemVal>
-              </ProfileItem>
-              <ProfileItem>
-                <ProfileItemKey>Email</ProfileItemKey>
-                <ProfileItemVal>{email}</ProfileItemVal>
-              </ProfileItem>
-            </ProfileItems>
-          </Profile>
-          <MarketList>
-            <MarketListHeader>Markets</MarketListHeader>
-            <MarketListItems>
-            {markets.map(market =>
-              <MarketListItem key={market.id}>
-                <MarketListItemStatus>
-                  {market.status}
-                </MarketListItemStatus>
-                <MarketListItemTitle href={"/market/" + market.id}>
-                  {market.title}
-                </MarketListItemTitle>
-              </MarketListItem>
-            )}
-            </MarketListItems>
-          </MarketList>
-        </Container>
-      </Page>
-    );
-  }
+function MeContents(me) {
+  const name = me.name;
+  const email = me.email;
+  const markets = me.markets;
+  return (
+    <>
+    <Profile>
+      <ProfileHeader>Profile</ProfileHeader>
+      <ProfileItems>
+        <ProfileItem>
+          <ProfileItemKey>Name</ProfileItemKey>
+          <ProfileItemVal>{name}</ProfileItemVal>
+        </ProfileItem>
+        <ProfileItem>
+          <ProfileItemKey>Email</ProfileItemKey>
+          <ProfileItemVal>{email}</ProfileItemVal>
+        </ProfileItem>
+      </ProfileItems>
+    </Profile>
+    <MarketList>
+      <MarketListHeader>Markets</MarketListHeader>
+      <MarketListItems>
+      {markets.map(market =>
+        <MarketListItem key={market.id}>
+          <MarketListItemStatus>
+            {market.status}
+          </MarketListItemStatus>
+          <MarketListItemTitle href={"/market/" + market.id}>
+            {market.title}
+          </MarketListItemTitle>
+        </MarketListItem>
+      )}
+      </MarketListItems>
+    </MarketList>
+    </>
+  );
 }
 
 
@@ -166,24 +186,3 @@ const MarketListItemTitle = styled.a`
   font-size: 14px;
   width: 80%;
 `;
-
-function mapStateToProps(state) {
-  return {
-    ...state.pages.account,
-    name: state.me.name,
-    email: state.me.email,
-    markets: state.me.markets,
-    accessToken: state.me.accessToken,
-  }
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    requestMe: token => dispatch(requestMe(token))
-  }
-}
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AccountPage)

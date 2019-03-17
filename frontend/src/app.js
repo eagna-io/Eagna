@@ -1,33 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Route,
   Switch,
   Redirect
 } from "react-router-dom";
-import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-import LoginPage from './pages/login';
-import AccountPage from './pages/account';
-import MarketPage from './pages/market';
+import LoginPage from 'src/pages/login';
+import AccountPage from 'src/pages/account';
+import MarketPage from 'src/pages/market';
+import { AccessTokenContext } from 'src/context';
 
-class App extends React.Component {
-  render() {
-    return (
+export default function App() {
+  const [token, setToken] = useState(null);
+  const [isTokenInitialized, setIsTokenInitialized] = useState(false);
+  const tokenCtx = {token, setToken}
+
+  useEffect(() => {
+    if (!isTokenInitialized) {
+      setIsTokenInitialized(true);
+      setToken(localStorage.getItem('accessToken'));
+    } else {
+      localStorage.setItem('accessToken', token);
+    }
+  }, [token]);
+
+  return (
+    <AccessTokenContext.Provider value={tokenCtx}>
       <Router>
         <Switch>
+          <Route path="/login" component={LoginPage} />
           <Route path="/me" component={AccountPage} />
           <Route path="/market/:id" component={MarketPage} />
-          <Route path="/login" component={LoginPage} />
-          <Route component={LoginPage} />
         </Switch>
       </Router>
-    )
-  }
+    </AccessTokenContext.Provider>
+  )
 }
-
-export default connect(
-  null,
-  null,
-)(App)

@@ -1,80 +1,80 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { requestLogin } from '../actions';
+import { AccessTokenContext } from 'src/context';
+import { getAccessToken, LoginFailedError, NetworkError } from 'src/api';
 
-/*
- * onLoginSuccess
- */
-class LoginPage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.onChange = this.onChange.bind(this);
-    this.onKeyPress = this.onKeyPress.bind(this);
-    this.onPressLogin = this.onPressLogin.bind(this);
-    this.state = {
-      email: "",
-      password: "",
-    };
+export default function LoginPage() {
+  const {token, setToken} = useContext(AccessTokenContext);
+  const [emailInput, setEmailInput] = useState("");
+  const [passInput, setPassInput] = useState("");
+  const [requesting, setRequesting] = useState(false);
+  const [errMsg, setErrMsg] = useState(null);
+
+  // すでにアクセストークンを取得している場合は
+  // アカウントページにリダイレクトする
+  if (token) {
+    return <Redirect to="/me" />
   }
 
-  onChange(event) {
-    const target = event.target;
-    this.setState({
-      [target.name]: target.value
-    })
+  // TODO : Loading の表示方法
+  if (requesting) {
+    return <h3>Requesting...</h3>
   }
 
-  onKeyPress(event) {
-    if (event.which == 13) {
-      event.preventDefault();
-      const name = this.state.email;
-      const rawPass = this.state.password;
-      this.props.requestLogin(name, rawPass);
-    }
-  }
+  const requestLogin = () => {
+    setRequesting(true);
+    setErrMsg(null);
+    getAccessToken(emailInput, passInput)
+      .then(accessToken => setToken(accessToken))
+      .catch(err => {
+        switch(err) {
+          case LoginFailedError:
+            setErrMsg("Email or Password is incorrect");
+            break;
+          case NetworkError:
+          default:
+            setErrMsg("Network error is detected");
+        }
+      });
+  };
 
-  onPressLogin(event) {
-    event.preventDefault(); 
-    const email = this.state.email;
-    const rawPass = this.state.password;
-    this.props.requestLogin(email, rawPass);
-  }
+  return (
+    <Body>
+      <Container>
+        <Title>ROHAN MARKET</Title>
+        { errMsg ? <h3>{errMsg}</h3> : null /* TODO : css style */ }
+        <Input
+          type="text"
+          placeholder="Email"
+          value={emailInput}
+          onChange={e => setEmailInput(e.target.value)} 
+          onKeyPress={e => isPressEnter(e) && requestLogin()} />
+        <Input
+          type="password"
+          placeholder="Password"
+          value={passInput}
+          onChange={e => setPassInput(e.target.value)}
+          onKeyPress={e => isPressEnter(e) && requestLogin()} />
+        <SubmitButton
+          onClick={e => {
+            e.preventDefault();
+            requestLogin()
+          }}>
+            Login
+        </SubmitButton>
+      </Container>
+    </Body>
+  );
+}
 
-  render() {
-    if (this.props.accessToken) {
-      return <Redirect to="/me" />
-    }
-    if (this.props.isRequesting) {
-      return <h3>Requesting...</h3>
-    }
-    const failedMessage = this.props.showFailed ? <h3>email or password is incorrect</h3> : null
-    return (
-      <Body>
-        <Container>
-          <Title>ROHAN MARKET</Title>
-          { failedMessage }
-          <Input
-            type="text"
-            name="email"
-            placeholder="email"
-            onChange={this.onChange} 
-            onKeyPress={this.onKeyPress} />
-          <Input
-            type="text"
-            name="password"
-            placeholder="Password"
-            onChange={this.onChange}
-            onKeyPress={this.onKeyPress} />
-          <SubmitButton
-            onClick={this.onPressLogin}>
-              Login
-          </SubmitButton>
-        </Container>
-      </Body>
-    );
+function isPressEnter(e) {
+  if (e.which === 13) {
+    e.preventDefault();
+    return true;
+  } else {
+    return false;
   }
 }
 
@@ -116,24 +116,3 @@ const SubmitButton = styled.button`
   font-size: 20px;
   font-family: "Arial";
 `;
-
-
-function mapStateToProps(state) {
-  return {
-    ...state.pages.login,
-    accessToken: state.me.accessToken,
-  }
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    requestLogin: (email, rawPass) => {
-      dispatch(requestLogin(email, rawPass))
-    }
-  }
-}
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(LoginPage)

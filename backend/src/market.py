@@ -42,4 +42,4 @@ def query_settlement_token(conn, market_id):
    "WHERE is_settlement_token = True"
    " AND market_id = %s"
    )
-  return db.query_one(conn, sql, (market_id,))
+  return db.query_one(conn, sql, (market_id,))[0]
