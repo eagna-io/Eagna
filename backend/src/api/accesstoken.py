@@ -1,12 +1,12 @@
 from datetime import datetime, timezone
 import db
-from access_token import create_access_token
+from access_token import create_access_token, check_access_token
 from api import response
 
-class LoginResource():
-  def on_get(self, req, resp):
-    email = req.params.get("email")
-    hashed_pass = req.params.get("pass")
+class AccessTokenResource():
+  def on_post(self, req, resp):
+    email = req.media.get("email")
+    hashed_pass = req.media.get("pass")
     if email == None or hashed_pass == None:
       resp.body = response.failure("parameter is not enough")
       return
@@ -18,10 +18,21 @@ class LoginResource():
         return
 
       # AccessToken の発行
-      access_token = create_access_token(user_id, conn)
+      access_token = create_access_token(conn, user_id)
 
       resp.body = response.success(access_token)
       return
+
+  def on_get(self, req, resp, access_token):
+    with db.connect_with_env() as conn:
+      user_id = check_access_token(conn, access_token)
+      if user_id == None:
+        resp.body = response.failure("access token is invalid")
+        return
+
+      resp.body = response.success({
+        "userId": user_id,
+      })
 
 # Return "user_id" if success, or None
 def check_password(email, hashed_pass, conn):

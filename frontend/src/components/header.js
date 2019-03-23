@@ -1,11 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { AccountPage, Link } from 'src/router';
+
 export default function Header(props) {
   return (
     <Container className={props.className}>
       <Title>Rohan Market</Title>
-      <Profile href="/me"></Profile>
+      <Profile to={AccountPage()}></Profile>
     </Container>
   );
 }
@@ -28,7 +30,7 @@ const Title = styled.div`
   margin-left: 30px;
 `;
 
-const Profile = styled.a`
+const Profile = styled(Link)`
   display: inline-block;
   position: absolute;
   top: 16px;

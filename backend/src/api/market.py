@@ -25,7 +25,7 @@ class MarketResource():
         return
 
       # access_token が指定されていた場合、ユーザー固有の情報も返す
-      user_id = check_access_token(access_token, conn)
+      user_id = check_access_token(conn, access_token)
       if user_id == None:
         resp.body = response.failure("invalid access token")
         return

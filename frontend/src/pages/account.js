@@ -2,43 +2,54 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
-import Header from 'src/components/header';
 import { getMe, InvalidAccessTokenError, NetworkError } from 'src/api';
-import { AccessTokenContext } from 'src/context';
+import { LoginPage, MarketPage, Link } from 'src/router';
+import { AccessTokenContext, RouterContext } from 'src/context';
+import NoticeBar from 'src/components/notice_bar';
+import Loading from 'src/components/loading';
+import Header from 'src/components/header';
 
 export default function AccountPage(props) {
   const {token, setToken} = useContext(AccessTokenContext);
+  const router = useContext(RouterContext);
   const [me, setMe] = useState(null);
-  const [errMsg, setErrMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [[errMsg, errNonce], setErr] = useState([null, null]);
 
   useEffect(() => {
+    if (!token) {
+      router.redirectTo(LoginPage());
+      return;
+    }
+    setLoading(true);
     getMe(token)
       .then(me => setMe(me))
       .catch(err => {
         switch(err) {
           case InvalidAccessTokenError:
             setToken(null);
+            router.redirectTo(LoginPage());
             break;
           case NetworkError:
           default:
-            setErrMsg("Network error is detected");
+            setErr(["Network error is detected", Date.now()]);
             break;
         }
-      });
+      })
+      .finally(() => setLoading(false));
   }, [token])
 
-  if (!token) {
-    return <Redirect to="/login" />
-  }
-
   return (
+    <>
+    <Loading loading={loading} />
+    <NoticeBar nonce={errNonce}>{errMsg}</NoticeBar>
     <Page>
       <Header />
       <Container>
-        { errMsg ? <h3>{errMsg}</h3> : null }
         { me ? MeContents(me) : null }
       </Container>
     </Page>
+    </>
   );
 }
 
@@ -69,7 +80,7 @@ function MeContents(me) {
           <MarketListItemStatus>
             {market.status}
           </MarketListItemStatus>
-          <MarketListItemTitle href={"/market/" + market.id}>
+          <MarketListItemTitle to={MarketPage(market.id)}>
             {market.title}
           </MarketListItemTitle>
         </MarketListItem>
@@ -169,7 +180,7 @@ const MarketListItems = styled.ul`
 
 const MarketListItem = styled.li`
   padding: 10px;
-  background-color: ${props => props.filled ? "#F9F9F9" : "white"}
+  background-color: ${props => props.filled ? "#F9F9F9" : "white"};
 `;
 
 const MarketListItemStatus = styled.div`
@@ -180,7 +191,7 @@ const MarketListItemStatus = styled.div`
   padding-left: 20px;
 `;
 
-const MarketListItemTitle = styled.a`
+const MarketListItemTitle = styled(Link)`
   display: inline-block;
   text-align: left;
   font-size: 14px;

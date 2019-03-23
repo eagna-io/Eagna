@@ -1,50 +1,71 @@
-import React, { useState, useContext } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { AccessTokenContext } from 'src/context';
-import { getAccessToken, LoginFailedError, NetworkError } from 'src/api';
+import { AccessTokenContext, RouterContext } from 'src/context';
+import { AccountPage } from 'src/router';
+import { createAccessToken, getAccessToken,
+  LoginFailedError, NetworkError, InvalidAccessTokenError } from 'src/api';
+import NoticeBar from 'src/components/notice_bar';
+import Loading from 'src/components/loading';
 
 export default function LoginPage() {
   const {token, setToken} = useContext(AccessTokenContext);
+  const router = useContext(RouterContext);
   const [emailInput, setEmailInput] = useState("");
   const [passInput, setPassInput] = useState("");
-  const [requesting, setRequesting] = useState(false);
-  const [errMsg, setErrMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [[errMsg, errNonce], setErr] = useState([null, null]);
 
-  // すでにアクセストークンを取得している場合は
-  // アカウントページにリダイレクトする
-  if (token) {
-    return <Redirect to="/me" />
-  }
-
-  // TODO : Loading の表示方法
-  if (requesting) {
-    return <h3>Requesting...</h3>
-  }
+  // すでのアクセストークンを持っている場合はそれが
+  // 有効なものかチェックする
+  useEffect(() => {
+    if (token) {
+      getAccessToken(token)
+        .then(info => {
+          router.redirectTo(AccountPage());
+        })
+        .catch(err => {
+          switch(err) {
+            case InvalidAccessTokenError:
+              setToken(null);
+              break;
+          }
+        });
+    }
+  }, [token]);
 
   const requestLogin = () => {
-    setRequesting(true);
-    setErrMsg(null);
-    getAccessToken(emailInput, passInput)
-      .then(accessToken => setToken(accessToken))
+    setLoading(true);
+    setErr([null, null]);
+    createAccessToken(emailInput, passInput)
+      .then(accessToken => {
+        setToken(accessToken);
+        router.redirectTo(AccountPage());
+      })
       .catch(err => {
+        setLoading(false);
         switch(err) {
           case LoginFailedError:
-            setErrMsg("Email or Password is incorrect");
+            setErr(["Email or Password is incorrect", Date.now()]);
             break;
           case NetworkError:
+            setErr(["Network error is detected", Date.now()]);
+            break;
           default:
-            setErrMsg("Network error is detected");
+            setErr("Sorry. Server error is detected. Please try again later");
+            console.error(err);
+            break;
         }
       });
   };
 
   return (
+  <>
+    <Loading loading={loading} />
+    <NoticeBar nonce={errNonce}>{errMsg}</NoticeBar>
     <Body>
       <Container>
         <Title>ROHAN MARKET</Title>
-        { errMsg ? <h3>{errMsg}</h3> : null /* TODO : css style */ }
         <Input
           type="text"
           placeholder="Email"
@@ -66,6 +87,7 @@ export default function LoginPage() {
         </SubmitButton>
       </Container>
     </Body>
+    </>
   );
 }
 

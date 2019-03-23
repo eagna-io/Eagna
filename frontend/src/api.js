@@ -10,10 +10,11 @@ export const TokenPriceIsMovedError = "TokenPriceIsMovedError";
 const base = process.env.API_BASE;
 
 
-export function getAccessToken(email, rawPass) {
+export function createAccessToken(email, rawPass) {
   const hashedPass = sha256(rawPass);
-  const url = `${base}/login?email=${email}&pass=${hashedPass}`;
-  return get(url)
+  const params = {email, pass: hashedPass};
+  const url = `${base}/accesstoken`;
+  return post(url, params)
     .then(json => {
       if (!json.success) {
         if (json.result === "invalid email or password") {
@@ -25,6 +26,23 @@ export function getAccessToken(email, rawPass) {
       return json.result;
     })
 }
+
+
+export function getAccessToken(token) {
+  const url = `${base}/accesstoken/${token}`;
+  return get(url)
+    .then(json => {
+      if (!json.success) {
+        if (json.result === "access token is invalid") {
+          throw InvalidAccessTokenError;
+        } else {
+          getUnexpectedError(json.result);
+        }
+      }
+      return json;
+    })
+}
+
 
 
 
@@ -77,6 +95,8 @@ export function postOrder(tokenId, amountToken, amountCoin, accessToken) {
           throw InvalidAccessTokenError;
         } else if (json.result === "amount coin is invalid") {
           throw TokenPriceIsMovedError;
+        } else if (json.result === "you dont have the token enough") {
+          throw NotEnoughTokenError;
         } else {
           getUnexpectedError(json.result);
         }

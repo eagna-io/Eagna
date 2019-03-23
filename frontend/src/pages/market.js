@@ -2,6 +2,11 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { AccessTokenContext } from 'src/context';
+import { getMarket, InvalidAccessTokenError, MarketNotFoundError } from 'src/api';
+
+import Loading from 'src/components/loading';
+import NoticeBar from 'src/components/notice_bar';
 import Header from 'src/components/header';
 import MarketHeader from './market/header';
 import TokensComponent from './market/tokens';
@@ -10,43 +15,51 @@ import AssetsComponent from './market/assets';
 import ResultComponent from './market/result';
 import DescComponent from './market/description';
 
-import { AccessTokenContext } from 'src/context';
-import { getMarket, InvalidAccessTokenError, MarketNotFoundError } from 'src/api';
-
 
 export default function MarketPage(props) {
-  const marketId = props.match.params.id;
+  const marketId = props.id;
   const {token, setToken} = useContext(AccessTokenContext);
   const [market, setMarket] = useState(null);
-  const [errMsg, setErrMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [[errMsg, errNonce], setErr] = useState([null, null]);
 
   useEffect(() => {
+    setLoading(true);
     getMarket(marketId, token)
-      .then(market => setMarket(market))
+      .then(market => {
+        setMarket(market);
+        setLoading(false);
+      })
       .catch(err => {
         switch(err) {
           case InvalidAccessTokenError:
             setToken(null);
+            setErr(["Your login session is expired", Date.now()]);
             setMarket(null);
+            setLoading(false);
             break;
           case MarketNotFoundError:
-            setErrMsg("Market not found");
+            setErr(["Market not found", Date.now()]);
             setMarket(null);
+            setLoading(false);
             break;
         }
       });
   }, [marketId, token]);
 
   return (
+    <>
+    <Loading loading={loading} />
+    <NoticeBar nonce={errNonce}>{errMsg}</NoticeBar>
     <Page>
       <Header />
-      { errMsg ? <h3>{errMsg}</h3> : null }
-      { market ? MarketContents(market) : null }
+      { market ? MarketContents(market, setErr, setMarket) : null }
     </Page>
+    </>
   )
 }
 
-function MarketContents(market) {
+function MarketContents(market, setErr, setMarket) {
   return (
     <>
     <MarketHeader
@@ -62,8 +75,8 @@ function MarketContents(market) {
             <OrderContainer>
               <OrderComponent
                 tokens={market.tokens}
-                marketId={marketId}
-                setErrMsg={setErrMsg}
+                marketId={market.id}
+                setErr={setErr}
                 setMarket={setMarket} />
               <AssetsComponent
                 tokens={market.tokens}

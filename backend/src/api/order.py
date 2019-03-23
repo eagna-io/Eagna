@@ -17,7 +17,7 @@ class OrderResource():
 
     with db.connect_with_env() as conn:
       # access_token を検証
-      user_id = check_access_token(access_token, conn)
+      user_id = check_access_token(conn, access_token)
       if user_id == None:
         resp.body = response.failure("access token is invalid")
         return

@@ -4,11 +4,11 @@ import db
 # AccessTokenの長さ
 TOKEN_LENGTH = 8
 
-# AccessTokenが有効な秒数
-VALID_SECS = 60 * 60
+# AccessTokenが有効な時間
+VALID_HOURS = 24
 
 # Return "token" or None
-def create_access_token(user_id, conn):
+def create_access_token(conn, user_id):
   token = secrets.token_hex(TOKEN_LENGTH)
   sql = (
    "INSERT INTO access_tokens "
@@ -20,11 +20,11 @@ def create_access_token(user_id, conn):
 
 
 # Return "user_id" or None
-def check_access_token(token, conn):
+def check_access_token(conn, token):
   sql = (
    "SELECT user_id FROM access_tokens "
    "WHERE token = %s "
    " AND force_expired = False "
-   " AND now() < created_at + INTERVAL '1 hour'"
+   " AND now() < created_at + INTERVAL '%s hour'"
   )
-  return db.query_one(conn, sql, (token,))
+  return db.query_one(conn, sql, (token, VALID_HOURS))

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from wsgiref import simple_server
 import falcon
 import json
-from .login import LoginResource
+from .accesstoken import AccessTokenResource
 from .me import MeResource
 from .market import MarketResource
 from .order import OrderResource
@@ -19,7 +19,8 @@ class Server():
 
   def serve_forever(self):
     app = falcon.API(middleware=[CORSMiddleware()])
-    app.add_route("/login", LoginResource())
+    app.add_route("/accesstoken/{access_token}", AccessTokenResource())
+    app.add_route("/accesstoken", AccessTokenResource())
     app.add_route("/me", MeResource())
     app.add_route("/markets/{id}", MarketResource())
     app.add_route("/order", OrderResource())

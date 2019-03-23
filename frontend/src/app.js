@@ -1,40 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import {
-  BrowserRouter as Router,
-  Route,
-  Switch,
-  Redirect
-} from "react-router-dom";
 import styled from 'styled-components';
 
 import LoginPage from 'src/pages/login';
 import AccountPage from 'src/pages/account';
 import MarketPage from 'src/pages/market';
-import { AccessTokenContext } from 'src/context';
+import { AccessTokenContext, RouterContext } from 'src/context';
+import Router, { Login, Account, Market, pageFromPath } from 'src/router';
 
-export default function App() {
-  const [token, setToken] = useState(null);
-  const [isTokenInitialized, setIsTokenInitialized] = useState(false);
-  const tokenCtx = {token, setToken}
+export default function App(props) {
+  const initialAccessToken = props.initialAccessToken;
+  const initialPage = props.initialPage;
+  const [token, setToken] = useState(initialAccessToken);
+  const [page, setPage] = useState(initialPage);
 
   useEffect(() => {
-    if (!isTokenInitialized) {
-      setIsTokenInitialized(true);
-      setToken(localStorage.getItem('accessToken'));
-    } else {
+    window.onpopstate = (event) => {
+      setPage(pageFromPath(window.location.pathname))
+    };
+  });
+
+  useEffect(() => {
+    if (token) {
       localStorage.setItem('accessToken', token);
+    } else {
+      localStorage.removeItem('accessToken');
     }
   }, [token]);
 
+  const router = new Router(setPage);
+  const tokenCtx = {token, setToken}
+
+  const renderPage = page => {
+    console.log(page);
+    switch(page.name) {
+      case Login:
+        return <LoginPage />
+      case Account:
+        return <AccountPage />
+      case Market:
+        return <MarketPage id={page.params.id} />
+    }
+  };
+
   return (
     <AccessTokenContext.Provider value={tokenCtx}>
-      <Router>
-        <Switch>
-          <Route path="/login" component={LoginPage} />
-          <Route path="/me" component={AccountPage} />
-          <Route path="/market/:id" component={MarketPage} />
-        </Switch>
-      </Router>
+      <RouterContext.Provider value={router}>
+        { renderPage(page) }
+      </RouterContext.Provider>
     </AccessTokenContext.Provider>
   )
 }

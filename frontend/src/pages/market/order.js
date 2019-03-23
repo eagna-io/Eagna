@@ -1,26 +1,28 @@
-import React from 'react';
+import React, {useContext, useState} from 'react';
 import styled from 'styled-components';
 import * as lmsr from 'src/lmsr';
+import {AccessTokenContext} from 'src/context';
+import {postOrder, getMarket} from 'src/api';
 
 const MAX_QUANTITY = 100;
 const MICRO_COIN = 1000000;
 
 export default function  Order(props) {
-  const {tokens, marketId, setErrMsg, setMarket } = props;
+  const {tokens, marketId, setErr, setMarket } = props;
   const accessToken = useContext(AccessTokenContext).token;
   const [selectedToken, setSelectedToken] = useState(null);
   const [orderType, setOrderType] = useState("buy");
   const [amountToken, setAmountToken] = useState(null);
 
-  const cost = currentCost(selectedToken, amountToken, tokens, orderType);
+  const cost = selectedToken !== null ? currentCost(selectedToken, amountToken, tokens, orderType) : 0;
 
   const requestOrder = () => {
     if (selectedToken === null) {
-      setErrMsg("Please select the token");
+      setErr(["Please select the token", Date.now()]);
       return;
     }
     if (amountToken === null) {
-      setErrMsg("Please input amount of the token");
+      setErr(["Please input amount of the token", Date.now()]);
       return;
     }
     postOrder(
@@ -33,10 +35,10 @@ export default function  Order(props) {
         switch(err) {
           case InvalidAccessTokenError:
             setToken(null);
-            setErrMsg("You need to login");
+            setErr(["You need to login", Date.now()]);
             break;
           case TokenPriceIsMovedError:
-            setErrMsg("Price of the token is changed");
+            setErr(["Price of the token is changed", Date.now()]);
             break;
         }
       })
@@ -46,7 +48,7 @@ export default function  Order(props) {
   };
 
   return (
-    <Container className={this.props.className}>
+    <Container className={props.className}>
       <TokenSelect
         selected={selectedToken}
         tokens={props.tokens}
