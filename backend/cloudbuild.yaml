@@ -1,9 +1,11 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/backend', 'backend' ]
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/backend', '.' ]
+  dir: 'backend'
   timeout: '300s'
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'push', 'gcr.io/$PROJECT_ID/backend' ]
 - name: 'gcr.io/cloud-builders/gcloud'
   args: [ 'app', 'deploy', '--image-url=gcr.io/rohanmarket/backend' ]
+  dir: 'backend'
   timeout: '300s'
