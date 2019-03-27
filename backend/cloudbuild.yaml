@@ -3,7 +3,7 @@ steps:
   args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/backend', 'backend' ]
   timeout: '300s'
 - name: 'gcr.io/cloud-builders/gcloud'
-  args: [ 'app', 'deploy' ]
+  args: [ 'app', 'deploy', 'backend/app.yaml' ]
   timeout: '300s'
 images:
 - 'gcr.io/$PROJECT_ID/backend'
