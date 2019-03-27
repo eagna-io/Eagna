@@ -2,3 +2,5 @@ test_data.sql
 market_def.json
 
 __pycache__
+
+service-account-credentials.json
