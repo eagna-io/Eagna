@@ -2,11 +2,11 @@ import os
 import psycopg2
 
 def connect_with_env():
-  db_host = os.enviton['ROHAN_DB_HOST']
-  db_port = os.enviton['ROHAN_DB_PORT']
-  db_name = os.enviton['ROHAN_DB_NAME']
-  db_user = os.enviton['ROHAN_DB_USER']
-  db_pass = os.enviton['ROHAN_DB_PASS']
+  db_host = os.environ['ROHAN_DB_HOST']
+  db_port = os.environ['ROHAN_DB_PORT']
+  db_name = os.environ['ROHAN_DB_NAME']
+  db_user = os.environ['ROHAN_DB_USER']
+  db_pass = os.environ['ROHAN_DB_PASS']
   return connect(db_host, db_port, db_name, db_user, db_pass)
 
 def connect(db_host, db_port, db_name, db_user, db_pass):
