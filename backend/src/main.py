@@ -13,7 +13,7 @@ print("Start to observe market open/close")
 # 環境変数の取得
 # 環境変数が指定されていない場合はエラー
 bind_host = os.environ['ROHAN_BIND_HOST']
-bind_port = os.environ['ROHAN_BIND_PORT']
+bind_port = int(os.environ['ROHAN_BIND_PORT'])
 
 # API server の起動
 print(f"Server start on {bind_host}:{bind_port}")

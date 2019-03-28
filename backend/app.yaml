@@ -8,5 +8,9 @@ env_variables:
   ROHAN_DB_PASS: diamondisunbreakable
   ROHAN_BIND_PORT: 8080
   ROHAN_BIND_HOST: 0.0.0.0
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10
 beta_settings:
   cloud_sql_instances: "rohanmarket:asia-northeast1:backend"
