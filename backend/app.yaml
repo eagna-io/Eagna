@@ -1,10 +1,12 @@
 runtime: custom
 env: flex
 env_variables:
-  ROHAN_DB_HOST: rohanmarket:asia-northeast1:backend
+  ROHAN_DB_HOST: /cloudsql/rohanmarket:asia-northeast1:backend
   ROHAN_DB_PORT: 5432
   ROHAN_DB_NAME: rohanmarket
   ROHAN_DB_USER: kishiberohan
   ROHAN_DB_PASS: diamondisunbreakable
   ROHAN_BIND_PORT: 8080
   ROHAN_BIND_HOST: 0.0.0.0
+beta_settings:
+  cloud_sql_instances: "rohanmarket:asia-northeast1:backend"
