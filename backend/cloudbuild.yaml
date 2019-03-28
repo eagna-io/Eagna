@@ -8,4 +8,4 @@ steps:
 - name: 'gcr.io/cloud-builders/gcloud'
   args: [ 'app', 'deploy', '--image-url=gcr.io/rohanmarket/backend' ]
   dir: 'backend'
-  timeout: '1000s'
+timeout: '1800s'
