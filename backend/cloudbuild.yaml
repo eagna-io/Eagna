@@ -9,3 +9,5 @@ steps:
   args: [ 'app', 'deploy', '--image-url=gcr.io/rohanmarket/backend' ]
   dir: 'backend'
 timeout: '1800s'
+images:
+- 'gcr.io/$PROJECT_ID/backend'
