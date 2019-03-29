@@ -13,4 +13,4 @@ steps:
 images:
 - 'gcr.io/$PROJECT_ID/backend:$SHORT_SHA'
 - 'gcr.io/$PROJECT_ID/backend:$BRANCH_NAME'
-- 'gcr.io/$PROJECT_ID/backend:$latest'
+- 'gcr.io/$PROJECT_ID/backend:latest'
