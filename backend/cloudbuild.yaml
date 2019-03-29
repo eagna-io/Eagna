@@ -3,7 +3,7 @@ steps:
   args:
   - 'build'
   - '-t'
-  - 'gcr.io/$PROJECT_ID/backend:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/backend:$SHORT_SHA'
   - '-t'
   - 'gcr.io/$PROJECT_ID/backend:$BRANCH_NAME'
   - '-t'
@@ -11,4 +11,6 @@ steps:
   - '.'
   dir: 'backend'
 images:
-- 'gcr.io/$PROJECT_ID/backend:$COMMIT_SHA'
+- 'gcr.io/$PROJECT_ID/backend:$SHORT_SHA'
+- 'gcr.io/$PROJECT_ID/backend:$BRANCH_NAME'
+- 'gcr.io/$PROJECT_ID/backend:$latest'
