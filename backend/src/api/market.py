@@ -4,9 +4,12 @@ from access_token import check_access_token
 from market import query_current_distribution, query_settlement_token, query_user_coins, query_user_tokens
 
 class MarketResource():
+  def __init__(self, db_url):
+    self.db_url = db_url
+
   def on_get(self, req, resp, id):
     market_id = id
-    with db.connect_with_env() as conn:
+    with db.connect(self.db_url) as conn:
       market = query_market(conn, market_id)
       if market == None:
         resp.body = response.failure("market not found")

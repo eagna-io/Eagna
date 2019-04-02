@@ -2,17 +2,17 @@ from time import sleep
 from datetime import datetime, timezone
 import db
 
-def observe_market():
+def observe_market(db_url):
   while True:
-    check_open_markets()
-    check_close_markets()
+    check_open_markets(db_url)
+    check_close_markets(db_url)
     sleep_until_next_minite()
 
 
 # Opening instruction
 
-def check_open_markets():
-  with db.connect_with_env() as conn:
+def check_open_markets(db_url):
+  with db.connect(db_url) as conn:
     # 新しくopen する必要のあるmarket 一覧を取得
     new_markets = query_new_open_markets(conn)
     if len(new_markets) != 0:
@@ -58,8 +58,8 @@ def open_market(market_id, conn):
 
 # Closing instruction
 
-def check_close_markets():
-  with db.connect_with_env() as conn:
+def check_close_markets(db_url):
+  with db.connect(db_url) as conn:
     new_markets = query_new_close_markets(conn)
     if len(new_markets) != 0:
       for market_id in new_markets:

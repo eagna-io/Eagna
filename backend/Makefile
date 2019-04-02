@@ -6,7 +6,7 @@ PG_URI=postgres://$(PG_USER):$(PG_PASS)@localhost:$(PG_PORT)/$(PG_DATA)
 DOCKER_PG_NAME=rohan-pg
 
 install:
-	pip install psycopg2 psycopg2-binary falcon
+	pip install -r requirements.txt
 
 start-db:
 	docker run -d --rm -e POSTGRES_DB=$(PG_DATA) -e POSTGRES_PASSWORD=$(PG_PASS) -e POSTGRES_USER=$(PG_USER) --name $(DOCKER_PG_NAME) -p $(PG_PORT):5432 postgres

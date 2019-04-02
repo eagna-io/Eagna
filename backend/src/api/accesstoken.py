@@ -4,6 +4,9 @@ from access_token import create_access_token, check_access_token
 from api import response
 
 class AccessTokenResource():
+  def __init__(self, db_url):
+    self.db_url = db_url
+
   def on_post(self, req, resp):
     email = req.media.get("email")
     hashed_pass = req.media.get("pass")
@@ -11,7 +14,7 @@ class AccessTokenResource():
       resp.body = response.failure("parameter is not enough")
       return
 
-    with db.connect_with_env() as conn:
+    with db.connect(self.db_url) as conn:
       user_id = check_password(email, hashed_pass, conn)
       if user_id == None:
         resp.body = response.failure("invalid email or password")
@@ -24,7 +27,7 @@ class AccessTokenResource():
       return
 
   def on_get(self, req, resp, access_token):
-    with db.connect_with_env() as conn:
+    with db.connect(self.db_url) as conn:
       user_id = check_access_token(conn, access_token)
       if user_id == None:
         resp.body = response.failure("access token is invalid")

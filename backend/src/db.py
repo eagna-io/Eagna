@@ -2,21 +2,11 @@ import os
 import psycopg2
 
 def connect_with_env():
-  db_host = os.environ['ROHAN_DB_HOST']
-  db_port = os.environ['ROHAN_DB_PORT']
-  db_name = os.environ['ROHAN_DB_NAME']
-  db_user = os.environ['ROHAN_DB_USER']
-  db_pass = os.environ['ROHAN_DB_PASS']
-  return connect(db_host, db_port, db_name, db_user, db_pass)
+  db_url = os.environ['DB_URL']
+  return connect(db_url)
 
-def connect(db_host, db_port, db_name, db_user, db_pass):
-  return psycopg2.connect(
-    database = db_name,
-    host = db_host,
-    port = db_port,
-    user = db_user,
-    password = db_pass
-  )
+def connect(db_url):
+  return psycopg2.connect(db_url)
 
 def query_all(conn, sql, args=()):
   with conn.cursor() as cur:

@@ -4,3 +4,5 @@ market_def.json
 __pycache__
 
 service-account-credentials.json
+secrets/*
+!secrets/.gitkeep

@@ -5,6 +5,9 @@ from access_token import check_access_token
 import db
 
 class OrderResource():
+  def __init__(self, db_url):
+    self.db_url = db_url
+
   def on_post(self, req, resp):
     access_token = req.media.get("accessToken")
     token_id = req.media.get("tokenId")
@@ -15,7 +18,7 @@ class OrderResource():
       resp.body = response.failure("parameter is not enough")
       return
 
-    with db.connect_with_env() as conn:
+    with db.connect(self.db_url) as conn:
       # access_token を検証
       user_id = check_access_token(conn, access_token)
       if user_id == None:

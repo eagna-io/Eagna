@@ -3,13 +3,16 @@ from access_token import check_access_token
 import db
 
 class MeResource():
+  def __init__(self, db_url):
+    self.db_url = db_url
+
   def on_get(self, req, resp):
     access_token = req.params.get("access_token")
     if access_token == None:
       resp.body = response.failure("access_token is required")
       return
 
-    with db.connect_with_env() as conn:
+    with db.connect(self.db_url) as conn:
       user_id = check_access_token(conn, access_token)
       if user_id == None:
         resp.body = response.failure("invalid access token")

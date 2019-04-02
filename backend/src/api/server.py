@@ -13,16 +13,17 @@ class CORSMiddleware():
     resp.set_header('Access-Control-Allow-Headers', 'Content-Type')
 
 class Server():
-  def __init__(self, url, port):
+  def __init__(self, url, port, db_url):
     self.url = url
     self.port = port
+    self.db_url = db_url
 
   def serve_forever(self):
     app = falcon.API(middleware=[CORSMiddleware()])
-    app.add_route("/accesstoken/{access_token}", AccessTokenResource())
-    app.add_route("/accesstoken", AccessTokenResource())
-    app.add_route("/me", MeResource())
-    app.add_route("/markets/{id}", MarketResource())
-    app.add_route("/order", OrderResource())
+    app.add_route("/accesstoken/{access_token}", AccessTokenResource(self.db_url))
+    app.add_route("/accesstoken", AccessTokenResource(self.db_url))
+    app.add_route("/me", MeResource(self.db_url))
+    app.add_route("/markets/{id}", MarketResource(self.db_url))
+    app.add_route("/order", OrderResource(self.db_url))
     httpd = simple_server.make_server(self.url, self.port, app)
     httpd.serve_forever()
