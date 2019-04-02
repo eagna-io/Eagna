@@ -1,0 +1,6 @@
+runtime: python37
+entrypoint: python src/main.py
+env_variables:
+  ROHAN_DB_URL: "postgres://rohan@10.138.0.2/rohanmarket"
+  ROHAN_BIND_HOST: 0.0.0.0
+  ROHAN_BIND_PORT: $PORT
