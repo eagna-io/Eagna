@@ -1,8 +1,8 @@
-from api import response
-from market import query_current_distribution, query_user_coins
-from lmsr import cost
-from access_token import check_access_token
-import db
+from lib.api import response
+from lib.market import query_current_distribution, query_user_coins
+from lib.lmsr import cost
+from lib.access_token import check_access_token
+from lib import db
 
 class OrderResource():
   def __init__(self, db_url):

@@ -1,7 +1,7 @@
-from api import response
-import db
-from access_token import check_access_token
-from market import query_current_distribution, query_settlement_token, query_user_coins, query_user_tokens
+from lib.api import response
+from lib import db
+from lib.access_token import check_access_token
+from lib.market import query_current_distribution, query_settlement_token, query_user_coins, query_user_tokens
 
 class MarketResource():
   def __init__(self, db_url):

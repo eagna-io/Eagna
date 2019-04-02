@@ -1,6 +1,6 @@
-from api import response
-from access_token import check_access_token
-import db
+from lib.api import response
+from lib.access_token import check_access_token
+from lib import db
 
 class MeResource():
   def __init__(self, db_url):

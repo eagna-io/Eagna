@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-import db
-from access_token import create_access_token, check_access_token
-from api import response
+from lib import db
+from lib.access_token import create_access_token, check_access_token
+from lib.api import response
 
 class AccessTokenResource():
   def __init__(self, db_url):
@@ -26,7 +26,11 @@ class AccessTokenResource():
       resp.body = response.success(access_token)
       return
 
-  def on_get(self, req, resp, access_token):
+  def on_get(self, req, resp, access_token = None):
+    if access_token == None:
+      resp.body = response.failure("access token is not set")
+      return
+
     with db.connect(self.db_url) as conn:
       user_id = check_access_token(conn, access_token)
       if user_id == None:

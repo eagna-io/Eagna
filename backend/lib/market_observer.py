@@ -1,6 +1,6 @@
 from time import sleep
 from datetime import datetime, timezone
-import db
+from lib import db
 
 def observe_market(db_url):
   while True:

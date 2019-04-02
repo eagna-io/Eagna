@@ -1,4 +1,4 @@
-import db
+from lib import db
 
 # Return array of (outcome_id, amount)
 def query_current_distribution(conn, market_id):

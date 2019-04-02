@@ -1,5 +1,5 @@
 import secrets
-import db
+from lib import db
 
 # AccessTokenの長さ
 TOKEN_LENGTH = 8
