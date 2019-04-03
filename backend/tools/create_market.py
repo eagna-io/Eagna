@@ -70,4 +70,5 @@ def insert_tokens(conn, market_id, tokens):
     )
 
 
-main()
+if __name__ == "__main__":
+  main()

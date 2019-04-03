@@ -1,16 +1,30 @@
-import db
-from data import feed_user_data, feed_market_data
-from market_observer import check_open_markets
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from lib import db
+from lib.market_observer import check_open_markets
+from tools.create_market import insert_market_data
+from tools.create_user import insert_user_data
+
+from data import demo_users, demo_market
 
 
 def main():
-  conn = db.connect_with_env()
-  feed_user_data(conn)
-  market_id = feed_market_data(conn)
+  db_url = os.environ["DB_URL"]
+  conn = db.connect(db_url)
+
+  market = demo_market()
+  insert_market_data(conn, market)
+  print("Prepared market data")
+
+  users = demo_users()
+  for user in users:
+    insert_user_data(conn, user)
+  print("Prepared user datas")
+
   conn.commit()
-  print("Feed data")
 
   print("Opening market")
-  check_open_markets()
+  check_open_markets(db_url)
 
 main()

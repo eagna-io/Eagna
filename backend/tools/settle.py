@@ -95,4 +95,5 @@ def set_settle_token_id(conn, market_id, token_id):
   db.update(conn, sql, (token_id, market_id))
 
 
-main()
+if __name__ == "__main__":
+  main()

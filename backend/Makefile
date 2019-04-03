@@ -2,7 +2,7 @@ PG_DATA=pgdata
 PG_USER=postgres
 PG_PASS=postgres
 PG_PORT=5555
-PG_URI=postgres://$(PG_USER):$(PG_PASS)@localhost:$(PG_PORT)/$(PG_DATA)
+PG_URL=postgres://$(PG_USER):$(PG_PASS)@localhost:$(PG_PORT)/$(PG_DATA)
 DOCKER_PG_NAME=rohan-pg
 
 install:
@@ -23,26 +23,18 @@ run-sql-on-db:
 initialize-db:
 	$(MAKE) run-sql-on-db SQL=initialize.sql
 
-tests/data/test_user.sql: tests/data/test_user.csv
-	tests/data/csv2sql.sh $< > $@
-
-tests/data/test_data.sql: tests/data/test_user.sql tests/data/test_raw_data.sql
-	cat $^ > $@
-
 connect-db:
 	docker run -it --rm -e PGPASSWORD=$(PG_PASS) --link $(DOCKER_PG_NAME):$(DOCKER_PG_NAME) postgres psql -h $(DOCKER_PG_NAME) -U $(PG_USER) -d $(PG_DATA)
 
 echo-db-uri:
-	echo $(PG_URI)
+	echo $(PG_URL)
 
-prepare-demo: demo/data.py
+run-demo:
 	$(MAKE) restart-db
 	sleep 2
 	$(MAKE) initialize-db
-	PYTHONPATH=${CURDIR}/tests/data:$(CURDIR)/src DATABASE_URL=${PG_URI} python3 demo/prepare.py
+	DB_URL=${PG_URL} python3 demo/prepare.py
+	DB_URL=$(PG_URL) python3 main.py
 
 test:
-	DATABASE_URL=$(PG_URI) python3 -m unittest discover tests
-
-run:
-	DATABASE_URL=$(PG_URI) python3 src/main.py
+	DB_URL=$(PG_URL) python3 -m unittest discover tests
