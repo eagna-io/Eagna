@@ -22,7 +22,10 @@ export default function AccountPage(props) {
     }
     setLoading(true);
     getMe(token)
-      .then(me => setMe(me))
+      .then(me => {
+        setMe(me);
+        setLoading(false);
+      })
       .catch(err => {
         switch(err) {
           case InvalidAccessTokenError:
@@ -32,10 +35,10 @@ export default function AccountPage(props) {
           case NetworkError:
           default:
             setErr(["Network error is detected", Date.now()]);
+            setLoading(false);
             break;
         }
-      })
-      .finally(() => setLoading(false));
+      });
   }, [token])
 
   return (
