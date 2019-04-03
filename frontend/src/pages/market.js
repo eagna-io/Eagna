@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { AccessTokenContext } from 'src/context';
@@ -17,7 +16,7 @@ import DescComponent from './market/description';
 
 
 export default function MarketPage(props) {
-  const marketId = props.id;
+  const marketId = props.match.params.id;
   const {token, setToken} = useContext(AccessTokenContext);
   const [market, setMarket] = useState(null);
   const [loading, setLoading] = useState(false);

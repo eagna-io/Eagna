@@ -1,24 +1,23 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 import { getMe, InvalidAccessTokenError, NetworkError } from 'src/api';
-import { LoginPage, MarketPage, Link } from 'src/router';
-import { AccessTokenContext, RouterContext } from 'src/context';
+import { AccessTokenContext } from 'src/context';
 import NoticeBar from 'src/components/notice_bar';
 import Loading from 'src/components/loading';
 import Header from 'src/components/header';
 
 export default function AccountPage(props) {
+  const history = props.history;
   const {token, setToken} = useContext(AccessTokenContext);
-  const router = useContext(RouterContext);
   const [me, setMe] = useState(null);
   const [loading, setLoading] = useState(false);
   const [[errMsg, errNonce], setErr] = useState([null, null]);
 
   useEffect(() => {
     if (!token) {
-      router.redirectTo(LoginPage());
+      history.push("/login");
       return;
     }
     setLoading(true);
@@ -28,7 +27,7 @@ export default function AccountPage(props) {
         switch(err) {
           case InvalidAccessTokenError:
             setToken(null);
-            router.redirectTo(LoginPage());
+            history.push("/login");
             break;
           case NetworkError:
           default:
@@ -80,7 +79,7 @@ function MeContents(me) {
           <MarketListItemStatus>
             {market.status}
           </MarketListItemStatus>
-          <MarketListItemTitle to={MarketPage(market.id)}>
+          <MarketListItemTitle to={`/market/${market.id}`}>
             {market.title}
           </MarketListItemTitle>
         </MarketListItem>

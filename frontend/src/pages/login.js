@@ -1,16 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { AccessTokenContext, RouterContext } from 'src/context';
-import { AccountPage } from 'src/router';
+import { AccessTokenContext } from 'src/context';
 import { createAccessToken, getAccessToken,
   LoginFailedError, NetworkError, InvalidAccessTokenError } from 'src/api';
 import NoticeBar from 'src/components/notice_bar';
 import Loading from 'src/components/loading';
 
-export default function LoginPage() {
+export default function LoginPage(props) {
+  const history = props.history;
   const {token, setToken} = useContext(AccessTokenContext);
-  const router = useContext(RouterContext);
   const [emailInput, setEmailInput] = useState("");
   const [passInput, setPassInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +21,7 @@ export default function LoginPage() {
     if (token) {
       getAccessToken(token)
         .then(info => {
-          router.redirectTo(AccountPage());
+          history.push("/me");
         })
         .catch(err => {
           switch(err) {
@@ -39,8 +38,8 @@ export default function LoginPage() {
     setErr([null, null]);
     createAccessToken(emailInput, passInput)
       .then(accessToken => {
+        history.push("/me");
         setToken(accessToken);
-        router.redirectTo(AccountPage());
       })
       .catch(err => {
         setLoading(false);

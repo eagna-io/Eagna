@@ -1,13 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { AccountPage, Link } from 'src/router';
+import { Link } from 'react-router-dom';
 
 export default function Header(props) {
   return (
     <Container className={props.className}>
       <Title>Rohan Market</Title>
-      <Profile to={AccountPage()}></Profile>
+      <Profile to="/me"></Profile>
     </Container>
   );
 }
