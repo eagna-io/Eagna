@@ -46,7 +46,7 @@ def query_market(conn, market_id):
     " id, title, organizer, short_desc, description,"
     " EXTRACT(EPOCH FROM open_time), "
     " EXTRACT(EPOCH FROM close_time), "
-    " initial_coin_issue, status "
+    " start_coin_supply, status "
     "FROM markets "
     "WHERE markets.id = %s"
   )
@@ -54,7 +54,7 @@ def query_market(conn, market_id):
 
 
 def market_to_dict(market):
-  (id, title, organizer, short_desc, description, open_ts, close_ts, initial_coin_issue, status) = market
+  (id, title, organizer, short_desc, description, open_ts, close_ts, start_coin_supply, status) = market
   return {
     "id": id,
     "title": title,
@@ -63,7 +63,7 @@ def market_to_dict(market):
     "desc": description,
     "openTs": open_ts,
     "closeTs": close_ts,
-    "initialCoinIssue": initial_coin_issue,
+    "startCoinSupply": start_coin_supply,
     "status": status,
   }
 
