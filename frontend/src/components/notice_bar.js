@@ -29,12 +29,13 @@ const Container = styled.div`
   position: absolute;
   z-index: 5;
   top: ${props => props.dissappearing ? "-50px" : "0px"};
-  left: 0;
-  width: 100%;
+  left: calc((100vw - 500px) / 2);
+  width: 500px;
   height: 50px;
   background-color: #4A90E2;
-  border-bottom: solid 1px white;
+  border-radius: 0px 0px 4px 4px;
   transition: all 1000ms 0s ease;
+  box-shadow: 0px 4px 4px 0px rgba(0,0,0,0.5);
 `;
 
 const Msg = styled.h5`
