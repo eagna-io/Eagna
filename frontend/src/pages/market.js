@@ -69,29 +69,31 @@ function MarketContents(market, setErr, setMarket) {
       status={market.status} />
     <Contents>
       <Tokens tokens={market.tokens} />
-      { market.me !== undefined ?
-          market.status === "open" ? (
-            <OrderContainer>
-              <OrderComponent
-                tokens={market.tokens}
-                marketId={market.id}
-                setErr={setErr}
-                setMarket={setMarket} />
-              <AssetsComponent
-                tokens={market.tokens}
-                assets={market.me.tokens}
-                coins={market.me.coins} />
-            </OrderContainer>
-          ) : market.status === "closed" ? (
-            <OrderContainer>
-              <ResultComponent result={market.result} />
-              <AssetsComponent
-                tokens={market.tokens}
-                assets={market.me.tokens}
-                coins={market.me.coins} />
-            </OrderContainer>
-          ) : null
-        : null
+      {
+        market.me !== undefined && market.status === "open" ? (
+          <OrderContainer>
+            <OrderComponent
+              tokens={market.tokens}
+              marketId={market.id}
+              setErr={setErr}
+              setMarket={setMarket} />
+            <AssetsComponent
+              tokens={market.tokens}
+              assets={market.me.tokens}
+              coins={market.me.coins} />
+          </OrderContainer>
+        ) : null
+      }
+      {
+        market.status === "closed" || market.status === "settled" ? (
+          <OrderContainer>
+            <ResultComponent settleToken={market.settlementTokenId} />
+            <AssetsComponent
+              tokens={market.tokens}
+              assets={market.me.tokens}
+              coins={market.me.coins} />
+          </OrderContainer>
+        ) : null
       }
       <Description content={market.desc}/>
     </Contents>

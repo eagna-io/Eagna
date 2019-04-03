@@ -2,7 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 export default function Description(props) {
-  const result = props.result || "The result will be determined soon.";
+  const result = props.settleToken ?
+    `The result is [ ${props.settleToken} ]` :
+    "The result will be determined soon.";
   return (
     <Container className={props.className}>
       <Header>Result</Header>
