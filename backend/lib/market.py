@@ -38,7 +38,7 @@ def query_user_tokens(conn, market_id, user_id):
 
 def query_settlement_token(conn, market_id):
   sql = (
-   "SELECT settle_token_id FROM market_tokens "
-   "WHERE market_id = %s"
+   "SELECT settle_token_id FROM markets "
+   "WHERE id = %s"
    )
   return db.query_one(conn, sql, (market_id,))[0]
