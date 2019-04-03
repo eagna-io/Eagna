@@ -39,11 +39,11 @@ def query_user(conn, user_id):
 
 def query_markets(conn, user_id):
   sql = (
-    "SELECT markets.id, markets.title, markets.status FROM markets "
-    "INNER JOIN orders "
-    " ON markets.id = orders.market_id "
-    "  AND orders.type = 'initial_supply'"
-    "  AND orders.user_id = %s"
+    "SELECT id, title, status FROM markets "
+    "WHERE id IN ( "
+    " SELECT market_id FROM orders "
+    " WHERE type = 'initial_supply' AND user_id = %s "
+    ")"
   )
   return [
     {
