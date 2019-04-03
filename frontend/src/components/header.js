@@ -15,9 +15,9 @@ export default function Header(props) {
 const Container = styled.div`
   display: flex;
   width: 100vw;
-  height: 80px;
+  height: 60px;
   padding: 0 30px;
-  background-color: #358ED7;
+  background-color: #1c384e;
   border-bottom: 1px solid #979797;
   justify-content: space-between;
   align-items: center;
@@ -25,14 +25,14 @@ const Container = styled.div`
 
 const Logo = styled.img`
   display: block;
-  height: 80px;
+  height: 50px;
   margin-left: 30px;
 `;
 
 const Profile = styled(Link)`
   display: block;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   background-color: white;
   border-radius: 4px;
 `;
