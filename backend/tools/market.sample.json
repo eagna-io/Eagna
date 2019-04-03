@@ -1,0 +1,22 @@
+{
+  "title": "The sample market",
+  "organizer": "RohanMarket.inc",
+  "shortDesc": "サンプルのマーケットだよい",
+  "desc": "## The sample market\nマークダウンでかけるよ",
+  "openTime": "2019-03-09 23:47:29+09:00",
+  "closeTime": "2019-03-09 23:47:29+09:00",
+  "initialCoinIssue": 10000,
+  "status": "preparing",
+  "tokens": [
+    {
+      "name": "Alice",
+      "desc": "The sample token Alice",
+      "initialPrice": 50
+    },
+    {
+      "name": "Bob",
+      "desc": "The sample token Bob",
+      "initialPrice": 50
+    }
+  ]
+}

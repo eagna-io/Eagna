@@ -3,15 +3,15 @@ from hashlib import sha256
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-
 from lib import db
 
 
 def main():
   db_url = os.environ.get('DB_URL')
   if db_url == None:
-    print("DB_URL is not set")
+    print("DB_URL environment variable is not set")
     return
+
   conn = db.connect(db_url)
 
   name = input("Enter user name : ")
