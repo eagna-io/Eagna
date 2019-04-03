@@ -1,7 +1,7 @@
 from lib.api import response
 from lib import db
 from lib.access_token import check_access_token
-from lib.market import query_current_distribution, query_settlement_token, query_user_coins, query_user_tokens
+from lib.market import query_current_distribution, query_settlement_token, query_user_orders
 
 class MarketResource():
   def __init__(self, db_url):
@@ -107,16 +107,19 @@ def distribution_to_dict(distribution):
 
 
 def get_user_specific_data(conn, market_id, user_id):
-  coins = query_user_coins(conn, market_id, user_id)
-  tokens = [
-    {
-      "id": id,
-      "amount": amount,
-    }
-    for (id, amount)
-    in query_user_tokens(conn, market_id, user_id)
-  ]
+  orders = [ order_to_dict(order) for order
+    in query_user_orders(conn, market_id, user_id) ]
   return {
-    "coins": coins,
-    "tokens": tokens,
+    "orders": orders,
+  }
+
+def order_to_dict(order):
+  (id, token_id, amount_token, amount_coin, type, time) = order
+  return {
+      "id": id,
+      "tokenId": token_id,
+      "amountToken": amount_token,
+      "amountCoin": amount_coin,
+      "type": type,
+      "time": time,
   }

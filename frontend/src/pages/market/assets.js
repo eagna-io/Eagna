@@ -3,7 +3,9 @@ import styled from 'styled-components';
 
 export default function Assets(props) {
   const tokens = props.tokens;
-  const assets = props.assets;
+  const orders = props.orders;
+
+  const coins = orders.reduce((acc, order) => acc + order.amountCoin, 0);
 
   return (
     <Container className={props.className}>
@@ -14,17 +16,20 @@ export default function Assets(props) {
         </Header>
       </thead>
       <tbody>
-        <AssetItem filled={false} key={"coin"}>
+        <AssetItem key={"coin"}>
           <AssetLabel coin={true}>{"Coin"}</AssetLabel>
-          <ItemVolume>{props.coins}</ItemVolume>
+          <ItemVolume>{coins}</ItemVolume>
         </AssetItem>
         {
-          assets.map((asset, idx) => {
-            const token = tokens.find(t => t.id === asset.id);
+          tokens.map(token => {
+            const amountToken =
+              orders
+                .filter(o => o.tokenId === token.id)
+                .reduce((acc, order) => acc + order.amountToken, 0);
             return (
-              <AssetItem filled={idx % 2 == 0} key={token.id}>
+              <AssetItem key={token.id}>
                 <AssetLabel coin={false}>{token.name}</AssetLabel>
-                <ItemVolume>{asset.amount}</ItemVolume>
+                <ItemVolume>{amountToken}</ItemVolume>
               </AssetItem>
             )
           })
@@ -67,7 +72,11 @@ const HeaderVolume = styled.th`
 const AssetItem = styled.tr`
   height: 50px;
   border-top: 1px solid #D1D5DA;
-  background-color: ${props => props.filled ? "#F9F9F9" : "white" };
+  background-color: white;
+
+  &:nth-child(even) {
+    background-color: #F9F9F9;
+  }
 `;
 
 const AssetLabel = styled.td`

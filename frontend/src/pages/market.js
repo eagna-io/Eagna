@@ -12,6 +12,7 @@ import TokensComponent from './market/tokens';
 import OrderComponent from './market/order';
 import AssetsComponent from './market/assets';
 import ResultComponent from './market/result';
+import HistoryComponent from './market/history';
 import DescComponent from './market/description';
 
 
@@ -70,7 +71,7 @@ function MarketContents(market, setErr, setMarket) {
     <Contents>
       <Tokens tokens={market.tokens} />
       {
-        market.me !== undefined && market.status === "open" ? (
+        market.me && market.status === "open" ? (
           <OrderContainer>
             <OrderComponent
               tokens={market.tokens}
@@ -79,8 +80,8 @@ function MarketContents(market, setErr, setMarket) {
               setMarket={setMarket} />
             <AssetsComponent
               tokens={market.tokens}
-              assets={market.me.tokens}
-              coins={market.me.coins} />
+              orders={market.me.orders}
+            />
           </OrderContainer>
         ) : null
       }
@@ -90,9 +91,17 @@ function MarketContents(market, setErr, setMarket) {
             <ResultComponent settleToken={market.settlementTokenId} />
             <AssetsComponent
               tokens={market.tokens}
-              assets={market.me.tokens}
-              coins={market.me.coins} />
+              orders={market.me.orders}
+            />
           </OrderContainer>
+        ) : null
+      }
+      {
+        market.me ? (
+          <History
+            tokens={market.tokens}
+            orders={market.me.orders}
+          />
         ) : null
       }
       <Description content={market.desc}/>
@@ -120,6 +129,11 @@ const Tokens = styled(TokensComponent)`
 const OrderContainer = styled.div`
   display: flex;
   justify-content: space-between;
+  margin-top: 50px;
+`;
+
+const History = styled(HistoryComponent)`
+  width: 100%;
   margin-top: 50px;
 `;
 

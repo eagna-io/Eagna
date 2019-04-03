@@ -4,6 +4,8 @@ import * as lmsr from 'src/lmsr';
 
 export default function Tokens(props) {
   const prices = lmsr.prices(props.tokens.map(t => t.amount))
+  const tokens = props.tokens;
+
   return (
     <Container className={props.className}>
       <thead>
@@ -14,8 +16,9 @@ export default function Tokens(props) {
         </Header>
       </thead>
       <tbody>
-        { props.tokens.map((token, idx) => (
-          <Item filled={idx % 2 == 1} key={token.name}>
+        {
+          tokens.map((token, idx) => (
+          <Item key={token.name}>
             <ItemToken>{token.name}</ItemToken>
             <ItemPrice>{prices[idx]}</ItemPrice>
             <ItemDesc>{token.desc}</ItemDesc>
@@ -66,7 +69,11 @@ const HeaderDesc = styled.th`
 const Item = styled.tr`
   height: 50px;
   border-top: 1px solid #D1D5DA;
-  background-color: ${props => props.filled ? "#F9F9F9" : "white" };
+  background-color: "white";
+
+  &:nth-child(odd) {
+    background-color: #F9F9F9;
+  }
 `;
 
 const ItemToken = styled.td`

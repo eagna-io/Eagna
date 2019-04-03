@@ -23,17 +23,14 @@ def query_user_coins(conn, market_id, user_id):
   return db.query_one(conn, sql, (user_id, market_id))[0]
 
 
-def query_user_tokens(conn, market_id, user_id):
+def query_user_orders(conn, market_id, user_id):
   sql = (
-    "SELECT market_tokens.id, COALESCE(SUM(orders.amount_token), 0) "
-    "FROM market_tokens "
-    "LEFT OUTER JOIN orders "
-    " ON market_tokens.id = orders.token_id "
-    "  AND orders.user_id = %s "
-    "WHERE market_tokens.market_id = %s "
-    "GROUP BY market_tokens.id"
+    "SELECT id, token_id, amount_token, amount_coin, type,"
+    " EXTRACT(EPOCH FROM time) "
+    "FROM orders "
+    "WHERE market_id = %s AND user_id = %s "
   )
-  return db.query_all(conn, sql, (user_id, market_id))
+  return db.query_all(conn, sql, (market_id, user_id))
 
 
 def query_settlement_token(conn, market_id):
