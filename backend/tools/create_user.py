@@ -26,6 +26,8 @@ def main():
   insert_user_data(conn, user)
 
   conn.commit()
+  print(f"Success to create a new user [{name}]")
+  return
 
 
 def insert_user_data(conn, user):

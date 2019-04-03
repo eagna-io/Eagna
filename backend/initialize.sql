@@ -30,7 +30,8 @@ CREATE TABLE markets (
   open_time           timestamptz NOT NULL,
   close_time          timestamptz NOT NULL,
   start_coin_supply   integer NOT NULL,
-  status              market_status NOT NULL DEFAULT 'preparing'
+  status              market_status NOT NULL DEFAULT 'preparing',
+  settle_token_id     integer DEFAULT NULL
 );
 
 CREATE TABLE market_tokens (
@@ -39,7 +40,6 @@ CREATE TABLE market_tokens (
   description         text NOT NULL,
   market_id           integer NOT NULL,
   initial_price       integer NOT NULL,
-  is_settlement_token boolean,
   CONSTRAINT market_tokens_fkey FOREIGN KEY(market_id)
     REFERENCES markets(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
@@ -47,7 +47,8 @@ CREATE TABLE market_tokens (
 CREATE TYPE order_type AS ENUM (
  'normal',
  'initial_supply',
- 'reword'
+ 'reward',
+ 'failure'
 );
 
 CREATE TABLE orders (

@@ -23,7 +23,7 @@ def main():
 
   market_id = insert_market_data(conn, market)
   conn.commit()
-  print(f"Success to create market {market_id}")
+  print(f"Success to create market [{market_id}]")
   return
 
 
@@ -31,7 +31,7 @@ def insert_market_data(conn, market):
   sql = (
     "INSERT INTO markets "
     "( title, organizer, short_desc, description, open_time, close_time, "
-    "  initial_coin_issue, status ) "
+    "  start_coin_supply, status ) "
     "VALUES "
     "( %s, %s, %s, %s, %s, %s, %s, %s ) "
     "RETURNING id"
@@ -44,7 +44,7 @@ def insert_market_data(conn, market):
       market["desc"],
       market["openTime"],
       market["closeTime"],
-      market["initialCoinIssue"],
+      market["startCoinSupply"],
       market["status"],
     )
   )[0]
