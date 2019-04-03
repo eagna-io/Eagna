@@ -12,17 +12,24 @@ def main():
     print("No market is waiting for settle")
     return
 
-  for (market_id, market_title) in query_closed_markets(conn):
+  for (market_id, market_title) in closed_markets:
     print(f"{market_id}  {market_title}")
 
-  settle_market_id = input("Enter market id : ")
+  settle_market_id = int(input("Enter market id : "))
+  print([id for (id, title) in closed_markets])
+  if settle_market_id not in [id for (id, title) in closed_markets]:
+    print("Invalid market id")
+    return
 
   settle_market_tokens = query_tokens(conn, settle_market_id)
   print("Tokens")
   for (token_id, token_name) in settle_market_tokens:
     print(f"{token_id}  {token_name}")
 
-  settle_token_id = input("Enter token id : ")
+  settle_token_id = int(input("Enter token id : "))
+  if settle_token_id not in [id for (id, name) in settle_market_tokens]:
+    print("Invalid token id")
+    return
 
   insert_settlement_orders(conn, settle_market_id, settle_token_id)
   set_settle_token_id(conn, settle_market_id, settle_token_id)

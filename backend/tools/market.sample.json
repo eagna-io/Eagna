@@ -6,7 +6,7 @@
   "openTime": "2019-03-09 23:47:29+09:00",
   "closeTime": "2019-03-09 23:47:29+09:00",
   "startCoinSupply": 1000,
-  "status": "preparing",
+  "status": "closed",
   "tokens": [
     {
       "name": "Alice",
