@@ -19,7 +19,7 @@ class MarketResource():
       res_data["tokens"] = query_tokens(conn, market_id)
 
       if res_data["status"] == "settled":
-        res_data["settlemmentTokenId"] = query_settlement_token(conn, market_id)
+        res_data["settlementTokenId"] = query_settlement_token(conn, market_id)
 
       # access_token が指定されていない場合、一般的な情報のみ返す
       access_token = req.params.get("access_token")
