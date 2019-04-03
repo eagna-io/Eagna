@@ -95,8 +95,6 @@ export function postOrder(tokenId, amountToken, amountCoin, accessToken) {
           throw InvalidAccessTokenError;
         } else if (json.result === "amount coin is invalid") {
           throw TokenPriceIsMovedError;
-        } else if (json.result === "you dont have the token enough") {
-          throw NotEnoughTokenError;
         } else {
           getUnexpectedError(json.result);
         }

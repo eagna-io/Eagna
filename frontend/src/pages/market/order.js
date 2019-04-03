@@ -2,7 +2,9 @@ import React, {useContext, useState} from 'react';
 import styled from 'styled-components';
 import * as lmsr from 'src/lmsr';
 import {AccessTokenContext} from 'src/context';
-import {postOrder, getMarket} from 'src/api';
+import {postOrder, getMarket,
+  InvalidAccessTokenError, TokenPriceIsMovedError
+} from 'src/api';
 
 const MAX_QUANTITY = 100;
 const MICRO_COIN = 1000000;
@@ -17,14 +19,6 @@ export default function  Order(props) {
   const cost = selectedToken !== null ? currentCost(selectedToken, amountToken, tokens, orderType) : 0;
 
   const requestOrder = () => {
-    if (selectedToken === null) {
-      setErr(["Please select the token", Date.now()]);
-      return;
-    }
-    if (amountToken === null) {
-      setErr(["Please input amount of the token", Date.now()]);
-      return;
-    }
     postOrder(
       selectedToken.id,
       orderType === "buy" ? amountToken : -amountToken, // buy なら tokenは増える
@@ -40,12 +34,31 @@ export default function  Order(props) {
           case TokenPriceIsMovedError:
             setErr(["Price of the token is changed", Date.now()]);
             break;
+          default:
+            setErr(["Invalid order", Date.now()]);
+            break;
         }
       })
       // Error が検知された場合も market 情報を取得し直す
       .then(() => getMarket(marketId, accessToken))
       .then(market => setMarket(market))
   };
+
+  const checkSelectedToken = () => {
+    if (selectedToken === null) {
+      setErr(["Please select the token", Date.now()]);
+      return false;
+    }
+    return true
+  };
+
+  const checkAmountToken = () => {
+    if (amountToken === null) {
+      setErr(["Please input amount of the token", Date.now()]);
+      return false;
+    }
+    return true
+  }
 
   return (
     <Container className={props.className}>
@@ -75,6 +88,8 @@ export default function  Order(props) {
       <Separator />
       <OrderButton onClick={(e) => {
         e.preventDefault();
+        checkSelectedToken() &&
+        checkAmountToken() &&
         requestOrder();
       }}>
         Order

@@ -21,21 +21,23 @@ export default function TradeHistory(props) {
       </thead>
       <tbody>
         {
-          orders.map(order => {
-            const tokenName =
-              order.type === "normal"
-              ? tokens.find(t => t.order.tokenId).name
-              : "-";
-            return (
-              <Item bold={order.type !== "normal"} key={order.id}>
-                <ItemCol>{timestampToStr(order.time)}</ItemCol>
-                <ItemCol>{order.type}</ItemCol>
-                <ItemCol>{tokenName}</ItemCol>
-                <ItemCol>{order.amountToken}</ItemCol>
-                <ItemCol>{order.amountCoin}</ItemCol>
-              </Item>
-            )
-          })
+          orders
+            .sort((a,b) => b.time - a.time)
+            .map(order => {
+              const tokenName =
+                order.type === "normal"
+                ? tokens.find(t => t.id === order.tokenId).name
+                : "-";
+              return (
+                <Item bold={order.type !== "normal"} key={order.id}>
+                  <ItemCol>{timestampToStr(order.time)}</ItemCol>
+                  <ItemCol>{order.type}</ItemCol>
+                  <ItemCol>{tokenName}</ItemCol>
+                  <ItemCol>{order.amountToken}</ItemCol>
+                  <ItemCol>{order.amountCoin}</ItemCol>
+                </Item>
+              )
+            })
         }
       </tbody>
     </Table>
