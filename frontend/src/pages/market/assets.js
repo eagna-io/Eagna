@@ -8,7 +8,7 @@ export default function Assets(props) {
   const coins = orders.reduce((acc, order) => acc + order.amountCoin, 0);
 
   return (
-    <Container className={props.className}>
+    <Table className={props.className}>
       <thead>
         <Header>
           <HeaderAsset>Asset</HeaderAsset>
@@ -16,8 +16,8 @@ export default function Assets(props) {
         </Header>
       </thead>
       <tbody>
-        <AssetItem key={"coin"}>
-          <AssetLabel coin={true}>{"Coin"}</AssetLabel>
+        <AssetItem coin key={"coin"}>
+          <AssetLabel>{"Coin"}</AssetLabel>
           <ItemVolume>{coins}</ItemVolume>
         </AssetItem>
         {
@@ -28,18 +28,19 @@ export default function Assets(props) {
                 .reduce((acc, order) => acc + order.amountToken, 0);
             return (
               <AssetItem key={token.id}>
-                <AssetLabel coin={false}>{token.name}</AssetLabel>
+                <AssetLabel>{token.name}</AssetLabel>
                 <ItemVolume>{amountToken}</ItemVolume>
               </AssetItem>
             )
           })
         }
       </tbody>
-    </Container>
+    </Table>
   );
 }
 
-const Container = styled.table`
+const Table = styled.table`
+  table-layout: fixed;
   width: 406px;
   border: 1px solid #D1D5DA;
   border-radius: 4px;
@@ -58,13 +59,11 @@ const Header = styled.tr`
 `;
 
 const HeaderAsset = styled.th`
-  width: 70%;
   text-align: left;
   padding-left: 75px;
 `;
 
 const HeaderVolume = styled.th`
-  width: 30%;
   text-align: right;
   padding-right: 75px;
 `;
@@ -73,6 +72,10 @@ const AssetItem = styled.tr`
   height: 50px;
   border-top: 1px solid #D1D5DA;
   background-color: white;
+  color: #37474F;
+  font-size: ${props => props.coin ? "16px" : "14px"};
+  font-family: Lucida Grande;
+  font-weight: ${props => props.coin ? "bold" : "normal"};
 
   &:nth-child(even) {
     background-color: #F9F9F9;
@@ -80,18 +83,11 @@ const AssetItem = styled.tr`
 `;
 
 const AssetLabel = styled.td`
-  color: #37474F;
-  font-size: ${props => props.coin ? "16px" : "14px"};
-  font-family: Lucida Grande;
-  font-weight: ${props => props.coin ? "bold" : "normal"};
+  text-align: left;
   padding-left: 75px;
 `;
 
 const ItemVolume = styled.td`
-  color: #37474F;
-  font-size: 16px;
-  font-family: Lucida Grande;
-  font-weight: normal;
   text-align: right;
   padding-right: 75px;
 `;

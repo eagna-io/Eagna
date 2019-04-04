@@ -7,7 +7,7 @@ export default function Tokens(props) {
   const tokens = props.tokens;
 
   return (
-    <Container className={props.className}>
+    <Table className={props.className}>
       <thead>
         <Header>
           <HeaderToken>Token</HeaderToken>
@@ -26,11 +26,12 @@ export default function Tokens(props) {
           ))
         }
       </tbody>
-    </Container>
+    </Table>
   );
 }
 
-const Container = styled.table`
+const Table = styled.table`
+  table-layout: fixed;
   width: 100%;
   border: 1px solid #D1D5DA;
   border-radius: 4px;
@@ -51,16 +52,15 @@ const Header = styled.tr`
 const HeaderToken = styled.th`
   padding-left: 75px;
   text-align: left;
-  width: 20%;
+  width: 180px;
 `;
 
 const HeaderPrice = styled.th`
-  width: 10%;
+  width: 100px;
   text-align: right;
 `;
 
 const HeaderDesc = styled.th`
-  width: 70%;
   padding-left: 100px;
   padding-right: 30px;
   text-align: left;
@@ -69,9 +69,9 @@ const HeaderDesc = styled.th`
 const Item = styled.tr`
   height: 50px;
   border-top: 1px solid #D1D5DA;
-  background-color: "white";
+  background-color: white;
 
-  &:nth-child(odd) {
+  &:nth-child(even) {
     background-color: #F9F9F9;
   }
 `;
