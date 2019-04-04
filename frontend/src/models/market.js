@@ -94,8 +94,13 @@ export class OrderHistory {
   }
 
   currentAmountToken(token) {
-    const reducer = (sum, record) =>
-      sum + record.token === token ? record.amountToken : 0;
+    const reducer = (sum, record) => {
+      if (record.token && record.token.id === token.id) {
+        return sum + record.amountToken;
+      } else {
+        return sum;
+      }
+    }
     return this.records.reduce(reducer, 0);
   }
 

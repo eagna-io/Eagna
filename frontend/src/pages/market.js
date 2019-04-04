@@ -51,7 +51,6 @@ export default function MarketPage(props) {
   }, [marketId, accessToken]);
 
   const requestOrder = (token, orderType, amountToken, amountCoin) => {
-    console.log(amountToken);
     if (orderType === "buy") {
       // 十分なCoinを持っているかチェック
       if (market.me.orderHistory.currentAmountCoin() + amountCoin < 0) {
