@@ -14,10 +14,10 @@ export default function  Order(props) {
   const tokens = props.tokens;
   const [selectedToken, setSelectedToken] = useState(null);
   const [orderType, setOrderType] = useState("buy");
-  const [amountToken, setAmountToken] = useState(null);
+  const [inputAmountToken, setAmountToken] = useState(null);
   const [errMsg, setErr] = useState(null);
 
-  const cost = selectedToken ? currentCost(selectedToken, amountToken, tokens, orderType) : 0;
+  const cost = selectedToken ? currentCost(selectedToken, inputAmountToken, tokens, orderType) : 0;
 
   const onPressEnter = () => {
     if (!selectedToken) {
@@ -30,7 +30,7 @@ export default function  Order(props) {
     }
     setErr(null);
     // "buy" なら token は増える。"sell" なら逆
-    const amountToken = orderType === "buy" ? amountToken : -amountToken;
+    const amountToken = orderType === "buy" ? inputAmountToken : -inputAmountToken;
     const amountCoin = -cost; // Coin の増量は cost の逆
     requestOrder(selectedToken, orderType, amountToken, amountCoin);
   };
@@ -50,7 +50,7 @@ export default function  Order(props) {
       <PriceContainer>
         <QuantityInput
           type="text"
-          value={amountToken || ""}
+          value={inputAmountToken || ""}
           placeholder="Quantity"
           onChange={e => {
             setAmountToken(validateAmountToken(e.target.value));
