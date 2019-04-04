@@ -45,5 +45,5 @@ def insert_user_data(conn, user):
     )
   )[0]
 
-if __name__ == "__main":
+if __name__ == "__main__":
   main()
