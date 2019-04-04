@@ -60,7 +60,7 @@ def insert_settlement_orders(conn, settle_market_id, settle_token_id):
   for (user_id, token_id, amount_token) in user_tokens:
     if token_id == settle_token_id:
       insert_reward_order(conn, user_id, settle_market_id, token_id, amount_token)
-    else:
+    elif token_id != None:
       insert_failure_order(conn, user_id, settle_market_id, token_id, amount_token)
 
 
