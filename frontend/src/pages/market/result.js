@@ -2,8 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 export default function Description(props) {
-  const result = props.settleToken ?
-    `The result is [ ${props.settleToken} ]` :
+  const settleToken = props.settleToken;
+  const result = settleToken ?
+    `The result is [ ${settleToken.name} ]` :
     "The result will be determined soon.";
   return (
     <Container className={props.className}>
