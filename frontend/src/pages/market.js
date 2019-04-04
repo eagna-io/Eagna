@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 
 import { AccessTokenContext } from 'src/context';
-import { getMarket, InvalidAccessTokenError, MarketNotFoundError } from 'src/api';
+import { getMarket, postOrder, InvalidAccessTokenError, MarketNotFoundError, TokenPriceIsMovedError } from 'src/api';
 
 import Loading from 'src/components/loading';
 import NoticeBar from 'src/components/notice_bar';
