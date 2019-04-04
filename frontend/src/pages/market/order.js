@@ -32,7 +32,7 @@ export default function  Order(props) {
     // "buy" なら token は増える。"sell" なら逆
     const amountToken = orderType === "buy" ? amountToken : -amountToken;
     const amountCoin = -cost; // Coin の増量は cost の逆
-    requestOrder(token, orderType, amountToken, amountCoin);
+    requestOrder(selectedToken, orderType, amountToken, amountCoin);
   };
 
   return (
