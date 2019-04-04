@@ -80,7 +80,7 @@ def insert_reward_order(conn, user_id, market_id, token_id, amount_token):
    "VALUES "
    "( %s, %s, %s, %s, %s, 'reward' )"
   )
-  db.insert(conn, sql, (user_id, market_id, token_id, -amount_token, amount_token))
+  db.insert(conn, sql, (user_id, market_id, token_id, -amount_token, amount_token * 1000))
 
 def insert_failure_order(conn, user_id, market_id, token_id, amount_token):
   sql = (
