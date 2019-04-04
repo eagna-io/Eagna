@@ -9,7 +9,7 @@ import Loading from 'src/components/loading';
 
 export default function LoginPage(props) {
   const history = props.history;
-  const {token, setToken} = useContext(AccessTokenContext);
+  const {accessToken, setAccessToken} = useContext(AccessTokenContext);
   const [emailInput, setEmailInput] = useState("");
   const [passInput, setPassInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,20 +18,20 @@ export default function LoginPage(props) {
   // すでのアクセストークンを持っている場合はそれが
   // 有効なものかチェックする
   useEffect(() => {
-    if (token) {
-      getAccessToken(token)
+    if (accessToken) {
+      getAccessToken(accessToken)
         .then(info => {
           history.push("/me");
         })
         .catch(err => {
           switch(err) {
             case InvalidAccessTokenError:
-              setToken(null);
+              setAccessToken(null);
               break;
           }
         });
     }
-  }, [token]);
+  }, [accessToken]);
 
   const requestLogin = () => {
     setLoading(true);
@@ -39,7 +39,7 @@ export default function LoginPage(props) {
     createAccessToken(emailInput, passInput)
       .then(accessToken => {
         history.push("/me");
-        setToken(accessToken);
+        setAccessToken(accessToken);
       })
       .catch(err => {
         setLoading(false);

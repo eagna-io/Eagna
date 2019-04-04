@@ -3,9 +3,7 @@ import styled from 'styled-components';
 
 export default function Assets(props) {
   const tokens = props.tokens;
-  const orders = props.orders;
-
-  const coins = orders.reduce((acc, order) => acc + order.amountCoin, 0);
+  const orderHistory = props.orderHistory;
 
   return (
     <Table className={props.className}>
@@ -18,18 +16,14 @@ export default function Assets(props) {
       <tbody>
         <AssetItem coin key={"coin"}>
           <AssetLabel>{"Coin"}</AssetLabel>
-          <ItemVolume>{coins}</ItemVolume>
+          <ItemVolume>{orderHistory.currentAmountCoin()}</ItemVolume>
         </AssetItem>
         {
           tokens.map(token => {
-            const amountToken =
-              orders
-                .filter(o => o.tokenId === token.id)
-                .reduce((acc, order) => acc + order.amountToken, 0);
             return (
               <AssetItem key={token.id}>
                 <AssetLabel>{token.name}</AssetLabel>
-                <ItemVolume>{amountToken}</ItemVolume>
+                <ItemVolume>{orderHistory.currentAmountToken(token)}</ItemVolume>
               </AssetItem>
             )
           })

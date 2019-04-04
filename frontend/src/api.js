@@ -1,4 +1,6 @@
 import sha256 from 'js-sha256';
+import { timestampToDate } from 'src/time';
+import { Token, Market, OrderRecord, OrderHistory } from 'src/models/market';
 
 export const ApiError = "ApiError";
 export const NetworkError = "NetworkError";
@@ -70,6 +72,7 @@ export function getMarket(marketId, token = null) {
   }
   return get(url)
     .then(json => {
+      // Error handle
       if (!json.success) {
         if (json.result === "invalid access token") {
           throw InvalidAccessTokenError;
@@ -79,7 +82,44 @@ export function getMarket(marketId, token = null) {
           getUnexpectedError(json.result);
         }
       }
-      return json.result;
+
+      // Success handle
+      const tokens = Token.fromDistribution(json.result.tokens);
+
+      let me = null;
+      if (json.result.me) {
+        const orderRecords = json.result.me.orders.map(item => {
+          const token = tokens.find(t => t.id === item.tokenId) || null;
+          return new OrderRecord(
+            item.id,
+            token,
+            item.type,
+            item.amountToken,
+            item.amountCoin,
+            timestampToDate(item.time),
+          );
+        });
+        const orderHistory = new OrderHistory(orderRecords);
+        me = {
+          orderHistory,
+        };
+      }
+
+      const market = new Market(
+        json.result.id,
+        json.result.title,
+        json.result.organizer,
+        json.result.shortDesc,
+        json.result.desc,
+        json.result.status,
+        timestampToDate(json.result.openTs),
+        timestampToDate(json.result.closeTs),
+        tokens,
+        me,
+        tokens.find(t => t.id === json.result.settleTokenId) || null,
+      );
+      
+      return market;
     });
 }
 

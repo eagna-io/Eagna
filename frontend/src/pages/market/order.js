@@ -10,61 +10,36 @@ const MAX_QUANTITY = 100;
 const MICRO_COIN = 1000000;
 
 export default function  Order(props) {
-  const {tokens, marketId, setErr, setMarket } = props;
-  const accessToken = useContext(AccessTokenContext).token;
+  const requestOrder = props.requestOrder;
+  const tokens = props.tokens;
   const [selectedToken, setSelectedToken] = useState(null);
   const [orderType, setOrderType] = useState("buy");
   const [amountToken, setAmountToken] = useState(null);
+  const [errMsg, setErr] = useState(null);
 
-  const cost = selectedToken !== null ? currentCost(selectedToken, amountToken, tokens, orderType) : 0;
+  const cost = selectedToken ? currentCost(selectedToken, amountToken, tokens, orderType) : 0;
 
-  const requestOrder = () => {
-    postOrder(
-      selectedToken.id,
-      orderType === "buy" ? amountToken : -amountToken, // buy なら tokenは増える
-      -cost, // Coin の増量は cost の逆
-      accessToken
-    )
-      .catch(err => {
-        switch(err) {
-          case InvalidAccessTokenError:
-            setToken(null);
-            setErr(["You need to login", Date.now()]);
-            break;
-          case TokenPriceIsMovedError:
-            setErr(["Price of the token is changed", Date.now()]);
-            break;
-          default:
-            setErr(["Invalid order", Date.now()]);
-            break;
-        }
-      })
-      // Error が検知された場合も market 情報を取得し直す
-      .then(() => getMarket(marketId, accessToken))
-      .then(market => setMarket(market))
-  };
-
-  const checkSelectedToken = () => {
-    if (selectedToken === null) {
-      setErr(["Please select the token", Date.now()]);
-      return false;
+  const onPressEnter = () => {
+    if (!selectedToken) {
+      setErr("Please select token");
+      return;
     }
-    return true
-  };
-
-  const checkAmountToken = () => {
-    if (amountToken === null) {
-      setErr(["Please input amount of the token", Date.now()]);
-      return false;
+    if (cost === 0) {
+      setErr("Please input amount of the token");
+      return;
     }
-    return true
-  }
+    setErr(null);
+    // "buy" なら token は増える。"sell" なら逆
+    const amountToken = orderType === "buy" ? amountToken : -amountToken;
+    const amountCoin = -cost; // Coin の増量は cost の逆
+    requestOrder(token, orderType, amountToken, amountCoin);
+  };
 
   return (
     <Container className={props.className}>
       <TokenSelect
         selected={selectedToken}
-        tokens={props.tokens}
+        tokens={tokens}
         onChange={e => {
           const token = tokens.find(t => t.name === e.target.value);
           setSelectedToken(token);
@@ -85,12 +60,11 @@ export default function  Order(props) {
           <PriceUnit>coins</PriceUnit>
         </Price>
       </PriceContainer>
+      { errMsg ? <h5>{errMsg}</h5> : null }
       <Separator />
       <OrderButton onClick={(e) => {
         e.preventDefault();
-        checkSelectedToken() &&
-        checkAmountToken() &&
-        requestOrder();
+        onPressEnter();
       }}>
         Order
       </OrderButton>

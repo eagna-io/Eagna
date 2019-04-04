@@ -8,18 +8,18 @@ import { AccessTokenContext } from 'src/context';
 
 export default function App(props) {
   const initialAccessToken = props.initialAccessToken;
-  const [token, setToken] = useState(initialAccessToken);
+  const [accessToken, setAccessToken] = useState(initialAccessToken);
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('accessToken', token);
+    if (accessToken) {
+      localStorage.setItem('accessToken', accessToken);
     } else {
       localStorage.removeItem('accessToken');
     }
-  }, [token]);
+  }, [accessToken]);
 
   return (
-    <AccessTokenContext.Provider value={{token, setToken}}>
+    <AccessTokenContext.Provider value={{accessToken, setAccessToken}}>
       <Router>
         <Switch>
           <Route path="/login" exact component={LoginPage} />

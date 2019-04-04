@@ -18,14 +18,14 @@ import DescComponent from './market/description';
 
 export default function MarketPage(props) {
   const marketId = props.match.params.id;
-  const {token, setToken} = useContext(AccessTokenContext);
+  const {accessToken, setAccessToken} = useContext(AccessTokenContext);
   const [market, setMarket] = useState(null);
   const [loading, setLoading] = useState(false);
   const [[errMsg, errNonce], setErr] = useState([null, null]);
 
   useEffect(() => {
     setLoading(true);
-    getMarket(marketId, token)
+    getMarket(marketId, accessToken)
       .then(market => {
         setMarket(market);
         setLoading(false);
@@ -33,7 +33,7 @@ export default function MarketPage(props) {
       .catch(err => {
         switch(err) {
           case InvalidAccessTokenError:
-            setToken(null);
+            setAccessToken(null);
             setErr(["Your login session is expired", Date.now()]);
             setMarket(null);
             setLoading(false);
@@ -43,9 +43,48 @@ export default function MarketPage(props) {
             setMarket(null);
             setLoading(false);
             break;
+          default:
+            console.error(err);
+            break;
         }
       });
-  }, [marketId, token]);
+  }, [marketId, accessToken]);
+
+  const requestOrder = (token, orderType, amountToken, amountCoin) => {
+    if (orderType === "buy") {
+      // 十分なCoinを持っているかチェック
+      if (market.me.orderHistory.currentAmountCoin() + amountCoin < 0) {
+        setErr(["You don't have enough coin", Date.now()]);
+        return;
+      }
+    } else {
+      // 十分な対象Tokenを持っているかチェック
+      if (market.me.orderHistory.currentAmountToken(token) + amountToken < 0) {
+        setErr(["You don't have enough token", Date.now()]);
+        return;
+      }
+    }
+
+    setLoading(true);
+    postOrder(token.id, amountToken, amountCoin, accessToken)
+      .then(() => setErr(["Success!!", Date.now()]))
+      .catch(err => {
+        switch(err) {
+          case InvalidAccessTokenError:
+            setAccessToken(null);
+            setErr(["You login session is expired", Date.now()]);
+            setMarket(null);
+            break;
+          case TokenPriceIsMovedError:
+            setErr(["Token price is changed. Please try again", Date.now()]);
+            break;
+        }
+      })
+      // リクエストの結果にかかわらず market 情報を再取得する
+      .then(() => getMarket(market.id, accessToken))
+      .then(market => setMarket(market))
+      .finally(() => setLoading(false));
+  };
 
   return (
     <>
@@ -53,61 +92,53 @@ export default function MarketPage(props) {
     <NoticeBar nonce={errNonce}>{errMsg}</NoticeBar>
     <Page>
       <Header />
-      { market ? MarketContents(market, setErr, setMarket) : null }
+      <MarketHeader market={market} />
+      <Contents>
+        <Tokens tokens={market ? market.tokens : []} />
+        {
+          market && market.me && market.status === "open" ? (
+            <OrderContainer>
+              <OrderComponent
+                tokens={market.tokens}
+                requestOrder={requestOrder}
+              />
+              <AssetsComponent
+                tokens={market.tokens}
+                orderHistory={market.me.orderHistory}
+              />
+            </OrderContainer>
+          ) : null
+        }
+        {
+          market && (
+            market.status === "closed" || market.status === "settled"
+          ) ? (
+            <OrderContainer>
+              <ResultComponent settleToken={market.settleToken} />
+              {
+                market.me ? (
+                  <AssetsComponent
+                    tokens={market.tokens}
+                    orderHistory={market.me.orderHistory}
+                  />
+                ) : null
+              }
+            </OrderContainer>
+          ) : null
+        }
+        {
+          market && market.me ? (
+            <History
+              tokens={market.tokens}
+              orderHistory={market.me.orderHistory}
+            />
+          ) : null
+        }
+        <Description content={market ? market.desc : ""}/>
+      </Contents>
     </Page>
     </>
   )
-}
-
-function MarketContents(market, setErr, setMarket) {
-  return (
-    <>
-    <MarketHeader
-      title={market.title}
-      shortDesc={market.shortDesc}
-      openTs={market.openTs}
-      closeTs={market.closeTs}
-      status={market.status} />
-    <Contents>
-      <Tokens tokens={market.tokens} />
-      {
-        market.me && market.status === "open" ? (
-          <OrderContainer>
-            <OrderComponent
-              tokens={market.tokens}
-              marketId={market.id}
-              setErr={setErr}
-              setMarket={setMarket} />
-            <AssetsComponent
-              tokens={market.tokens}
-              orders={market.me.orders}
-            />
-          </OrderContainer>
-        ) : null
-      }
-      {
-        market.status === "closed" || market.status === "settled" ? (
-          <OrderContainer>
-            <ResultComponent settleToken={market.settlementTokenId} />
-            <AssetsComponent
-              tokens={market.tokens}
-              orders={market.me.orders}
-            />
-          </OrderContainer>
-        ) : null
-      }
-      {
-        market.me ? (
-          <History
-            tokens={market.tokens}
-            orders={market.me.orders}
-          />
-        ) : null
-      }
-      <Description content={market.desc}/>
-    </Contents>
-    </>
-  );
 }
 
 

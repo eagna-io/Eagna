@@ -1,34 +1,29 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { timestampToStr } from 'src/time';
+import { dateToStr } from 'src/time';
 
-/*
- title      : string,
- shortDesc  : string,
- openTs     : int,
- closeTs    : int,
- status     : string,
- */
 
 export default function MarketHeader(props) {
+  const market = props.market;
+
   return (
     <Container className={props.className}>
       <Contents>
         <LeftContents>
-          <Title>{props.title}</Title>
-          <Desc>{props.shortDesc}</Desc>
+          <Title>{market ? market.title : "-"}</Title>
+          <Desc>{market ? market.shortDesc : "-"}</Desc>
         </LeftContents>
         <RightContents>
-          <Status>{props.status}</Status>
+          <Status>{market ? market.status : "-" }</Status>
           <TimeContents>
             <TimeItem>
               <TimeKey>Open</TimeKey>
-              <TimeVal>{timestampToStr(props.openTs)}</TimeVal>
+              <TimeVal>{market ? dateToStr(market.openTime) : "-"}</TimeVal>
             </TimeItem>
             <TimeItem>
               <TimeKey>Close</TimeKey>
-              <TimeVal>{timestampToStr(props.closeTs)}</TimeVal>
+              <TimeVal>{market ? dateToStr(market.closeTime) : "-"}</TimeVal>
             </TimeItem>
           </TimeContents>
         </RightContents>

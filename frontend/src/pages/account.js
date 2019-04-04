@@ -10,18 +10,18 @@ import Header from 'src/components/header';
 
 export default function AccountPage(props) {
   const history = props.history;
-  const {token, setToken} = useContext(AccessTokenContext);
+  const {accessToken, setAccessToken} = useContext(AccessTokenContext);
   const [me, setMe] = useState(null);
   const [loading, setLoading] = useState(false);
   const [[errMsg, errNonce], setErr] = useState([null, null]);
 
   useEffect(() => {
-    if (!token) {
+    if (!accessToken) {
       history.push("/login");
       return;
     }
     setLoading(true);
-    getMe(token)
+    getMe(accessToken)
       .then(me => {
         setMe(me);
         setLoading(false);
@@ -29,7 +29,7 @@ export default function AccountPage(props) {
       .catch(err => {
         switch(err) {
           case InvalidAccessTokenError:
-            setToken(null);
+            setAccessToken(null);
             history.push("/login");
             break;
           case NetworkError:
@@ -39,7 +39,7 @@ export default function AccountPage(props) {
             break;
         }
       });
-  }, [token])
+  }, [accessToken])
 
   return (
     <>

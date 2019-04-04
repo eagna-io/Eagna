@@ -1,12 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { timestampToStr } from 'src/time';
+import { dateToStr } from 'src/time';
 
 
 export default function TradeHistory(props) {
   const tokens = props.tokens;
-  const orders = props.orders;
+  const orderHistory = props.orderHistory;
 
   return (
     <Table className={props.className}>
@@ -21,16 +21,15 @@ export default function TradeHistory(props) {
       </thead>
       <tbody>
         {
-          orders
+          orderHistory
+            .records
             .sort((a,b) => b.time - a.time)
             .map(order => {
               const tokenName =
-                order.type === "normal"
-                ? tokens.find(t => t.id === order.tokenId).name
-                : "-";
+                order.type === "normal" ? order.token.name : "-";
               return (
                 <Item bold={order.type !== "normal"} key={order.id}>
-                  <ItemCol>{timestampToStr(order.time)}</ItemCol>
+                  <ItemCol>{dateToStr(order.time)}</ItemCol>
                   <ItemCol>{order.type}</ItemCol>
                   <ItemCol>{tokenName}</ItemCol>
                   <ItemCol>{order.amountToken}</ItemCol>

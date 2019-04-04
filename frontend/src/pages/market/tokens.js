@@ -1,9 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import * as lmsr from 'src/lmsr';
 
 export default function Tokens(props) {
-  const prices = lmsr.prices(props.tokens.map(t => t.amount))
   const tokens = props.tokens;
 
   return (
@@ -17,10 +15,10 @@ export default function Tokens(props) {
       </thead>
       <tbody>
         {
-          tokens.map((token, idx) => (
+          tokens.map(token => (
           <Item key={token.name}>
             <ItemToken>{token.name}</ItemToken>
-            <ItemPrice>{prices[idx]}</ItemPrice>
+            <ItemPrice>{token.price}</ItemPrice>
             <ItemDesc>{token.desc}</ItemDesc>
           </Item>
           ))

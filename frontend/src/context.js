@@ -1,8 +1,8 @@
 import React from 'react';
 
 export const AccessTokenContext = React.createContext({
-  token: null,
-  setToken: () => {},
+  accessToken: null,
+  setAccessToken: () => {},
 });
 
 export const RouterContext = React.createContext(null);
