@@ -16,7 +16,7 @@ export default function Loading(props) {
 }
 
 const View = styled.div`
-  position: absolute;
+  position: fixed;
   z-index: 10;
   width: 100vw;
   height: 100vh;

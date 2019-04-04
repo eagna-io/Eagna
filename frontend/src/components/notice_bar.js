@@ -26,7 +26,7 @@ export default function NoticeBar(props) {
 }
 
 const Container = styled.div`
-  position: absolute;
+  position: fixed;
   z-index: 5;
   top: ${props => props.dissappearing ? "-60px" : "0px"};
   left: calc((100vw - 500px) / 2);
