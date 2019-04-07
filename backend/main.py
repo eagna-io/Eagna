@@ -18,11 +18,6 @@ def main():
     db_url = getDBUrlFromCloudStorage()
   print(f"DB_URL : {db_url}")
 
-  # Observerの起動
-  p = Process(target = observe_market, args=(db_url,))
-  p.start()
-  print("Start to observe market open/close")
-  
   # API server の起動
   print(f"Server start on {bind_host}:{bind_port}")
   server = Server(bind_host, bind_port, db_url)

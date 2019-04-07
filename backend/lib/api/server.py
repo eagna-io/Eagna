@@ -6,6 +6,7 @@ from .accesstoken import AccessTokenResource
 from .me import MeResource
 from .market import MarketResource
 from .order import OrderResource
+from .cron import CronResource
 
 class CORSMiddleware():
   def process_request(self, req, resp):
@@ -25,5 +26,6 @@ class Server():
     app.add_route("/me", MeResource(self.db_url))
     app.add_route("/markets/{id}", MarketResource(self.db_url))
     app.add_route("/order", OrderResource(self.db_url))
+    app.add_route("/cron", CronResource(self.db_url))
     httpd = simple_server.make_server(self.url, self.port, app)
     httpd.serve_forever()

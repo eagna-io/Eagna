@@ -2,11 +2,25 @@ from time import sleep
 from datetime import datetime, timezone
 from lib import db
 
-def observe_market(db_url):
-  while True:
+class CronResource():
+  def __init__(self, db_url):
+    self.db_url = db_url
+
+  def on_get(self, req, resp):
+    validate_cron_req(req):
+
     check_open_markets(db_url)
     check_close_markets(db_url)
-    sleep_until_next_minite()
+
+    resp.status = falcon.HTTP_200
+    return
+
+
+# "X-Appengine-Cron" ヘッダーがあるかチェック。
+# ない場合は HTTPBadRequest 例外が飛ぶ
+# 値まではチェックしない
+def validate_cron_req(req):
+  req.get_header("X-Appengine-Cron", required = True)
 
 
 # Opening instruction
@@ -78,10 +92,3 @@ def query_new_close_markets(conn):
 
 def close_market(market_id, conn):
   db.update(conn, "UPDATE markets SET status = 'closed' WHERE id = %s", (market_id,))
-
-
-
-def sleep_until_next_minite():
-  cur_ts = int(datetime.now(timezone.utc).timestamp())
-  next_ts = (int(cur_ts / 60) + 1) * 60
-  sleep(next_ts - cur_ts)
