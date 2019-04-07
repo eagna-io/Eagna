@@ -26,6 +26,6 @@ class Server():
     app.add_route("/me", MeResource(self.db_url))
     app.add_route("/markets/{id}", MarketResource(self.db_url))
     app.add_route("/order", OrderResource(self.db_url))
-    app.add_route("/cron", CronResource(self.db_url))
+    app.add_route("/cron/market_status_check", CronResource(self.db_url))
     httpd = simple_server.make_server(self.url, self.port, app)
     httpd.serve_forever()
