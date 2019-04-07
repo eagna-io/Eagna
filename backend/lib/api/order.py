@@ -31,6 +31,12 @@ class OrderResource():
         resp.body = response.failure("token id is invalid")
         return
 
+      # マーケットがopen状態かチェック
+      if check_market_status(conn, market_id) != "open":
+        resp.body = response.failure("market is already closed")
+        return
+
+
       # 各トークンの現在の流通量を取得
       # Never error
       cur_tokens = query_current_distribution(conn, market_id)
@@ -67,7 +73,19 @@ class OrderResource():
 
 
 def query_market_id(conn, token_id):
-  return db.query_one(conn, 'SELECT market_id FROM market_tokens WHERE id = %s', (token_id,))
+  sql = (
+    "SELECT market_id FROM market_tokens "
+    "WHERE id = %s"
+  )
+  return db.query_one(conn, sql, (token_id,))
+
+
+def check_market_status(conn, market_id):
+  sql = (
+    "SELECT status FROM market "
+    "WHERE id = %s"
+  )
+  return db.query_one(conn, sql, (market_id,))
 
 
 def query_target_user_token(conn, token_id, user_id):
@@ -76,6 +94,7 @@ def query_target_user_token(conn, token_id, user_id):
     "WHERE token_id = %s and user_id = %s"
   )
   return db.query_one(conn, sql, (token_id, user_id))[0]
+
 
 # Return True if success, otherwise False
 def save_order(user_id, market_id, token_id, amount_token, amount_coin, conn):
