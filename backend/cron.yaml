@@ -1,0 +1,4 @@
+cron:
+- description: "market status check"
+  url: /cron/market_status_check
+  schedule: every 1 mins
