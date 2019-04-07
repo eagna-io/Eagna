@@ -1,8 +1,6 @@
 import json
 import os
-from multiprocessing import Process
 
-from lib.market_observer import observe_market
 from lib.api.server import Server
 
 
