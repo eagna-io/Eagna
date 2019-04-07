@@ -1,5 +1,6 @@
 from time import sleep
 from datetime import datetime, timezone
+import falcon
 from lib import db
 
 class CronResource():
@@ -7,10 +8,10 @@ class CronResource():
     self.db_url = db_url
 
   def on_get(self, req, resp):
-    validate_cron_req(req):
+    validate_cron_req(req)
 
-    check_open_markets(db_url)
-    check_close_markets(db_url)
+    check_open_markets(self.db_url)
+    check_close_markets(self.db_url)
 
     resp.status = falcon.HTTP_200
     return
@@ -30,8 +31,7 @@ def check_open_markets(db_url):
     # 新しくopen する必要のあるmarket 一覧を取得
     new_markets = query_new_open_markets(conn)
     if len(new_markets) != 0:
-      n = len(new_markets)
-      print(f"Open {n} new markets")
+      print("Open %s new markets"%(len(new_markets),))
       # market に参加するuser 一覧を取得（現在は全員）
       users = query_users(conn)
       for (market_id, coin_supply) in new_markets:
@@ -75,6 +75,7 @@ def check_close_markets(db_url):
   with db.connect(db_url) as conn:
     new_markets = query_new_close_markets(conn)
     if len(new_markets) != 0:
+      print("Close %s new markets"%(len(new_markets),))
       for market_id in new_markets:
         # market_status をclosed に変更
         # settlement tokenの決定、reward の配布は手動で行う

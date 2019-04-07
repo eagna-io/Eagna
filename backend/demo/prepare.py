@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from lib import db
-from lib.market_observer import check_open_markets
+from lib.api.cron import check_open_markets
 from tools.create_market import insert_market_data
 from tools.create_user import insert_user_data
 
