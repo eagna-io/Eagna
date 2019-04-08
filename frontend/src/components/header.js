@@ -7,7 +7,9 @@ export default function Header(props) {
   return (
     <Container className={props.className}>
       <Link to="/"><Logo src="/img/logo.png" /></Link>
-      <Profile to="/me"></Profile>
+      <Profile to="/me">
+        <i className="fas fa-user-circle"></i>
+      </Profile>
     </Container>
   );
 }
@@ -33,6 +35,10 @@ const Profile = styled(Link)`
   display: block;
   width: 40px;
   height: 40px;
+  font-size: 30px;
+  text-align: center;
+  line-height: 40px;
+  color: #1c384e;
   background-color: white;
   border-radius: 4px;
 `;
