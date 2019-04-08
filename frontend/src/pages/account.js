@@ -61,34 +61,44 @@ function MeContents(me) {
   const markets = me.markets;
   return (
     <>
-    <Profile>
-      <ProfileHeader>Profile</ProfileHeader>
-      <ProfileItems>
-        <ProfileItem>
-          <ProfileItemKey>Name</ProfileItemKey>
-          <ProfileItemVal>{name}</ProfileItemVal>
-        </ProfileItem>
-        <ProfileItem>
-          <ProfileItemKey>Email</ProfileItemKey>
-          <ProfileItemVal>{email}</ProfileItemVal>
-        </ProfileItem>
-      </ProfileItems>
-    </Profile>
-    <MarketList>
-      <MarketListHeader>Markets</MarketListHeader>
-      <MarketListItems>
-      {markets.map(market =>
-        <MarketListItem key={market.id}>
-          <MarketListItemStatus>
-            {market.status}
-          </MarketListItemStatus>
-          <MarketListItemTitle to={`/market/${market.id}`}>
-            {market.title}
-          </MarketListItemTitle>
-        </MarketListItem>
-      )}
-      </MarketListItems>
-    </MarketList>
+    <LeftContents>
+      <Profile>
+        <ProfileHeader>Profile</ProfileHeader>
+        <ProfileItems>
+          <tbody>
+            <ProfileItem>
+              <ProfileItemKey>Name</ProfileItemKey>
+              <ProfileItemVal>{name}</ProfileItemVal>
+            </ProfileItem>
+            <ProfileItem>
+              <ProfileItemKey>Email</ProfileItemKey>
+              <ProfileItemVal>{email}</ProfileItemVal>
+            </ProfileItem>
+          </tbody>
+        </ProfileItems>
+      </Profile>
+    </LeftContents>
+    <RightContents>
+      <MarketList>
+        <MarketListHeader>Markets</MarketListHeader>
+        <MarketListItems>
+          <tbody>
+          {markets.map(market =>
+            <MarketListItem key={market.id}>
+              <MarketListItemStatus>
+                {market.status}
+              </MarketListItemStatus>
+              <td>
+                <MarketListItemTitle to={`/market/${market.id}`}>
+                {market.title}
+                </MarketListItemTitle>
+              </td>
+            </MarketListItem>
+          )}
+          </tbody>
+        </MarketListItems>
+      </MarketList>
+    </RightContents>
     </>
   );
 }
@@ -109,8 +119,17 @@ const Container = styled.div`
   align-items: flex-start;
 `;
 
-const Profile = styled.section`
+const LeftContents = styled.div`
+  display: inline-block;
   width: 300px;
+`;
+
+const RightContents = styled.div`
+  display: inline-block;
+  width: 600px
+`;
+
+const Profile = styled.section`
   border: 1px solid #D1D5DA;
   border-radius: 4px;
 `;
@@ -128,35 +147,39 @@ const ProfileHeader = styled.h3`
   text-align: left;
 `;
 
-const ProfileItems = styled.ul`
+const ProfileItems = styled.table`
   width: 100%;
-  list-style: none;
+  table-layout: fixed;
+  border-spacing: 0;
+  border-collapse: collapse;
   padding: 0;
   margin: 0;
 `;
 
-const ProfileItem = styled.li`
+const ProfileItem = styled.tr`
   width: 100%;
-  padding: 10px 20px;
 `;
 
-const ProfileItemKey = styled.div`
+const ProfileItemKey = styled.td`
   display: inline-block;
   text-align: left;
   font-size: 14px;
   width: 30%;
+  padding: 10px 0px;
+  padding-left: 20px;
 `
 
-const ProfileItemVal = styled.div`
+const ProfileItemVal = styled.td`
   display: inline-block;
   text-align: right;
   font-size: 14px;
   font-weight: bold;
   width: 70%;
+  padding: 10px 0px;
+  padding-right: 20px;
 `;
 
 const MarketList = styled.section`
-  width: 600px;
   border: 1px solid #D1D5DA;
   border-radius: 4px;
 `;
@@ -173,24 +196,29 @@ const MarketListHeader = styled.h3`
   border-bottom: 1px solid #D1D5DA;
 `;
 
-const MarketListItems = styled.ul`
+const MarketListItems = styled.table`
   width: 100%;
-  list-style: none;
+  table-layout: fixed;
+  border-spacing: 0;
+  border-collapse: collapse;
   padding: 0;
   margin: 0;
 `;
 
-const MarketListItem = styled.li`
-  padding: 10px;
-  background-color: ${props => props.filled ? "#F9F9F9" : "white"};
+const MarketListItem = styled.tr`
+  background-color: white;
+
+  &:nth-child(even) {
+    background-color: #F9F9F9;
+  }
 `;
 
-const MarketListItemStatus = styled.div`
+const MarketListItemStatus = styled.td`
   display: inline-block;
   text-align: left;
   font-size: 14px;
   width: 20%;
-  padding-left: 20px;
+  padding: 20px;
 `;
 
 const MarketListItemTitle = styled(Link)`
