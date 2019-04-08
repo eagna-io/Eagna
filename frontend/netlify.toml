@@ -1,13 +1,9 @@
 # Production context: All deploys to the main
 # repository branch will inherit these settings.
 [context.production]
-  command = "npm run build-debug"
-  [context.production.environment]
-    API_BASE = "https://chaintracker.atsuki.me"
+  command = "npm run build"
 
 # Branch deploy context: All deploys that are not in
 # an active Deploy Preview will inherit these settings.
-#[context.branch-deploy]
-  #command = "npm run build-debug"
-  #[context.branch-deploy.environment]
-    #API_BASE = "https://chaintracker.atsuki.me"
+[context.branch-deploy]
+  command = "npm run build-debug"
