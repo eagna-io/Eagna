@@ -21,11 +21,11 @@ export default function  Order(props) {
 
   const onPressEnter = () => {
     if (!selectedToken) {
-      setErr("Please select token");
+      setErr("トークンを選択してください");
       return;
     }
     if (cost === 0) {
-      setErr("Please input amount of the token");
+      setErr("注文するトークンの量を入力してください");
       return;
     }
     setErr(null);

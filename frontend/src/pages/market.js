@@ -34,12 +34,12 @@ export default function MarketPage(props) {
         switch(err) {
           case InvalidAccessTokenError:
             setAccessToken(null);
-            setErr(["Your login session is expired", Date.now()]);
+            setErr(["ログインセッションが切れました。再ログインが必要です。", Date.now()]);
             setMarket(null);
             setLoading(false);
             break;
           case MarketNotFoundError:
-            setErr(["Market not found", Date.now()]);
+            setErr(["マーケットが見つかりません", Date.now()]);
             setMarket(null);
             setLoading(false);
             break;
@@ -54,13 +54,13 @@ export default function MarketPage(props) {
     if (orderType === "buy") {
       // 十分なCoinを持っているかチェック
       if (market.me.orderHistory.currentAmountCoin() + amountCoin < 0) {
-        setErr(["You don't have enough coin", Date.now()]);
+        setErr(["コインの量が不足しています", Date.now()]);
         return;
       }
     } else {
       // 十分な対象Tokenを持っているかチェック
       if (market.me.orderHistory.currentAmountToken(token) + amountToken < 0) {
-        setErr(["You don't have enough token", Date.now()]);
+        setErr(["トークンの量が不足しています", Date.now()]);
         return;
       }
     }
@@ -72,11 +72,11 @@ export default function MarketPage(props) {
         switch(err) {
           case InvalidAccessTokenError:
             setAccessToken(null);
-            setErr(["You login session is expired", Date.now()]);
+            setErr(["ログインセッションが切れました。再ログインが必要です。", Date.now()]);
             setMarket(null);
             break;
           case TokenPriceIsMovedError:
-            setErr(["Token price is changed. Please try again", Date.now()]);
+            setErr(["トークン価格が変わっています。もう一度注文をお願いします。", Date.now()]);
             break;
         }
       })

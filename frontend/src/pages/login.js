@@ -45,13 +45,13 @@ export default function LoginPage(props) {
         setLoading(false);
         switch(err) {
           case LoginFailedError:
-            setErr(["Email or Password is incorrect", Date.now()]);
+            setErr(["EmailかPasswordが違います", Date.now()]);
             break;
           case NetworkError:
-            setErr(["Network error is detected", Date.now()]);
+            setErr(["ネットワークエラー", Date.now()]);
             break;
           default:
-            setErr("Sorry. Server error is detected. Please try again later");
+            setErr("サーバーエラーが検知されました");
             console.error(err);
             break;
         }

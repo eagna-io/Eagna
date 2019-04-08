@@ -34,7 +34,7 @@ export default function AccountPage(props) {
             break;
           case NetworkError:
           default:
-            setErr(["Network error is detected", Date.now()]);
+            setErr(["ネットワークエラー", Date.now()]);
             setLoading(false);
             break;
         }
