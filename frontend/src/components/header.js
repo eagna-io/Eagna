@@ -66,6 +66,8 @@ function ProfileDropdown(props) {
 
   const Container = onClickOutside(Dropdown, clickOutsideConfig);
 
+  const isLogin = accessToken !== null;
+
   const render = () => (
     <Container className={props.className}>
       <ProfileButton onClick={toggleDropdown}>
@@ -75,19 +77,23 @@ function ProfileDropdown(props) {
         </DropdownCaret>
       </ProfileButton>
       <ProfileMenu show={showMenu}>
-        <MenuItem>
-          <MenuItemLink to="/me">Account Page</MenuItemLink>
-        </MenuItem>
-        <Line />
-        <MenuItem>
         {
-          accessToken ? (
-            <Signout onClick={signOut}>Sign out</Signout>
+          isLogin ? (
+            <>
+            <MenuItem>
+              <MenuItemLink to="/me">Account Page</MenuItemLink>
+            </MenuItem>
+            <Line />
+            <MenuItem>
+              <Signout onClick={signOut}>Sign out</Signout>
+            </MenuItem>
+            </>
           ) : (
-            <Signin onClick={signIn}>Sign in</Signin>
+            <MenuItem>
+              <Signin onClick={signIn}>Sign in</Signin>
+            </MenuItem>
           )
         }
-        </MenuItem>
       </ProfileMenu>
     </Container>
   );
