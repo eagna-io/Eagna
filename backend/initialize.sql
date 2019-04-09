@@ -29,7 +29,6 @@ CREATE TABLE markets (
   description         text NOT NULL,
   open_time           timestamptz NOT NULL,
   close_time          timestamptz NOT NULL,
-  start_coin_supply   integer NOT NULL,
   status              market_status NOT NULL DEFAULT 'preparing',
   settle_token_id     integer DEFAULT NULL
 );

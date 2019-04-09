@@ -26,6 +26,8 @@ def validate_cron_req(req):
 
 # Opening instruction
 
+INITIAL_COIN_SUPPLY = 5000
+
 def check_open_markets(db_url):
   with db.connect(db_url) as conn:
     # 新しくopen する必要のあるmarket 一覧を取得
@@ -34,15 +36,15 @@ def check_open_markets(db_url):
       print("Open %s new markets"%(len(new_markets),))
       # market に参加するuser 一覧を取得（現在は全員）
       users = query_users(conn)
-      for (market_id, coin_supply) in new_markets:
+      for (market_id,) in new_markets:
         # 参加者にコインを配布
-        distribute_init_coin(market_id, coin_supply, users, conn)
+        distribute_init_coin(market_id, users, conn)
         open_market(market_id, conn)
 
 
 def query_new_open_markets(conn):
   sql = (
-    "SELECT id, start_coin_supply FROM markets "
+    "SELECT id FROM markets "
     "WHERE open_time <= now()"
     " AND status = 'preparing'"
   )
@@ -53,7 +55,7 @@ def query_users(conn):
   return db.query_all(conn, "SELECT id FROM users")
 
 
-def distribute_init_coin(market_id, coin_supply, users, conn):
+def distribute_init_coin(market_id, users, conn):
   sql = (
     "INSERT INTO orders "
     "(user_id, market_id, amount_token, amount_coin, type) "
@@ -61,7 +63,7 @@ def distribute_init_coin(market_id, coin_supply, users, conn):
     "(%s, %s, 0, %s, 'initial_supply')"
   )
   for user_id in users:
-    db.insert(conn, sql, (user_id, market_id, coin_supply))
+    db.insert(conn, sql, (user_id, market_id, INITIAL_COIN_SUPPLY))
 
 
 def open_market(market_id, conn):
