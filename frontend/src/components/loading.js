@@ -1,5 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 export default function Loading(props) {
   const loading = props.loading;
@@ -7,7 +9,7 @@ export default function Loading(props) {
   if (loading) {
     return (
       <View className={props.className}>
-        <Spinner className="fas fa-spinner fa-spin fa-5x"></Spinner>
+        <Spinner icon={faSpinner} size="5x" spin />
       </View>
     );
   } else {
@@ -25,7 +27,7 @@ const View = styled.div`
   background-color: rgba(0, 0, 0, 0.3);
 `;
 
-const Spinner = styled.i`
+const Spinner = styled(FontAwesomeIcon)`
   margin-left: calc(50vw - 45px);
   margin-top: calc(50vh - 45px);
   color: white;

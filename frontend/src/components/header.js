@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react';
 import styled from 'styled-components';
 import onClickOutside from 'react-onclickoutside';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserCircle, faCaretDown } from '@fortawesome/free-solid-svg-icons';
 
 import { AccessTokenContext } from 'src/context';
 
@@ -67,9 +69,9 @@ function ProfileDropdown(props) {
   const render = () => (
     <Container className={props.className}>
       <ProfileButton onClick={toggleDropdown}>
-        <i className="fas fa-user-circle fa-3x"></i>
+        <FontAwesomeIcon icon={faUserCircle} size="3x" />
         <DropdownCaret>
-          <i className="fas fa-caret-down fa-lg"></i>
+          <FontAwesomeIcon icon={faCaretDown} size="lg" />
         </DropdownCaret>
       </ProfileButton>
       <ProfileMenu show={showMenu}>
