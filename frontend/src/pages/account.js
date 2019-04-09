@@ -46,7 +46,7 @@ export default function AccountPage(props) {
     <Loading loading={loading} />
     <NoticeBar nonce={errNonce}>{errMsg}</NoticeBar>
     <Page>
-      <Header />
+      <Header history={history} />
       <Container>
         { me ? MeContents(me) : null }
       </Container>

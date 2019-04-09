@@ -18,6 +18,7 @@ import DescComponent from './market/description';
 
 export default function MarketPage(props) {
   const marketId = props.match.params.id;
+  const history = props.history;
   const {accessToken, setAccessToken} = useContext(AccessTokenContext);
   const [market, setMarket] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -91,7 +92,7 @@ export default function MarketPage(props) {
     <Loading loading={loading} />
     <NoticeBar nonce={errNonce}>{errMsg}</NoticeBar>
     <Page>
-      <Header />
+      <Header history={history} />
       <MarketHeader market={market} />
       <Contents>
         <Tokens tokens={market ? market.tokens : []} />
