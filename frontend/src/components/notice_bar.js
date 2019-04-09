@@ -29,8 +29,7 @@ const Container = styled.div`
   position: fixed;
   z-index: 5;
   top: ${props => props.dissappearing ? "-60px" : "0px"};
-  left: calc((100vw - 500px) / 2);
-  width: 500px;
+  width: 100vw;
   height: 50px;
   background-color: #4A90E2;
   border-radius: 0px 0px 4px 4px;
