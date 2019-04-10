@@ -44,6 +44,7 @@ def query_markets(conn, user_id):
     " SELECT market_id FROM orders "
     " WHERE type = 'initial_supply' AND user_id = %s "
     ")"
+    " OR status = 'preparing'"
   )
   return [
     {
