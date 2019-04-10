@@ -82,7 +82,7 @@ def query_market_id(conn, token_id):
 
 def check_market_status(conn, market_id):
   sql = (
-    "SELECT status FROM market "
+    "SELECT status FROM markets "
     "WHERE id = %s"
   )
   return db.query_one(conn, sql, (market_id,))
