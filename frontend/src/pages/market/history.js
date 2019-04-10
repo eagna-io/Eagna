@@ -25,12 +25,15 @@ export default function TradeHistory(props) {
             .records
             .sort((a,b) => b.time - a.time)
             .map(order => {
-              const tokenName =
-                order.type === "normal" ? order.token.name : "-";
+              const orderType =
+                order.type === "normal"
+                  ? order.amountToken < 0 ? "sell" : "buy"
+                  : order.type
+              const tokenName = order.token ? order.token.name : "-"
               return (
                 <Item bold={order.type !== "normal"} key={order.id}>
                   <ItemCol>{dateToStr(order.time)}</ItemCol>
-                  <ItemCol>{order.type}</ItemCol>
+                  <ItemCol>{orderType}</ItemCol>
                   <ItemCol>{tokenName}</ItemCol>
                   <ItemCol>{order.amountToken}</ItemCol>
                   <ItemCol>{order.amountCoin}</ItemCol>
