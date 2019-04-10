@@ -15,8 +15,8 @@ export default function TradeHistory(props) {
           <HeaderCol>Time</HeaderCol>
           <HeaderCol>Types</HeaderCol>
           <HeaderCol>Token</HeaderCol>
-          <HeaderCol>Amount Token</HeaderCol>
-          <HeaderCol>Amount Coin</HeaderCol>
+          <HeaderCol right>Amount Token</HeaderCol>
+          <HeaderCol right>Amount Coin</HeaderCol>
         </Header>
       </thead>
       <tbody>
@@ -35,8 +35,8 @@ export default function TradeHistory(props) {
                   <ItemCol>{dateToStr(order.time)}</ItemCol>
                   <ItemCol>{orderType}</ItemCol>
                   <ItemCol>{tokenName}</ItemCol>
-                  <ItemCol>{order.amountToken}</ItemCol>
-                  <ItemCol>{order.amountCoin}</ItemCol>
+                  <ItemCol right>{order.amountToken}</ItemCol>
+                  <ItemCol right>{order.amountCoin}</ItemCol>
                 </Item>
               )
             })
@@ -64,8 +64,8 @@ const HeaderCol = styled.th`
   color: #586069;
   font-size: 12px;
   font-family: Lucida Grande;
-  text-align: left;
-  padding-left: 30px;
+  text-align: ${props => props.right ? "right" : "left"};
+  padding: 0px 30px;
 `;
 
 const Item = styled.tr`
@@ -82,5 +82,6 @@ const Item = styled.tr`
 const ItemCol = styled.td`
   font-size: 12px;
   font-family: Lucida Grande;
-  padding-left: 30px;
+  text-align: ${props => props.right ? "right" : "left"};
+  padding: 0px 30px;
 `;
