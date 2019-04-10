@@ -98,6 +98,7 @@ export default function MarketPage(props) {
         <Tokens tokens={market ? market.tokens : []} />
         {
           market && market.me && market.status === "open" ? (
+            <>
             <OrderContainer>
               <OrderComponent
                 tokens={market.tokens}
@@ -112,12 +113,14 @@ export default function MarketPage(props) {
               tokens={market.tokens}
               orderHistory={market.me.orderHistory}
             />
+            </>
           ) : null
         }
         {
           market && (
             market.status === "closed" || market.status === "settled"
           ) ? (
+            <>
             <OrderContainer>
               <ResultComponent settleToken={market.settleToken} />
               {
@@ -133,6 +136,7 @@ export default function MarketPage(props) {
               tokens={market.tokens}
               orderHistory={market.me.orderHistory}
             />
+            </>
           ) : null
         }
         <Description content={market ? market.desc : ""}/>
