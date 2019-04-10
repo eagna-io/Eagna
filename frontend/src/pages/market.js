@@ -108,6 +108,10 @@ export default function MarketPage(props) {
                 orderHistory={market.me.orderHistory}
               />
             </OrderContainer>
+            <History
+              tokens={market.tokens}
+              orderHistory={market.me.orderHistory}
+            />
           ) : null
         }
         {
@@ -125,10 +129,6 @@ export default function MarketPage(props) {
                 ) : null
               }
             </OrderContainer>
-          ) : null
-        }
-        {
-          market && market.me ? (
             <History
               tokens={market.tokens}
               orderHistory={market.me.orderHistory}
