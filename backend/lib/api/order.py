@@ -32,8 +32,9 @@ class OrderResource():
         return
 
       # マーケットがopen状態かチェック
+      
       if check_market_status(conn, market_id) != "open":
-        resp.body = response.failure("market is already closed")
+        resp.body = response.failure("market is not open")
         return
 
 
@@ -85,7 +86,7 @@ def check_market_status(conn, market_id):
     "SELECT status FROM markets "
     "WHERE id = %s"
   )
-  return db.query_one(conn, sql, (market_id,))
+  return db.query_one(conn, sql, (market_id,))[0]
 
 
 def query_target_user_token(conn, token_id, user_id):
