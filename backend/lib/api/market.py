@@ -67,10 +67,6 @@ def market_to_dict(market):
 
 def query_tokens(conn, market_id):
   sql = (
-    "SELECT id, name, description FROM market_tokens "
-    "WHERE market_id = %s"
-  )
-  sql = (
     "SELECT "
     " market_tokens.id, "
     " market_tokens.name, "
@@ -79,7 +75,8 @@ def query_tokens(conn, market_id):
     "FROM market_tokens "
     "LEFT OUTER JOIN orders "
     " ON market_tokens.id = orders.token_id "
-    "WHERE market_tokens.market_id = %s"
+    "WHERE market_tokens.market_id = %s "
+    "ORDER BY market_tokens.id ASC "
     "GROUP BY market_tokens.id"
   )
   return [token_to_dict(t) for t in db.query_all(conn, sql, (market_id,))]
