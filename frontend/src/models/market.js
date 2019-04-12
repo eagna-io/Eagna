@@ -24,7 +24,7 @@ export class Market {
     this.status = status;
     this.openTime = openTime;
     this.closeTime = closeTime;
-    tokens.sort(a, b => a.id - b.id);
+    tokens.sort((a, b) => a.id - b.id);
     this.tokens = tokens;
     this.settleToken = settleToken;
     this.me = me;
