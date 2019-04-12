@@ -64,7 +64,7 @@ export default function LoginPage(props) {
     <NoticeBar nonce={errNonce}>{errMsg}</NoticeBar>
     <Body>
       <Container>
-        <Title>ROHAN MARKET</Title>
+        <Logo src="/img/logo-big.png" />
         <Input
           type="text"
           placeholder="Email"
@@ -102,7 +102,6 @@ function isPressEnter(e) {
 const Body = styled.div`
   width: 100vw;
   height: 100vh;
-  background-color: #F5F8FD;
   position: absolute;
   top: 0px;
   left: 0px;
@@ -114,10 +113,11 @@ const Container = styled.div`
   width: 40vw;
 `;
 
-const Title = styled.div`
-  color: #84B6F9;
-  margin-left: 30vw;
-  width: 40vw;
+const Logo = styled.img`
+  display: block;
+  width: 40%;
+  margin: 0 auto;
+  margin-bottom: 50px;
 `;
 
 const Input = styled.input`
@@ -132,7 +132,7 @@ const SubmitButton = styled.button`
   width: 100%;
   height: 50px;
   margin-top: 20px;
-  background-color: #84B6F9;
+  background-color: #1c384e;
   color: white;
   font-size: 20px;
   font-family: "Arial";
