@@ -26,7 +26,7 @@ def validate_cron_req(req):
 
 # Opening instruction
 
-INITIAL_COIN_SUPPLY = 5000
+INITIAL_COIN_SUPPLY = 10000
 
 def check_open_markets(db_url):
   with db.connect(db_url) as conn:
