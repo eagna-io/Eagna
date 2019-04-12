@@ -96,7 +96,7 @@ export function getMarket(marketId, token = null) {
             item.type,
             item.amountToken,
             item.amountCoin,
-            timestampToDate(item.time),
+            new Date(item.time),
           );
         });
         const orderHistory = new OrderHistory(orderRecords);
@@ -112,12 +112,14 @@ export function getMarket(marketId, token = null) {
         json.result.shortDesc,
         json.result.desc,
         json.result.status,
-        timestampToDate(json.result.openTs),
-        timestampToDate(json.result.closeTs),
+        new Date(json.result.openTime),
+        new Date(json.result.closeTime),
         tokens,
         me,
         tokens.find(t => t.id === json.result.settleTokenId) || null,
       );
+
+      console.log(market);
       
       return market;
     });

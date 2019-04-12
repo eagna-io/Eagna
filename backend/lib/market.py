@@ -25,8 +25,7 @@ def query_user_coins(conn, market_id, user_id):
 
 def query_user_orders(conn, market_id, user_id):
   sql = (
-    "SELECT id, token_id, amount_token, amount_coin, type,"
-    " EXTRACT(EPOCH FROM time) "
+    "SELECT id, token_id, amount_token, amount_coin, type, time "
     "FROM orders "
     "WHERE market_id = %s AND user_id = %s "
   )
