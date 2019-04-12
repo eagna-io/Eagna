@@ -153,7 +153,8 @@ const Page = styled.div`
 `;
 
 const Contents = styled.div`
-  width: 980px;
+  width: 90%;
+  max-width: 980px;
   margin: 0 auto;
   padding-bottom: 50px;
 `;

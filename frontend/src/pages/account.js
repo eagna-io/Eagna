@@ -110,7 +110,8 @@ const Page = styled.div`
 `;
 
 const Container = styled.div`
-  width: 980px;
+  width: 90%;
+  max-width: 980px;
   margin: 0 auto;
   margin-top: 100px;
   display: flex;
