@@ -58,7 +58,7 @@ export default function AccountPage(props) {
 function MeContents(me) {
   const name = me.name;
   const email = me.email;
-  const markets = me.markets;
+  const markets = me.markets.sort(sortMarket);
   return (
     <>
     <LeftContents>
@@ -103,6 +103,23 @@ function MeContents(me) {
   );
 }
 
+function sortMarket(a, b) {
+  const statusScore = status => {
+    switch (status) {
+      case "open": return 0;
+      case "preparing": return 1;
+      case "closed": return 2;
+      case "settled": return 3;
+    }
+  }
+  const statusDiff = statusScore(a.status) - statusScore(b.status);
+  if (statusDiff === 0) {
+    return a.id - b.id;
+  } else {
+    return statusDiff;
+  }
+
+}
 
 const Page = styled.div`
   width: 100vw;
