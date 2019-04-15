@@ -130,21 +130,25 @@ const Container = styled.div`
   width: 90%;
   max-width: 980px;
   margin: 0 auto;
-  margin-top: 100px;
+  margin-top: 50px;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: flex-start;
 `;
 
 const LeftContents = styled.div`
-  display: inline-block;
+  display: block;
   width: 300px;
+  margin: 0 auto;
+  margin-top: 50px;
 `;
 
 const RightContents = styled.div`
-  display: inline-block;
-  width: 600px
+  display: block;
+  width: 600px;
+  margin: 0 auto;
+  margin-top: 50px;
 `;
 
 const Profile = styled.section`
