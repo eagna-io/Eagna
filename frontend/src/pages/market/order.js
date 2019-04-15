@@ -25,7 +25,7 @@ export default function  Order(props) {
       return;
     }
     if (cost === 0) {
-      setErr("注文するトークンの量を入力してください");
+      setErr("コストが0の注文は出せません。Quantityを大きくしてください。");
       return;
     }
     setErr(null);
