@@ -1,8 +1,10 @@
+use diesel::pg::PgConnection;
 use failure::Error;
 use redis::{Commands, Connection as RedisConn};
-use diesel::pg::PgConnection;
+use rand::RngCore;
 
-const TOKEN_LENGTH: usize = 8;
+// Tokenの長さは64文字。base64の規格により、それは48byteになる
+const TOKEN_SIZE: usize = 64 / 4 * 3;
 const TOKEN_EXPIRE_SEC: usize = 60 * 60 * 24;
 
 pub fn authenticate_user(
@@ -10,8 +12,8 @@ pub fn authenticate_user(
     email: &str,
     hashed_pass: &str,
 ) -> Result<i32, Error> {
-    use diesel::prelude::*;
     use crate::postgres::schema::users::{self, columns};
+    use diesel::prelude::*;
 
     Ok(users::table
         .filter(columns::email.eq(email))
@@ -21,7 +23,9 @@ pub fn authenticate_user(
 }
 
 pub fn create_token(conn: &RedisConn, user_id: i32) -> Result<String, Error> {
-    let token = base64::encode(&rand::random::<[u8; TOKEN_LENGTH]>());
+    let mut buf = [0; TOKEN_SIZE];
+    rand::thread_rng().fill_bytes(&mut buf[..]);
+    let token = base64::encode(&buf[..]);
     conn.set_ex(&token, user_id, TOKEN_EXPIRE_SEC)?;
     Ok(token)
 }

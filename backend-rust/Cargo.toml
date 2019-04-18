@@ -24,3 +24,7 @@ base64 = "0.10"
 rand = "0.6"
 failure = "0.1"
 sha2 = "0.8"
+
+[dev-dependencies]
+reqwest = "0.9"
+utils = { path = "utils" }
