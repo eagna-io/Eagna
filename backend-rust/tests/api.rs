@@ -1,8 +1,6 @@
 #[macro_use]
 extern crate serde_derive;
 
-use diesel::connection::Connection;
-
 #[test]
 fn test_apis() {
     spawn_server();

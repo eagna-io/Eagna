@@ -10,7 +10,6 @@ extern crate failure;
 pub mod api;
 pub mod redis;
 pub mod postgres;
-pub mod auth;
 
 pub use self::api::Server;
 pub use self::postgres::ConnectionFactory as PgConnectionFactory;

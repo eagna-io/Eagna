@@ -1,6 +1,5 @@
-use crate::auth::check_token;
 use failure::Error;
-use redis::Connection as RedisConn;
+use redis::{Commands, Connection as RedisConn};
 use rouille::Request;
 
 pub fn validate_bearer_header(redis_conn: &RedisConn, req: &Request) -> Result<i32, Error> {
@@ -20,14 +19,20 @@ fn extract_token<'a>(header_val: &'a str) -> Result<&'a str, Error> {
         .map(|mat| mat.as_str())
 }
 
+fn check_token(conn: &RedisConn, token: &str) -> Result<i32, Error> {
+    let maybe_user_id: Option<i32> = conn.get(token)?;
+    maybe_user_id.ok_or(Error::from(AuthorizationError::Unauthorized))
+}
+
 #[derive(Debug, Copy, Clone, Fail)]
 pub enum AuthorizationError {
     #[fail(display = "Authorization header is not presented")]
     NotPresented,
     #[fail(display = "Authorization header value is invalid")]
     Invalid,
+    #[fail(display = "Unauthorized. token is invalid")]
+    Unauthorized,
 }
-
 
 #[cfg(test)]
 mod tests {
