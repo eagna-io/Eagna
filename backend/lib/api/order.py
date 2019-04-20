@@ -62,8 +62,7 @@ class OrderResource():
         return
 
       # amount_coin が適切かチェック
-      expected_amount_coin =
-        cost(cur_distribution, lmsr_b) - cost(new_distribution, lmsr_b)
+      expected_amount_coin = cost(cur_distribution, lmsr_b) - cost(new_distribution, lmsr_b)
       if amount_coin != expected_amount_coin:
         resp.body = response.failure("amount coin is invalid")
         return
