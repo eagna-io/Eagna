@@ -44,7 +44,7 @@ def query_market(conn, market_id):
   sql = (
     "SELECT "
     " id, title, organizer, short_desc, description,"
-    " open_time, close_time, status "
+    " open_time, close_time, lmsr_b, status "
     "FROM markets "
     "WHERE markets.id = %s"
   )
@@ -52,7 +52,8 @@ def query_market(conn, market_id):
 
 
 def market_to_dict(market):
-  (id, title, organizer, short_desc, description, open_time, close_time, status) = market
+  ( id, title, organizer, short_desc, description,
+    open_time, close_time, lmsr_b, status) = market
   return {
     "id": id,
     "title": title,
@@ -61,6 +62,7 @@ def market_to_dict(market):
     "desc": description,
     "openTime": open_time.isoformat(),
     "closeTime": close_time.isoformat(),
+    "lmsrB": lmsr_b,
     "status": status,
   }
 

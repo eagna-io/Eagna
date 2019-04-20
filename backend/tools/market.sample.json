@@ -5,6 +5,7 @@
   "desc": "## The sample market\nマークダウンでかけるよ",
   "openTime": "2019-03-09 23:47:29+09:00",
   "closeTime": "2019-03-09 23:47:29+09:00",
+  "lmsrB": 50,
   "status": "closed",
   "tokens": [
     {

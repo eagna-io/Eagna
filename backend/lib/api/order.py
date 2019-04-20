@@ -32,8 +32,8 @@ class OrderResource():
         return
 
       # マーケットがopen状態かチェック
-      
-      if check_market_status(conn, market_id) != "open":
+      (market_status, lmsr_b) = query_market(conn, market_id)
+      if market_status != "open":
         resp.body = response.failure("market is not open")
         return
 
@@ -62,7 +62,8 @@ class OrderResource():
         return
 
       # amount_coin が適切かチェック
-      expected_amount_coin = cost(cur_distribution) - cost(new_distribution)
+      expected_amount_coin =
+        cost(cur_distribution, lmsr_b) - cost(new_distribution, lmsr_b)
       if amount_coin != expected_amount_coin:
         resp.body = response.failure("amount coin is invalid")
         return
@@ -81,12 +82,12 @@ def query_market_id(conn, token_id):
   return db.query_one(conn, sql, (token_id,))
 
 
-def check_market_status(conn, market_id):
+def query_market(conn, market_id):
   sql = (
-    "SELECT status FROM markets "
+    "SELECT status, lmsr_b FROM markets "
     "WHERE id = %s"
   )
-  return db.query_one(conn, sql, (market_id,))[0]
+  return db.query_one(conn, sql, (market_id,))
 
 
 def query_target_user_token(conn, token_id, user_id):

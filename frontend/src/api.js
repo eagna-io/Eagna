@@ -114,6 +114,7 @@ export function getMarket(marketId, token = null) {
         json.result.status,
         new Date(json.result.openTime),
         new Date(json.result.closeTime),
+        json.result.lmsrB,
         tokens,
         me,
         tokens.find(t => t.id === json.result.settleTokenId) || null,

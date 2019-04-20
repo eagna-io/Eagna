@@ -30,9 +30,9 @@ def main():
 def insert_market_data(conn, market):
   sql = (
     "INSERT INTO markets "
-    "( title, organizer, short_desc, description, open_time, close_time, status ) "
+    "( title, organizer, short_desc, description, open_time, close_time, lmsr_b, status ) "
     "VALUES "
-    "( %s, %s, %s, %s, %s, %s, %s ) "
+    "( %s, %s, %s, %s, %s, %s, %s, %s ) "
     "RETURNING id"
   )
   market_id = db.insert_and_fetch(conn, sql,
@@ -43,6 +43,7 @@ def insert_market_data(conn, market):
       market["desc"],
       market["openTime"],
       market["closeTime"],
+      market["lmsrB"],
       market["status"],
     )
   )[0]

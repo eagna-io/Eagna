@@ -15,7 +15,7 @@ export class Market {
   // me : {
   //   orderHistry : OrderHistory,
   // }
-  constructor(id, title, organizer, shortDesc, desc, status, openTime, closeTime, tokens, me = null, settleToken = null) {
+  constructor(id, title, organizer, shortDesc, desc, status, openTime, closeTime, lmsrB, tokens, me = null, settleToken = null) {
     this.id = id;
     this.title = title;
     this.organizer = organizer;
@@ -24,6 +24,7 @@ export class Market {
     this.status = status;
     this.openTime = openTime;
     this.closeTime = closeTime;
+    this.lmsrB = lmsrB;
     tokens.sort((a, b) => a.id - b.id);
     this.tokens = tokens;
     this.settleToken = settleToken;
