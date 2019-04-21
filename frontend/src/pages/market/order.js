@@ -10,14 +10,13 @@ const MAX_QUANTITY = 100;
 const MICRO_COIN = 1000000;
 
 export default function  Order(props) {
-  const requestOrder = props.requestOrder;
-  const tokens = props.tokens;
+  const {lmsrB, tokens, requestOrder} = props;
   const [selectedToken, setSelectedToken] = useState(null);
   const [orderType, setOrderType] = useState("buy");
   const [inputAmountToken, setAmountToken] = useState(null);
   const [errMsg, setErr] = useState(null);
 
-  const cost = selectedToken ? currentCost(selectedToken, inputAmountToken, tokens, orderType) : 0;
+  const cost = selectedToken ? currentCost(selectedToken, inputAmountToken, tokens, orderType, lmsrB) : 0;
 
   const onPressEnter = () => {
     if (!selectedToken) {
@@ -84,9 +83,9 @@ function validateAmountToken(input) {
   }
 }
 
-function currentCost(token, amountToken, tokens, orderType) {
-  const baseCost = lmsr.cost(tokens.map(t => t.amount));
-  const newCost = lmsr.cost(tokens.map(t => {
+function currentCost(token, amountToken, tokens, orderType, lmsrB) {
+  const baseCost = lmsr.cost(lmsrB, tokens.map(t => t.amount));
+  const newCost = lmsr.cost(lmsrB, tokens.map(t => {
     if (t.id === token.id) {
       if (orderType === "buy") {
         return t.amount + amountToken;

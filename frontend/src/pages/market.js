@@ -102,6 +102,7 @@ export default function MarketPage(props) {
             <OrderContainer>
               <OrderComponent
                 tokens={market.tokens}
+                lmsrB={market.lmsrB}
                 requestOrder={requestOrder}
               />
               <AssetsComponent

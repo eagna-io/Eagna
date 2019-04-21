@@ -59,8 +59,8 @@ export class Token {
     # Returns
     - [ Token ]
   */ 
-  static fromDistribution(distribution) {
-    const prices = lmsr.prices(distribution.map(item => item.amount));
+  static fromDistribution(lmsrB, distribution) {
+    const prices = lmsr.prices(lmsrB, distribution.map(item => item.amount));
     return distribution.map((item, i) => {
       return new Token(item.id, item.name, item.desc, item.amount, prices[i]);
     });

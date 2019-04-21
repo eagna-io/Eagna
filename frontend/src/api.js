@@ -84,7 +84,7 @@ export function getMarket(marketId, token = null) {
       }
 
       // Success handle
-      const tokens = Token.fromDistribution(json.result.tokens);
+      const tokens = Token.fromDistribution(json.result.lmsrB, json.result.tokens);
 
       let me = null;
       if (json.result.me) {
