@@ -1,3 +1,4 @@
+use super::failure_response::FailureResponse;
 use crate::Server;
 use diesel::pg::PgConnection;
 use failure::Error;
@@ -10,8 +11,12 @@ const TOKEN_SIZE: usize = 64 / 4 * 3;
 const TOKEN_EXPIRE_SEC: usize = 60 * 60 * 24;
 
 pub fn create_access_token(server: &Server, req: &Request) -> Response {
+    inner(server, req).unwrap_or_else(<FailureResponse as Into<Response>>::into)
+}
+
+fn inner(server: &Server, req: &Request) -> Result<Response, FailureResponse> {
     #[derive(Debug, Deserialize)]
-    struct Data {
+    struct ReqData {
         email: String,
         hashed_pass: String,
     }
@@ -21,25 +26,27 @@ pub fn create_access_token(server: &Server, req: &Request) -> Response {
         access_token: String,
     }
 
-    let req_data: Data = try_or_res!(json_input(&req), 400, 0, "Invalid payload");
-    let pg_conn = try_or_res!(server.pg.establish_connection(), 500, 1, "Server error");
-    let user_id = try_or_res!(
-        authenticate_user(
-            &pg_conn,
-            req_data.email.as_str(),
-            req_data.hashed_pass.as_str()
-        ),
-        401,
-        2,
-        "Credentials are invalid"
-    );
-    let redis_conn = try_or_res!(server.redis.establish_connection(), 500, 1, "Server error");
-    let token = try_or_res!(create_token(&redis_conn, user_id), 500, 1, "Server error");
+    let req_data = json_input::<ReqData>(&req).map_err(|_e| FailureResponse::InvalidPayload)?;
+    let pg_conn = server
+        .pg
+        .establish()
+        .map_err(|_e| FailureResponse::ServerError)?;
+    let user_id = authenticate_user(
+        &pg_conn,
+        req_data.email.as_str(),
+        req_data.hashed_pass.as_str(),
+    )
+    .map_err(|_e| FailureResponse::Unauthorized)?;
+    let redis_conn = server
+        .redis
+        .establish()
+        .map_err(|_e| FailureResponse::ServerError)?;
+    let token = create_token(&redis_conn, user_id).map_err(|_e| FailureResponse::ServerError)?;
 
     let res_data = ResData {
         access_token: token,
     };
-    Response::json(&res_data)
+    Ok(Response::json(&res_data))
 }
 
 fn authenticate_user(conn: &PgConnection, email: &str, hashed_pass: &str) -> Result<i32, Error> {
@@ -50,7 +57,7 @@ fn authenticate_user(conn: &PgConnection, email: &str, hashed_pass: &str) -> Res
         .filter(columns::email.eq(email))
         .filter(columns::hashed_pass.eq(hashed_pass))
         .select(columns::id)
-        .first::<i32>(conn)?)
+        .first(conn)?)
 }
 
 fn create_token(conn: &RedisConn, user_id: i32) -> Result<String, Error> {

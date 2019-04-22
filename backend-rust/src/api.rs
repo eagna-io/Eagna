@@ -1,9 +1,11 @@
 #[macro_use]
-pub mod failure_response;
-pub mod access_token;
-pub mod auth;
+mod failure_response;
+mod access_token;
+mod auth;
+// mod me;
 
 use self::access_token::create_access_token;
+// use self::me::get_me;
 use rouille::{router, Request, Response};
 
 #[derive(Debug, Clone)]
@@ -33,6 +35,11 @@ impl Server {
             (POST) (/access_token) => {
                 create_access_token(&self, req)
             },
+            /*
+            (GET) (/me) => {
+                get_me(&self, req)
+            },
+            */
             _ => Response::empty_404()
         )
     }

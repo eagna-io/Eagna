@@ -6,7 +6,7 @@ pub struct ConnectionFactory(redis::Client);
 
 impl ConnectionFactory {
     pub fn new_with_env() -> ConnectionFactory {
-        let redis_url = std::env::var("REDIS_URL").expect("REDIS_URL not presented");
+        let redis_url = std::env::var("REDIS_URL").expect("REDIS_URL is not presented");
         ConnectionFactory::new(redis_url)
     }
 
@@ -14,7 +14,7 @@ impl ConnectionFactory {
         ConnectionFactory(redis::Client::open(url.as_str()).unwrap())
     }
 
-    pub fn establish_connection(&self) -> Result<RedisConnection, Error> {
+    pub fn establish(&self) -> Result<RedisConnection, Error> {
         Ok(self.0.get_connection()?)
     }
 }

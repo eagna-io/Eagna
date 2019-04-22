@@ -18,7 +18,7 @@ impl ConnectionFactory {
         ConnectionFactory { url: url }
     }
 
-    pub fn establish_connection(&self) -> Result<PgConnection, Error> {
+    pub fn establish(&self) -> Result<PgConnection, Error> {
         Ok(PgConnection::establish(self.url.as_str())?)
     }
 }

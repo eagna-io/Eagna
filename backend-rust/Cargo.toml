@@ -14,17 +14,17 @@ path = "src/main.rs"
 
 [dependencies]
 rouille = "~3.0"
-redis = "0.10"
+redis = "~0.10"
 diesel = { version = "~1.4", features = ["postgres"] }
-diesel-derive-enum = { version = "0.4", features = ["postgres"] }
+diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
 serde = "~1.0"
 serde_derive = "~1.0"
 regex = "~1.1"
-base64 = "0.10"
-rand = "0.6"
-failure = "0.1"
-sha2 = "0.8"
+base64 = "~0.10"
+rand = "~0.6"
+failure = "~0.1"
+sha2 = "~0.8"
 
 [dev-dependencies]
-reqwest = "0.9"
+reqwest = "~0.9"
 utils = { path = "utils" }
