@@ -1,7 +1,7 @@
 pub mod schema;
+pub use self::types::{MarketStatus, OrderType};
 
-use diesel::{pg::PgConnection, Connection};
-use failure::Error;
+use diesel::{pg::PgConnection, result::ConnectionError, Connection};
 
 #[derive(Debug, Clone)]
 pub struct ConnectionFactory {
@@ -18,13 +18,13 @@ impl ConnectionFactory {
         ConnectionFactory { url: url }
     }
 
-    pub fn establish(&self) -> Result<PgConnection, Error> {
-        Ok(PgConnection::establish(self.url.as_str())?)
+    pub fn establish(&self) -> Result<PgConnection, ConnectionError> {
+        PgConnection::establish(self.url.as_str())
     }
 }
 
 pub mod types {
-    #[derive(Debug, PartialEq, DbEnum)]
+    #[derive(Debug, PartialEq, DbEnum, Serialize)]
     #[DieselType = "Market_status"]
     pub enum MarketStatus {
         Preparing,
@@ -33,7 +33,7 @@ pub mod types {
         Settled,
     }
 
-    #[derive(Debug, PartialEq, DbEnum)]
+    #[derive(Debug, PartialEq, DbEnum, Serialize)]
     #[DieselType = "Order_type"]
     pub enum OrderType {
         Normal,

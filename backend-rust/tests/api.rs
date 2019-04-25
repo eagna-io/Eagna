@@ -1,15 +1,15 @@
 #[macro_use]
 extern crate serde_derive;
 
+use utils::user;
+
 #[test]
 fn test_apis() {
     spawn_server();
 
-    let pg_conn = librohan::PgConnectionFactory::new_with_env()
-        .establish_connection()
-        .unwrap();
-
-    test_post_access_token(&pg_conn);
+    let token = test_post_access_token();
+    test_get_me(token.as_str());
+    test_get_me_orders(token.as_str());
 }
 
 fn spawn_server() {
@@ -18,17 +18,11 @@ fn spawn_server() {
     });
 }
 
-fn test_post_access_token(pg_conn: &diesel::pg::PgConnection) {
-    let new_user = utils::NewUser {
-        name: "Rohan",
-        email: "rohan@rohanmarket.com",
-        hashed_pass: "somethinghashedpassword",
-    };
-    utils::create_user(pg_conn, &new_user);
-
+// Returns access token
+fn test_post_access_token() -> String {
     let mut data = std::collections::HashMap::new();
-    data.insert("email", new_user.email);
-    data.insert("hashed_pass", new_user.hashed_pass);
+    data.insert("email", user::Alice.email);
+    data.insert("hashed_pass", user::Alice.hashed_pass);
 
     let client = reqwest::Client::new();
     let mut res = client
@@ -45,4 +39,50 @@ fn test_post_access_token(pg_conn: &diesel::pg::PgConnection) {
 
     let body = res.json::<RespBody>().unwrap();
     assert_eq!(body.access_token.len(), 64);
+
+    body.access_token
+}
+
+fn test_get_me(token: &str) {
+    let client = reqwest::Client::new();
+    let mut res = client
+        .get("http://localhost:12098/me")
+        .bearer_auth(token)
+        .send()
+        .unwrap();
+    assert_eq!(res.status().as_u16(), 200);
+
+    #[derive(Deserialize)]
+    struct RespBody {
+        id: i32,
+        name: String,
+        email: String,
+    }
+
+    let body = res.json::<RespBody>().unwrap();
+    assert_eq!(body.name, user::Alice.name);
+    assert_eq!(body.email, user::Alice.email);
+}
+
+fn test_get_me_orders(token: &str) {
+    let client = reqwest::Client::new();
+    let mut res = client
+        .get("http://localhost:12098/me/orders")
+        .bearer_auth(token)
+        .send()
+        .unwrap();
+    assert_eq!(res.status().as_u16(), 200);
+
+    #[derive(Deserialize)]
+    struct RespMarket {
+        id: i32,
+        title: String,
+        short_desc: String,
+        status: String,
+        open_time: String,
+        close_time: String,
+    }
+
+    let body = res.json::<Vec<RespMarket>>().unwrap();
+    assert_eq!(body.len(), 1);
 }

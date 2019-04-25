@@ -37,6 +37,7 @@ table! {
         user_id -> Int4,
         market_id -> Int4,
         token_id -> Nullable<Int4>,
+        in_market_id -> Int4,
         amount_token -> Int4,
         amount_coin -> Int4,
         #[sql_name = "type"]

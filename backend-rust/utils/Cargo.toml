@@ -6,4 +6,5 @@ edition = "2018"
 
 [dependencies]
 diesel = { version = "~1.4", features = ["postgres"] }
+chrono = { version = "~0.4", features = ["serde"] }
 rohanmarket-backend = { path = ".." }

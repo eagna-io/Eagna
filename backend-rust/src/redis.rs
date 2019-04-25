@@ -1,5 +1,4 @@
-use failure::Error;
-use redis::Connection as RedisConnection;
+use redis::{Connection as RedisConnection, RedisError};
 
 #[derive(Debug, Clone)]
 pub struct ConnectionFactory(redis::Client);
@@ -14,7 +13,7 @@ impl ConnectionFactory {
         ConnectionFactory(redis::Client::open(url.as_str()).unwrap())
     }
 
-    pub fn establish(&self) -> Result<RedisConnection, Error> {
+    pub fn establish(&self) -> Result<RedisConnection, RedisError> {
         Ok(self.0.get_connection()?)
     }
 }

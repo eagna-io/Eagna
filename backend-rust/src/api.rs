@@ -1,11 +1,13 @@
-#[macro_use]
 mod failure_response;
 mod access_token;
 mod auth;
-// mod me;
+mod me;
 
-use self::access_token::create_access_token;
-// use self::me::get_me;
+pub use self::auth::validate_bearer_header;
+pub use self::failure_response::FailureResponse;
+
+use diesel::pg::PgConnection as PgConn;
+use redis::Connection as RedisConn;
 use rouille::{router, Request, Response};
 
 #[derive(Debug, Clone)]
@@ -22,6 +24,18 @@ impl Server {
         }
     }
 
+    pub fn get_new_redis_conn(&self) -> Result<RedisConn, FailureResponse> {
+        self.redis
+            .establish()
+            .map_err(|_e| FailureResponse::ServerError)
+    }
+
+    pub fn get_new_pg_conn(&self) -> Result<PgConn, FailureResponse> {
+        self.pg
+            .establish()
+            .map_err(|_e| FailureResponse::ServerError)
+    }
+
     pub fn run<A: std::net::ToSocketAddrs>(self, addr: A) {
         rouille::Server::new(addr, move |req| {
             rouille::log(req, ::std::io::stdout(), || self.routing(req))
@@ -31,16 +45,18 @@ impl Server {
     }
 
     fn routing(&self, req: &Request) -> Response {
-        router!(req,
+        let res = router!(req,
             (POST) (/access_token) => {
-                create_access_token(&self, req)
+                access_token::create(&self, req)
             },
-            /*
             (GET) (/me) => {
-                get_me(&self, req)
+                me::get(&self, req)
             },
-            */
-            _ => Response::empty_404()
-        )
+            (GET) (/me/orders) => {
+                me::orders::get(&self, req)
+            },
+            _ => Err(FailureResponse::ResourceNotFound)
+        );
+        res.unwrap_or_else(<FailureResponse as Into<Response>>::into)
     }
 }

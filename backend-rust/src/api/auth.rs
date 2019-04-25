@@ -1,37 +1,30 @@
-use failure::Error;
+use crate::api::FailureResponse;
 use redis::{Commands, Connection as RedisConn};
 use rouille::Request;
 
-pub fn validate_bearer_header(redis_conn: &RedisConn, req: &Request) -> Result<i32, Error> {
+pub fn validate_bearer_header(
+    redis_conn: &RedisConn,
+    req: &Request,
+) -> Result<i32, FailureResponse> {
     req.header("Authorization")
-        .ok_or(Error::from(AuthorizationError::NotPresented))
+        .ok_or(FailureResponse::Unauthorized)
         .and_then(extract_token)
         .and_then(move |token| check_token(redis_conn, token))
 }
 
-fn extract_token<'a>(header_val: &'a str) -> Result<&'a str, Error> {
+fn extract_token<'a>(header_val: &'a str) -> Result<&'a str, FailureResponse> {
     // トークンはbase64エンコードされた64文字の文字列
     // base64の仕様上、4の倍数長の文字列には=は含まれない
     let re = regex::Regex::new(r"^Bearer ([A-Za-z0-9+/]{64})$").unwrap();
     re.captures(header_val)
         .and_then(|cap| cap.get(1))
-        .ok_or(Error::from(AuthorizationError::Invalid))
+        .ok_or(FailureResponse::Unauthorized)
         .map(|mat| mat.as_str())
 }
 
-fn check_token(conn: &RedisConn, token: &str) -> Result<i32, Error> {
-    let maybe_user_id: Option<i32> = conn.get(token)?;
-    maybe_user_id.ok_or(Error::from(AuthorizationError::Unauthorized))
-}
-
-#[derive(Debug, Copy, Clone, Fail)]
-pub enum AuthorizationError {
-    #[fail(display = "Authorization header is not presented")]
-    NotPresented,
-    #[fail(display = "Authorization header value is invalid")]
-    Invalid,
-    #[fail(display = "Unauthorized. token is invalid")]
-    Unauthorized,
+fn check_token(conn: &RedisConn, token: &str) -> Result<i32, FailureResponse> {
+    let maybe_user_id: Option<i32> = conn.get(token).map_err(|_| FailureResponse::ServerError)?;
+    maybe_user_id.ok_or(FailureResponse::Unauthorized)
 }
 
 #[cfg(test)]
