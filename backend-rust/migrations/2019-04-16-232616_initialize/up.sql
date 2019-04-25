@@ -46,10 +46,12 @@ CREATE TABLE orders (
   user_id       integer NOT NULL,
   market_id     integer NOT NULL,
   token_id      integer,
+  in_market_id  integer NOT NULL,
   amount_token  integer NOT NULL,
   amount_coin   integer NOT NULL,
   type          order_type NOT NULL DEFAULT 'normal',
   time          timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (market_id, in_market_id),
   CONSTRAINT order_user_fkey FOREIGN KEY(user_id)
     REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT order_market_fkey FOREIGN KEY(market_id)
