@@ -1,4 +1,4 @@
-pub mod orders;
+pub mod markets;
 
 use crate::{
     api::{validate_bearer_header, FailureResponse},

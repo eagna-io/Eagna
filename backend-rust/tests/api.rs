@@ -9,7 +9,7 @@ fn test_apis() {
 
     let token = test_post_access_token();
     test_get_me(token.as_str());
-    test_get_me_orders(token.as_str());
+    test_get_me_markets(token.as_str());
 }
 
 fn spawn_server() {
@@ -64,10 +64,10 @@ fn test_get_me(token: &str) {
     assert_eq!(body.email, user::Alice.email);
 }
 
-fn test_get_me_orders(token: &str) {
+fn test_get_me_markets(token: &str) {
     let client = reqwest::Client::new();
     let mut res = client
-        .get("http://localhost:12098/me/orders")
+        .get("http://localhost:12098/me/markets")
         .bearer_auth(token)
         .send()
         .unwrap();

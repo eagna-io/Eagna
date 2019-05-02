@@ -52,8 +52,8 @@ impl Server {
             (GET) (/me) => {
                 me::get(&self, req)
             },
-            (GET) (/me/orders) => {
-                me::orders::get(&self, req)
+            (GET) (/me/markets) => {
+                me::markets::get(&self, req)
             },
             _ => Err(FailureResponse::ResourceNotFound)
         );
