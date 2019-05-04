@@ -2,6 +2,7 @@ mod failure_response;
 mod access_token;
 mod auth;
 mod me;
+mod markets;
 
 pub use self::auth::validate_bearer_header;
 pub use self::failure_response::FailureResponse;
@@ -54,6 +55,9 @@ impl Server {
             },
             (GET) (/me/markets) => {
                 me::markets::get(&self, req)
+            },
+            (GET) (/markets/{id: i32}) => {
+                markets::get(&self, req, id)
             },
             _ => Err(FailureResponse::ResourceNotFound)
         );

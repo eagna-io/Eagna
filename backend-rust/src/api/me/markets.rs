@@ -17,7 +17,7 @@ pub fn get(server: &Server, req: &Request) -> Result<Response, FailureResponse> 
 }
 
 #[derive(Debug, Serialize, Queryable)]
-struct QueryMarket {
+struct Market {
     id: i32,
     title: String,
     short_desc: String,
@@ -26,7 +26,7 @@ struct QueryMarket {
     close_time: DateTime<Utc>,
 }
 
-fn query_markets(conn: &PgConn, user_id: i32) -> Result<Vec<QueryMarket>, FailureResponse> {
+fn query_markets(conn: &PgConn, user_id: i32) -> Result<Vec<Market>, FailureResponse> {
     use crate::postgres::schema::markets::{columns as market, table as markets};
     use crate::postgres::schema::orders::{columns as order, table as orders};
     use diesel::expression::dsl::any;
@@ -56,7 +56,7 @@ fn query_markets(conn: &PgConn, user_id: i32) -> Result<Vec<QueryMarket>, Failur
                 .eq(MarketStatus::Preparing)
                 .or(market::id.eq(any(joining_market_ids))),
         )
-        .load::<QueryMarket>(conn)
+        .load::<Market>(conn)
         .map_err(|_| FailureResponse::ServerError)
 }
 

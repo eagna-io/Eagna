@@ -24,7 +24,7 @@ impl ConnectionFactory {
 }
 
 pub mod types {
-    #[derive(Debug, PartialEq, DbEnum, Serialize)]
+    #[derive(Debug, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
     #[DieselType = "Market_status"]
     pub enum MarketStatus {
         Preparing,
@@ -33,7 +33,7 @@ pub mod types {
         Settled,
     }
 
-    #[derive(Debug, PartialEq, DbEnum, Serialize)]
+    #[derive(Debug, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
     #[DieselType = "Order_type"]
     pub enum OrderType {
         Normal,

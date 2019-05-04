@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate serde_derive;
 
+use chrono::{DateTime, Utc};
+use librohan::postgres::MarketStatus;
 use utils::user;
 
 #[test]
@@ -10,6 +12,7 @@ fn test_apis() {
     let token = test_post_access_token();
     test_get_me(token.as_str());
     test_get_me_markets(token.as_str());
+    test_get_market();
 }
 
 fn spawn_server() {
@@ -85,4 +88,42 @@ fn test_get_me_markets(token: &str) {
 
     let body = res.json::<Vec<RespMarket>>().unwrap();
     assert_eq!(body.len(), 1);
+}
+
+fn test_get_market() {
+    let client = reqwest::Client::new();
+    let mut res = client
+        .get("http://localhost:12098/markets/1")
+        .send()
+        .unwrap();
+    assert_eq!(res.status().as_u16(), 200);
+
+    #[derive(Debug, Deserialize, PartialEq, Eq)]
+    struct RespBody {
+        title: String,
+        organizer: String,
+        short_desc: String,
+        description: String,
+        open_time: DateTime<Utc>,
+        close_time: DateTime<Utc>,
+        status: MarketStatus,
+        settle_token_id: Option<i32>,
+    }
+
+    let body = res.json::<RespBody>().unwrap();
+    let expected = utils::market::preparing_market();
+    assert_eq!(body.title, expected.title);
+    assert_eq!(body.organizer, expected.organizer);
+    assert_eq!(body.short_desc, expected.short_desc);
+    assert_eq!(body.description, expected.description);
+    assert_eq!(body.status, expected.status);
+    assert_eq!(body.settle_token_id, expected.settle_token_id);
+
+    // Access to unavailable market
+    let client = reqwest::Client::new();
+    let mut res = client
+        .get("http://localhost:12098/markets/2")
+        .send()
+        .unwrap();
+    assert_eq!(res.status().as_u16(), 404);
 }
