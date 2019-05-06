@@ -1,8 +1,6 @@
-use crate::{
-    api::{validate_bearer_header, FailureResponse},
-    postgres::MarketStatus,
-    Server,
-};
+pub mod orders;
+
+use crate::{api::FailureResponse, postgres::MarketStatus, Server};
 use chrono::{DateTime, Utc};
 use diesel::{pg::PgConnection as PgConn, result::Error as PgError};
 use rouille::{Request, Response};

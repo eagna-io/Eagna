@@ -18,6 +18,7 @@ CREATE TABLE markets (
   organizer           text NOT NULL,
   short_desc          text NOT NULL,
   description         text NOT NULL,
+  lmsr_b              integer NOT NULL,
   open_time           timestamptz NOT NULL,
   close_time          timestamptz NOT NULL,
   status              market_status NOT NULL DEFAULT 'preparing',
@@ -57,5 +58,9 @@ CREATE TABLE orders (
   CONSTRAINT order_market_fkey FOREIGN KEY(market_id)
     REFERENCES markets(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT order_token_fkey FOREIGN KEY(token_id)
-    REFERENCES market_tokens(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    REFERENCES market_tokens(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT if_type_is_normal_then_token_id_is_not_null
+    CHECK ( (NOT type = 'normal') OR (token_id IS NOT NULL) ),
+  CONSTRAINT if_type_is_not_normal_then_token_id_is_null
+    CHECK ( (type = 'normal') OR (token_id IS NULL) )
 );

@@ -10,6 +10,15 @@ run:
 	docker stop postgres redis
 
 
+TMP_PG_URL:=postgres://postgres:postgres@localhost:5430/postgres
+print_schema:
+	docker run -d --rm --name postgres-tmp -p 5430:5432 postgres
+	sleep 2
+	diesel migration run --database-url "${TMP_PG_URL}"
+	diesel print-schema --database-url "${TMP_PG_URL}"
+	docker stop postgres-tmp
+
+
 TEST_PG_URL:=postgres://postgres:postgres@localhost:5431/postgres
 TEST_REDIS_URL:=redis://localhost:6378
 

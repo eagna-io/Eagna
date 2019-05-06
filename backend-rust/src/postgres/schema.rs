@@ -8,6 +8,7 @@ table! {
         organizer -> Text,
         short_desc -> Text,
         description -> Text,
+        lmsr_b -> Int4,
         open_time -> Timestamptz,
         close_time -> Timestamptz,
         status -> Market_status,

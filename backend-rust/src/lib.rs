@@ -8,6 +8,7 @@ extern crate serde_derive;
 pub mod api;
 pub mod redis;
 pub mod postgres;
+pub mod lmsr;
 
 pub use self::api::Server;
 pub use self::postgres::ConnectionFactory as PgConnectionFactory;

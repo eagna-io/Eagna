@@ -59,6 +59,12 @@ impl Server {
             (GET) (/markets/{id: i32}) => {
                 markets::get(&self, req, id)
             },
+            (GET) (/markets/{id: i32}/orders) => {
+                markets::orders::get_all(self, req, id)
+            },
+            (POST) (/markets/{id: i32}/orders) => {
+                markets::orders::post(self, req, id)
+            },
             _ => Err(FailureResponse::ResourceNotFound)
         );
         res.unwrap_or_else(<FailureResponse as Into<Response>>::into)
