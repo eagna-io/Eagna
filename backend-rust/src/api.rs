@@ -3,6 +3,7 @@ mod access_token;
 mod auth;
 mod me;
 mod markets;
+mod cronjob;
 
 pub use self::auth::validate_bearer_header;
 pub use self::failure_response::FailureResponse;
@@ -64,6 +65,9 @@ impl Server {
             },
             (POST) (/markets/{id: i32}/orders) => {
                 markets::orders::post(self, req, id)
+            },
+            (GET) (/cronjob/open_market) => {
+                cronjob::open_market::get(self, req)
             },
             _ => Err(FailureResponse::ResourceNotFound)
         );
