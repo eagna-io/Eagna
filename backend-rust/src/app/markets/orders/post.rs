@@ -1,7 +1,10 @@
 use crate::{
     app::{validate_bearer_header, FailureResponse},
     domain::{
-        models::market::{Market, MarketId, NormalOrder, TokenId},
+        models::{
+            market::{Market, MarketId, NormalOrder, TokenId},
+            num::{AmountCoin, AmountToken},
+        },
         services::{
             market_store::{MarketStore, UpdateMarketLastOrderResult},
             AccessTokenStore,
@@ -15,7 +18,7 @@ where
     S: AccessTokenStore + MarketStore,
 {
     let req_data = json_input::<ReqData>(&req).map_err(|_| FailureResponse::InvalidPayload)?;
-    if req_data.amount_token == 0 || req_data.amount_coin == 0 {
+    if req_data.amount_token == AmountToken(0) || req_data.amount_coin == AmountCoin(0) {
         return Err(FailureResponse::InvalidPayload);
     }
 
@@ -79,13 +82,13 @@ where
 #[derive(Debug, Deserialize)]
 struct ReqData {
     token_id: TokenId,
-    amount_token: i32,
-    amount_coin: i32,
+    amount_token: AmountToken,
+    amount_coin: AmountCoin,
 }
 
 #[derive(Debug, Serialize)]
 struct ResData {
     token_id: TokenId,
-    amount_token: i32,
-    amount_coin: i32,
+    amount_token: AmountToken,
+    amount_coin: AmountCoin,
 }

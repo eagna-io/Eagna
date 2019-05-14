@@ -1,4 +1,8 @@
-use crate::domain::models::{market::TokenId, user::UserId};
+use crate::domain::models::{
+    market::TokenId,
+    num::{AmountCoin, AmountToken},
+    user::UserId,
+};
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone)]
@@ -17,15 +21,15 @@ pub enum Order {
 pub struct NormalOrder {
     pub user_id: UserId,
     pub token_id: TokenId,
-    pub amount_token: i32,
-    pub amount_coin: i32,
+    pub amount_token: AmountToken,
+    pub amount_coin: AmountCoin,
     pub time: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InitialSupplyOrder {
     pub user_id: UserId,
-    pub amount_coin: i32,
+    pub amount_coin: AmountCoin,
     pub time: DateTime<Utc>,
 }
 
@@ -33,8 +37,8 @@ pub struct InitialSupplyOrder {
 pub struct SettleOrder {
     pub user_id: UserId,
     pub token_id: TokenId,
-    pub amount_token: i32,
-    pub amount_coin: i32,
+    pub amount_token: AmountToken,
+    pub amount_coin: AmountCoin,
     pub time: DateTime<Utc>,
 }
 
@@ -73,13 +77,13 @@ impl MarketOrders {
         self.iter().filter(move |(_i, o)| *o.user_id() == user_id)
     }
 
-    pub fn balance_of_user_coin(&self, user_id: UserId) -> i32 {
+    pub fn balance_of_user_coin(&self, user_id: UserId) -> AmountCoin {
         self.related_to_user(user_id)
             .map(|(_id, order)| order.amount_coin())
             .sum()
     }
 
-    pub fn balance_of_user_token(&self, user_id: UserId, token_id: TokenId) -> i32 {
+    pub fn balance_of_user_token(&self, user_id: UserId, token_id: TokenId) -> AmountToken {
         self.related_to_user(user_id)
             .filter_map(|(_id, order)| match order {
                 Order::Normal(n) if n.token_id == token_id => Some(n.amount_token),
@@ -116,7 +120,7 @@ impl Order {
         }
     }
 
-    pub fn amount_coin(&self) -> i32 {
+    pub fn amount_coin(&self) -> AmountCoin {
         match self {
             Order::Normal(o) => o.amount_coin,
             Order::InitialSupply(o) => o.amount_coin,
@@ -129,8 +133,8 @@ impl NormalOrder {
     pub fn new(
         user_id: UserId,
         token_id: TokenId,
-        amount_token: i32,
-        amount_coin: i32,
+        amount_token: AmountToken,
+        amount_coin: AmountCoin,
     ) -> NormalOrder {
         NormalOrder {
             user_id,

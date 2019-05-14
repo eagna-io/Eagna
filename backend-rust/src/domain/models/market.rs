@@ -2,9 +2,13 @@ mod order;
 pub use order::{InitialSupplyOrder, NormalOrder, Order, OrderId, SettleOrder};
 
 pub const MAX_SPLIT_PERCENT: f64 = 0.05;
-pub const INITIAL_SUPPLY_COIN: i32 = 10000;
+pub const INITIAL_SUPPLY_COIN: AmountCoin = AmountCoin(10000);
 
-use crate::domain::models::{lmsr, user::UserId};
+use crate::domain::models::{
+    lmsr,
+    num::{AmountCoin, AmountToken},
+    user::UserId,
+};
 use chrono::{DateTime, Utc};
 use order::MarketOrders;
 use std::{collections::HashMap, sync::Arc};
@@ -184,18 +188,18 @@ impl OpenMarket {
     /// チェックが通った場合にのみ、NormalOrderを追加する
     pub fn try_order(&mut self, order: NormalOrder) -> Result<(), TryOrderError> {
         // check balance
-        if order.amount_token < 0 {
+        if order.amount_token < AmountToken(0) {
             // user SELL the token. So check balance of token.
             let token_balance = self
                 .orders
                 .balance_of_user_token(order.user_id, order.token_id);
-            if token_balance + order.amount_token < 0 {
+            if token_balance + order.amount_token < AmountToken(0) {
                 return Err(TryOrderError::InsufficientBalance);
             }
-        } else if order.amount_token > 0 {
+        } else if order.amount_token > AmountToken(0) {
             // user BUY the token. So check balance of coin.
             let coin_balance = self.orders.balance_of_user_coin(order.user_id);
-            if coin_balance + order.amount_coin < 0 {
+            if coin_balance + order.amount_coin < AmountCoin(0) {
                 return Err(TryOrderError::InsufficientBalance);
             }
         } else {
@@ -204,13 +208,7 @@ impl OpenMarket {
 
         // check price
         let cur_price = self.price_of_token(&order.token_id, order.amount_token);
-        if cur_price.signum() != order.amount_coin.signum() {
-            return Err(TryOrderError::PriceOutOfRange);
-        }
-        let order_price_abs = order.amount_coin.abs() as f64;
-        let bottom_price_abs = cur_price.abs() as f64 * (1_f64 - MAX_SPLIT_PERCENT);
-        let top_price_abs = cur_price.abs() as f64 * (1_f64 + MAX_SPLIT_PERCENT);
-        if !(bottom_price_abs < order_price_abs && order_price_abs < top_price_abs) {
+        if !order.amount_coin.is_around(&cur_price, MAX_SPLIT_PERCENT) {
             return Err(TryOrderError::PriceOutOfRange);
         }
 
@@ -223,12 +221,12 @@ impl OpenMarket {
         Ok(())
     }
 
-    fn token_distribution(&self) -> HashMap<TokenId, i32> {
+    fn token_distribution(&self) -> HashMap<TokenId, AmountToken> {
         let mut distribution = HashMap::new();
 
         // initialize
         for token in self.base.tokens.iter() {
-            distribution.insert(token.id, 0);
+            distribution.insert(token.id, AmountToken(0));
         }
 
         // update
@@ -244,7 +242,7 @@ impl OpenMarket {
         distribution
     }
 
-    fn price_of_token(&self, token_id: &TokenId, amount_token: i32) -> i32 {
+    fn price_of_token(&self, token_id: &TokenId, amount_token: AmountToken) -> AmountCoin {
         let lmsr_b = self.base.lmsr_b;
         let mut distribution = self.token_distribution();
         let cur_cost = lmsr::cost(lmsr_b, distribution.values());

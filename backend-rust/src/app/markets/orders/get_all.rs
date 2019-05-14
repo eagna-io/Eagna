@@ -1,6 +1,9 @@
 use crate::{
     app::{validate_bearer_header, FailureResponse},
-    domain::models::market::{MarketId, NormalOrder, Order, OrderId, TokenId},
+    domain::models::{
+        market::{MarketId, NormalOrder, Order, OrderId, TokenId},
+        num::{AmountCoin, AmountToken},
+    },
     domain::services::{AccessTokenStore, MarketStore},
 };
 use chrono::{DateTime, Utc};
@@ -62,8 +65,8 @@ struct RespBody {
 struct RespOrder {
     id: OrderId,
     token_id: TokenId,
-    amount_token: i32,
-    amount_coin: i32,
+    amount_token: AmountToken,
+    amount_coin: AmountCoin,
     time: DateTime<Utc>,
 }
 
