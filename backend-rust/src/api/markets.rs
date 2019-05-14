@@ -11,8 +11,16 @@ pub fn get(server: &Server, _req: &Request, market_id: i32) -> Result<Response, 
     Ok(Response::json(&market))
 }
 
+fn get<MS>(market_store: &MS, market_id: MarketId) -> Result<Response, FailureResponse> {
+    let market = market_store.find_market(market_id).map_err(|e| match e {
+        FindMarketError::NotFound => FailureResponse::ResourceNotFound,
+        FindMarketError::InternalError => FailureResponse::ServerError,
+    })?;
+    Ok(Response::json(&RespData::from(market)))
+}
+
 #[derive(Debug, Serialize, Queryable)]
-struct Market {
+struct RespData {
     title: String,
     organizer: String,
     short_desc: String,

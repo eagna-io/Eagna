@@ -1,6 +1,6 @@
 table! {
     use diesel::sql_types::*;
-    use crate::postgres::types::*;
+    use crate::infra::postgres::types::*;
 
     markets (id) {
         id -> Int4,
@@ -18,7 +18,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::postgres::types::*;
+    use crate::infra::postgres::types::*;
 
     market_tokens (id) {
         id -> Int4,
@@ -30,14 +30,14 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::postgres::types::*;
+    use crate::infra::postgres::types::*;
 
     orders (id) {
         id -> Int4,
-        user_id -> Int4,
         market_id -> Int4,
+        market_internal_serial_num -> Int4,
+        user_id -> Int4,
         token_id -> Nullable<Int4>,
-        in_market_id -> Int4,
         amount_token -> Int4,
         amount_coin -> Int4,
         #[sql_name = "type"]
@@ -48,7 +48,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::postgres::types::*;
+    use crate::infra::postgres::types::*;
 
     users (id) {
         id -> Int4,

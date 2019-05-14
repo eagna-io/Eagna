@@ -14,8 +14,8 @@ TMP_PG_URL:=postgres://postgres:postgres@localhost:5430/postgres
 print_schema:
 	docker run -d --rm --name postgres-tmp -p 5430:5432 postgres
 	sleep 2
-	diesel migration run --database-url "${TMP_PG_URL}"
-	diesel print-schema --database-url "${TMP_PG_URL}"
+	diesel migration run --database-url "${TMP_PG_URL}" || true
+	diesel print-schema --database-url "${TMP_PG_URL}" || true
 	docker stop postgres-tmp
 
 
@@ -27,6 +27,6 @@ test:
 	docker run -d --rm --name redis-test -p 6378:6379 redis redis-server --bind 0.0.0.0
 	sleep 2
 	diesel migration run --database-url "${TEST_PG_URL}"
-	PG_URL="${TEST_PG_URL}" cargo run --example feed-test-data
+	PG_URL="${TEST_PG_URL}" cargo run --example feed-test-data || true
 	PG_URL="${TEST_PG_URL}" REDIS_URL="${TEST_REDIS_URL}" cargo test || true
 	docker stop postgres-test redis-test

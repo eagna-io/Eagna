@@ -74,7 +74,7 @@ fn check_order(
                 amount_coin: price,
             };
             Ok(Response::json(&res_data).with_status_code(201))
-        },
+        }
         SaveResult::Retry => check_order(pg_conn, req_data, market, user_id),
         SaveResult::Failure(res) => Err(res),
     }
@@ -273,12 +273,10 @@ fn distributions(orders: &Vec<Order>) -> HashMap<TokenId, AmountToken> {
 }
 
 fn save_order(conn: &PgConn, new_order: NewOrder) -> SaveResult {
-    use crate::postgres::schema::orders::{table as orders};
+    use crate::postgres::schema::orders::table as orders;
     use diesel::prelude::*;
 
-    let res = diesel::insert_into(orders)
-        .values(new_order)
-        .execute(conn);
+    let res = diesel::insert_into(orders).values(new_order).execute(conn);
     match res {
         Ok(_) => SaveResult::Success,
         Err(PgError::DatabaseError(_, _)) => SaveResult::Retry,
