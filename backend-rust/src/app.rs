@@ -75,6 +75,9 @@ impl<S> ApiServer<S> {
                 (GET) (/cronjob/open_market) => {
                     cronjob::open_market::get(&self.store, req)
                 },
+                (GET) (/cronjob/close_market) => {
+                    cronjob::close_market::get(&self.store, req)
+                },
                 _ => Err(FailureResponse::ResourceNotFound)
             )
         });

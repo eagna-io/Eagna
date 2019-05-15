@@ -6,4 +6,4 @@ pub struct User {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub struct UserId(i32);
+pub struct UserId(pub i32);

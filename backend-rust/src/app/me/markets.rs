@@ -17,7 +17,7 @@ where
 {
     let access_token = validate_bearer_header(store, req)?;
     let markets = store
-        .query_markets_by_user_id(&access_token.user_id)
+        .query_markets_related_to_user(&access_token.user_id)
         .map_err(|e| {
             dbg!(e);
             FailureResponse::ServerError

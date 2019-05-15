@@ -61,7 +61,7 @@ where
     // Save a new market
     match store.update_market_last_order(&market) {
         UpdateMarketLastOrderResult::Success => {
-            let new_order = *market.last_normal_order().unwrap();
+            let (_id, new_order) = market.last_normal_order().unwrap();
             let res_data = ResData {
                 token_id: new_order.token_id,
                 amount_token: new_order.amount_token,

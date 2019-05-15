@@ -19,28 +19,23 @@ where
         return Err(FailureResponse::ResourceNotFound);
     }
 
-    let prepared_markets = store.query_markets_ready_to_open().map_err(|e| {
+    let closing_markets = store.query_markets_ready_to_close().map_err(|e| {
         dbg!(e);
         FailureResponse::ServerError
     })?;
-    if prepared_markets.is_empty() {
+    if closing_markets.is_empty() {
         return Ok(Response::text("No market is opened"));
     }
 
-    let user_ids = store.query_all_user_ids().map_err(|e| {
-        dbg!(e);
-        FailureResponse::ServerError
-    })?;
+    let closed_market_ids: Vec<MarketId> = closing_markets.iter().map(|m| m.base.id).collect();
 
-    let open_market_ids: Vec<MarketId> = prepared_markets.iter().map(|m| m.base.id).collect();
-
-    for prepared_market in prepared_markets {
-        let open_market = prepared_market.open_uncheck(&user_ids);
-        match store.update_market_status_to_open(&open_market) {
+    for closing_market in closing_markets {
+        let closed_market = closing_market.close_uncheck();
+        match store.update_market_status_to_closed(&closed_market) {
             UpdateMarketStatusResult::Success => {}
             UpdateMarketStatusResult::MarketNotFound => panic!(
-                "Logic Error : try to open unprepared market {:?}",
-                open_market.base.id
+                "logic error : try to close invalid market {:?}",
+                closed_market.base.id
             ),
             UpdateMarketStatusResult::Error(e) => {
                 dbg!(e);
@@ -48,6 +43,5 @@ where
             }
         }
     }
-
-    Ok(Response::json(&open_market_ids))
+    Ok(Response::json(&closed_market_ids))
 }

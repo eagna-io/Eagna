@@ -1,5 +1,5 @@
 mod order;
-pub use order::{InitialSupplyOrder, NormalOrder, Order, OrderId, SettleOrder};
+pub use order::{InitialSupplyOrder, MarketOrders, NormalOrder, Order, OrderId, SettleOrder};
 
 pub const MAX_SPLIT_PERCENT: f64 = 0.05;
 pub const INITIAL_SUPPLY_COIN: AmountCoin = AmountCoin(10000);
@@ -10,7 +10,6 @@ use crate::domain::models::{
     user::UserId,
 };
 use chrono::{DateTime, Utc};
-use order::MarketOrders;
 use std::{collections::HashMap, sync::Arc};
 
 #[derive(Debug, Clone)]
@@ -60,19 +59,19 @@ pub struct BaseInfos {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub struct MarketId(i32);
+pub struct MarketId(pub i32);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct MarketTitle(Arc<String>);
+pub struct MarketTitle(pub Arc<String>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct MarketOrganizer(Arc<String>);
+pub struct MarketOrganizer(pub Arc<String>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct MarketShortDesc(Arc<String>);
+pub struct MarketShortDesc(pub Arc<String>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct MarketDesc(Arc<String>);
+pub struct MarketDesc(pub Arc<String>);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum MarketStatus {
@@ -93,13 +92,13 @@ pub struct Token {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct TokenId(i32);
+pub struct TokenId(pub i32);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct TokenName(Arc<String>);
+pub struct TokenName(pub Arc<String>);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct TokenDesc(Arc<String>);
+pub struct TokenDesc(pub Arc<String>);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TryOrderError {
@@ -179,9 +178,21 @@ impl PreparingMarket {
 }
 
 impl OpenMarket {
-    /// close_time がすでに過ぎていた場合に、close処理をしてClosedMarketを返す.
-    pub fn try_close(self) -> Result<ClosedMarket, Self> {
-        unimplemented!();
+    /// close_time がすでに過ぎているかどうか
+    pub fn can_close(&self) -> bool {
+        self.base.close_time < Utc::now()
+    }
+
+    /// close処理をして、ClosedMarketを返す
+    ///
+    /// ## panics
+    /// まだclose_timeがきていないとき
+    pub fn close_uncheck(self) -> ClosedMarket {
+        assert!(self.can_close());
+        ClosedMarket {
+            base: self.base,
+            orders: self.orders,
+        }
     }
 
     /// 新しいNormalOrderを追加する。
@@ -257,7 +268,7 @@ impl OpenMarket {
         new_cost - cur_cost
     }
 
-    pub fn last_normal_order(&self) -> Option<&NormalOrder> {
+    pub fn last_normal_order(&self) -> Option<(OrderId, &NormalOrder)> {
         self.orders.last_normal_order()
     }
 }

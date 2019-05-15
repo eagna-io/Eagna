@@ -7,7 +7,7 @@ use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone)]
 pub struct MarketOrders {
-    orders: Vec<Order>,
+    pub orders: Vec<Order>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -43,7 +43,7 @@ pub struct SettleOrder {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub struct OrderId(i32);
+pub struct OrderId(pub i32);
 
 impl MarketOrders {
     /// InitialSupplyOrder で初期化。
@@ -59,16 +59,9 @@ impl MarketOrders {
         MarketOrders { orders }
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (OrderId, &Order)> {
+    pub fn iter(&self) -> impl Iterator<Item = (OrderId, &Order)> + DoubleEndedIterator {
         self.orders
             .iter()
-            .enumerate()
-            .map(|(idx, order)| (OrderId(idx as i32), order))
-    }
-
-    pub fn into_iter(self) -> impl Iterator<Item = (OrderId, Order)> {
-        self.orders
-            .into_iter()
             .enumerate()
             .map(|(idx, order)| (OrderId(idx as i32), order))
     }
@@ -100,11 +93,10 @@ impl MarketOrders {
         self.orders.push(order);
     }
 
-    pub fn last_normal_order(&self) -> Option<&NormalOrder> {
-        self.orders
-            .iter()
-            .filter_map(|order| match order {
-                Order::Normal(n) => Some(n),
+    pub fn last_normal_order(&self) -> Option<(OrderId, &NormalOrder)> {
+        self.iter()
+            .filter_map(|(id, order)| match order {
+                Order::Normal(n) => Some((id, n)),
                 _ => None,
             })
             .next_back()
