@@ -4,7 +4,7 @@ use crate::{
     app::FailureResponse,
     domain::models::market::{
         Market, MarketDesc, MarketId, MarketOrganizer, MarketShortDesc, MarketStatus, MarketTitle,
-        TokenId,
+        MarketTokens, TokenId,
     },
     domain::services::MarketStore,
 };
@@ -34,6 +34,7 @@ struct RespData {
     description: MarketDesc,
     open_time: DateTime<Utc>,
     close_time: DateTime<Utc>,
+    tokens: MarketTokens,
     status: MarketStatus,
     settle_token_id: Option<TokenId>,
 }
@@ -53,6 +54,7 @@ impl From<Market> for RespData {
             description: market.description.clone(),
             open_time: market.open_time,
             close_time: market.close_time,
+            tokens: market.tokens.clone(),
             status: market.status(),
             settle_token_id,
         }

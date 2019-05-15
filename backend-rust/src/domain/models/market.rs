@@ -56,7 +56,7 @@ pub struct BaseInfos {
     pub lmsr_b: lmsr::B,
     pub open_time: DateTime<Utc>,
     pub close_time: DateTime<Utc>,
-    pub tokens: Vec<Token>,
+    pub tokens: MarketTokens,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -82,7 +82,10 @@ pub enum MarketStatus {
     Settled,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct MarketTokens(pub Arc<Vec<Token>>);
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Token {
     pub id: TokenId,
     pub name: TokenName,
@@ -262,5 +265,11 @@ impl OpenMarket {
 impl ClosedMarket {
     pub fn settle(self, settle_token_id: TokenId) -> SettledMarket {
         unimplemented!();
+    }
+}
+
+impl MarketTokens {
+    pub fn iter(&self) -> impl Iterator<Item = &Token> {
+        self.0.iter()
     }
 }

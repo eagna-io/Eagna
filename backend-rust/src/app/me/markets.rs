@@ -3,7 +3,7 @@ use crate::{
     domain::{
         models::market::{
             Market, MarketDesc, MarketId, MarketOrganizer, MarketShortDesc, MarketStatus,
-            MarketTitle,
+            MarketTitle, MarketTokens,
         },
         services::{AccessTokenStore, MarketStore},
     },
@@ -35,9 +35,10 @@ struct RespItem {
     organizer: MarketOrganizer,
     short_desc: MarketShortDesc,
     description: MarketDesc,
-    status: MarketStatus,
     open_time: DateTime<Utc>,
     close_time: DateTime<Utc>,
+    tokens: MarketTokens,
+    status: MarketStatus,
 }
 
 impl From<Market> for RespItem {
@@ -48,9 +49,10 @@ impl From<Market> for RespItem {
             organizer: market.organizer.clone(),
             short_desc: market.short_desc.clone(),
             description: market.description.clone(),
-            status: market.status(),
             open_time: market.open_time,
             close_time: market.close_time,
+            tokens: market.tokens.clone(),
+            status: market.status(),
         }
     }
 }
