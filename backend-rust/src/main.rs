@@ -1,3 +1,6 @@
+use librohan::{app::ApiServer, infra::store::DbStoreFactory};
+
 fn main() {
-    // librohan::Server::new_with_env().run("localhost:8080");
+    let store_factory = DbStoreFactory::new_with_env();
+    ApiServer::new(store_factory).run("localhost:8088");
 }

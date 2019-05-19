@@ -6,14 +6,18 @@ use crate::{
             num::{AmountCoin, AmountToken},
         },
         services::{
-            market_store::{MarketStore, UpdateMarketLastOrderResult},
+            market_store::{MarketStore, UpdateMarketLastOrderErrorKind},
             AccessTokenStore,
         },
     },
 };
 use rouille::{input::json::json_input, Request, Response};
 
-pub fn post<S>(store: &S, req: &Request, market_id: MarketId) -> Result<Response, FailureResponse>
+pub fn post<S>(
+    mut store: S,
+    req: &Request,
+    market_id: MarketId,
+) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + MarketStore,
 {
@@ -23,7 +27,7 @@ where
     }
 
     // 認証チェック
-    let user_id = validate_bearer_header(store, req)?.user_id;
+    let user_id = validate_bearer_header(&mut store, req)?.user_id;
 
     let req_order = NormalOrder::new(
         user_id,
@@ -32,11 +36,13 @@ where
         req_data.amount_coin,
     );
 
-    try_add_order(store, market_id, req_order)
+    let res = try_add_order(&mut store, market_id, req_order);
+    store.commit()?;
+    res
 }
 
 fn try_add_order<S>(
-    store: &S,
+    store: &mut S,
     market_id: MarketId,
     req_order: NormalOrder,
 ) -> Result<Response, FailureResponse>
@@ -44,13 +50,9 @@ where
     S: MarketStore,
 {
     // marketがopenかチェック
-    let mut market = match store.query_market(&market_id) {
-        Ok(Some(Market::Open(m))) => m,
-        Ok(_) => return Err(FailureResponse::ResourceNotFound),
-        Err(e) => {
-            dbg!(e);
-            return Err(FailureResponse::ServerError);
-        }
+    let mut market = match store.query_market(&market_id)? {
+        Some(Market::Open(m)) => m,
+        _ => return Err(FailureResponse::ResourceNotFound),
     };
 
     market
@@ -60,7 +62,7 @@ where
 
     // Save a new market
     match store.update_market_last_order(&market) {
-        UpdateMarketLastOrderResult::Success => {
+        Ok(()) => {
             let (_id, new_order) = market.last_normal_order().unwrap();
             let res_data = ResData {
                 token_id: new_order.token_id,
@@ -70,12 +72,9 @@ where
             Ok(Response::json(&res_data).with_status_code(201))
         }
         // Retry when conflict
-        UpdateMarketLastOrderResult::Conflict => try_add_order(store, market_id, req_order),
-        UpdateMarketLastOrderResult::NotOpen => Err(FailureResponse::ResourceNotFound),
-        UpdateMarketLastOrderResult::Error(e) => {
-            dbg!(e);
-            Err(FailureResponse::ServerError)
-        }
+        Err(UpdateMarketLastOrderErrorKind::Conflict) => try_add_order(store, market_id, req_order),
+        Err(UpdateMarketLastOrderErrorKind::NotOpen) => Err(FailureResponse::ResourceNotFound),
+        Err(UpdateMarketLastOrderErrorKind::Error(e)) => Err(FailureResponse::from(e)),
     }
 }
 

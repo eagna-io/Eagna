@@ -11,17 +11,13 @@ use crate::{
 use chrono::{DateTime, Utc};
 use rouille::{Request, Response};
 
-pub fn get<S>(store: &S, _req: &Request, market_id: MarketId) -> Result<Response, FailureResponse>
+pub fn get<S>(mut store: S, _req: &Request, market_id: MarketId) -> Result<Response, FailureResponse>
 where
     S: MarketStore,
 {
-    let market = match store.query_market(&market_id) {
-        Ok(Some(market)) => market,
-        Ok(None) => return Err(FailureResponse::ResourceNotFound),
-        Err(e) => {
-            dbg!(e);
-            return Err(FailureResponse::ServerError);
-        }
+    let market = match store.query_market(&market_id)? {
+        Some(market) => market,
+        None => return Err(FailureResponse::ResourceNotFound),
     };
     Ok(Response::json(&RespData::from(market)))
 }

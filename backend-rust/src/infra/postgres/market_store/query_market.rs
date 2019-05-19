@@ -5,7 +5,7 @@ use crate::{
         num::{AmountCoin, AmountToken},
         user::UserId,
     },
-    infra::postgres::{MarketStatus, OrderType},
+    infra::postgres::types::{MarketStatus, OrderType},
 };
 use chrono::{DateTime, Utc};
 use diesel::{pg::PgConnection, prelude::*, result::Error as PgError};

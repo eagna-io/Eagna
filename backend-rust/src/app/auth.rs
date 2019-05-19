@@ -5,7 +5,7 @@ use crate::{
 };
 use rouille::Request;
 
-pub fn validate_bearer_header<S>(store: &S, req: &Request) -> Result<AccessToken, FailureResponse>
+pub fn validate_bearer_header<S>(store: &mut S, req: &Request) -> Result<AccessToken, FailureResponse>
 where
     S: AccessTokenStore,
 {
@@ -13,13 +13,9 @@ where
         .header("Authorization")
         .ok_or(FailureResponse::Unauthorized)?;
     let token_id = extract_token(header_val)?;
-    match store.query(&token_id) {
-        Ok(Some(token)) => Ok(token),
-        Ok(None) => Err(FailureResponse::Unauthorized),
-        Err(e) => {
-            dbg!(e);
-            Err(FailureResponse::ServerError)
-        }
+    match store.query_access_token(&token_id)? {
+        Some(token) => Ok(token),
+        None => Err(FailureResponse::Unauthorized),
     }
 }
 
@@ -30,7 +26,7 @@ fn extract_token(header_val: &str) -> Result<AccessTokenId, FailureResponse> {
     re.captures(header_val)
         .and_then(|cap| cap.get(1))
         .ok_or(FailureResponse::Unauthorized)
-        .map(|mat| AccessTokenId(mat.as_str().into()))
+        .map(|mat| AccessTokenId::from_exact_length_str(mat.as_str()))
 }
 
 #[cfg(test)]

@@ -10,20 +10,16 @@ use chrono::{DateTime, Utc};
 use rouille::{Request, Response};
 
 pub fn get_all<S>(
-    store: &S,
+    mut store: S,
     req: &Request,
     market_id: MarketId,
 ) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + MarketStore,
 {
-    let market = match store.query_market(&market_id) {
-        Ok(Some(m)) => m,
-        Ok(None) => return Err(FailureResponse::ResourceNotFound),
-        Err(e) => {
-            dbg!(e);
-            return Err(FailureResponse::ServerError);
-        }
+    let market = match store.query_market(&market_id)? {
+        Some(m) => m,
+        None => return Err(FailureResponse::ResourceNotFound),
     };
 
     let orders = match market.orders() {
@@ -33,7 +29,7 @@ where
 
     let maybe_mine = match req.get_param("contains") {
         Some(ref s) if s.as_str() == "mine" => {
-            let user_id = validate_bearer_header(store, req)?.user_id;
+            let user_id = validate_bearer_header(&mut store, req)?.user_id;
             let order_ids = orders.related_to_user(user_id).map(|(id, _o)| id).collect();
             Some(Mine { orders: order_ids })
         }

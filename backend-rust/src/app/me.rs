@@ -7,19 +7,15 @@ use crate::{
 };
 use rouille::{Request, Response};
 
-pub fn get<S>(store: &S, req: &Request) -> Result<Response, FailureResponse>
+pub fn get<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + UserStore,
 {
-    let access_token = validate_bearer_header(store, req)?;
-    let user = match store.query_user(&access_token.user_id) {
-        Ok(Some(user)) => user,
-        Ok(None) => {
+    let access_token = validate_bearer_header(&mut store, req)?;
+    let user = match store.query_user(&access_token.user_id)? {
+        Some(user) => user,
+        None => {
             println!("User does not exists, but AccessToken exists");
-            return Err(FailureResponse::ServerError);
-        }
-        Err(e) => {
-            dbg!(e);
             return Err(FailureResponse::ServerError);
         }
     };

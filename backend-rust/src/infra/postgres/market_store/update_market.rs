@@ -1,9 +1,9 @@
 use crate::{
     domain::{
         models::market::*,
-        services::market_store::{UpdateMarketLastOrderResult, UpdateMarketStatusResult},
+        services::market_store::{UpdateMarketLastOrderErrorKind, UpdateMarketStatusErrorKind},
     },
-    infra::postgres::{MarketStatus, OrderType},
+    infra::postgres::types::{MarketStatus, OrderType},
 };
 use chrono::{DateTime, Utc};
 use diesel::{pg::PgConnection, prelude::*, result::Error as PgError};
@@ -11,7 +11,7 @@ use diesel::{pg::PgConnection, prelude::*, result::Error as PgError};
 pub fn update_market_last_order(
     conn: &PgConnection,
     target: &OpenMarket,
-) -> UpdateMarketLastOrderResult<PgError> {
+) -> Result<(), UpdateMarketLastOrderErrorKind<failure::Error>> {
     use crate::infra::postgres::schema::{markets, orders};
 
     let (serial_num, last_order) = target.last_normal_order().unwrap();
@@ -26,26 +26,22 @@ pub fn update_market_last_order(
         .first::<MarketStatus>(conn)
     {
         Ok(_) => {}
-        Err(PgError::NotFound) => return UpdateMarketLastOrderResult::NotOpen,
-        Err(e) => return UpdateMarketLastOrderResult::Error(e),
+        Err(PgError::NotFound) => return Err(UpdateMarketLastOrderErrorKind::NotOpen),
+        Err(e) => return Err(UpdateMarketLastOrderErrorKind::Error(e.into())),
     }
 
     // Orderを記録
-    match diesel::insert_into(orders::table)
+    diesel::insert_into(orders::table)
         .values(NewOrder::normal(target.base.id, serial_num, *last_order))
         .execute(conn)
-    {
-        Ok(_) => {}
-        Err(e) => return UpdateMarketLastOrderResult::Error(e),
-    }
-
-    UpdateMarketLastOrderResult::Success
+        .map(|_| ())
+        .map_err(|e| UpdateMarketLastOrderErrorKind::Error(e.into()))
 }
 
 pub fn update_market_status_to_open(
     conn: &PgConnection,
     target: &OpenMarket,
-) -> UpdateMarketStatusResult<PgError> {
+) -> Result<(), UpdateMarketStatusErrorKind<failure::Error>> {
     use crate::infra::postgres::schema::{markets, orders};
 
     // 対象マーケットがDB上でPreparing状態であることをチェックし、
@@ -58,8 +54,8 @@ pub fn update_market_status_to_open(
         .first::<MarketStatus>(conn)
     {
         Ok(_) => {}
-        Err(PgError::NotFound) => return UpdateMarketStatusResult::MarketNotFound,
-        Err(e) => return UpdateMarketStatusResult::Error(e),
+        Err(PgError::NotFound) => return Err(UpdateMarketStatusErrorKind::MarketNotFound),
+        Err(e) => return Err(UpdateMarketStatusErrorKind::Error(e.into())),
     }
 
     // Orderを記録
@@ -71,28 +67,23 @@ pub fn update_market_status_to_open(
             _ => panic!("A new opened market contains non-initial-supply order"),
         })
         .collect();
-    match diesel::insert_into(orders::table)
+    diesel::insert_into(orders::table)
         .values(order_records)
         .execute(conn)
-    {
-        Ok(_) => {}
-        Err(e) => return UpdateMarketStatusResult::Error(e),
-    }
+        .map_err(|e| UpdateMarketStatusErrorKind::Error(e.into()))?;
 
     // Market の status を open に変更
-    match diesel::update(markets::table.filter(markets::id.eq(target.base.id.0)))
+    diesel::update(markets::table.filter(markets::id.eq(target.base.id.0)))
         .set(markets::status.eq(MarketStatus::Open))
         .execute(conn)
-    {
-        Ok(_) => UpdateMarketStatusResult::Success,
-        Err(e) => UpdateMarketStatusResult::Error(e),
-    }
+        .map(|_| ())
+        .map_err(|e| UpdateMarketStatusErrorKind::Error(e.into()))
 }
 
 pub fn update_market_status_to_closed(
     conn: &PgConnection,
     target: &ClosedMarket,
-) -> UpdateMarketStatusResult<PgError> {
+) -> Result<(), UpdateMarketStatusErrorKind<failure::Error>> {
     use crate::infra::postgres::schema::markets;
 
     // 対象マーケットがDB上でOpen状態であることをチェックし、
@@ -105,18 +96,16 @@ pub fn update_market_status_to_closed(
         .first::<MarketStatus>(conn)
     {
         Ok(_) => {}
-        Err(PgError::NotFound) => return UpdateMarketStatusResult::MarketNotFound,
-        Err(e) => return UpdateMarketStatusResult::Error(e),
+        Err(PgError::NotFound) => return Err(UpdateMarketStatusErrorKind::MarketNotFound),
+        Err(e) => return Err(UpdateMarketStatusErrorKind::Error(e.into())),
     }
 
     // Market の status を closed に変更
-    match diesel::update(markets::table.filter(markets::id.eq(target.base.id.0)))
+    diesel::update(markets::table.filter(markets::id.eq(target.base.id.0)))
         .set(markets::status.eq(MarketStatus::Closed))
         .execute(conn)
-    {
-        Ok(_) => UpdateMarketStatusResult::Success,
-        Err(e) => UpdateMarketStatusResult::Error(e),
-    }
+        .map(|_| ())
+        .map_err(|e| UpdateMarketStatusErrorKind::Error(e.into()))
 }
 
 use crate::infra::postgres::schema::orders;

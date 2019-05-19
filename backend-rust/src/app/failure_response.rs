@@ -41,6 +41,14 @@ impl Into<Response> for FailureResponse {
     }
 }
 
+impl<E: failure::AsFail> From<E> for FailureResponse {
+    fn from(e: E) -> FailureResponse {
+        println!("Convert error into failure response");
+        println!("{:?}", e.as_fail());
+        FailureResponse::ServerError
+    }
+}
+
 #[derive(Debug, Serialize)]
 struct FailureData<'a> {
     error: InnerFailureData<'a>,

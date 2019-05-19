@@ -11,17 +11,13 @@ use crate::{
 use chrono::{DateTime, Utc};
 use rouille::{Request, Response};
 
-pub fn get<S>(store: &S, req: &Request) -> Result<Response, FailureResponse>
+pub fn get<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + MarketStore,
 {
-    let access_token = validate_bearer_header(store, req)?;
+    let access_token = validate_bearer_header(&mut store, req)?;
     let markets = store
-        .query_markets_related_to_user(&access_token.user_id)
-        .map_err(|e| {
-            dbg!(e);
-            FailureResponse::ServerError
-        })?;
+        .query_markets_related_to_user(&access_token.user_id)?;
 
     let resp_data: Vec<RespItem> = markets.into_iter().map(|m| RespItem::from(m)).collect();
 

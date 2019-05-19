@@ -7,7 +7,7 @@ use crate::{
 };
 use rouille::{input::json::json_input, Request, Response};
 
-pub fn create<S>(store: &S, req: &Request) -> Result<Response, FailureResponse>
+pub fn create<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
 where
     S: UserStore + AccessTokenStore,
 {
@@ -16,25 +16,18 @@ where
         dbg!(e);
         FailureResponse::InvalidPayload
     })?;
-    let query_res = store.query_user_by_email_and_hashed_pass(
+    let user = match store.query_user_by_email_and_hashed_pass(
         req_data.email.as_str(),
         req_data.hashed_pass.as_str(),
-    );
-    let user = match query_res {
-        Ok(Some(user)) => user,
-        Ok(None) => return Err(FailureResponse::Unauthorized),
-        Err(e) => {
-            dbg!(e);
-            return Err(FailureResponse::ServerError);
-        }
+    )? {
+        Some(user) => user,
+        None => return Err(FailureResponse::Unauthorized),
     };
 
     // 新規トークンの発行
     let access_token = AccessToken::new(user.id);
-    store.save(&access_token).map_err(|e| {
-        dbg!(e);
-        FailureResponse::ServerError
-    })?;
+    store.save_access_token(&access_token)?;
+    store.commit()?;
 
     let res_data = ResData {
         access_token: access_token.id,

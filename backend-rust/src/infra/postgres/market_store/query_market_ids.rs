@@ -1,6 +1,6 @@
 use crate::{
     domain::models::{market::MarketId, user::UserId},
-    infra::postgres::{MarketStatus, OrderType},
+    infra::postgres::types::{MarketStatus, OrderType},
 };
 use diesel::{pg::PgConnection, prelude::*, result::Error as PgError};
 

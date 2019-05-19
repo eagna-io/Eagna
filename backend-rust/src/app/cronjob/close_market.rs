@@ -2,12 +2,12 @@ use crate::{
     app::FailureResponse,
     domain::{
         models::market::MarketId,
-        services::{market_store::UpdateMarketStatusResult, MarketStore, UserStore},
+        services::{market_store::UpdateMarketStatusErrorKind, MarketStore, UserStore},
     },
 };
 use rouille::{Request, Response};
 
-pub fn get<S>(store: &S, req: &Request) -> Result<Response, FailureResponse>
+pub fn get<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
 where
     S: MarketStore + UserStore,
 {
@@ -19,10 +19,7 @@ where
         return Err(FailureResponse::ResourceNotFound);
     }
 
-    let closing_markets = store.query_markets_ready_to_close().map_err(|e| {
-        dbg!(e);
-        FailureResponse::ServerError
-    })?;
+    let closing_markets = store.query_markets_ready_to_close()?;
     if closing_markets.is_empty() {
         return Ok(Response::text("No market is opened"));
     }
@@ -32,16 +29,17 @@ where
     for closing_market in closing_markets {
         let closed_market = closing_market.close_uncheck();
         match store.update_market_status_to_closed(&closed_market) {
-            UpdateMarketStatusResult::Success => {}
-            UpdateMarketStatusResult::MarketNotFound => panic!(
-                "logic error : try to close invalid market {:?}",
+            Ok(()) => {}
+            Err(UpdateMarketStatusErrorKind::MarketNotFound) => panic!(
+                "Logic Error : the store returns un-closable market : {:?}",
                 closed_market.base.id
             ),
-            UpdateMarketStatusResult::Error(e) => {
-                dbg!(e);
-                return Err(FailureResponse::ServerError);
+            Err(UpdateMarketStatusErrorKind::Error(e)) => {
+                return Err(FailureResponse::from(e));
             }
         }
     }
+    store.commit()?;
+
     Ok(Response::json(&closed_market_ids))
 }
