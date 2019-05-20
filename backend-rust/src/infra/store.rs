@@ -6,7 +6,9 @@ use crate::{
             user::{User, UserId},
         },
         services::{
-            market_store::{UpdateMarketLastOrderErrorKind, UpdateMarketStatusErrorKind},
+            market_store::{
+                NewMarket, UpdateMarketLastOrderErrorKind, UpdateMarketStatusErrorKind,
+            },
             AccessTokenStore, MarketStore, Store, StoreFactory, UserStore,
         },
     },
@@ -95,6 +97,10 @@ impl std::ops::Drop for DbStore {
 }
 
 impl MarketStore for DbStore {
+    fn insert_market(&mut self, market: NewMarket) -> Result<MarketId, Self::Error> {
+        Ok(market_store::insert_market(self.pg_conn()?, market)?)
+    }
+
     /// 単純な実装。
     /// リクエストのたびに、全ての情報をDBから取ってくる
     /// 将来的にはOpenMarketのみ構造体内部にキャッシュするような実装にしたい

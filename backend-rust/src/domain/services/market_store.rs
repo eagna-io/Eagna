@@ -1,10 +1,8 @@
 use crate::domain::{
-    models::{
-        market::{ClosedMarket, Market, MarketId, OpenMarket, PreparingMarket},
-        user::UserId,
-    },
+    models::{lmsr, market::*, user::UserId},
     services::Store,
 };
+use chrono::{DateTime, Utc};
 
 #[derive(Debug)]
 pub enum UpdateMarketLastOrderErrorKind<E> {
@@ -22,6 +20,8 @@ pub enum UpdateMarketStatusErrorKind<E> {
 
 pub trait MarketStore: Store {
     // *************   Required methods ***********
+
+    fn insert_market(&mut self, market: NewMarket) -> Result<MarketId, Self::Error>;
 
     fn query_market(&mut self, market_id: &MarketId) -> Result<Option<Market>, Self::Error>;
 
@@ -86,7 +86,10 @@ pub trait MarketStore: Store {
     // ************* Provided methods ***********
 
     /// 指定されたUserに紐づくMarketのリストを返す。
-    fn query_markets_related_to_user(&mut self, user_id: &UserId) -> Result<Vec<Market>, Self::Error> {
+    fn query_markets_related_to_user(
+        &mut self,
+        user_id: &UserId,
+    ) -> Result<Vec<Market>, Self::Error> {
         let market_ids = self.query_market_ids_related_to_user(user_id)?;
         let mut vec = Vec::with_capacity(market_ids.len());
         for market_id in market_ids {
@@ -120,4 +123,20 @@ pub trait MarketStore: Store {
         }
         Ok(vec)
     }
+}
+
+pub struct NewMarket {
+    pub title: MarketTitle,
+    pub organizer: MarketOrganizer,
+    pub short_desc: MarketShortDesc,
+    pub description: MarketDesc,
+    pub lmsr_b: lmsr::B,
+    pub open_time: DateTime<Utc>,
+    pub close_time: DateTime<Utc>,
+    pub tokens: Vec<NewToken>,
+}
+
+pub struct NewToken {
+    pub name: TokenName,
+    pub description: TokenDesc,
 }

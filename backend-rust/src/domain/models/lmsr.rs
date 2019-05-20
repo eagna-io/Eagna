@@ -1,8 +1,9 @@
 use crate::domain::models::num::{AmountToken, AmountCoin};
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone, Serialize, Deserialize)]
 pub struct B(pub u32);
 
+#[derive(Debug, PartialEq, Eq, Copy, Clone, Serialize, Deserialize)]
 pub struct Cost(i32);
 
 impl std::ops::Sub for Cost {

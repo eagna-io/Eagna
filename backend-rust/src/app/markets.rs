@@ -1,20 +1,59 @@
 pub mod orders;
 
 use crate::{
-    app::FailureResponse,
-    domain::models::market::{
-        Market, MarketDesc, MarketId, MarketOrganizer, MarketShortDesc, MarketStatus, MarketTitle,
-        MarketTokens, TokenId,
+    app::{validate_bearer_header, FailureResponse},
+    domain::models::{lmsr, market::*},
+    domain::services::{
+        market_store::{NewMarket, NewToken},
+        AccessTokenStore, MarketStore, UserStore,
     },
-    domain::services::MarketStore,
 };
 use chrono::{DateTime, Utc};
-use rouille::{Request, Response};
+use rouille::{input::json::json_input, Request, Response};
 
-pub fn get<S>(mut store: S, _req: &Request, market_id: MarketId) -> Result<Response, FailureResponse>
+pub fn get<S>(
+    mut store: S,
+    _req: &Request,
+    market_id: MarketId,
+) -> Result<Response, FailureResponse>
 where
     S: MarketStore,
 {
+    #[derive(Debug, Serialize, Queryable)]
+    struct RespData {
+        title: MarketTitle,
+        organizer: MarketOrganizer,
+        short_desc: MarketShortDesc,
+        description: MarketDesc,
+        open_time: DateTime<Utc>,
+        close_time: DateTime<Utc>,
+        tokens: MarketTokens,
+        status: MarketStatus,
+        settle_token_id: Option<TokenId>,
+    }
+
+    impl From<Market> for RespData {
+        fn from(market: Market) -> RespData {
+            let settle_token_id = match &market {
+                Market::Preparing(_) => None,
+                Market::Open(_) => None,
+                Market::Closed(_) => None,
+                Market::Settled(m) => Some(m.settle_token.id),
+            };
+            RespData {
+                title: market.title.clone(),
+                organizer: market.organizer.clone(),
+                short_desc: market.short_desc.clone(),
+                description: market.description.clone(),
+                open_time: market.open_time,
+                close_time: market.close_time,
+                tokens: market.tokens.clone(),
+                status: market.status(),
+                settle_token_id,
+            }
+        }
+    }
+
     let market = match store.query_market(&market_id)? {
         Some(market) => market,
         None => return Err(FailureResponse::ResourceNotFound),
@@ -22,37 +61,68 @@ where
     Ok(Response::json(&RespData::from(market)))
 }
 
-#[derive(Debug, Serialize, Queryable)]
-struct RespData {
-    title: MarketTitle,
-    organizer: MarketOrganizer,
-    short_desc: MarketShortDesc,
-    description: MarketDesc,
-    open_time: DateTime<Utc>,
-    close_time: DateTime<Utc>,
-    tokens: MarketTokens,
-    status: MarketStatus,
-    settle_token_id: Option<TokenId>,
-}
+pub fn post<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
+where
+    S: MarketStore + UserStore + AccessTokenStore,
+{
+    #[derive(Deserialize)]
+    struct ReqData {
+        title: MarketTitle,
+        organizer: MarketOrganizer,
+        short_desc: MarketShortDesc,
+        description: MarketDesc,
+        lmsr_b: lmsr::B,
+        open_time: DateTime<Utc>,
+        close_time: DateTime<Utc>,
+        tokens: Vec<ReqTokenData>,
+    }
 
-impl From<Market> for RespData {
-    fn from(market: Market) -> RespData {
-        let settle_token_id = match &market {
-            Market::Preparing(_) => None,
-            Market::Open(_) => None,
-            Market::Closed(_) => None,
-            Market::Settled(m) => Some(m.settle_token.id),
-        };
-        RespData {
-            title: market.title.clone(),
-            organizer: market.organizer.clone(),
-            short_desc: market.short_desc.clone(),
-            description: market.description.clone(),
-            open_time: market.open_time,
-            close_time: market.close_time,
-            tokens: market.tokens.clone(),
-            status: market.status(),
-            settle_token_id,
+    #[derive(Deserialize)]
+    struct ReqTokenData {
+        name: TokenName,
+        description: TokenDesc,
+    }
+
+    impl Into<NewMarket> for ReqData {
+        fn into(self) -> NewMarket {
+            let tokens: Vec<NewToken> = self
+                .tokens
+                .into_iter()
+                .map(|token| NewToken {
+                    name: token.name,
+                    description: token.description,
+                })
+                .collect();
+            NewMarket {
+                title: self.title,
+                organizer: self.organizer,
+                short_desc: self.short_desc,
+                description: self.description,
+                lmsr_b: self.lmsr_b,
+                open_time: self.open_time,
+                close_time: self.close_time,
+                tokens,
+            }
         }
     }
+
+    let access_token = validate_bearer_header(&mut store, req)?;
+    let user = match store.query_user(&access_token.user_id)? {
+        Some(user) => user,
+        None => {
+            println!("User does not exists, but AccessToken exists");
+            return Err(FailureResponse::ServerError);
+        }
+    };
+    if !user.is_admin {
+        return Err(FailureResponse::Unauthorized);
+    }
+
+    let req_data = json_input::<ReqData>(req).map_err(|e| {
+        dbg!(e);
+        FailureResponse::InvalidPayload
+    })?;
+    let market_id = store.insert_market(req_data.into())?;
+
+    Ok(Response::json(&market_id).with_status_code(201))
 }

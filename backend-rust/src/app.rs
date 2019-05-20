@@ -55,6 +55,9 @@ where
         (GET) (/me/markets) => {
             me::markets::get(store_factory.establish(), req)
         },
+        (POST) (/markets) => {
+            markets::post(store_factory.establish(), req)
+        },
         (GET) (/markets/{id: MarketId}) => {
             markets::get(store_factory.establish(), req, id)
         },
