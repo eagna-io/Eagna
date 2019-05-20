@@ -6,5 +6,5 @@ pub struct User {
     pub is_admin: bool,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
 pub struct UserId(pub i32);

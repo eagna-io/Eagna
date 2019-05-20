@@ -274,8 +274,56 @@ impl OpenMarket {
 }
 
 impl ClosedMarket {
-    pub fn settle(self, settle_token_id: TokenId) -> SettledMarket {
-        unimplemented!();
+    pub fn settle(mut self, settle_token_id: TokenId) -> SettledMarket {
+        let settle_token = self
+            .base
+            .tokens
+            .iter()
+            .find(|t| t.id == settle_token_id)
+            .expect("Logic error : call ClosedMarket::settle with non-market token_id")
+            .clone();
+
+        // Settle orderを発行
+        let distribution = self.token_user_distribution();
+        let now = Utc::now();
+        for ((token_id, user_id), amount_token) in distribution.iter() {
+            let amount_coin = match *token_id == settle_token_id {
+                true => AmountCoin(amount_token.0 * 1000),
+                false => AmountCoin(0),
+            };
+            let settle_order = SettleOrder {
+                user_id: *user_id,
+                token_id: *token_id,
+                amount_token: -amount_token,
+                amount_coin,
+                time: now,
+            };
+            self.orders.push_valid_order(Order::Settle(settle_order));
+        }
+
+        SettledMarket {
+            base: self.base,
+            orders: self.orders,
+            settle_token,
+        }
+    }
+
+    fn token_user_distribution(&self) -> HashMap<(TokenId, UserId), AmountToken> {
+        let mut distribution = HashMap::new();
+
+        // update
+        for (_id, order) in self.orders.iter() {
+            match order {
+                Order::Normal(n) => {
+                    let key = (n.token_id, n.user_id);
+                    let v = distribution.get(&key).cloned().unwrap_or(AmountToken(0));
+                    distribution.insert(key, v + n.amount_token);
+                }
+                _ => {}
+            }
+        }
+
+        distribution
     }
 }
 

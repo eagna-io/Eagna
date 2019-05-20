@@ -64,6 +64,13 @@ macro_rules! impl_ops {
                 $constructor(iter.map(|a| a.0).sum())
             }
         }
+
+        impl<'a> std::ops::Neg for &'a $target {
+            type Output = $target;
+            fn neg(self) -> Self::Output {
+                $constructor(-self.0)
+            }
+        }
     };
 }
 
