@@ -5,14 +5,15 @@ pub fn query_user(conn: &PgConnection, user_id: &UserId) -> Result<Option<User>,
     use crate::infra::postgres::schema::users;
 
     match users::table
-        .select((users::id, users::name, users::email))
+        .select((users::id, users::name, users::email, users::is_admin))
         .filter(users::id.eq(user_id.0))
         .first(conn)
     {
-        Ok((id, name, email)) => Ok(Some(User {
+        Ok((id, name, email, is_admin)) => Ok(Some(User {
             id: UserId(id),
             name,
             email,
+            is_admin,
         })),
         Err(PgError::NotFound) => Ok(None),
         Err(e) => Err(e),
@@ -27,15 +28,16 @@ pub fn query_user_by_email_and_hashed_pass(
     use crate::infra::postgres::schema::users;
 
     match users::table
-        .select((users::id, users::name, users::email))
+        .select((users::id, users::name, users::email, users::is_admin))
         .filter(users::email.eq(email))
         .filter(users::hashed_pass.eq(hashed_pass))
         .first(conn)
     {
-        Ok((id, name, email)) => Ok(Some(User {
+        Ok((id, name, email, is_admin)) => Ok(Some(User {
             id: UserId(id),
             name,
             email,
+            is_admin,
         })),
         Err(PgError::NotFound) => Ok(None),
         Err(e) => Err(e),

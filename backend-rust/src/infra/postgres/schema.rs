@@ -55,6 +55,7 @@ table! {
         name -> Text,
         email -> Text,
         hashed_pass -> Text,
+        is_admin -> Bool,
     }
 }
 

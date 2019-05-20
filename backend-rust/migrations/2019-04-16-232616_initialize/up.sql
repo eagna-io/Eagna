@@ -2,7 +2,8 @@ CREATE TABLE users (
   id          serial PRIMARY KEY,
   name        text UNIQUE NOT NULL,
   email       text UNIQUE NOT NULL,
-  hashed_pass text NOT NULL
+  hashed_pass text NOT NULL,
+  is_admin    boolean NOT NULL DEFAULT False
 );
 
 CREATE TYPE market_status AS ENUM (
