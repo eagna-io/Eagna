@@ -29,6 +29,7 @@ where
         close_time: DateTime<Utc>,
         tokens: MarketTokens,
         status: MarketStatus,
+        #[serde(skip_serializing_if = "Option::is_none")]
         settle_token_id: Option<TokenId>,
     }
 
