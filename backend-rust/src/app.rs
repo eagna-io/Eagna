@@ -61,6 +61,9 @@ where
         (GET) (/markets/{id: MarketId}) => {
             markets::get(store_factory.establish(), req, id)
         },
+        (PUT) (/markets/{id: MarketId}) => {
+            markets::put(store_factory.establish(), req, id)
+        },
         (GET) (/markets/{id: MarketId}/orders) => {
             markets::orders::get_all(store_factory.establish(), req, id)
         },

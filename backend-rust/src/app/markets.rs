@@ -123,13 +123,50 @@ where
         FailureResponse::InvalidPayload
     })?;
     let market_id = store.insert_market(req_data.into())?;
+    store.commit()?;
 
     Ok(Response::json(&market_id).with_status_code(201))
 }
 
-pub fn put<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
+pub fn put<S>(mut store: S, req: &Request, market_id: MarketId) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + UserStore + MarketStore,
 {
-    unimplemented!();
+    #[derive(Deserialize)]
+    struct ReqData {
+        status: MarketStatus,
+        settle_token_id: TokenId,
+    }
+
+    let access_token = validate_bearer_header(&mut store, req)?;
+    match store.query_user(&access_token.user_id)? {
+        Some(ref user) if user.is_admin => {}
+        Some(_) => return Err(FailureResponse::Unauthorized),
+        None => {
+            println!("User does not exists, but AccessToken exists");
+            return Err(FailureResponse::ServerError);
+        }
+    };
+
+    let req_data = json_input::<ReqData>(req).map_err(|e| {
+        dbg!(e);
+        FailureResponse::InvalidPayload
+    })?;
+    if req_data.status != MarketStatus::Settled {
+        return Err(FailureResponse::InvalidPayload);
+    }
+
+    {
+        let mut locked_store = store.lock_market(&market_id)?;
+        let closed_market = match locked_store.query_market(&market_id)? {
+            Some(Market::Closed(m)) => m,
+            Some(_) => return Err(FailureResponse::ResourceNotFound),
+            None => return Err(FailureResponse::ResourceNotFound),
+        };
+        let settled_market = closed_market.settle(req_data.settle_token_id);
+        locked_store.update_market_status_to_settle(&settled_market)?;
+    }
+    store.commit()?;
+
+    Ok(Response::json(&market_id).with_status_code(201))
 }
