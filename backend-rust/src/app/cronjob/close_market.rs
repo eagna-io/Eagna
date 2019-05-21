@@ -1,8 +1,8 @@
 use crate::{
     app::FailureResponse,
     domain::{
-        models::market::MarketId,
-        services::{market_store::UpdateMarketStatusErrorKind, MarketStore, UserStore},
+        models::market::Market,
+        services::{MarketStore, UserStore},
     },
 };
 use rouille::{Request, Response};
@@ -19,25 +19,28 @@ where
         return Err(FailureResponse::ResourceNotFound);
     }
 
-    let closing_markets = store.query_markets_ready_to_close()?;
-    if closing_markets.is_empty() {
+    let closing_market_ids = store.query_market_ids_ready_to_close()?;
+    if closing_market_ids.is_empty() {
         return Ok(Response::text("No market is opened"));
     }
 
-    let closed_market_ids: Vec<MarketId> = closing_markets.iter().map(|m| m.base.id).collect();
+    let mut closed_market_ids = Vec::with_capacity(closing_market_ids.len());
 
-    for closing_market in closing_markets {
-        let closed_market = closing_market.close_uncheck();
-        match store.update_market_status_to_closed(&closed_market) {
-            Ok(()) => {}
-            Err(UpdateMarketStatusErrorKind::MarketNotFound) => panic!(
-                "Logic Error : the store returns un-closable market : {:?}",
-                closed_market.base.id
-            ),
-            Err(UpdateMarketStatusErrorKind::Error(e)) => {
-                return Err(FailureResponse::from(e));
+    for market_id in closing_market_ids.iter() {
+        let mut locked_store = store.lock_market(market_id)?;
+        // lockを獲得し、Open状態であることを保証する
+        match locked_store.query_market(market_id)?.unwrap() {
+            Market::Open(m) => {
+                let closed_market = m.close_uncheck();
+                locked_store.update_market_status_to_closed(&closed_market)?;
+                closed_market_ids.push(market_id);
             }
-        }
+            _ => {
+                // query_market_ids_ready_to_close からここまでの間に
+                // 他のプロセスによってClose処理がされていた場合
+                continue;
+            }
+        };
     }
     store.commit()?;
 

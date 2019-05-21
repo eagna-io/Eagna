@@ -2,14 +2,12 @@ use crate::{
     domain::{
         models::{
             access_token::{AccessToken, AccessTokenId, TOKEN_EXPIRE_SEC},
-            market::{ClosedMarket, Market, MarketId, OpenMarket},
+            market::{Market, MarketId, Order, OrderId, MarketStatus},
             user::{User, UserId},
         },
         services::{
-            market_store::{
-                NewMarket, UpdateMarketLastOrderErrorKind, UpdateMarketStatusErrorKind,
-            },
-            AccessTokenStore, MarketStore, Store, StoreFactory, UserStore,
+            market_store::NewMarket, AccessTokenStore, MarketStore, Store, StoreFactory,
+            UserStore,
         },
     },
     infra::postgres::{market_store, user_store},
@@ -97,6 +95,10 @@ impl std::ops::Drop for DbStore {
 }
 
 impl MarketStore for DbStore {
+    fn lock_market_inner(&mut self, market_id: &MarketId) -> Result<(), Self::Error> {
+        market_store::lock_market(self.pg_conn()?, market_id)
+    }
+
     fn insert_market(&mut self, market: NewMarket) -> Result<MarketId, Self::Error> {
         Ok(market_store::insert_market(self.pg_conn()?, market)?)
     }
@@ -130,34 +132,23 @@ impl MarketStore for DbStore {
         )?)
     }
 
-    fn update_market_last_order(
+    fn update_market_status(
         &mut self,
-        market: &OpenMarket,
-    ) -> Result<(), UpdateMarketLastOrderErrorKind<Self::Error>> {
-        match self.pg_conn() {
-            Ok(conn) => market_store::update_market_last_order(conn, market),
-            Err(e) => Err(UpdateMarketLastOrderErrorKind::Error(e)),
-        }
+        market_id: &MarketId,
+        status: &MarketStatus,
+    ) -> Result<(), Self::Error> {
+        market_store::update_market_status(self.pg_conn()?, market_id, status)
     }
 
-    fn update_market_status_to_open(
+    fn insert_market_orders<'a, I>(
         &mut self,
-        market: &OpenMarket,
-    ) -> Result<(), UpdateMarketStatusErrorKind<Self::Error>> {
-        match self.pg_conn() {
-            Ok(conn) => market_store::update_market_status_to_open(conn, market),
-            Err(e) => Err(UpdateMarketStatusErrorKind::Error(e)),
-        }
-    }
-
-    fn update_market_status_to_closed(
-        &mut self,
-        market: &ClosedMarket,
-    ) -> Result<(), UpdateMarketStatusErrorKind<Self::Error>> {
-        match self.pg_conn() {
-            Ok(conn) => market_store::update_market_status_to_closed(conn, market),
-            Err(e) => Err(UpdateMarketStatusErrorKind::Error(e)),
-        }
+        market_id: &MarketId,
+        orders: I,
+    ) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (OrderId, &'a Order)>,
+    {
+        market_store::insert_market_orders(self.pg_conn()?, market_id, orders)
     }
 }
 

@@ -1,8 +1,8 @@
 use crate::{
     app::FailureResponse,
     domain::{
-        models::market::MarketId,
-        services::{market_store::UpdateMarketStatusErrorKind, MarketStore, UserStore},
+        models::market::Market,
+        services::{MarketStore, UserStore},
     },
 };
 use rouille::{Request, Response};
@@ -19,26 +19,29 @@ where
         return Err(FailureResponse::ResourceNotFound);
     }
 
-    let prepared_markets = store.query_markets_ready_to_open()?;
-    if prepared_markets.is_empty() {
+    let prepared_market_ids = store.query_market_ids_ready_to_open()?;
+    if prepared_market_ids.is_empty() {
         return Ok(Response::text("No market is opened"));
     }
 
     let user_ids = store.query_all_user_ids()?;
-    let open_market_ids: Vec<MarketId> = prepared_markets.iter().map(|m| m.base.id).collect();
 
-    for prepared_market in prepared_markets {
-        let open_market = prepared_market.open_uncheck(&user_ids);
-        match store.update_market_status_to_open(&open_market) {
-            Ok(()) => {}
-            Err(UpdateMarketStatusErrorKind::MarketNotFound) => panic!(
-                "Logic Error : the store returns unprepared market as open market : {:?}",
-                open_market.base.id
-            ),
-            Err(UpdateMarketStatusErrorKind::Error(e)) => {
-                return Err(FailureResponse::from(e));
+    let mut open_market_ids = Vec::with_capacity(prepared_market_ids.len());
+
+    for market_id in prepared_market_ids {
+        let mut locked_store = store.lock_market(&market_id)?;
+        match locked_store.query_market(&market_id)?.unwrap() {
+            Market::Preparing(m) => {
+                let open_market = m.open_uncheck(&user_ids);
+                locked_store.update_market_status_to_open(&open_market)?;
+                open_market_ids.push(market_id);
             }
-        }
+            _ => {
+                // query_market_ids_ready_to_open からここまでの間に
+                // 他のプロセスによってOpen処理がなされていた場合
+                continue;
+            }
+        };
     }
     store.commit()?;
 

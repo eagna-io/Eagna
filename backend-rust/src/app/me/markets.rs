@@ -16,10 +16,14 @@ where
     S: AccessTokenStore + MarketStore,
 {
     let access_token = validate_bearer_header(&mut store, req)?;
-    let markets = store
-        .query_markets_related_to_user(&access_token.user_id)?;
+    let market_ids = store.query_market_ids_related_to_user(&access_token.user_id)?;
 
-    let resp_data: Vec<RespItem> = markets.into_iter().map(|m| RespItem::from(m)).collect();
+    let mut resp_data = Vec::with_capacity(market_ids.len());
+
+    for market_id in market_ids {
+        let market = store.query_market(&market_id)?.unwrap();
+        resp_data.push(RespItem::from(market));
+    }
 
     Ok(Response::json(&resp_data))
 }

@@ -5,10 +5,7 @@ use crate::{
             market::{Market, MarketId, NormalOrder, TokenId},
             num::{AmountCoin, AmountToken},
         },
-        services::{
-            market_store::{MarketStore, UpdateMarketLastOrderErrorKind},
-            AccessTokenStore,
-        },
+        services::{market_store::MarketStore, AccessTokenStore},
     },
 };
 use rouille::{input::json::json_input, Request, Response};
@@ -36,46 +33,33 @@ where
         req_data.amount_coin,
     );
 
-    let res = try_add_order(&mut store, market_id, req_order);
-    store.commit()?;
-    res
-}
+    let open_market = {
+        let mut locked_store = store.lock_market(&market_id)?;
 
-fn try_add_order<S>(
-    store: &mut S,
-    market_id: MarketId,
-    req_order: NormalOrder,
-) -> Result<Response, FailureResponse>
-where
-    S: MarketStore,
-{
-    // marketがopenかチェック
-    let mut market = match store.query_market(&market_id)? {
-        Some(Market::Open(m)) => m,
-        _ => return Err(FailureResponse::ResourceNotFound),
+        let mut open_market = match locked_store.query_market(&market_id)? {
+            Some(Market::Open(m)) => m,
+            _ => return Err(FailureResponse::ResourceNotFound),
+        };
+
+        open_market
+            .try_order(req_order)
+            // TODO : return more information about failure.
+            .map_err(|_e| FailureResponse::InvalidPayload)?;
+
+        locked_store.update_market_last_order(&open_market)?;
+
+        open_market
     };
 
-    market
-        .try_order(req_order)
-        // TODO : return more information about failure.
-        .map_err(|_e| FailureResponse::InvalidPayload)?;
+    store.commit()?;
 
-    // Save a new market
-    match store.update_market_last_order(&market) {
-        Ok(()) => {
-            let (_id, new_order) = market.last_normal_order().unwrap();
-            let res_data = ResData {
-                token_id: new_order.token_id,
-                amount_token: new_order.amount_token,
-                amount_coin: new_order.amount_coin,
-            };
-            Ok(Response::json(&res_data).with_status_code(201))
-        }
-        // Retry when conflict
-        Err(UpdateMarketLastOrderErrorKind::Conflict) => try_add_order(store, market_id, req_order),
-        Err(UpdateMarketLastOrderErrorKind::NotOpen) => Err(FailureResponse::ResourceNotFound),
-        Err(UpdateMarketLastOrderErrorKind::Error(e)) => Err(FailureResponse::from(e)),
-    }
+    let (_id, new_order) = open_market.last_normal_order().unwrap();
+    let res_data = ResData {
+        token_id: new_order.token_id,
+        amount_token: new_order.amount_token,
+        amount_coin: new_order.amount_coin,
+    };
+    Ok(Response::json(&res_data).with_status_code(201))
 }
 
 #[derive(Debug, Deserialize)]

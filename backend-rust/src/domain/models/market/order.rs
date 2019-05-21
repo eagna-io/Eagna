@@ -112,11 +112,27 @@ impl Order {
         }
     }
 
+    pub fn amount_token(&self) -> AmountToken {
+        match self {
+            Order::Normal(o) => o.amount_token,
+            Order::InitialSupply(_) => AmountToken(0),
+            Order::Settle(o) => o.amount_token,
+        }
+    }
+
     pub fn amount_coin(&self) -> AmountCoin {
         match self {
             Order::Normal(o) => o.amount_coin,
             Order::InitialSupply(o) => o.amount_coin,
             Order::Settle(o) => o.amount_coin,
+        }
+    }
+
+    pub fn time(&self) -> &DateTime<Utc> {
+        match self {
+            Order::Normal(o) => &o.time,
+            Order::InitialSupply(o) => &o.time,
+            Order::Settle(o) => &o.time,
         }
     }
 }

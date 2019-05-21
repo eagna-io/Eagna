@@ -4,124 +4,155 @@ use crate::domain::{
 };
 use chrono::{DateTime, Utc};
 
-#[derive(Debug)]
-pub enum UpdateMarketLastOrderErrorKind<E> {
-    Conflict,
-    NotOpen,
-    Error(E),
-}
+pub trait MarketStore: Store + Sized {
+    /// 指定されたMarketに対するロックを獲得する。
+    /// ロックはこの構造体がdropされるまで（トランザクションが終わるまで）有効である。
+    /// ロックを複数回獲得しても影響はない
+    fn lock_market_inner(&mut self, market_id: &MarketId) -> Result<(), Self::Error>;
 
-#[derive(Debug)]
-pub enum UpdateMarketStatusErrorKind<E> {
-    /// 指定のMarketが存在しない、もしくは既にUpdate処理がなされている場合
-    MarketNotFound,
-    Error(E),
-}
-
-pub trait MarketStore: Store {
-    // *************   Required methods ***********
+    /// Marketに対するロックを獲得する
+    /// ロックは返された構造体がdropされるまで有効である。
+    fn lock_market(
+        &mut self,
+        market_id: &MarketId,
+    ) -> Result<LockedMarketStore<Self>, Self::Error> {
+        self.lock_market_inner(market_id)?;
+        Ok(LockedMarketStore {
+            inner: self,
+            market_id: *market_id,
+        })
+    }
 
     fn insert_market(&mut self, market: NewMarket) -> Result<MarketId, Self::Error>;
 
     fn query_market(&mut self, market_id: &MarketId) -> Result<Option<Market>, Self::Error>;
 
     /// 指定されたUserに紐づくMarketのIDのリストを返す。
-    ///
-    /// ## NOTE
-    /// この関数を直接呼び出すことは基本的にない。
-    /// 代わりにquery_markets_related_to_userメソッドを呼び出す。
     fn query_market_ids_related_to_user(
         &mut self,
         user_id: &UserId,
     ) -> Result<Vec<MarketId>, Self::Error>;
 
     /// open_timeがすでに過ぎているPreparingMarketのIDのリストを返す
-    ///
-    /// ## NOTE
-    /// この関数を直接呼び出すことは基本的にない。
-    /// 代わりにquery_markets_ready_to_openメソッドを呼び出す。
     fn query_market_ids_ready_to_open(&mut self) -> Result<Vec<MarketId>, Self::Error>;
 
-    /// close_timeがすでに過ぎているOpenMarketのリストを返す
-    ///
-    /// ## NOTE
-    /// この関数を直接呼び出すことは基本的にない。
-    /// 代わりにquery_markets_ready_to_closeメソッドを呼び出す。
+    /// close_timeがすでに過ぎているOpenMarketのIDのリストを返す
     fn query_market_ids_ready_to_close(&mut self) -> Result<Vec<MarketId>, Self::Error>;
 
+    /// 指定されたMarketのstatusを変更する
+    ///
+    /// ## NOTE
+    /// 利用者はこのメソッドを直接使用するべきではない
+    fn update_market_status(
+        &mut self,
+        market_id: &MarketId,
+        status: &MarketStatus,
+    ) -> Result<(), Self::Error>;
+
+    /// MarketにOrderを追加する。
+    ///
+    /// ## NOTE
+    /// 利用者はこのメソッドを直接使用するべきではない
+    fn insert_market_orders<'a, I>(
+        &mut self,
+        market_id: &MarketId,
+        orders: I,
+    ) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = (OrderId, &'a Order)>;
+}
+
+pub struct LockedMarketStore<'a, S> {
+    inner: &'a mut S,
+    market_id: MarketId,
+}
+
+impl<'a, S> LockedMarketStore<'a, S>
+where
+    S: MarketStore,
+{
     /// 渡されたOpenMarketのMarketOrdersを更新する。
     /// MarketOrdersはMarketに紐づく「状態」であるので、insertではなく、updateとなる。
     /// もし「状態」がコンフリクトしていたら、このメソッドは失敗する。
-    /// また、MarketがStore内でOpen状態でない場合もこのメソッドは失敗する。
+    ///
+    /// ## NOTE
+    /// このメソッドは、Marketが現在Openかどうかをチェックしない。
+    /// よって呼び出し元は、MarketがOpenであり、ロックされていることを保証する必要がある
     ///
     /// ## NOTE
     /// このメソッドは、updateする差分を計算するときに、最後のOrderのみをチェックする。
     /// つまり、以下のような挙動をする。
-    /// 1. 最後のOrderがStoreに存在し、それが等しい場合
-    ///   - 何もupdateしない
-    /// 2. 最後のOrderがStoreに存在し、それが異なる場合
+    /// 1. 最後のOrderと同じOrderIdがStoreに存在するとき
     ///   - コンフリクトエラー
     /// 3. 最後のOrderがStoreに存在しない場合
     ///   - 最後のOrderを新たに記録する
-    ///   - その前のOrderも存在するかどうかはチェックしない
+    ///   - **その前のOrderも存在するかどうかはチェックしない**
     ///
     /// よって呼び出し元は、Orderを一つ更新するたびにこのメソッドを呼び出す必要がある。
-    fn update_market_last_order(
-        &mut self,
-        market: &OpenMarket,
-    ) -> Result<(), UpdateMarketLastOrderErrorKind<Self::Error>>;
+    pub fn update_market_last_order(&mut self, market: &OpenMarket) -> Result<(), S::Error> {
+        assert_eq!(self.market_id, market.base.id);
+        let (serial_num, last_order) = market.last_normal_order().unwrap();
+        self.inner.insert_market_orders(
+            &self.market_id,
+            std::iter::once((serial_num, &Order::Normal(*last_order))),
+        )
+    }
 
     /// 渡されたOpenMarketのopen処理をstoreに記録する。
-    fn update_market_status_to_open(
-        &mut self,
-        market: &OpenMarket,
-    ) -> Result<(), UpdateMarketStatusErrorKind<Self::Error>>;
+    ///
+    /// ## NOTE
+    /// このメソッドは、Marketが現在Preparingかどうかをチェックしない。
+    /// よって呼び出し元は、MarketがPreparingであり、
+    /// ロックされていることを保証する必要がある。
+    pub fn update_market_status_to_open(&mut self, market: &OpenMarket) -> Result<(), S::Error> {
+        assert_eq!(self.market_id, market.base.id);
+        self.inner
+            .insert_market_orders(&self.market_id, market.orders.iter())?;
+        self.inner
+            .update_market_status(&self.market_id, &MarketStatus::Open)
+    }
 
     /// 渡されたClosedMarketのclose処理をstoreに記録する。
-    fn update_market_status_to_closed(
-        &mut self,
-        market: &ClosedMarket,
-    ) -> Result<(), UpdateMarketStatusErrorKind<Self::Error>>;
-
-    // ************* Provided methods ***********
-
-    /// 指定されたUserに紐づくMarketのリストを返す。
-    fn query_markets_related_to_user(
-        &mut self,
-        user_id: &UserId,
-    ) -> Result<Vec<Market>, Self::Error> {
-        let market_ids = self.query_market_ids_related_to_user(user_id)?;
-        let mut vec = Vec::with_capacity(market_ids.len());
-        for market_id in market_ids {
-            vec.push(self.query_market(&market_id)?.unwrap());
-        }
-        Ok(vec)
+    ///
+    /// ## NOTE
+    /// このメソッドは、Marketが現在Openかどうかをチェックしない。
+    /// よって呼び出し元は、MarketがOpenであり、
+    /// ロックされていることを保証する必要がある。
+    pub fn update_market_status_to_closed(&mut self, market: &ClosedMarket) -> Result<(), S::Error> {
+        assert_eq!(self.market_id, market.base.id);
+        self.inner
+            .update_market_status(&self.market_id, &MarketStatus::Closed)
     }
 
-    /// open_timeがすでに過ぎているPreparingMarketのリストを返す
-    fn query_markets_ready_to_open(&mut self) -> Result<Vec<PreparingMarket>, Self::Error> {
-        let market_ids = self.query_market_ids_ready_to_open()?;
-        let mut vec = Vec::with_capacity(market_ids.len());
-        for market_id in market_ids {
-            match self.query_market(&market_id)?.unwrap() {
-                Market::Preparing(m) => vec.push(m),
-                _ => panic!("MarketStore::query_market_ids_ready_to_open returns invalid id"),
-            }
-        }
-        Ok(vec)
+    /// 渡されたClosedMarketのsettle処理をstoreに記録する。
+    ///
+    /// ## NOTE
+    /// このメソッドは、Marketが現在Closeかどうかをチェックしない。
+    /// よって呼び出し元は、MarketがCloseであり、
+    /// ロックされていることを保証する必要がある。
+    pub fn update_market_status_to_settle(&mut self, market: &SettledMarket) -> Result<(), S::Error> {
+        assert_eq!(self.market_id, market.base.id);
+        let settle_orders = market.orders.iter().filter(|(_id, order)| match order {
+            Order::Settle(_) => true,
+            _ => false,
+        });
+        self.inner
+            .insert_market_orders(&self.market_id, settle_orders)?;
+        self.inner
+            .update_market_status(&self.market_id, &MarketStatus::Settled)
     }
+}
 
-    /// close_timeがすでに過ぎているOpenMarketのリストを返す
-    fn query_markets_ready_to_close(&mut self) -> Result<Vec<OpenMarket>, Self::Error> {
-        let market_ids = self.query_market_ids_ready_to_close()?;
-        let mut vec = Vec::with_capacity(market_ids.len());
-        for market_id in market_ids {
-            match self.query_market(&market_id)?.unwrap() {
-                Market::Open(m) => vec.push(m),
-                _ => panic!("MarketStore::query_market_ids_ready_to_close returns invalid id"),
-            }
-        }
-        Ok(vec)
+impl<'a, S> std::ops::Deref for LockedMarketStore<'a, S> {
+    type Target = S;
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl<'a, S> std::ops::DerefMut for LockedMarketStore<'a, S> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
     }
 }
 

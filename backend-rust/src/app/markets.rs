@@ -126,3 +126,10 @@ where
 
     Ok(Response::json(&market_id).with_status_code(201))
 }
+
+pub fn put<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
+where
+    S: AccessTokenStore + UserStore + MarketStore,
+{
+    unimplemented!();
+}
