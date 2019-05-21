@@ -45,6 +45,13 @@ pub struct SettleOrder {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub struct OrderId(pub i32);
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+pub enum OrderType {
+    Normal,
+    InitialSupply,
+    Settle,
+}
+
 impl MarketOrders {
     /// InitialSupplyOrder で初期化。
     /// MarketOrdersは、必ず最初にInitialSupplyで初期化される。
@@ -112,6 +119,14 @@ impl Order {
         }
     }
 
+    pub fn token_id(&self) -> Option<&TokenId> {
+        match self {
+            Order::Normal(o) => Some(&o.token_id),
+            Order::InitialSupply(_) => None,
+            Order::Settle(o) => Some(&o.token_id),
+        }
+    }
+
     pub fn amount_token(&self) -> AmountToken {
         match self {
             Order::Normal(o) => o.amount_token,
@@ -133,6 +148,14 @@ impl Order {
             Order::Normal(o) => &o.time,
             Order::InitialSupply(o) => &o.time,
             Order::Settle(o) => &o.time,
+        }
+    }
+
+    pub fn type_(&self) -> OrderType {
+        match self {
+            Order::Normal(_) => OrderType::Normal,
+            Order::InitialSupply(_) => OrderType::InitialSupply,
+            Order::Settle(_) => OrderType::Settle,
         }
     }
 }

@@ -1,5 +1,7 @@
 mod order;
-pub use order::{InitialSupplyOrder, MarketOrders, NormalOrder, Order, OrderId, SettleOrder};
+pub use order::{
+    InitialSupplyOrder, MarketOrders, NormalOrder, Order, OrderId, OrderType, SettleOrder,
+};
 
 pub const MAX_SPLIT_PERCENT: f64 = 0.05;
 pub const INITIAL_SUPPLY_COIN: AmountCoin = AmountCoin(10000);

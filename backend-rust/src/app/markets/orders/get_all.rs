@@ -1,7 +1,7 @@
 use crate::{
     app::{validate_bearer_header, FailureResponse},
     domain::models::{
-        market::{MarketId, NormalOrder, Order, OrderId, TokenId},
+        market::{MarketId, NormalOrder, Order, TokenId, OrderType},
         num::{AmountCoin, AmountToken},
     },
     domain::services::{AccessTokenStore, MarketStore},
@@ -30,16 +30,25 @@ where
     let maybe_mine = match req.get_param("contains") {
         Some(ref s) if s.as_str() == "mine" => {
             let user_id = validate_bearer_header(&mut store, req)?.user_id;
-            let order_ids = orders.related_to_user(user_id).map(|(id, _o)| id).collect();
-            Some(Mine { orders: order_ids })
+            let my_orders = orders
+                .related_to_user(user_id)
+                .map(|(_, order)| RespMyOrder {
+                    token_id: order.token_id().cloned(),
+                    amount_token: order.amount_token(),
+                    amount_coin: order.amount_coin(),
+                    time: *order.time(),
+                    type_: order.type_(),
+                })
+                .collect();
+            Some(Mine { orders: my_orders })
         }
         _ => None,
     };
 
     let resp_orders = orders
         .iter()
-        .filter_map(|(id, order)| match order {
-            Order::Normal(o) => Some(RespOrder::from((id, *o))),
+        .filter_map(|(_, order)| match order {
+            Order::Normal(o) => Some(RespNormalOrder::from(*o)),
             _ => None,
         })
         .collect();
@@ -53,13 +62,12 @@ where
 
 #[derive(Debug, Serialize)]
 struct RespBody {
-    orders: Vec<RespOrder>,
+    orders: Vec<RespNormalOrder>,
     mine: Option<Mine>,
 }
 
 #[derive(Debug, Serialize)]
-struct RespOrder {
-    id: OrderId,
+struct RespNormalOrder {
     token_id: TokenId,
     amount_token: AmountToken,
     amount_coin: AmountCoin,
@@ -68,14 +76,23 @@ struct RespOrder {
 
 #[derive(Debug, Serialize)]
 struct Mine {
-    orders: Vec<OrderId>,
+    orders: Vec<RespMyOrder>,
 }
 
-impl From<(OrderId, NormalOrder)> for RespOrder {
-    fn from(items: (OrderId, NormalOrder)) -> RespOrder {
-        let (id, order) = items;
-        RespOrder {
-            id,
+#[derive(Debug, Serialize)]
+struct RespMyOrder {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    token_id: Option<TokenId>,
+    amount_token: AmountToken,
+    amount_coin: AmountCoin,
+    time: DateTime<Utc>,
+    #[serde(rename = "type")]
+    type_: OrderType,
+}
+
+impl From<NormalOrder> for RespNormalOrder {
+    fn from(order: NormalOrder) -> RespNormalOrder {
+        RespNormalOrder {
             token_id: order.token_id,
             amount_token: order.amount_token,
             amount_coin: order.amount_coin,
