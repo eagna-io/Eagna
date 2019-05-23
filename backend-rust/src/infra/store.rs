@@ -1,17 +1,17 @@
-use crate::{
-    domain::{
-        models::{
-            access_token::{AccessToken, AccessTokenId},
-            market::{Market, MarketId, MarketStatus, Order, OrderId},
-            user::{User, UserId},
-        },
-        services::{
-            market_store::NewMarket, AccessTokenStore, MarketStore, Store, StoreFactory, UserStore,
-        },
+use super::{
+    firebase as firebase_store,
+    postgres::{market_store, user_store},
+    redis as redis_store,
+};
+use crate::domain::{
+    models::{
+        access_token::{AccessToken, AccessTokenId},
+        market::{Market, MarketId, MarketStatus, Order, OrderId},
+        user::{User, UserId},
     },
-    infra::{
-        self,
-        postgres::{market_store, user_store},
+    services::{
+        market_store::NewMarket, user_store::NewUser, AccessTokenStore, MarketStore, Store,
+        StoreFactory, UserStore,
     },
 };
 use diesel::{connection::TransactionManager, pg::PgConnection as PgConn, Connection};
@@ -168,14 +168,18 @@ impl UserStore for DbStore {
     fn query_all_user_ids(&mut self) -> Result<Vec<UserId>, <Self as Store>::Error> {
         Ok(user_store::query_all_user_ids(self.pg_conn()?)?)
     }
+
+    fn save_user(&mut self, new_user: NewUser) -> Result<(), Self::Error> {
+        Ok(user_store::save_user(self.pg_conn()?, new_user)?)
+    }
 }
 
 impl AccessTokenStore for DbStore {
-    fn query_access_token(
+    fn validate_access_token(
         &mut self,
         access_token_id: &AccessTokenId,
     ) -> Result<Option<AccessToken>, Self::Error> {
-        match infra::redis::query_access_token(self.redis_conn()?, access_token_id)? {
+        match redis_store::query_access_token(self.redis_conn()?, access_token_id)? {
             Some(token) => return Ok(Some(token)),
             None => {}
         }
@@ -183,9 +187,9 @@ impl AccessTokenStore for DbStore {
         // Token を Cache する時間。10分
         const CACHE_EXPIRE_SEC: usize = 60 * 10;
 
-        match infra::firebase::get_user(self.firebase_api_key.as_str(), access_token_id)? {
+        match firebase_store::get_user(self.firebase_api_key.as_str(), access_token_id)? {
             Some(token) => {
-                infra::redis::save_access_token(self.redis_conn()?, &token, CACHE_EXPIRE_SEC)?;
+                redis_store::save_access_token(self.redis_conn()?, &token, CACHE_EXPIRE_SEC)?;
                 Ok(Some(token))
             }
             None => Ok(None),

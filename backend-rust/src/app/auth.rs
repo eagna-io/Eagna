@@ -16,7 +16,7 @@ where
         .header("Authorization")
         .ok_or(FailureResponse::Unauthorized)?;
     let token_id = extract_token(header_val)?;
-    match store.query_access_token(&token_id)? {
+    match store.validate_access_token(&token_id)? {
         Some(token) => Ok(token),
         None => Err(FailureResponse::Unauthorized),
     }

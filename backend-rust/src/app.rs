@@ -3,6 +3,7 @@ mod cronjob;
 mod failure_response;
 mod markets;
 mod me;
+mod users;
 
 pub use self::auth::validate_bearer_header;
 pub use self::failure_response::FailureResponse;
@@ -50,6 +51,9 @@ where
         },
         (GET) (/me/markets) => {
             me::markets::get(store_factory.establish(), req)
+        },
+        (POST) (/users) => {
+            users::post(store_factory.establish(), req)
         },
         (POST) (/markets) => {
             markets::post(store_factory.establish(), req)

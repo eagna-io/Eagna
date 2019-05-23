@@ -18,7 +18,7 @@ pub fn post<S>(
 where
     S: AccessTokenStore + MarketStore,
 {
-    let req_data = json_input::<ReqData>(&req).map_err(|_| FailureResponse::InvalidPayload)?;
+    let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
     if req_data.amount_token == AmountToken(0) || req_data.amount_coin == AmountCoin(0) {
         return Err(FailureResponse::InvalidPayload);
     }
