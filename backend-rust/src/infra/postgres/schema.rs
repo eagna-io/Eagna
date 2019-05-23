@@ -36,7 +36,7 @@ table! {
         id -> Int4,
         market_id -> Int4,
         market_internal_serial_num -> Int4,
-        user_id -> Int4,
+        user_id -> Text,
         token_id -> Nullable<Int4>,
         amount_token -> Int4,
         amount_coin -> Int4,
@@ -51,10 +51,9 @@ table! {
     use crate::infra::postgres::types::*;
 
     users (id) {
-        id -> Int4,
+        id -> Text,
         name -> Text,
         email -> Text,
-        hashed_pass -> Text,
         is_admin -> Bool,
     }
 }

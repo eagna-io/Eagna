@@ -1,9 +1,8 @@
 CREATE TABLE users (
-  id          serial PRIMARY KEY,
-  name        text UNIQUE NOT NULL,
-  email       text UNIQUE NOT NULL,
-  hashed_pass text NOT NULL,
-  is_admin    boolean NOT NULL DEFAULT False
+  id            text PRIMARY KEY,
+  name          text UNIQUE NOT NULL,
+  email         text UNIQUE NOT NULL,
+  is_admin      boolean NOT NULL DEFAULT False
 );
 
 CREATE TYPE market_status AS ENUM (
@@ -56,7 +55,7 @@ CREATE TABLE orders (
   market_id     integer NOT NULL,
   /* An serial number used to obtain optimistic lock */
   market_internal_serial_num  integer NOT NULL,
-  user_id       integer NOT NULL,
+  user_id       text NOT NULL,
   /* MUST NULL if "type" is 'initial_supply' */
   token_id      integer,
   amount_token  integer NOT NULL,

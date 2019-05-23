@@ -1,4 +1,3 @@
-mod access_token;
 mod auth;
 mod cronjob;
 mod failure_response;
@@ -46,9 +45,6 @@ where
     S: AccessTokenStore + MarketStore + UserStore + Send + 'static,
 {
     let res = router!(req,
-        (POST) (/access_token) => {
-            access_token::create(store_factory.establish(), req)
-        },
         (GET) (/me) => {
             me::get(store_factory.establish(), req)
         },

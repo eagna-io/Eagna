@@ -49,10 +49,10 @@ where
     use crate::infra::postgres::schema::orders;
     #[derive(Insertable)]
     #[table_name = "orders"]
-    struct NewOrder {
+    struct NewOrder<'b> {
         market_id: i32,
         market_internal_serial_num: i32,
-        user_id: i32,
+        user_id: &'b str,
         token_id: Option<i32>,
         amount_token: i32,
         amount_coin: i32,
@@ -60,7 +60,7 @@ where
         time: DateTime<Utc>,
     }
 
-    let order_records: Vec<NewOrder> = orders
+    let order_records: Vec<NewOrder<'a>> = orders
         .map(|(serial_num, order)| {
             let (order_type, maybe_token_id) = match order {
                 Order::InitialSupply(_) => (OrderType::InitialSupply, None),
@@ -70,7 +70,7 @@ where
             NewOrder {
                 market_id: market_id.0,
                 market_internal_serial_num: serial_num.0,
-                user_id: order.user_id().0,
+                user_id: order.user_id().as_str(),
                 token_id: maybe_token_id,
                 amount_token: order.amount_token().0,
                 amount_coin: order.amount_coin().0,

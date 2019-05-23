@@ -38,7 +38,7 @@ fn query_participated_market_ids(
 
     orders
         .select(order::market_id)
-        .filter(order::user_id.eq(user_id.0))
+        .filter(order::user_id.eq(user_id.as_str()))
         .filter(order::type_.eq(OrderType::InitialSupply))
         .load::<i32>(conn)
 }

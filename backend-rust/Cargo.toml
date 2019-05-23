@@ -18,12 +18,14 @@ path = "tests/setup/feed_data.rs"
 
 [dependencies]
 rouille = "~3.0"
+reqwest = "~0.9"
 redis = "~0.10"
 diesel = { version = "~1.4", features = ["postgres", "chrono"] }
 diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
 serde = { version = "~1.0", features = ["rc"] }
 serde_derive = "~1.0"
 chrono = { version = "~0.4", features = ["serde"] }
+arrayvec = { version = "~0.4", features = ["serde-1"] }
 regex = "~1.1"
 base64 = "~0.10"
 rand = "~0.6"
@@ -31,5 +33,4 @@ sha2 = "~0.8"
 failure = "~0.1"
 
 [dev-dependencies]
-reqwest = "~0.9"
 utils = { path = "utils" }

@@ -87,7 +87,7 @@ struct QueryableOrder {
     id: i32,
     market_id: i32,
     serial_num: i32,
-    user_id: i32,
+    user_id: String,
     token_id: Option<i32>,
     amount_token: i32,
     amount_coin: i32,
@@ -109,19 +109,19 @@ impl Into<Order> for QueryableOrder {
     fn into(self) -> Order {
         match self.type_ {
             OrderType::Normal => Order::Normal(NormalOrder {
-                user_id: UserId(self.user_id),
+                user_id: UserId::from_str(self.user_id.as_str()),
                 token_id: TokenId(self.token_id.unwrap()),
                 amount_token: AmountToken(self.amount_token),
                 amount_coin: AmountCoin(self.amount_coin),
                 time: self.time,
             }),
             OrderType::InitialSupply => Order::InitialSupply(InitialSupplyOrder {
-                user_id: UserId(self.user_id),
+                user_id: UserId::from_str(self.user_id.as_str()),
                 amount_coin: AmountCoin(self.amount_coin),
                 time: self.time,
             }),
             OrderType::Settle => Order::Settle(SettleOrder {
-                user_id: UserId(self.user_id),
+                user_id: UserId::from_str(self.user_id.as_str()),
                 token_id: TokenId(self.token_id.unwrap()),
                 amount_token: AmountToken(self.amount_token),
                 amount_coin: AmountCoin(self.amount_coin),

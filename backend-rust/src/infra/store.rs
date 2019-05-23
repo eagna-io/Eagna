@@ -1,29 +1,33 @@
 use crate::{
     domain::{
         models::{
-            access_token::{AccessToken, AccessTokenId, TOKEN_EXPIRE_SEC},
-            market::{Market, MarketId, Order, OrderId, MarketStatus},
+            access_token::{AccessToken, AccessTokenId},
+            market::{Market, MarketId, MarketStatus, Order, OrderId},
             user::{User, UserId},
         },
         services::{
-            market_store::NewMarket, AccessTokenStore, MarketStore, Store, StoreFactory,
-            UserStore,
+            market_store::NewMarket, AccessTokenStore, MarketStore, Store, StoreFactory, UserStore,
         },
     },
-    infra::postgres::{market_store, user_store},
+    infra::{
+        self,
+        postgres::{market_store, user_store},
+    },
 };
 use diesel::{connection::TransactionManager, pg::PgConnection as PgConn, Connection};
-use redis::{Commands, Connection as RedisConn};
+use redis::{Client as RedisClient, Connection as RedisConn};
 use std::sync::Arc;
 
 pub struct DbStoreFactory {
     pg_conn_url: Arc<String>,
-    redis_client: redis::Client,
+    redis_client: RedisClient,
+    firebase_api_key: Arc<String>,
 }
 
 pub struct DbStore {
     pg_conn_url: Arc<String>,
-    redis_client: redis::Client,
+    redis_client: RedisClient,
+    firebase_api_key: Arc<String>,
     pg_conn: Option<PgConn>,
     redis_conn: Option<RedisConn>,
 }
@@ -32,10 +36,13 @@ impl DbStoreFactory {
     pub fn new_with_env() -> DbStoreFactory {
         let pg_conn_url = std::env::var("PG_URL").expect("PG_URL is not defined");
         let redis_conn_url = std::env::var("REDIS_URL").expect("REDIS_URL is not defined");
-        let redis_client = redis::Client::open(redis_conn_url.as_str()).unwrap();
+        let redis_client = RedisClient::open(redis_conn_url.as_str()).unwrap();
+        let firebase_api_key =
+            std::env::var("FIREBASE_API_KEY").expect("FIREBASE_API_KEY is not defined");
         DbStoreFactory {
             pg_conn_url: Arc::new(pg_conn_url),
             redis_client,
+            firebase_api_key: Arc::new(firebase_api_key),
         }
     }
 }
@@ -45,6 +52,7 @@ impl StoreFactory<DbStore> for DbStoreFactory {
         DbStore {
             pg_conn_url: self.pg_conn_url.clone(),
             redis_client: self.redis_client.clone(),
+            firebase_api_key: self.firebase_api_key.clone(),
             pg_conn: None,
             redis_conn: None,
         }
@@ -157,39 +165,29 @@ impl UserStore for DbStore {
         Ok(user_store::query_user(self.pg_conn()?, user_id)?)
     }
 
-    fn query_user_by_email_and_hashed_pass(
-        &mut self,
-        email: &str,
-        hashed_pass: &str,
-    ) -> Result<Option<User>, <Self as Store>::Error> {
-        Ok(user_store::query_user_by_email_and_hashed_pass(
-            self.pg_conn()?,
-            email,
-            hashed_pass,
-        )?)
-    }
-
     fn query_all_user_ids(&mut self) -> Result<Vec<UserId>, <Self as Store>::Error> {
         Ok(user_store::query_all_user_ids(self.pg_conn()?)?)
     }
 }
 
 impl AccessTokenStore for DbStore {
-    fn save_access_token(&mut self, token: &AccessToken) -> Result<(), <Self as Store>::Error> {
-        Ok(self
-            .redis_conn()?
-            .set_ex(token.id.as_str(), token.user_id.0, TOKEN_EXPIRE_SEC)?)
-    }
-
     fn query_access_token(
         &mut self,
         access_token_id: &AccessTokenId,
-    ) -> Result<Option<AccessToken>, <Self as Store>::Error> {
-        match self.redis_conn()?.get(access_token_id.as_str())? {
-            Some(user_id) => Ok(Some(AccessToken {
-                id: *access_token_id,
-                user_id: UserId(user_id),
-            })),
+    ) -> Result<Option<AccessToken>, Self::Error> {
+        match infra::redis::query_access_token(self.redis_conn()?, access_token_id)? {
+            Some(token) => return Ok(Some(token)),
+            None => {}
+        }
+
+        // Token を Cache する時間。10分
+        const CACHE_EXPIRE_SEC: usize = 60 * 10;
+
+        match infra::firebase::get_user(self.firebase_api_key.as_str(), access_token_id)? {
+            Some(token) => {
+                infra::redis::save_access_token(self.redis_conn()?, &token, CACHE_EXPIRE_SEC)?;
+                Ok(Some(token))
+            }
             None => Ok(None),
         }
     }
