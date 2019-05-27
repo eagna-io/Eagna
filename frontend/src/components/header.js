@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserCircle, faCaretDown } from '@fortawesome/free-solid-svg-icons';
 
-import { AccessTokenContext } from 'src/context';
+import { AccessTokenContext } from 'context/access_token';
 
 export default function Header(props) {
   const history = props.history;

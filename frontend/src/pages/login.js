@@ -1,11 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { AccessTokenContext } from 'src/context';
+import { AccessTokenContext } from 'context/access_token';
 import { createAccessToken, getAccessToken,
-  LoginFailedError, NetworkError, InvalidAccessTokenError } from 'src/api';
-import NoticeBar from 'src/components/notice_bar';
-import Loading from 'src/components/loading';
+  LoginFailedError, NetworkError, InvalidAccessTokenError } from 'api/api';
+import NoticeBar from 'components/notice_bar';
+import Loading from 'components/loading';
 
 export default function LoginPage(props) {
   const history = props.history;

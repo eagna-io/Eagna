@@ -1,10 +1,10 @@
 import React, {useContext, useState} from 'react';
 import styled from 'styled-components';
-import * as lmsr from 'src/lmsr';
-import {AccessTokenContext} from 'src/context';
+import * as lmsr from 'models/lmsr';
+import {AccessTokenContext} from 'context/access_token';
 import {postOrder, getMarket,
   InvalidAccessTokenError, TokenPriceIsMovedError
-} from 'src/api';
+} from 'api/api';
 
 const MAX_QUANTITY = 100;
 const MICRO_COIN = 1000000;

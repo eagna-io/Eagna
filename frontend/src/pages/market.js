@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 
-import { AccessTokenContext } from 'src/context';
-import { getMarket, postOrder, InvalidAccessTokenError, MarketNotFoundError, TokenPriceIsMovedError } from 'src/api';
+import { AccessTokenContext } from 'context/access_token';
+import { getMarket, postOrder, InvalidAccessTokenError, MarketNotFoundError, TokenPriceIsMovedError } from 'api/api';
 
-import Loading from 'src/components/loading';
-import NoticeBar from 'src/components/notice_bar';
-import Header from 'src/components/header';
+import Loading from 'components/loading';
+import NoticeBar from 'components/notice_bar';
+import Header from 'components/header';
 import MarketHeader from './market/header';
 import TokensComponent from './market/tokens';
 import OrderComponent from './market/order';

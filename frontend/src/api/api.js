@@ -1,6 +1,6 @@
 import sha256 from 'js-sha256';
-import { timestampToDate } from 'src/time';
-import { Token, Market, OrderRecord, OrderHistory } from 'src/models/market';
+import { timestampToDate } from 'models/time';
+import { Token, Market, OrderRecord, OrderHistory } from 'models/market';
 
 export const ApiError = "ApiError";
 export const NetworkError = "NetworkError";

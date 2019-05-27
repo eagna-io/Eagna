@@ -1,4 +1,4 @@
-import * as lmsr from 'src/lmsr';
+import * as lmsr from 'models/lmsr';
 
 
 export class Market {

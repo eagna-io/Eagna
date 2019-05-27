@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 
-import LoginPage from 'src/pages/login';
-import AccountPage from 'src/pages/account';
-import MarketPage from 'src/pages/market';
-import { AccessTokenContext } from 'src/context';
+import LoginPage from 'pages/login';
+import AccountPage from 'pages/account';
+import MarketPage from 'pages/market';
+import { AccessTokenContext } from 'context/access_token';
 
 export default function App(props) {
   const initialAccessToken = props.initialAccessToken;

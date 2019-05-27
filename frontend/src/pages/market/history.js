@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { dateToStr } from 'src/time';
+import { dateToStr } from 'models/time';
 
 
 export default function TradeHistory(props) {

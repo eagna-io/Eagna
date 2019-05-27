@@ -2,11 +2,11 @@ import React, { useState, useEffect, useContext } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
-import { getMe, InvalidAccessTokenError, NetworkError } from 'src/api';
-import { AccessTokenContext } from 'src/context';
-import NoticeBar from 'src/components/notice_bar';
-import Loading from 'src/components/loading';
-import Header from 'src/components/header';
+import { getMe, InvalidAccessTokenError, NetworkError } from 'api/api';
+import { AccessTokenContext } from 'context/access_token';
+import NoticeBar from 'components/notice_bar';
+import Loading from 'components/loading';
+import Header from 'components/header';
 
 export default function AccountPage(props) {
   const history = props.history;

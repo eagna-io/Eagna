@@ -9,5 +9,5 @@ ReactDOM.render(
   <App
     initialAccessToken={initialAccessToken}
   />,
-  document.getElementById('app')
+  document.getElementById('root')
 )
