@@ -1,8 +1,6 @@
 import * as lmsr from 'models/lmsr';
 
-
 export class Market {
-  
   // id : int
   // title : string
   // organizer : string
@@ -15,7 +13,20 @@ export class Market {
   // me : {
   //   orderHistry : OrderHistory,
   // }
-  constructor(id, title, organizer, shortDesc, desc, status, openTime, closeTime, lmsrB, tokens, me = null, settleToken = null) {
+  constructor(
+    id,
+    title,
+    organizer,
+    shortDesc,
+    desc,
+    status,
+    openTime,
+    closeTime,
+    lmsrB,
+    tokens,
+    me = null,
+    settleToken = null,
+  ) {
     this.id = id;
     this.title = title;
     this.organizer = organizer;
@@ -33,7 +44,6 @@ export class Market {
 }
 
 export class Token {
-
   // id : int
   // name : string
   // desc : string
@@ -58,7 +68,7 @@ export class Token {
 
     # Returns
     - [ Token ]
-  */ 
+  */
   static fromDistribution(lmsrB, distribution) {
     const prices = lmsr.prices(lmsrB, distribution.map(item => item.amount));
     return distribution.map((item, i) => {
@@ -67,9 +77,7 @@ export class Token {
   }
 }
 
-
 export class OrderRecord {
-
   /*
     # Args
     - id : int
@@ -89,7 +97,6 @@ export class OrderRecord {
   }
 }
 
-
 export class OrderHistory {
   constructor(orderRecords) {
     this.records = orderRecords;
@@ -102,7 +109,7 @@ export class OrderHistory {
       } else {
         return sum;
       }
-    }
+    };
     return this.records.reduce(reducer, 0);
   }
 
