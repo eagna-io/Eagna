@@ -59,7 +59,7 @@ export function request<T>(args: RequestParams<T>): Promise<T | Failure> {
 }
 
 function constructUrl(path: string, params?: object): string {
-  let url = `https://${base}${path}`;
+  let url = `${base}${path}`;
   if (params == null) {
     return url;
   } else {

@@ -14,6 +14,7 @@ interface LoginPageProps {
 const LoginPage: FC<LoginPageProps> = ({history, user}) => {
   useEffect(() => {
     if (user == null) {
+      // ログイン用のUIを表示する
       const ui = new firebaseui.auth.AuthUI(firebase.auth());
       ui.start('#firebaseui-auth-container', {
         signInOptions: [
@@ -23,6 +24,9 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
           },
         ],
       });
+    } else {
+      console.log("Already logged in");
+      // history.push("/account");
     }
   }, [user]);
 

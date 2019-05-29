@@ -9,30 +9,44 @@ import firebase from 'firebase';
 
 import LoginPage from 'pages/login';
 import User from 'models/user';
-import {getMe} from 'api/user';
+import {getMe, createUser} from 'api/user';
 
 const App: FC<{}> = () => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    // Firebase認証のステータスをwatch
     firebase.auth().onAuthStateChanged(fbUser => {
       if (fbUser == null) {
         setUser(null);
       } else {
         fbUser
           .getIdToken()
-          .then(token => getMe(token))
+          .then(token =>
+            getMe(token).then(user => {
+              if (user != null) {
+                return user;
+              } else {
+                // Firebase認証は終わっているが、サーバーには登録されていない
+                if (fbUser.displayName == null || fbUser.email == null) {
+                  // TODO
+                  throw 'Cant get name or email from FB login';
+                } else {
+                  return createUser({
+                    accessToken: token,
+                    name: fbUser.displayName,
+                    email: fbUser.email,
+                  });
+                }
+              }
+            }),
+          )
           .then(user => {
-            if (user != null) {
-              setUser(user);
-            } else {
-              // Firebase認証は終わっているが、サーバーには登録されていない
-              console.log(fbUser);
-            }
+            setUser(user);
           });
       }
     });
-  });
+  }, []);
 
   return (
     <Router>
