@@ -35,6 +35,7 @@ where
     };
 
     store.save_user(new_user)?;
+    store.commit()?;
 
     let res_data = ResData {
         id: &access_token.user_id,

@@ -96,7 +96,7 @@ impl<F> ApiServer<F> {
 
     fn cors_response(&self) -> Response {
         Response::text("")
-            .with_additional_header("Access-Control-Allow-Headers", "Authorization")
+            .with_additional_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
     }
 }
 

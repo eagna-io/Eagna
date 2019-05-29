@@ -15,8 +15,9 @@ where
     let user = match store.query_user(&access_token.user_id)? {
         Some(user) => user,
         None => {
-            println!("User does not exists, but AccessToken exists");
-            return Err(FailureResponse::ServerError);
+            // Firebase上には存在するが、DBに登録されていない
+            log::debug!("User need to sign-up first");
+            return Err(FailureResponse::Unauthorized);
         }
     };
 

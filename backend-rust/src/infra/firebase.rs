@@ -27,6 +27,8 @@ pub fn get_user(
     }
 
     let url = format!("{}/getAccountInfo?key={}", API_BASE, api_key);
+    log::debug!("Request to firebase : {}", url);
+
     let client = reqwest::Client::new();
     let mut res = client
         .post(&url)
@@ -34,6 +36,8 @@ pub fn get_user(
             id_token: access_token_id.as_str(),
         })
         .send()?;
+
+    log::debug!("Get response from firebase : {:?}", res);
 
     if !res.status().is_success() {
         return Ok(None);

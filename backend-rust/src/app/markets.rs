@@ -112,7 +112,7 @@ where
     let user = match store.query_user(&access_token.user_id)? {
         Some(user) => user,
         None => {
-            println!("User does not exists, but AccessToken exists");
+            log::warn!("User does not exists, but AccessToken exists");
             return Err(FailureResponse::ServerError);
         }
     };
@@ -145,7 +145,7 @@ where
         Some(ref user) if user.is_admin => {}
         Some(_) => return Err(FailureResponse::Unauthorized),
         None => {
-            println!("User does not exists, but AccessToken exists");
+            log::warn!("User does not exists, but AccessToken exists");
             return Err(FailureResponse::ServerError);
         }
     };

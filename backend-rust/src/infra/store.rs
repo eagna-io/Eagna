@@ -94,7 +94,7 @@ impl std::ops::Drop for DbStore {
             Some(conn) => match conn.transaction_manager().rollback_transaction(&conn) {
                 Ok(()) => {}
                 Err(e) => {
-                    println!("Error while pg transaction rollback : {:?}", e);
+                    log::warn!("Error while pg transaction rollback : {:?}", e);
                 }
             },
             None => {}

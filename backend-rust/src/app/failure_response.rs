@@ -43,8 +43,7 @@ impl Into<Response> for FailureResponse {
 
 impl<E: failure::AsFail> From<E> for FailureResponse {
     fn from(e: E) -> FailureResponse {
-        println!("Convert error into failure response");
-        println!("{:?}", e.as_fail());
+        log::info!("Convert error into failure response : {:?}", e.as_fail());
         FailureResponse::ServerError
     }
 }

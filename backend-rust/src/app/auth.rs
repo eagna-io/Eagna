@@ -23,7 +23,7 @@ where
 }
 
 fn extract_token(header_val: &str) -> Result<AccessTokenId, FailureResponse> {
-    let re = regex::Regex::new(r"^Bearer (.+)$").unwrap();
+    let re = regex::Regex::new(r"^Bearer: (.+)$").unwrap();
     re.captures(header_val)
         .and_then(|cap| cap.get(1))
         .ok_or(FailureResponse::Unauthorized)
@@ -37,7 +37,7 @@ mod tests {
     #[test]
     fn extract_valid_token() {
         let token = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz+/";
-        let header_val = format!("Bearer {}", token);
+        let header_val = format!("Bearer: {}", token);
         let res = extract_token(header_val.as_str());
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), token);
