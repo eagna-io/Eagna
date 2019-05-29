@@ -9,6 +9,7 @@ use crate::{
     },
 };
 use chrono::{DateTime, Utc};
+use log::info;
 use rouille::{input::json::json_input, Request, Response};
 
 pub fn get<S>(
@@ -120,7 +121,7 @@ where
     }
 
     let req_data = json_input::<ReqData>(req).map_err(|e| {
-        dbg!(e);
+        info!("{:?}", e);
         FailureResponse::InvalidPayload
     })?;
     let market_id = store.insert_market(req_data.into())?;
@@ -150,7 +151,7 @@ where
     };
 
     let req_data = json_input::<ReqData>(req).map_err(|e| {
-        dbg!(e);
+        info!("{:?}", e);
         FailureResponse::InvalidPayload
     })?;
     if req_data.status != MarketStatus::Settled {
