@@ -9,7 +9,7 @@ name = "librohan"
 path = "src/lib.rs"
 
 [[bin]]
-name = "rohanmarket-backend"
+name = "rohan"
 path = "src/main.rs"
 
 [[example]]

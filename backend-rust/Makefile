@@ -7,7 +7,11 @@ run:
 	docker run -d --rm --name redis -p 6379:6379 redis redis-server --bind 0.0.0.0
 	sleep 2
 	diesel migration run --database-url "${PG_URL}"
-	PG_URL="${PG_URL}" REDIS_URL="${REDIS_URL}" BIND="localhost:8080" cargo run || true
+	RUST_LOG=warn,librohan=debug,rohan=debug \
+	PG_URL="${PG_URL}" \
+	REDIS_URL="${REDIS_URL}" \
+	BIND="localhost:8080" \
+	cargo run || true
 	docker stop postgres redis || true
 
 

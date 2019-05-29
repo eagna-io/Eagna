@@ -82,19 +82,21 @@ impl<F> ApiServer<F> {
             (GET) (/cronjob/close_market) => {
                 cronjob::close_market::get(self.store_factory.establish(), req)
             },
-            (OPTION) (/{_any_path: String}) => {
+            (OPTIONS) (/{_any_path: String}) => {
                 Ok(self.cors_response())
             },
             _ => Err(FailureResponse::ResourceNotFound)
         );
         res.unwrap_or_else(<FailureResponse as Into<Response>>::into)
+            .with_additional_header(
+                "Access-Control-Allow-Origin",
+                self.access_allow_hosts.clone(),
+            )
     }
 
     fn cors_response(&self) -> Response {
-        Response::text("").with_additional_header(
-            "Access-Control-Allow-Origin",
-            self.access_allow_hosts.clone(),
-        )
+        Response::text("")
+            .with_additional_header("Access-Control-Allow-Headers", "Authorization")
     }
 }
 
