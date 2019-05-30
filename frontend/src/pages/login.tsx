@@ -1,13 +1,13 @@
-import React, {FC, useState, useEffect} from 'react';
+import React, {FC, useEffect} from 'react';
 import styled from 'styled-components';
-import {History} from 'history';
+import {History, LocationDescriptor} from 'history';
 import firebase from 'firebase';
 import * as firebaseui from 'firebaseui';
 
 import User from 'models/user';
 
 interface LoginPageProps {
-  history: History;
+  history: History<{redirect?: LocationDescriptor}>;
   user: User | null;
 }
 
@@ -25,8 +25,15 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
         ],
       });
     } else {
-      console.log("Already logged in");
-      // history.push("/account");
+      const redirectLocation =
+        history.location.state && history.location.state.redirect;
+      if (!redirectLocation) {
+        history.push('/me');
+      } else if (typeof redirectLocation === 'string') {
+        history.push(redirectLocation);
+      } else {
+        history.push(redirectLocation);
+      }
     }
   }, [user]);
 

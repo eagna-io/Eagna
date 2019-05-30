@@ -8,6 +8,7 @@ import {
 import firebase from 'firebase';
 
 import LoginPage from 'pages/login';
+import AccountPage from 'pages/account';
 import User from 'models/user';
 import {getMe, createUser} from 'api/user';
 
@@ -55,6 +56,11 @@ const App: FC<{}> = () => {
           path="/login"
           exact
           render={({history}) => <LoginPage user={user} history={history} />}
+        />
+        <Route
+          path="/me"
+          exact
+          render={({history}) => <AccountPage user={user} history={history} />}
         />
         <Route render={() => <Redirect to="/login" />} />
       </Switch>
