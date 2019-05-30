@@ -40,10 +40,26 @@ impl<F> ApiServer<F> {
         S: AccessTokenStore + MarketStore + UserStore + Send + 'static,
     {
         rouille::Server::new(addr, move |req| {
-            rouille::log_custom(req, log_ok, log_err, || self.routing(req))
+            rouille::log_custom(req, log_ok, log_err, || {
+                let res = match self.filter_cors_preflight(req) {
+                    Some(res) => res,
+                    None => self.routing(req),
+                };
+                self.append_cors_header(res)
+            })
         })
         .unwrap()
         .run();
+    }
+
+    pub fn filter_cors_preflight(&self, req: &Request) -> Option<Response> {
+        match req.method() {
+            "OPTIONS" => Some(Response::text("").with_additional_header(
+                "Access-Control-Allow-Headers",
+                "Authorization, Content-Type",
+            )),
+            _ => None,
+        }
     }
 
     pub fn routing<S>(&self, req: &Request) -> Response
@@ -82,21 +98,16 @@ impl<F> ApiServer<F> {
             (GET) (/cronjob/close_market) => {
                 cronjob::close_market::get(self.store_factory.establish(), req)
             },
-            (OPTIONS) (/{_any_path: String}) => {
-                Ok(self.cors_response())
-            },
             _ => Err(FailureResponse::ResourceNotFound)
         );
         res.unwrap_or_else(<FailureResponse as Into<Response>>::into)
-            .with_additional_header(
-                "Access-Control-Allow-Origin",
-                self.access_allow_hosts.clone(),
-            )
     }
 
-    fn cors_response(&self) -> Response {
-        Response::text("")
-            .with_additional_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+    pub fn append_cors_header(&self, resp: Response) -> Response {
+        resp.with_additional_header(
+            "Access-Control-Allow-Origin",
+            self.access_allow_hosts.clone(),
+        )
     }
 }
 
