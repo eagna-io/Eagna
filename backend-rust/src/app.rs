@@ -68,34 +68,34 @@ impl<F> ApiServer<F> {
         S: AccessTokenStore + MarketStore + UserStore + Send + 'static,
     {
         let res = router!(req,
-            (GET) (/me) => {
+            (GET) (/me/) => {
                 me::get(self.store_factory.establish(), req)
             },
-            (GET) (/me/markets) => {
+            (GET) (/me/markets/) => {
                 me::markets::get(self.store_factory.establish(), req)
             },
-            (POST) (/users) => {
+            (POST) (/users/) => {
                 users::post(self.store_factory.establish(), req)
             },
-            (POST) (/markets) => {
+            (POST) (/markets/) => {
                 markets::post(self.store_factory.establish(), req)
             },
-            (GET) (/markets/{id: MarketId}) => {
+            (GET) (/markets/{id: MarketId}/) => {
                 markets::get(self.store_factory.establish(), req, id)
             },
-            (PUT) (/markets/{id: MarketId}) => {
+            (PUT) (/markets/{id: MarketId}/) => {
                 markets::put(self.store_factory.establish(), req, id)
             },
-            (GET) (/markets/{id: MarketId}/orders) => {
+            (GET) (/markets/{id: MarketId}/orders/) => {
                 markets::orders::get_all(self.store_factory.establish(), req, id)
             },
-            (POST) (/markets/{id: MarketId}/orders) => {
+            (POST) (/markets/{id: MarketId}/orders/) => {
                 markets::orders::post(self.store_factory.establish(), req, id)
             },
-            (GET) (/cronjob/open_market) => {
+            (GET) (/cronjob/open_market/) => {
                 cronjob::open_market::get(self.store_factory.establish(), req)
             },
-            (GET) (/cronjob/close_market) => {
+            (GET) (/cronjob/close_market/) => {
                 cronjob::close_market::get(self.store_factory.establish(), req)
             },
             _ => Err(FailureResponse::ResourceNotFound)
