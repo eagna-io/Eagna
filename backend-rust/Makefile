@@ -1,12 +1,14 @@
 PG_URL:=postgres://postgres:postgres@localhost:5432/postgres
 REDIS_URL:=redis://localhost:6379
 
-run-dev:
+start-db:
 	docker stop postgres redis || true
 	docker run -d --rm --name postgres -p 5432:5432 postgres
 	docker run -d --rm --name redis -p 6379:6379 redis redis-server --bind 0.0.0.0
 	sleep 2
 	diesel migration run --database-url "${PG_URL}"
+
+run-dev:
 	RUST_LOG=warn,librohan=debug,rohan=debug \
 	PG_URL="${PG_URL}" \
 	REDIS_URL="${REDIS_URL}" \
