@@ -5,6 +5,9 @@ authors = ["AtsukiTak <takatomgoo@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-diesel = { version = "~1.4", features = ["postgres"] }
-chrono = { version = "~0.4", features = ["serde"] }
+chrono = { version = "~0.4" }
 rohanmarket-backend = { path = ".." }
+
+[[bin]]
+name = "feed_demo_data"
+path = "src/bin/feed_demo_data.rs"

@@ -1,53 +1,71 @@
 use chrono::{DateTime, Duration, Utc};
-use diesel::prelude::*;
-use librohan::postgres::{schema::markets, MarketStatus};
+use librohan::domain::{
+    models::{
+        lmsr,
+        market::{
+            Market, MarketDesc, MarketId, MarketOrganizer, MarketShortDesc, MarketTitle, TokenDesc,
+            TokenName,
+        },
+    },
+    services::{
+        market_store::{NewMarket, NewToken},
+        {MarketStore, UserStore},
+    },
+};
+use std::sync::{
+    atomic::{AtomicUsize, Ordering},
+    Arc,
+};
 
-#[derive(Debug, PartialEq, Eq, Insertable)]
-#[table_name = "markets"]
-pub struct NewMarket {
-    pub title: String,
-    pub organizer: String,
-    pub short_desc: String,
-    pub description: String,
-    pub lmsr_b: i32,
-    pub open_time: DateTime<Utc>,
-    pub close_time: DateTime<Utc>,
-    pub status: MarketStatus,
-    pub settle_token_id: Option<i32>,
+static SERIAL_ID: AtomicUsize = AtomicUsize::new(1);
+
+pub fn insert_new_market<S>(store: &mut S, open_time: DateTime<Utc>) -> MarketId
+where
+    S: MarketStore,
+{
+    let id = SERIAL_ID.fetch_add(1, Ordering::SeqCst);
+
+    let new_market = NewMarket {
+        title: MarketTitle(Arc::new(format!("Market {}", id))),
+        organizer: MarketOrganizer(Arc::new(format!("Rohan market.inc"))),
+        short_desc: MarketShortDesc(Arc::new(format!("The #{} market", id))),
+        description: MarketDesc(Arc::new(format!(
+            "Answer to the Ultimate Question of Life, the Universe, and Everything"
+        ))),
+        lmsr_b: lmsr::B(100),
+        open_time: open_time,
+        close_time: open_time + Duration::minutes(10),
+        tokens: vec![
+            NewToken {
+                name: TokenName(Arc::new(format!("Alice"))),
+                description: TokenDesc(Arc::new(format!("Alice wins"))),
+            },
+            NewToken {
+                name: TokenName(Arc::new(format!("Bob"))),
+                description: TokenDesc(Arc::new(format!("Bob wins"))),
+            },
+        ],
+    };
+
+    let market_id = store.insert_market(new_market).unwrap();
+
+    market_id
 }
 
-impl NewMarket {
-    pub fn save(&self, conn: &PgConnection) -> i32 {
-        use librohan::postgres::schema::markets::{columns as market, table as markets};
+pub fn open_preparing_market<S>(store: &mut S, market_id: &MarketId)
+where
+    S: MarketStore + UserStore,
+{
+    let users = store.query_all_user_ids().unwrap();
 
-        diesel::insert_into(markets)
-            .values(self)
-            .returning(market::id)
-            .get_result(conn)
-            .expect("Failed to insert market")
-    }
-
-    pub fn get_id(&self, conn: &PgConnection) -> i32 {
-        use librohan::postgres::schema::markets::{columns as market, table as markets};
-
-        markets
-            .select(market::id)
-            .filter(market::title.eq(self.title.as_str()))
-            .first(conn)
-            .expect("Failed to query market")
-    }
-}
-
-pub fn preparing_market() -> NewMarket {
-    NewMarket {
-        title: "The preparing market".into(),
-        organizer: "Rohan market.inc".into(),
-        short_desc: "It will always start 10min after it is created".into(),
-        description: "Answer to the Ultimate Question of Life, the Universe, and Everything".into(),
-        lmsr_b: 100,
-        open_time: Utc::now() - Duration::minutes(10),
-        close_time: Utc::now() + Duration::hours(1),
-        status: MarketStatus::Preparing,
-        settle_token_id: None,
+    let mut locked_store = store.lock_market(market_id).unwrap();
+    match locked_store.query_market(market_id).unwrap().unwrap() {
+        Market::Preparing(m) => {
+            let open_market = m.open_uncheck(&users);
+            locked_store
+                .update_market_status_to_open(&open_market)
+                .unwrap();
+        }
+        _ => panic!(format!("Market {} is not preparing", market_id.0)),
     }
 }
