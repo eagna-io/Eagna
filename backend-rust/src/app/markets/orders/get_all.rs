@@ -67,6 +67,7 @@ struct RespBody {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct RespNormalOrder {
     token_id: TokenId,
     amount_token: AmountToken,
@@ -80,6 +81,7 @@ struct Mine {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct RespMyOrder {
     #[serde(skip_serializing_if = "Option::is_none")]
     token_id: Option<TokenId>,

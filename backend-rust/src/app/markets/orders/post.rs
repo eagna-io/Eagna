@@ -70,6 +70,7 @@ struct ReqData {
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct ResData {
     token_id: TokenId,
     amount_token: AmountToken,

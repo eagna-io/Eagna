@@ -21,6 +21,7 @@ where
     S: MarketStore,
 {
     #[derive(Debug, Serialize, Queryable)]
+    #[serde(rename_all = "camelCase")]
     struct RespData {
         title: MarketTitle,
         organizer: MarketOrganizer,
@@ -28,6 +29,7 @@ where
         description: MarketDesc,
         open_time: DateTime<Utc>,
         close_time: DateTime<Utc>,
+        lmsr_b: lmsr::B,
         tokens: MarketTokens,
         status: MarketStatus,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -49,6 +51,7 @@ where
                 description: market.description.clone(),
                 open_time: market.open_time,
                 close_time: market.close_time,
+                lmsr_b: market.lmsr_b,
                 tokens: market.tokens.clone(),
                 status: market.status(),
                 settle_token_id,
@@ -151,7 +154,7 @@ where
     };
 
     let req_data = json_input::<ReqData>(req).map_err(|e| {
-        info!("{:?}", e);
+        info!("Invalid payload : {:?}", e);
         FailureResponse::InvalidPayload
     })?;
     if req_data.status != MarketStatus::Settled {

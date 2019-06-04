@@ -29,6 +29,7 @@ where
 }
 
 #[derive(Debug, Serialize, Queryable)]
+#[serde(rename_all = "camelCase")]
 struct RespItem {
     id: MarketId,
     title: MarketTitle,
