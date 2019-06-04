@@ -87,9 +87,10 @@ export function getMarketOrders(
     path: `/markets/${marketId}/orders/`,
     params: accessToken
       ? {
-          contains: 'me',
+          contains: 'mine',
         }
       : undefined,
+    accessToken: accessToken,
     decoder: ordersDecoder,
   }).then(res => {
     if (isFailure(res)) {

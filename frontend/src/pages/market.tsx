@@ -65,7 +65,7 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
             tokens={market ? market.tokens : []}
             tokenPrices={tokenPrices}
           />
-          {market && market.status === MarketStatus.Open ? (
+          {market && myOrders && market.status === MarketStatus.Open ? (
             <>
               <StyledHistoryComponent
                 tokens={market.tokens}
