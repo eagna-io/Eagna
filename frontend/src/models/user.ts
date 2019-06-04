@@ -3,6 +3,7 @@ interface User {
   name: string;
   email: string;
   accessToken: string;
+  isAdmin: boolean;
 }
 
 export default User;

@@ -64,7 +64,7 @@ function constructUrl(path: string, params?: object): string {
     return url;
   } else {
     url += '?';
-    Object.entries(params).forEach((key, val) => {
+    Object.entries(params).forEach(([key, val]) => {
       url += `${key}=${val}&`;
     });
     return url.slice(0, -1);

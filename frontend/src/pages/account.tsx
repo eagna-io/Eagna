@@ -1,12 +1,12 @@
-import React, {FC, useState, useEffect, useContext} from 'react';
+import React, {FC, useState, useEffect} from 'react';
 import styled from 'styled-components';
 import {Link} from 'react-router-dom';
 import {History} from 'history';
 
 import Header from 'components/header';
 import User from 'models/user';
-import Market from 'models/market';
-import {getMeMarkets} from 'api/user';
+import {Market} from 'models/market';
+import {getMyMarkets} from 'api/user';
 
 interface AccountPageProps {
   history: History;
@@ -21,7 +21,7 @@ const AccountPage: FC<AccountPageProps> = ({history, user}) => {
       history.push('/login', {redirect: '/me'});
       return;
     } else {
-      getMeMarkets(user.accessToken).then(ms => setMarkets(ms));
+      getMyMarkets(user.accessToken).then(ms => setMarkets(ms));
     }
   }, [user]);
 
