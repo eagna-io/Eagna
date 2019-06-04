@@ -25,13 +25,16 @@ where
         id: user.id,
         name: user.name,
         email: user.email,
+        is_admin: user.is_admin,
     };
     Ok(Response::json(&res_data))
 }
 
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct ResData {
     id: UserId,
     name: String,
     email: String,
+    is_admin: bool,
 }
