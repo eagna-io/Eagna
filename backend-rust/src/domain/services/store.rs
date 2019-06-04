@@ -1,5 +1,5 @@
 pub trait Store {
-    type Error: failure::AsFail;
+    type Error: failure::AsFail + std::fmt::Debug;
 
     fn commit(self) -> Result<(), Self::Error>;
 }
