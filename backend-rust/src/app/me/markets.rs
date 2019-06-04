@@ -1,9 +1,12 @@
 use crate::{
     app::{validate_bearer_header, FailureResponse},
     domain::{
-        models::market::{
-            Market, MarketDesc, MarketId, MarketOrganizer, MarketShortDesc, MarketStatus,
-            MarketTitle, MarketTokens,
+        models::{
+            lmsr,
+            market::{
+                Market, MarketDesc, MarketId, MarketOrganizer, MarketShortDesc, MarketStatus,
+                MarketTitle, MarketTokens,
+            },
         },
         services::{AccessTokenStore, MarketStore},
     },
@@ -36,6 +39,7 @@ struct RespItem {
     organizer: MarketOrganizer,
     short_desc: MarketShortDesc,
     description: MarketDesc,
+    lmsr_b: lmsr::B,
     open_time: DateTime<Utc>,
     close_time: DateTime<Utc>,
     tokens: MarketTokens,
@@ -50,6 +54,7 @@ impl From<Market> for RespItem {
             organizer: market.organizer.clone(),
             short_desc: market.short_desc.clone(),
             description: market.description.clone(),
+            lmsr_b: market.lmsr_b,
             open_time: market.open_time,
             close_time: market.close_time,
             tokens: market.tokens.clone(),

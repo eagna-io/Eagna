@@ -18,10 +18,12 @@ where
     }
 
     #[derive(Serialize)]
+    #[serde(rename_all = "camelCase")]
     struct ResData<'a> {
         id: &'a UserId,
         name: &'a str,
         email: &'a str,
+        is_admin: bool,
     }
 
     let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
@@ -41,6 +43,7 @@ where
         id: &access_token.user_id,
         name: req_data.name.as_str(),
         email: req_data.email.as_str(),
+        is_admin: false,
     };
 
     Ok(Response::json(&res_data).with_status_code(201))

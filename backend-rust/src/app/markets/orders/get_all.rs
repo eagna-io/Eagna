@@ -63,6 +63,7 @@ where
 #[derive(Debug, Serialize)]
 struct RespBody {
     orders: Vec<RespNormalOrder>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     mine: Option<Mine>,
 }
 

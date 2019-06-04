@@ -23,6 +23,7 @@ where
     #[derive(Debug, Serialize, Queryable)]
     #[serde(rename_all = "camelCase")]
     struct RespData {
+        id: MarketId,
         title: MarketTitle,
         organizer: MarketOrganizer,
         short_desc: MarketShortDesc,
@@ -45,6 +46,7 @@ where
                 Market::Settled(m) => Some(m.settle_token.id),
             };
             RespData {
+                id: market.id,
                 title: market.title.clone(),
                 organizer: market.organizer.clone(),
                 short_desc: market.short_desc.clone(),
@@ -71,6 +73,7 @@ where
     S: MarketStore + UserStore + AccessTokenStore,
 {
     #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
     struct ReqData {
         title: MarketTitle,
         organizer: MarketOrganizer,
