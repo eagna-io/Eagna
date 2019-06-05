@@ -63,6 +63,7 @@ where
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct ReqData {
     token_id: TokenId,
     amount_token: AmountToken,
