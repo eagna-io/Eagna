@@ -6,7 +6,7 @@ import Header from 'components/header';
 import MarketHeader from './market/header';
 import TokensComponent from './market/tokens';
 // import OrderComponent from './market/order';
-// import AssetsComponent from './market/assets';
+import AssetsComponent from './market/assets';
 // import ResultComponent from './market/result';
 import HistoryComponent from './market/history';
 import DescComponent from './market/description';
@@ -27,8 +27,6 @@ interface MarketPageProps {
   user: User | null;
   marketId: MarketId;
 }
-
-type MarketLike = MarketId | Market;
 
 const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
   const [market, setMarket] = useState<Market | null>(null);
@@ -67,6 +65,12 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
           />
           {market && myOrders && market.status === MarketStatus.Open ? (
             <>
+              <OrderContainer>
+                <StyledAssetsComponent
+                  tokens={market.tokens}
+                  myOrders={myOrders || []}
+                />
+              </OrderContainer>
               <StyledHistoryComponent
                 tokens={market.tokens}
                 myOrders={myOrders || []}
@@ -77,6 +81,14 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
           (market.status === MarketStatus.Closed ||
             market.status === MarketStatus.Settled) ? (
             <>
+              <OrderContainer>
+                {myOrders ? (
+                  <StyledAssetsComponent
+                    tokens={market.tokens}
+                    myOrders={myOrders}
+                  />
+                ) : null}
+              </OrderContainer>
               <StyledHistoryComponent
                 tokens={market.tokens}
                 myOrders={myOrders || []}
@@ -111,6 +123,9 @@ const StyledTokensComponent = styled(TokensComponent)`
 const OrderContainer = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const StyledAssetsComponent = styled(AssetsComponent)`
   margin-top: 50px;
 `;
 

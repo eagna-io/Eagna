@@ -131,6 +131,19 @@ function normalize(n: number): number {
   return Math.floor(n * KILO);
 }
 
+export function currentAmountOfCoin(myOrders: MyOrderHistory): number {
+  return myOrders.reduce((acc, order) => acc + order.amountCoin, 0);
+}
+
+export function currentAmountOfToken(
+  myOrders: MyOrderHistory,
+  tokenId: TokenId,
+): number {
+  return myOrders
+    .filter(order => !isInitialSupplyOrder(order) && order.tokenId === tokenId)
+    .reduce((acc, order) => acc + order.amountToken, 0);
+}
+
 export function createDemoPreparingMarket() {
   return {
     id: 1,

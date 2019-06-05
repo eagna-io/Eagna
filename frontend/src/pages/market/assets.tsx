@@ -1,13 +1,26 @@
-import React from 'react';
+import React, {FC} from 'react';
 import styled from 'styled-components';
 
-/*
-export default function Assets(props) {
-  const tokens = props.tokens;
-  const orderHistory = props.orderHistory;
+import {
+  Token,
+  MyOrderHistory,
+  currentAmountOfCoin,
+  currentAmountOfToken,
+} from 'models/market';
 
+interface AssetsComponentProps {
+  tokens: Token[];
+  myOrders: MyOrderHistory;
+  className?: string;
+}
+
+const AssetsComponent: FC<AssetsComponentProps> = ({
+  tokens,
+  myOrders,
+  className,
+}) => {
   return (
-    <Table className={props.className}>
+    <Table className={className}>
       <thead>
         <Header>
           <HeaderAsset>Asset</HeaderAsset>
@@ -15,29 +28,29 @@ export default function Assets(props) {
         </Header>
       </thead>
       <tbody>
-        <AssetItem coin key={"coin"}>
-          <AssetLabel>{"Coin"}</AssetLabel>
-          <ItemVolume>{orderHistory.currentAmountCoin()}</ItemVolume>
+        <AssetItem coin key={'coin'}>
+          <AssetLabel>{'Coin'}</AssetLabel>
+          <ItemVolume>{currentAmountOfCoin(myOrders)}</ItemVolume>
         </AssetItem>
-        {
-          tokens.map(token => {
-            return (
-              <AssetItem key={token.id}>
-                <AssetLabel>{token.name}</AssetLabel>
-                <ItemVolume>{orderHistory.currentAmountToken(token)}</ItemVolume>
-              </AssetItem>
-            )
-          })
-        }
+        {tokens.map(token => {
+          return (
+            <AssetItem key={token.id}>
+              <AssetLabel>{token.name}</AssetLabel>
+              <ItemVolume>{currentAmountOfToken(myOrders, token.id)}</ItemVolume>
+            </AssetItem>
+          );
+        })}
       </tbody>
     </Table>
   );
-}
+};
+
+export default AssetsComponent;
 
 const Table = styled.table`
   table-layout: fixed;
   width: 406px;
-  border: 1px solid #D1D5DA;
+  border: 1px solid #d1d5da;
   border-radius: 4px;
   border-spacing: 0;
   border-collapse: collapse;
@@ -48,7 +61,7 @@ const Header = styled.tr`
   font-size: 12px;
   font-family: Lucida Grande;
   font-weight: normal;
-  background-color: #F6F8FA;
+  background-color: #f6f8fa;
   height: 40px;
   border: none;
 `;
@@ -63,17 +76,17 @@ const HeaderVolume = styled.th`
   padding-right: 75px;
 `;
 
-const AssetItem = styled.tr`
+const AssetItem = styled('tr')<{coin?: boolean}>`
   height: 50px;
-  border-top: 1px solid #D1D5DA;
+  border-top: 1px solid #d1d5da;
   background-color: white;
-  color: #37474F;
-  font-size: ${props => props.coin ? "16px" : "14px"};
+  color: #37474f;
+  font-size: ${props => (props.coin ? '16px' : '14px')};
   font-family: Lucida Grande;
-  font-weight: ${props => props.coin ? "bold" : "normal"};
+  font-weight: ${props => (props.coin ? 'bold' : 'normal')};
 
   &:nth-child(even) {
-    background-color: #F9F9F9;
+    background-color: #f9f9f9;
   }
 `;
 
@@ -86,4 +99,3 @@ const ItemVolume = styled.td`
   text-align: right;
   padding-right: 75px;
 `;
-*/

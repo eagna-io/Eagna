@@ -23,12 +23,12 @@ const MarketHeaderComponent: FC<MarketHeaderComponentProps> = ({
           <Status>{market ? market.status : '-'}</Status>
           <TimeContents>
             <TimeItem>
-              <TimeKey>Open</TimeKey>
-              <TimeVal>{market ? market.openTime.toISOString() : '-'}</TimeVal>
+              <TimeKey>Open :</TimeKey>
+              <TimeVal>{market ? market.openTime.fromNow() : '-'}</TimeVal>
             </TimeItem>
             <TimeItem>
-              <TimeKey>Close</TimeKey>
-              <TimeVal>{market ? market.closeTime.toISOString() : '-'}</TimeVal>
+              <TimeKey>Close :</TimeKey>
+              <TimeVal>{market ? market.closeTime.fromNow() : '-'}</TimeVal>
             </TimeItem>
           </TimeContents>
         </RightContents>
