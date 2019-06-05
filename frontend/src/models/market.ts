@@ -60,6 +60,10 @@ export interface SettleOrder {
   type: 'Settle';
 }
 
+export type PublicOrderHistory = NormalOrder[];
+
+export type MyOrderHistory = Order[];
+
 export type TokenDistribution = Map<TokenId, number>;
 
 export type TokenPrices = Map<TokenId, number>;

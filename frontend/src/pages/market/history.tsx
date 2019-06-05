@@ -1,11 +1,11 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
 
-import {Token, Order} from 'models/market';
+import {Token, MyOrderHistory} from 'models/market';
 
 interface TradeHistoryComponentProps {
   tokens: Token[];
-  myOrders: Order[];
+  myOrders: MyOrderHistory;
   className?: string;
 }
 
@@ -46,7 +46,7 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
 
             return (
               <Item bold={order.type !== 'Normal'} key={order.time.unix()}>
-                <ItemCol>{order.time.toISOString()}</ItemCol>
+                <ItemCol>{order.time.fromNow()}</ItemCol>
                 <ItemCol>{orderType}</ItemCol>
                 <ItemCol>{tokenName}</ItemCol>
                 <ItemCol right>{order.amountToken}</ItemCol>
