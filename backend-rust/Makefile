@@ -14,7 +14,6 @@ run-dev:
 	REDIS_URL="${REDIS_URL}" \
 	BIND="localhost:8080" \
 	cargo run || true
-	docker stop postgres redis || true
 
 
 TMP_PG_URL:=postgres://postgres:postgres@localhost:5430/postgres
