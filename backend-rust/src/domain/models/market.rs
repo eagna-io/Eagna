@@ -225,15 +225,14 @@ impl OpenMarket {
         }
 
         // check price
-        let cost = self.cost_of_token(&order.token_id, order.amount_token);
-        let expect_amount_coin = -cost;
+        let expect_amount_coin = -self.cost_of_token(&order.token_id, order.amount_token);
         if !order.amount_coin.is_around(&expect_amount_coin, MAX_SPLIT_PERCENT) {
             return Err(TryOrderError::PriceOutOfRange);
         }
 
         // update data
         let new_order = NormalOrder {
-            amount_coin: cost,
+            amount_coin: expect_amount_coin,
             ..order
         };
         self.orders.push_valid_order(Order::Normal(new_order));
