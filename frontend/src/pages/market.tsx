@@ -19,6 +19,7 @@ import {
   MyOrderHistory,
   getTokenDistribution,
   getTokenPrices,
+  getMyAssets,
 } from 'models/market';
 import User from 'models/user';
 import {getMarket, getOrders, postOrder} from 'api/market';
@@ -45,13 +46,18 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
       setOrders(res.orders);
       setMyOrders(res.myOrders || null);
     });
-  }, [user]);
+  }, [marketId, user]);
 
   let tokenDistribution = null;
   let tokenPrices = null;
   if (market && orders) {
     tokenDistribution = getTokenDistribution(market.tokens, orders);
     tokenPrices = getTokenPrices(market.lmsrB, tokenDistribution);
+  }
+
+  let myAssets = null;
+  if (market && myOrders) {
+    myAssets = getMyAssets(market.tokens, myOrders);
   }
 
   const requestOrder = (
@@ -68,23 +74,25 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
         amountCoin: amountCoin,
       },
       accessToken: user.accessToken,
-    }).then(res => {
-      const settledAmountCoin = res.amountCoin;
-      alert(
-        'Orderに成功しました！\n' +
-          `トークン   : ${token.name}\n` +
-          `トークン数 : ${amountToken}\n` +
-          `コイン数   : ${settledAmountCoin}`,
-      );
-      return getOrders(marketId, user.accessToken);
-    }).then(res => {
-      setOrders(res.orders);
-      if (!res.myOrders) {
-        throw "Success to create a new Order, but it is not reflected";
-      } else {
-        setMyOrders(res.myOrders);
+    })
+      .then(res => {
+        const settledAmountCoin = res.amountCoin;
+        alert(
+          'Orderに成功しました！\n' +
+            `トークン   : ${token.name}\n` +
+            `トークン数 : ${amountToken}\n` +
+            `コイン数   : ${settledAmountCoin}`,
+        );
+        return getOrders(marketId, user.accessToken);
+      })
+      .then(res => {
+        setOrders(res.orders);
+        if (!res.myOrders) {
+          throw 'Success to create a new Order, but it is not reflected';
+        } else {
+          setMyOrders(res.myOrders);
         }
-    });
+      });
   };
 
   return (
@@ -99,6 +107,7 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
           />
           {market &&
           myOrders &&
+          myAssets &&
           tokenDistribution &&
           user &&
           market.status === MarketStatus.Open ? (
@@ -114,12 +123,12 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
                 />
                 <StyledAssetsComponent
                   tokens={market.tokens}
-                  myOrders={myOrders || []}
+                  myAssets={myAssets}
                 />
               </OrderContainer>
               <StyledHistoryComponent
                 tokens={market.tokens}
-                myOrders={myOrders || []}
+                myOrders={myOrders}
               />
             </>
           ) : null}
@@ -128,10 +137,10 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
             market.status === MarketStatus.Settled) ? (
             <>
               <OrderContainer>
-                {myOrders ? (
+                {myAssets ? (
                   <StyledAssetsComponent
                     tokens={market.tokens}
-                    myOrders={myOrders}
+                    myAssets={myAssets}
                   />
                 ) : null}
               </OrderContainer>

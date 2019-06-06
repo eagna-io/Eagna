@@ -3,20 +3,18 @@ import styled from 'styled-components';
 
 import {
   Token,
-  MyOrderHistory,
-  currentAmountOfCoin,
-  currentAmountOfToken,
+  MyAssets,
 } from 'models/market';
 
 interface AssetsComponentProps {
   tokens: Token[];
-  myOrders: MyOrderHistory;
+  myAssets: MyAssets;
   className?: string;
 }
 
 const AssetsComponent: FC<AssetsComponentProps> = ({
   tokens,
-  myOrders,
+  myAssets,
   className,
 }) => {
   return (
@@ -30,13 +28,13 @@ const AssetsComponent: FC<AssetsComponentProps> = ({
       <tbody>
         <AssetItem coin key={'coin'}>
           <AssetLabel>{'Coin'}</AssetLabel>
-          <ItemVolume>{currentAmountOfCoin(myOrders)}</ItemVolume>
+          <ItemVolume>{myAssets.get('Coin')}</ItemVolume>
         </AssetItem>
         {tokens.map(token => {
           return (
             <AssetItem key={token.id}>
               <AssetLabel>{token.name}</AssetLabel>
-              <ItemVolume>{currentAmountOfToken(myOrders, token.id)}</ItemVolume>
+              <ItemVolume>{myAssets.get(token.id)}</ItemVolume>
             </AssetItem>
           );
         })}

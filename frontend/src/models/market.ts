@@ -68,6 +68,8 @@ export type TokenDistribution = Map<TokenId, number>;
 
 export type TokenPrices = Map<TokenId, number>;
 
+export type MyAssets = Map<'Coin' | TokenId, number>;
+
 export const KILO: number = 1000;
 
 export function isNormalOrder(order: Order): order is NormalOrder {
@@ -141,11 +143,23 @@ function normalize(n: number): number {
   return Math.floor(n * KILO);
 }
 
-export function currentAmountOfCoin(myOrders: MyOrderHistory): number {
+export function getMyAssets(
+  tokens: Token[],
+  myOrders: MyOrderHistory,
+): MyAssets {
+  let assets = new Map<'Coin' | TokenId, number>(tokens.map(t => [t.id, 0]));
+  assets.set('Coin', currentAmountOfCoin(myOrders));
+  tokens.forEach(token =>
+    assets.set(token.id, currentAmountOfToken(myOrders, token.id)),
+  );
+  return assets;
+}
+
+function currentAmountOfCoin(myOrders: MyOrderHistory): number {
   return myOrders.reduce((acc, order) => acc + order.amountCoin, 0);
 }
 
-export function currentAmountOfToken(
+function currentAmountOfToken(
   myOrders: MyOrderHistory,
   tokenId: TokenId,
 ): number {
