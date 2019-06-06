@@ -226,7 +226,10 @@ impl OpenMarket {
 
         // check price
         let expect_amount_coin = -self.cost_of_token(&order.token_id, order.amount_token);
-        if !order.amount_coin.is_around(&expect_amount_coin, MAX_SPLIT_PERCENT) {
+        if !order
+            .amount_coin
+            .is_around(&expect_amount_coin, MAX_SPLIT_PERCENT)
+        {
             return Err(TryOrderError::PriceOutOfRange);
         }
 
@@ -264,7 +267,7 @@ impl OpenMarket {
         let lmsr_b = self.base.lmsr_b;
         let mut distribution = self.token_distribution();
         let cur_cost = lmsr::cost(lmsr_b, distribution.values());
-        let cur_amount_token = distribution
+        let cur_amount_token = *distribution
             .get(token_id)
             .expect("Token MUST belongs to the market");
         distribution.insert(*token_id, cur_amount_token + amount_token);

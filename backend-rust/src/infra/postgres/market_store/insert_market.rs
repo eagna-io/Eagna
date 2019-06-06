@@ -1,10 +1,9 @@
 use crate::domain::{models::market::MarketId, services::market_store::NewMarket};
 use chrono::{DateTime, Utc};
 use diesel::{pg::PgConnection, prelude::*, result::Error as PgError};
+use crate::infra::postgres::schema::{market_tokens, markets};
 
 pub fn insert_market(conn: &PgConnection, market: NewMarket) -> Result<MarketId, PgError> {
-    use crate::infra::postgres::schema::{market_tokens, markets};
-
     let market_id = diesel::insert_into(markets::table)
         .values(InnerNewMarket {
             title: market.title.0.as_str(),
@@ -34,7 +33,6 @@ pub fn insert_market(conn: &PgConnection, market: NewMarket) -> Result<MarketId,
         .map(|_| MarketId(market_id))
 }
 
-use crate::infra::postgres::schema::markets;
 #[derive(Insertable)]
 #[table_name = "markets"]
 struct InnerNewMarket<'a> {
@@ -47,7 +45,6 @@ struct InnerNewMarket<'a> {
     close_time: DateTime<Utc>,
 }
 
-use crate::infra::postgres::schema::market_tokens;
 #[derive(Insertable)]
 #[table_name = "market_tokens"]
 struct InnerNewToken<'a> {
