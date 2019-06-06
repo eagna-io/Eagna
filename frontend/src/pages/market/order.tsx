@@ -1,109 +1,122 @@
-import React, {useContext, useState} from 'react';
+import React, {FC, useState} from 'react';
 import styled from 'styled-components';
-import {Token} from 'models/market';
-/*
+import {
+  Token,
+  TokenDistribution,
+  cloneTokenDistribution,
+  distributionCost,
+} from 'models/market';
 
-const MAX_QUANTITY = 100;
-const MICRO_COIN = 1000000;
+const MAX_QUANTITY = 1000;
+
+enum OrderType {
+  Buy = 'Buy',
+  Sell = 'Sell',
+}
 
 interface OrderComponentProps {
   tokens: Token[];
+  lmsrB: number;
+  tokenDistribution: TokenDistribution;
+  requestOrder(token: Token, amountToken: number, amountCoin: number): void;
+  className?: string;
 }
 
-const OrderComponent: FC<OrderComponentProps> = ({tokens}) => {
-  const {lmsrB, tokens, requestOrder} = props;
-  const [selectedToken, setSelectedToken] = useState(null);
-  const [orderType, setOrderType] = useState("buy");
-  const [inputAmountToken, setAmountToken] = useState(null);
-  const [errMsg, setErr] = useState(null);
+const OrderComponent: FC<OrderComponentProps> = ({
+  tokens,
+  lmsrB,
+  tokenDistribution,
+  requestOrder,
+  className,
+}) => {
+  const [selectedToken, setSelectedToken] = useState<Token>(tokens[0]);
+  const [orderType, setOrderType] = useState<OrderType>(OrderType.Buy);
+  const [inputAmountToken, setAmountToken] = useState<number | null>(null);
+  const [errMsg, setErr] = useState<string | null>(null);
 
-  const cost = selectedToken ? currentCost(selectedToken, inputAmountToken, tokens, orderType, lmsrB) : 0;
+  let futureDistribution = cloneTokenDistribution(tokenDistribution);
+  if (inputAmountToken) {
+    const curAmount = futureDistribution.get(selectedToken.id) || 0;
+    const futAmount =
+      orderType === OrderType.Buy
+        ? curAmount + inputAmountToken
+        : curAmount - inputAmountToken;
+    futureDistribution.set(selectedToken.id, futAmount);
+  }
+
+  const cost =
+    distributionCost(lmsrB, futureDistribution) -
+    distributionCost(lmsrB, tokenDistribution);
 
   const onPressEnter = () => {
-    if (!selectedToken) {
-      setErr("トークンを選択してください");
+    if (cost === 0) {
+      setErr('コストが0の注文は出せません。Quantityを大きくしてください。');
       return;
     }
-    if (cost === 0) {
-      setErr("コストが0の注文は出せません。Quantityを大きくしてください。");
+    if (!inputAmountToken || inputAmountToken === 0) {
+      setErr('トークンの量を入力してください');
       return;
     }
     setErr(null);
     // "buy" なら token は増える。"sell" なら逆
-    const amountToken = orderType === "buy" ? inputAmountToken : -inputAmountToken;
+    const amountToken =
+      orderType === OrderType.Buy ? inputAmountToken : -inputAmountToken;
     const amountCoin = -cost; // Coin の増量は cost の逆
-    requestOrder(selectedToken, orderType, amountToken, amountCoin);
+    requestOrder(selectedToken, amountToken, amountCoin);
   };
 
   return (
-    <Container className={props.className}>
-      <TokenSelect
+    <Container className={className}>
+      <TokenSelectComponent
         selected={selectedToken}
         tokens={tokens}
-        onChange={e => {
-          const token = tokens.find(t => t.name === e.target.value);
-          setSelectedToken(token);
-        }} />
-      <OrderTypeSwitch
-        selected={orderType}
-        onChange={type => setOrderType(type)} />
+        onChange={setSelectedToken}
+      />
+      <OrderTypeSwitchComponent selected={orderType} onChange={setOrderType} />
       <PriceContainer>
         <QuantityInput
           type="text"
-          value={inputAmountToken || ""}
+          value={inputAmountToken || ''}
           placeholder="Quantity"
           onChange={e => {
             setAmountToken(validateAmountToken(e.target.value));
-          }}/>
+          }}
+        />
         <Price>
-          { Math.abs(cost) }
+          {Math.abs(cost)}
           <PriceUnit>coins</PriceUnit>
         </Price>
       </PriceContainer>
-      { errMsg ? <h5>{errMsg}</h5> : null }
+      {errMsg ? <h5>{errMsg}</h5> : null}
       <Separator />
-      <OrderButton onClick={(e) => {
-        e.preventDefault();
-        onPressEnter();
-      }}>
+      <OrderButton
+        onClick={e => {
+          e.preventDefault();
+          onPressEnter();
+        }}>
         Order
       </OrderButton>
     </Container>
   );
-}
+};
 
-function validateAmountToken(input) {
-  if (input === "") {
+export default OrderComponent;
+
+function validateAmountToken(input: string): number | null {
+  if (input === '') {
     return null;
   }
   const n = parseInt(input);
-  if (!Number.isNaN(n) && n < MAX_QUANTITY){
-    return n;
-  } else {
+  if (Number.isNaN(n)) {
     return null;
+  } else {
+    return Math.min(Math.max(n, 0), MAX_QUANTITY);
   }
 }
 
-function currentCost(token, amountToken, tokens, orderType, lmsrB) {
-  const baseCost = lmsr.cost(lmsrB, tokens.map(t => t.amount));
-  const newCost = lmsr.cost(lmsrB, tokens.map(t => {
-    if (t.id === token.id) {
-      if (orderType === "buy") {
-        return t.amount + amountToken;
-      } else {
-        return t.amount - amountToken;
-      }
-    } else {
-      return t.amount 
-    }
-  }));
-  return newCost - baseCost;
-}
-
-
 const Container = styled.div`
   width: 530px;
-  border: 1px solid #D1D5DA;
+  border: 1px solid #d1d5da;
   border-radius: 4px;
   padding: 34px;
 `;
@@ -116,7 +129,7 @@ const QuantityInput = styled.input`
   width: 270px;
   height: 40px;
   border-radius: 4px;
-  border: 1px solid #D1D5DA;
+  border: 1px solid #d1d5da;
   font-size: 14px;
   color: #979797;
   padding-left: 20px;
@@ -140,7 +153,7 @@ const PriceUnit = styled.span`
 
 const Separator = styled.hr`
   border: 0;
-  border-top: 2px solid #4A90E2;
+  border-top: 2px solid #4a90e2;
   margin-top: 33px;
   margin-bottom: 0px;
 `;
@@ -150,85 +163,97 @@ const OrderButton = styled.button`
   height: 38px;
   border: 0;
   border-radius: 4px;
-  background-color: #00C05E;
+  background-color: #00c05e;
   color: white;
   font-size: 17px;
   margin-top: 20px;
 `;
 
-function TokenSelect(props) {
-  const value = props.selected === null ? "" : props.selected.name;
+interface TokenSelectComponentProps {
+  selected: Token;
+  tokens: Token[];
+  onChange(token: Token): void;
+}
+
+const TokenSelectComponent: FC<TokenSelectComponentProps> = ({
+  selected,
+  tokens,
+  onChange,
+}) => {
   return (
-    <Select name="token" value={value} onChange={props.onChange}>
-      {
-        props.selected === null
-        ? (<Placeholder value="" disabled>Select Token</Placeholder>)
-        : null
-      }
-      {
-        props.tokens.map(token => (
-          <option value={token.name} key={token.name}>
-            { token.name }
-          </option>
-        ))
-      }
+    <Select
+      name="token"
+      value={selected.name}
+      onChange={e => {
+        const token = tokens.find(t => t.name === e.target.value);
+        if (token) {
+          onChange(token);
+        }
+      }}>
+      {tokens.map(token => (
+        <option value={token.name} key={token.name}>
+          {token.name}
+        </option>
+      ))}
     </Select>
   );
-}
+};
 
 const Select = styled.select`
   width: 100%;
   height: 40px;
-  border: 1px solid #D1D5DA;
+  border: 1px solid #d1d5da;
   border-radius: 4px;
   background-color: white;
   padding: 0 20px;
   font-family: Lucida Grande;
   font-size: 14px;
-  color: #37474F;
+  color: #37474f;
 `;
 
-const Placeholder = styled.option`
-  display: none;
-`;
+interface OrderTypeSwitchComponentProps {
+  selected: OrderType;
+  onChange(orderType: OrderType): void;
+}
 
-
-function OrderTypeSwitch(props) {
-  if (props.selected == "buy") {
+const OrderTypeSwitchComponent: FC<OrderTypeSwitchComponentProps> = ({
+  selected,
+  onChange,
+}) => {
+  if (selected === OrderType.Buy) {
     return (
       <Switch>
         <SelectedButton>Buy</SelectedButton>
-        <BaseButton onClick={() => props.onChange("sell")}>Sell</BaseButton>
+        <BaseButton onClick={() => onChange(OrderType.Sell)}>Sell</BaseButton>
       </Switch>
     );
   } else {
     return (
       <Switch>
-        <BaseButton onClick={() => props.onChange("buy")}>Buy</BaseButton>
+        <BaseButton onClick={() => onChange(OrderType.Buy)}>Buy</BaseButton>
         <SelectedButton>Sell</SelectedButton>
       </Switch>
     );
   }
-}
+};
 
 const Switch = styled.div`
   width: 100%;
   border-radius: 4px;
-  border: 1px solid #D1D5DA;
+  border: 1px solid #d1d5da;
   margin-top: 28px;
 `;
 
 const BaseButton = styled.button`
   width: 50%;
   height: 35px;
-  background-color: #F8F4F4;
+  background-color: #f8f4f4;
   font-size: 14px;
-  color: #37474F;
+  color: #37474f;
   border: none;
 `;
 
 const SelectedButton = styled(BaseButton)`
   color: white;
-  background-color: #358ED7;
+  background-color: #358ed7;
 `;
-*/

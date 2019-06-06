@@ -5,7 +5,7 @@ import {History} from 'history';
 import Header from 'components/header';
 import MarketHeader from './market/header';
 import TokensComponent from './market/tokens';
-// import OrderComponent from './market/order';
+import OrderComponent from './market/order';
 import AssetsComponent from './market/assets';
 // import ResultComponent from './market/result';
 import HistoryComponent from './market/history';
@@ -14,13 +14,14 @@ import {
   Market,
   MarketId,
   MarketStatus,
-  Order,
-  NormalOrder,
+  Token,
+  PublicOrderHistory,
+  MyOrderHistory,
   getTokenDistribution,
   getTokenPrices,
 } from 'models/market';
 import User from 'models/user';
-import {getMarket, getMarketOrders} from 'api/market';
+import {getMarket, getOrders, postOrder} from 'api/market';
 
 interface MarketPageProps {
   history: History;
@@ -30,8 +31,8 @@ interface MarketPageProps {
 
 const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
   const [market, setMarket] = useState<Market | null>(null);
-  const [orders, setOrders] = useState<NormalOrder[] | null>(null);
-  const [myOrders, setMyOrders] = useState<Order[] | null>(null);
+  const [orders, setOrders] = useState<PublicOrderHistory | null>(null);
+  const [myOrders, setMyOrders] = useState<MyOrderHistory | null>(null);
 
   useEffect(() => {
     getMarket(marketId).then(m => {
@@ -40,7 +41,7 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
   }, [marketId]);
 
   useEffect(() => {
-    getMarketOrders(marketId, user ? user.accessToken : undefined).then(res => {
+    getOrders(marketId, user ? user.accessToken : undefined).then(res => {
       setOrders(res.orders);
       setMyOrders(res.myOrders || null);
     });
@@ -49,9 +50,42 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
   let tokenDistribution = null;
   let tokenPrices = null;
   if (market && orders) {
-    tokenDistribution = getTokenDistribution(market, orders);
+    tokenDistribution = getTokenDistribution(market.tokens, orders);
     tokenPrices = getTokenPrices(market.lmsrB, tokenDistribution);
   }
+
+  const requestOrder = (
+    user: User,
+    token: Token,
+    amountToken: number,
+    amountCoin: number,
+  ): void => {
+    postOrder({
+      marketId: marketId,
+      order: {
+        tokenId: token.id,
+        amountToken: amountToken,
+        amountCoin: amountCoin,
+      },
+      accessToken: user.accessToken,
+    }).then(res => {
+      const settledAmountCoin = res.amountCoin;
+      alert(
+        'Orderに成功しました！\n' +
+          `トークン   : ${token.name}\n` +
+          `トークン数 : ${amountToken}\n` +
+          `コイン数   : ${settledAmountCoin}`,
+      );
+      return getOrders(marketId, user.accessToken);
+    }).then(res => {
+      setOrders(res.orders);
+      if (!res.myOrders) {
+        throw "Success to create a new Order, but it is not reflected";
+      } else {
+        setMyOrders(res.myOrders);
+        }
+    });
+  };
 
   return (
     <>
@@ -63,9 +97,21 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
             tokens={market ? market.tokens : []}
             tokenPrices={tokenPrices}
           />
-          {market && myOrders && market.status === MarketStatus.Open ? (
+          {market &&
+          myOrders &&
+          tokenDistribution &&
+          user &&
+          market.status === MarketStatus.Open ? (
             <>
               <OrderContainer>
+                <StyledOrderComponent
+                  tokens={market.tokens}
+                  lmsrB={market.lmsrB}
+                  tokenDistribution={tokenDistribution}
+                  requestOrder={(token, amountToken, amountCoin) =>
+                    requestOrder(user, token, amountToken, amountCoin)
+                  }
+                />
                 <StyledAssetsComponent
                   tokens={market.tokens}
                   myOrders={myOrders || []}
@@ -89,10 +135,12 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
                   />
                 ) : null}
               </OrderContainer>
-              <StyledHistoryComponent
-                tokens={market.tokens}
-                myOrders={myOrders || []}
-              />
+              {myOrders ? (
+                <StyledHistoryComponent
+                  tokens={market.tokens}
+                  myOrders={myOrders || []}
+                />
+              ) : null}
             </>
           ) : null}
           <Description content={market ? market.description : ''} />
@@ -123,6 +171,10 @@ const StyledTokensComponent = styled(TokensComponent)`
 const OrderContainer = styled.div`
   display: flex;
   justify-content: space-between;
+`;
+
+const StyledOrderComponent = styled(OrderComponent)`
+  margin-top: 50px;
 `;
 
 const StyledAssetsComponent = styled(AssetsComponent)`

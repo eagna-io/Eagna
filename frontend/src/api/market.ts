@@ -6,6 +6,7 @@ import {
   Market,
   MarketStatus,
   MarketId,
+  TokenId,
   Order,
   NormalOrder,
   InitialSupplyOrder,
@@ -69,19 +70,19 @@ function str2status(s: string): MarketStatus {
 
 /*
  * ========================
- * Get MarketOrders
+ * Get Orders
  * ========================
  */
 
-interface GetMarketOrdersResp {
+interface GetOrdersResp {
   orders: NormalOrder[];
   myOrders?: Order[];
 }
 
-export function getMarketOrders(
+export function getOrders(
   marketId: MarketId,
   accessToken?: string,
-): Promise<GetMarketOrdersResp> {
+): Promise<GetOrdersResp> {
   return request({
     method: Method.GET,
     path: `/markets/${marketId}/orders/`,
@@ -124,8 +125,16 @@ const settleOrderDecoder: D.Decoder<SettleOrder> = D.object({
   type: D.constant('Settle'),
 });
 
-const ordersDecoder: D.Decoder<GetMarketOrdersResp> = D.object({
-  orders: D.array(normalOrderDecoder),
+const ordersDecoder: D.Decoder<GetOrdersResp> = D.object({
+  orders: D.array(
+    D.object({
+      tokenId: D.number(),
+      amountToken: D.number(),
+      amountCoin: D.number(),
+      time: D.string().map(s => moment(s)),
+      type: D.succeed<'Normal'>('Normal'),
+    }),
+  ),
   mine: D.optional(
     D.object({
       orders: D.array(
@@ -183,3 +192,52 @@ export function postMarket({
     }
   });
 }
+
+/*
+ * ===================
+ * Post Order
+ * ===================
+ */
+
+interface PostOrderArgs {
+  marketId: MarketId;
+  order: {
+    tokenId: TokenId;
+    amountToken: number;
+    amountCoin: number;
+  };
+  accessToken: string;
+}
+
+interface PartialNormalOrder {
+  tokenId: TokenId;
+  amountToken: number;
+  amountCoin: number;
+}
+
+export function postOrder({
+  marketId,
+  order,
+  accessToken,
+}: PostOrderArgs): Promise<PartialNormalOrder> {
+  return request({
+    method: Method.POST,
+    path: `/markets/${marketId}/orders/`,
+    accessToken: accessToken,
+    body: order,
+    decoder: partialNormalOrderDecoder,
+  }).then(res => {
+    if (isFailure(res)) {
+      // TODO;
+      throw `Unexpected error : ${res.error.message}`;
+    } else {
+      return res;
+    }
+  });
+}
+
+const partialNormalOrderDecoder: D.Decoder<PartialNormalOrder> = D.object({
+  tokenId: D.number(),
+  amountToken: D.number(),
+  amountCoin: D.number(),
+});

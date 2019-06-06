@@ -1,4 +1,4 @@
-import moment, {Moment} from 'moment';
+import {Moment} from 'moment';
 
 export interface Market {
   id: MarketId;
@@ -85,10 +85,10 @@ export function isSettleOrder(order: Order): order is SettleOrder {
 }
 
 export function getTokenDistribution(
-  market: Market,
+  tokens: Token[],
   orders: NormalOrder[],
 ): TokenDistribution {
-  let distribution = new Map(market.tokens.map(t => [t.id, 0]));
+  let distribution = new Map(tokens.map(t => [t.id, 0]));
 
   orders.forEach(order => {
     const currentAmount = distribution.get(order.tokenId) || 0;
@@ -114,6 +114,16 @@ export function getTokenPrices(
       normalize(Math.exp(n / lmsrB) / denom),
     ]),
   );
+}
+
+export function cloneTokenDistribution(
+  distribution: TokenDistribution,
+): TokenDistribution {
+  return new Map(distribution);
+}
+
+export function cloneTokenPrices(prices: TokenPrices): TokenPrices {
+  return new Map(prices);
 }
 
 export function distributionCost(
@@ -142,30 +152,4 @@ export function currentAmountOfToken(
   return myOrders
     .filter(order => !isInitialSupplyOrder(order) && order.tokenId === tokenId)
     .reduce((acc, order) => acc + order.amountToken, 0);
-}
-
-export function createDemoPreparingMarket() {
-  return {
-    id: 1,
-    title: '明日の天気は？',
-    organizer: 'eagna.com',
-    shortDesc: '明日の天気を予測する',
-    description: '明日の天気が雨かどうかを予測する',
-    openTime: moment().subtract(1000 * 60 * 10), // 10分前
-    closeTime: moment().add(1000 * 60 * 10), // 10分後
-    lmsrB: 100,
-    tokens: [
-      {
-        id: 1,
-        name: '雨が降る',
-        description: '雨が降る',
-      },
-      {
-        id: 2,
-        name: '雨が降らない',
-        description: '雨が降らない',
-      },
-    ],
-    status: MarketStatus.Preparing,
-  };
 }
