@@ -1,20 +1,16 @@
 [package]
-name = "rohanmarket-backend"
+name = "eagna"
 version = "0.1.0"
 authors = ["AtsukiTak <takatomgoo@gmail.com>"]
 edition = "2018"
 
 [lib]
-name = "librohan"
+name = "libeagna"
 path = "src/lib.rs"
 
 [[bin]]
-name = "rohan"
+name = "eagna"
 path = "src/main.rs"
-
-[[example]]
-name = "feed-test-data"
-path = "tests/setup/feed_data.rs"
 
 [dependencies]
 rouille = "~3.0"

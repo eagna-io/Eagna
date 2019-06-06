@@ -1,4 +1,4 @@
-use librohan::{app::ApiServer, infra::store::DbStoreFactory};
+use libeagna::{app::ApiServer, infra::store::DbStoreFactory};
 use log::info;
 
 fn main() {
