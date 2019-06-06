@@ -2,7 +2,9 @@ import React, {FC, useState} from 'react';
 import styled from 'styled-components';
 import {
   Token,
+  TokenId,
   TokenDistribution,
+  MyAssets,
   cloneTokenDistribution,
   distributionCost,
 } from 'models/market';
@@ -18,6 +20,7 @@ interface OrderComponentProps {
   tokens: Token[];
   lmsrB: number;
   tokenDistribution: TokenDistribution;
+  myAssets: MyAssets;
   requestOrder(token: Token, amountToken: number, amountCoin: number): void;
   className?: string;
 }
@@ -26,6 +29,7 @@ const OrderComponent: FC<OrderComponentProps> = ({
   tokens,
   lmsrB,
   tokenDistribution,
+  myAssets,
   requestOrder,
   className,
 }) => {
@@ -56,6 +60,18 @@ const OrderComponent: FC<OrderComponentProps> = ({
     if (!inputAmountToken || inputAmountToken === 0) {
       setErr('トークンの量を入力してください');
       return;
+    }
+    if (orderType === OrderType.Buy) {
+      if (!checkBalance(myAssets, 'Coin', cost)) {
+        setErr('Coin の残高が不足しています');
+        return;
+      }
+    }
+    if (orderType === OrderType.Sell) {
+      if (!checkBalance(myAssets, selectedToken.id, inputAmountToken)) {
+        setErr('Token の残高が不足しています');
+        return;
+      }
     }
     setErr(null);
     // "buy" なら token は増える。"sell" なら逆
@@ -108,9 +124,27 @@ function validateAmountToken(input: string): number | null {
   }
   const n = parseInt(input);
   if (Number.isNaN(n)) {
+    alert('Not a number');
     return null;
   } else {
     return Math.min(Math.max(n, 0), MAX_QUANTITY);
+  }
+}
+
+function checkBalance(
+  myAssets: MyAssets,
+  key: 'Coin' | TokenId,
+  target: number,
+): boolean {
+  const balance = myAssets.get(key);
+  if (balance === undefined) {
+    throw `Logic error : MyAssets does not contain asset ${key}`;
+  } else {
+    if (balance < target) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }
 

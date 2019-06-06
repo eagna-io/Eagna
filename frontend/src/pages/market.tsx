@@ -117,6 +117,7 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
                   tokens={market.tokens}
                   lmsrB={market.lmsrB}
                   tokenDistribution={tokenDistribution}
+                  myAssets={myAssets}
                   requestOrder={(token, amountToken, amountCoin) =>
                     requestOrder(user, token, amountToken, amountCoin)
                   }
