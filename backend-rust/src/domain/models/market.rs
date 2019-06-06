@@ -203,6 +203,8 @@ impl OpenMarket {
     /// をチェックする.
     /// チェックが通った場合にのみ、NormalOrderを追加する
     pub fn try_order(&mut self, order: NormalOrder) -> Result<(), TryOrderError> {
+        log::debug!("Try a new order : {:?}", order);
+
         // check balance
         if order.amount_token < AmountToken(0) {
             // user SELL the token. So check balance of token.
@@ -223,14 +225,15 @@ impl OpenMarket {
         }
 
         // check price
-        let cur_price = self.price_of_token(&order.token_id, order.amount_token);
-        if !order.amount_coin.is_around(&cur_price, MAX_SPLIT_PERCENT) {
+        let cost = self.cost_of_token(&order.token_id, order.amount_token);
+        let expect_amount_coin = -cost;
+        if !order.amount_coin.is_around(&expect_amount_coin, MAX_SPLIT_PERCENT) {
             return Err(TryOrderError::PriceOutOfRange);
         }
 
         // update data
         let new_order = NormalOrder {
-            amount_coin: cur_price,
+            amount_coin: cost,
             ..order
         };
         self.orders.push_valid_order(Order::Normal(new_order));
@@ -258,7 +261,7 @@ impl OpenMarket {
         distribution
     }
 
-    fn price_of_token(&self, token_id: &TokenId, amount_token: AmountToken) -> AmountCoin {
+    fn cost_of_token(&self, token_id: &TokenId, amount_token: AmountToken) -> AmountCoin {
         let lmsr_b = self.base.lmsr_b;
         let mut distribution = self.token_distribution();
         let cur_cost = lmsr::cost(lmsr_b, distribution.values());

@@ -20,6 +20,7 @@ where
 {
     let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
     if req_data.amount_token == AmountToken(0) || req_data.amount_coin == AmountCoin(0) {
+        log::warn!("Received 0 amount order request : {:?}", req_data);
         return Err(FailureResponse::InvalidPayload);
     }
 
@@ -44,7 +45,10 @@ where
         open_market
             .try_order(req_order)
             // TODO : return more information about failure.
-            .map_err(|_e| FailureResponse::InvalidPayload)?;
+            .map_err(|e| {
+                log::info!("Failed to apply a new order : {:?}", e);
+                FailureResponse::InvalidPayload
+            })?;
 
         locked_store.update_market_last_order(&open_market)?;
 
