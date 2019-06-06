@@ -71,6 +71,13 @@ macro_rules! impl_ops {
                 $constructor(-self.0)
             }
         }
+
+        impl std::ops::Neg for $target {
+            type Output = $target;
+            fn neg(self) -> Self::Output {
+                $constructor(-self.0)
+            }
+        }
     };
 }
 
