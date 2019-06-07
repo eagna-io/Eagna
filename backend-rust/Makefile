@@ -9,11 +9,16 @@ start-db:
 	diesel migration run --database-url "${PG_URL}"
 
 run-dev:
-	RUST_LOG=warn,librohan=debug,rohan=debug \
-	PG_URL="${PG_URL}" \
-	REDIS_URL="${REDIS_URL}" \
-	BIND="localhost:8080" \
-	cargo run || true
+	docker run \
+	--rm \
+	--name eagna-dev \
+	-e RUST_LOG=warn,libeagna=debug,eagna=debug \
+	-e PG_URL="${PG_URL}" \
+	-e REDIS_URL="${REDIS_URL}" \
+	-e BIND="0.0.0.0:8000" \
+	-e FIREBASE_API_KEY=$${FIREBASE_API_KEY} \
+	-p 8081:8000 \
+	eagna-api-server:develop
 
 
 TMP_PG_URL:=postgres://postgres:postgres@localhost:5430/postgres

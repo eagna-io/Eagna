@@ -1,0 +1,22 @@
+FROM rust:1.35.0 as builder
+ENV USER=root
+RUN apt-get update
+WORKDIR /usr/src
+RUN cargo new eagna
+WORKDIR /usr/src/eagna
+RUN touch src/lib.rs 
+# Copy only manifest file
+COPY Cargo.toml Cargo.lock ./
+# Build only dependencies
+RUN cargo build
+# Copy whole source code
+COPY src src
+RUN touch src/lib.rs src/main.rs
+## Build whole source code
+RUN cargo build
+
+FROM rust:1.35.0
+WORKDIR /root/
+COPY --from=builder /usr/src/eagna/target/debug/eagna ./
+RUN ldd ./eagna
+CMD ["./eagna"]
