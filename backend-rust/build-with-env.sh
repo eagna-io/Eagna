@@ -1,16 +1,16 @@
 #!/bin/sh
 
-# MODE **MUST** be one of "develop" or "production"
+# BUILD_MODE **MUST** be one of "develop" or "release"
 
-if [ "${MODE}" = "develop" ]
+if [ "${BUILD_MODE}" = "develop" ]
 then
   echo "Building with develop mode"
   cargo build
-elif [ "${MODE}" = "production" ]
+elif [ "${BUILD_MODE}" = "release" ]
 then
-  echo "Building with production mode"
+  echo "Building with release mode"
   cargo build --release
 else
-  echo "MODE must be one of \"develop\" or \"production\"."
+  echo "BUILD_MODE must be one of \"develop\" or \"release\"."
   exit 1
 fi

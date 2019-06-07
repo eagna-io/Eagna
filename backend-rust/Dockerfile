@@ -1,7 +1,8 @@
 FROM rust:1.35.0 as builder
 ENV USER=root 
-# MODE *MUST* be one of "develop" or "production"
-ENV MODE=develop
+# MODE *MUST* be one of "develop" or "release"
+ARG BUILD_MODE
+ENV BUILD_MODE ${BUILD_MODE}
 RUN apt-get update
 WORKDIR /usr/src
 RUN cargo new eagna
