@@ -8,6 +8,6 @@ then
   echo "Building with release mode"
   cargo build --release
 else
-  echo "Building with develop mode"
+  echo "Building with debug mode"
   cargo build
 fi

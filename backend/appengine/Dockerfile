@@ -1,6 +1,6 @@
 FROM rust:1.35.0 as builder
 ENV USER=root 
-# MODE *MUST* be one of "develop" or "release"
+# MODE *MUST* be one of "debug" or "release"
 ARG BUILD_MODE
 ENV BUILD_MODE ${BUILD_MODE}
 RUN apt-get update
@@ -20,7 +20,7 @@ RUN ./build-with-env.sh
 
 FROM rust:1.35.0
 WORKDIR /root/
-COPY --from=builder /usr/src/eagna/target/debug/eagna ./
+COPY --from=builder /usr/src/eagna/target/${BUILD_MODE}/eagna ./
 RUN apt-get update && apt-get install -y python3-pip && pip3 install google-cloud-storage
 COPY appengine/fetch_secrets.py appengine/entrypoint.sh ./
 CMD ["./entrypoint.sh"]
