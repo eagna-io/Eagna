@@ -1,40 +1,44 @@
-PG_DATA=pgdata
-PG_USER=postgres
-PG_PASS=postgres
-PG_PORT=5555
-PG_URL=postgres://$(PG_USER):$(PG_PASS)@localhost:$(PG_PORT)/$(PG_DATA)
-DOCKER_PG_NAME=rohan-pg
-
-install:
-	pip install -r requirements.txt
+PG_URL:=postgres://postgres:postgres@localhost:5432/postgres
+REDIS_URL:=redis://localhost:6379
 
 start-db:
-	docker run -d --rm -e POSTGRES_DB=$(PG_DATA) -e POSTGRES_PASSWORD=$(PG_PASS) -e POSTGRES_USER=$(PG_USER) --name $(DOCKER_PG_NAME) -p $(PG_PORT):5432 postgres
-
-stop-db:
-	docker stop $(DOCKER_PG_NAME) || true
-
-restart-db: stop-db start-db
-
-# Run sql file specified by $SQL variable
-run-sql-on-db:
-	docker run -it --rm -v $(CURDIR)/$(SQL):/root/$(SQL) -e PGPASSWORD=$(PG_PASS) --link $(DOCKER_PG_NAME):$(DOCKER_PG_NAME) postgres psql -h $(DOCKER_PG_NAME) -U $(PG_USER) -d $(PG_DATA) -f /root/$(SQL)
-
-initialize-db:
-	$(MAKE) run-sql-on-db SQL=initialize.sql
-
-connect-db:
-	docker run -it --rm -e PGPASSWORD=$(PG_PASS) --link $(DOCKER_PG_NAME):$(DOCKER_PG_NAME) postgres psql -h $(DOCKER_PG_NAME) -U $(PG_USER) -d $(PG_DATA)
-
-echo-db-uri:
-	echo $(PG_URL)
-
-run-demo:
-	$(MAKE) restart-db
+	docker stop postgres redis || true
+	docker run -d --rm --name postgres -p 5432:5432 postgres
+	docker run -d --rm --name redis -p 6379:6379 redis redis-server --bind 0.0.0.0
 	sleep 2
-	$(MAKE) initialize-db
-	DB_URL=${PG_URL} python3 demo/prepare.py
-	DB_URL=$(PG_URL) python3 main.py
+	diesel migration run --database-url "${PG_URL}"
+
+run-dev:
+	docker run \
+	--rm \
+	--name eagna-dev \
+	-e RUST_LOG=warn,libeagna=debug,eagna=debug \
+	-e PG_URL="${PG_URL}" \
+	-e REDIS_URL="${REDIS_URL}" \
+	-e BIND="0.0.0.0:8000" \
+	-e FIREBASE_API_KEY=$${FIREBASE_API_KEY} \
+	-p 8081:8000 \
+	eagna-api-server:develop
+
+
+TMP_PG_URL:=postgres://postgres:postgres@localhost:5430/postgres
+
+print_schema:
+	docker run -d --rm --name postgres-tmp -p 5430:5432 postgres
+	sleep 2
+	diesel migration run --database-url "${TMP_PG_URL}" || true
+	diesel print-schema --database-url "${TMP_PG_URL}" || true
+	docker stop postgres-tmp
+
+
+TEST_PG_URL:=postgres://postgres:postgres@localhost:5431/postgres
+TEST_REDIS_URL:=redis://localhost:6378
 
 test:
-	DB_URL=$(PG_URL) python3 -m unittest discover tests
+	docker run -d --rm --name postgres-test -p 5431:5432 postgres
+	docker run -d --rm --name redis-test -p 6378:6379 redis redis-server --bind 0.0.0.0
+	sleep 2
+	diesel migration run --database-url "${TEST_PG_URL}"
+	PG_URL="${TEST_PG_URL}" cargo run --example feed-test-data || true
+	PG_URL="${TEST_PG_URL}" REDIS_URL="${TEST_REDIS_URL}" cargo test || true
+	docker stop postgres-test redis-test

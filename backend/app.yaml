@@ -1,4 +1,0 @@
-runtime: python37
-entrypoint: python main.py
-env_variables:
-  HOST: 0.0.0.0
