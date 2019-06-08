@@ -1,5 +1,5 @@
 import React, {FC, useState, useEffect} from 'react';
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 import firebase from 'firebase';
 import {createGlobalStyle} from 'styled-components';
 
@@ -62,6 +62,7 @@ const App: FC<{}> = () => {
       <GlobalStyle />
       <Router>
         <Switch>
+          <Redirect from="/" to="/login" exact />
           <Route
             path="/login"
             exact
