@@ -1,8 +1,8 @@
 import React, {FC, useEffect} from 'react';
 import styled from 'styled-components';
 import {History, LocationDescriptor} from 'history';
+import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase';
-import * as firebaseui from 'firebaseui';
 
 import User from 'models/user';
 
@@ -13,18 +13,7 @@ interface LoginPageProps {
 
 const LoginPage: FC<LoginPageProps> = ({history, user}) => {
   useEffect(() => {
-    if (user == null) {
-      // ログイン用のUIを表示する
-      const ui = new firebaseui.auth.AuthUI(firebase.auth());
-      ui.start('#firebaseui-auth-container', {
-        signInOptions: [
-          {
-            provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-            scopes: ['email'],
-          },
-        ],
-      });
-    } else {
+    if (user != null) {
       const redirectLocation =
         history.location.state && history.location.state.redirect;
       if (!redirectLocation) {
@@ -37,11 +26,21 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
     }
   }, [user]);
 
+  const uiConfig = {
+    signInOptions: [
+      {
+        provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        scopes: ['email'],
+      },
+    ],
+  };
+
   return (
     <>
       <Body>
         <Container>
           <Logo src="/img/logo-big.png" />
+          <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={firebase.auth()} />
           <div id="firebaseui-auth-container" />
         </Container>
       </Body>
