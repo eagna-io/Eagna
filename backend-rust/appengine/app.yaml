@@ -1,0 +1,15 @@
+runtime: custom
+env: flex
+env_variables:
+  BIND: 0.0.0.0:8080
+  RUST_LOG: warn,libeagna=info,eagna=info
+  ACCESS_ALLOW_HOSTS: "*"
+resources:
+  cpu: 1
+  memory_gb: 0.5
+  disk_size_gb: 10
+automatic_scaling:
+  min_idle_instances: automatic
+  max_idle_instances: 1
+  min_pending_latency: 3000ms
+  max_pending_latency: automatic

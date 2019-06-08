@@ -9,7 +9,7 @@ RUN cargo new eagna
 WORKDIR /usr/src/eagna
 RUN touch src/lib.rs 
 # Copy only manifest file
-COPY Cargo.toml Cargo.lock build-with-env.sh ./
+COPY Cargo.toml Cargo.lock appengine/build-with-env.sh ./
 # Build only dependencies
 RUN ./build-with-env.sh
 # Copy whole source code
@@ -21,4 +21,6 @@ RUN ./build-with-env.sh
 FROM rust:1.35.0
 WORKDIR /root/
 COPY --from=builder /usr/src/eagna/target/debug/eagna ./
-CMD ["./eagna"]
+RUN apt-get update && apt-get install -y python3-pip && pip3 install google-cloud-storage
+COPY appengine/fetch_secrets.py appengine/entrypoint.sh ./
+CMD ["./entrypoint.sh"]
