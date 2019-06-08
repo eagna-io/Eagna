@@ -3,6 +3,7 @@ steps:
   args: 
   - --build-arg=BUILD_MODE=$_BUILD_MODE
   - --dockerfile=appengine/Dockerfile
+  - --context=dir:///workspace/backend
   - --destination=gcr.io/$PROJECT_ID/eagna-api-server:$_BUILD_MODE
   - --cache=true
   dir: 'backend'
