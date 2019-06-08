@@ -5,6 +5,4 @@ steps:
   - --destination=gcr.io/$PROJECT_ID/eagna-api-server:$BRANCH_NAME
   - --cache=true
   dir: 'backend'
-images:
-- 'gcr.io/$PROJECT_ID/eagna-api-server:$BRANCH_NAME'
 timeout: '1000s'
