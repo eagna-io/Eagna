@@ -16,11 +16,11 @@ RUN ./build-with-env.sh
 COPY src src
 RUN touch src/lib.rs src/main.rs
 ## Build whole source code
-RUN ./build-with-env.sh
+RUN ./build-with-env.sh && cp target/${BUILD_MODE}/eagna /usr/bin/eagna
 
 FROM rust:1.35.0
 WORKDIR /root/
-COPY --from=builder /usr/src/eagna/target/${BUILD_MODE}/eagna ./
+COPY --from=builder /usr/bin/eagna ./
 RUN apt-get update && apt-get install -y python3-pip && pip3 install google-cloud-storage
 COPY appengine/fetch_secrets.py appengine/entrypoint.sh ./
 CMD ["./entrypoint.sh"]
