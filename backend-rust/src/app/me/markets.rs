@@ -62,24 +62,3 @@ impl From<Market> for RespItem {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use diesel::Connection;
-
-    #[test]
-    fn query_markets_should_contain_preparing_markets() {
-        let pg_conn = crate::PgConnectionFactory::new_with_env()
-            .establish()
-            .unwrap();
-        pg_conn.begin_test_transaction().unwrap();
-        let user_id = utils::user::Alice.get_id(&pg_conn);
-        let res = query_markets(&pg_conn, user_id);
-        assert!(res.is_ok());
-
-        let markets = res.unwrap();
-        let market_id = utils::market::preparing_market().get_id(&pg_conn);
-        assert!(markets.iter().find(|m| m.id == market_id).is_some());
-    }
-}

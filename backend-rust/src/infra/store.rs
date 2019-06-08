@@ -33,15 +33,10 @@ pub struct DbStore {
 }
 
 impl DbStoreFactory {
-    pub fn new_with_env() -> DbStoreFactory {
-        let pg_conn_url = std::env::var("PG_URL").expect("PG_URL is not defined");
-        let redis_conn_url = std::env::var("REDIS_URL").expect("REDIS_URL is not defined");
-        let redis_client = RedisClient::open(redis_conn_url.as_str()).unwrap();
-        let firebase_api_key =
-            std::env::var("FIREBASE_API_KEY").expect("FIREBASE_API_KEY is not defined");
+    pub fn new(pg_url: String, redis_url: String, firebase_api_key: String) -> DbStoreFactory {
         DbStoreFactory {
-            pg_conn_url: Arc::new(pg_conn_url),
-            redis_client,
+            pg_conn_url: Arc::new(pg_url),
+            redis_client: RedisClient::open(redis_url.as_str()).unwrap(),
             firebase_api_key: Arc::new(firebase_api_key),
         }
     }
