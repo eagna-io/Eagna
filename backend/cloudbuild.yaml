@@ -1,9 +1,9 @@
 steps:
 - name: 'gcr.io/kaniko-project/executor:latest'
   args: 
-  - --build-arg=BUILD_MODE=$BRANCH_NAME
+  - --build-arg=BUILD_MODE=$_BUILD_MODE
   - --dockerfile=appengine/Dockerfile
-  - --destination=gcr.io/$PROJECT_ID/eagna-api-server:$BRANCH_NAME
+  - --destination=gcr.io/$PROJECT_ID/eagna-api-server:$_BUILD_MODE
   - --cache=true
   dir: 'backend'
 - name: 'gcr.io/cloud-builders/gcloud'
@@ -11,6 +11,6 @@ steps:
   - 'app'
   - 'deploy'
   - 'appengine/app.yaml'
-  - '--image-url=gcr.io/$PROJECT_ID/eagna-api-server:$BRANCH_NAME'
+  - '--image-url=gcr.io/$PROJECT_ID/eagna-api-server:$_BUILD_MODE'
   dir: 'backend'
 timeout: '1800s'
