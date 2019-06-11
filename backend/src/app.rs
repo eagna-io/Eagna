@@ -92,11 +92,8 @@ impl<F> ApiServer<F> {
             (POST) (/markets/{id: MarketId}/orders/) => {
                 markets::orders::post(self.store_factory.establish(), req, id)
             },
-            (GET) (/cronjob/open_market/) => {
-                cronjob::open_market::get(self.store_factory.establish(), req)
-            },
-            (GET) (/cronjob/close_market/) => {
-                cronjob::close_market::get(self.store_factory.establish(), req)
+            (GET) (/cronjob/check_markets/) => {
+                cronjob::check_markets::get(self.store_factory.establish(), req)
             },
             _ => Err(FailureResponse::ResourceNotFound)
         );
