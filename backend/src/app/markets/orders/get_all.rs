@@ -10,7 +10,7 @@ use chrono::{DateTime, Utc};
 use rouille::{Request, Response};
 
 pub fn get_all<S>(
-    mut store: S,
+    store: &mut S,
     req: &Request,
     market_id: MarketId,
 ) -> Result<Response, FailureResponse>
@@ -29,7 +29,7 @@ where
 
     let maybe_mine = match req.get_param("contains") {
         Some(ref s) if s.as_str() == "mine" => {
-            let user_id = validate_bearer_header(&mut store, req)?.user_id;
+            let user_id = validate_bearer_header(store, req)?.user_id;
             let my_orders = orders
                 .related_to_user(user_id)
                 .map(|(_, order)| RespMyOrder {

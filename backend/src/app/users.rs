@@ -7,7 +7,7 @@ use crate::{
 };
 use rouille::{input::json::json_input, Request, Response};
 
-pub fn post<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
+pub fn post<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + UserStore,
 {
@@ -28,7 +28,7 @@ where
 
     let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
 
-    let access_token = validate_bearer_header(&mut store, req)?;
+    let access_token = validate_bearer_header(store, req)?;
 
     let new_user = NewUser {
         id: &access_token.user_id,
@@ -37,7 +37,6 @@ where
     };
 
     store.save_user(new_user)?;
-    store.commit()?;
 
     let res_data = ResData {
         id: &access_token.user_id,

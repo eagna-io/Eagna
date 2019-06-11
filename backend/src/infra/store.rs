@@ -43,13 +43,27 @@ impl DbStoreFactory {
 }
 
 impl StoreFactory<DbStore> for DbStoreFactory {
-    fn establish(&self) -> DbStore {
-        DbStore {
+    fn transaction<F, T, E>(&self, f: F) -> Result<T, E>
+    where
+        F: for<'a> FnOnce(&'a mut DbStore) -> Result<T, E>,
+        E: From<<DbStore as Store>::Error>,
+    {
+        let mut store = DbStore {
             pg_conn_url: self.pg_conn_url.clone(),
             redis_client: self.redis_client.clone(),
             firebase_api_key: self.firebase_api_key.clone(),
             pg_conn: None,
             redis_conn: None,
+        };
+        match f(&mut store) {
+            Ok(t) => {
+                store.commit()?;
+                Ok(t)
+            }
+            Err(e) => {
+                store.rollback()?;
+                Err(e)
+            }
         }
     }
 }
@@ -70,31 +84,24 @@ impl DbStore {
         }
         Ok(self.redis_conn.as_ref().unwrap())
     }
-}
 
-impl Store for DbStore {
-    type Error = failure::Error;
-
-    fn commit(mut self) -> Result<(), Self::Error> {
+    fn commit(mut self) -> Result<(), <Self as Store>::Error> {
         match self.pg_conn.take() {
             Some(conn) => Ok(conn.transaction_manager().commit_transaction(&conn)?),
             None => Ok(()),
         }
     }
-}
 
-impl std::ops::Drop for DbStore {
-    fn drop(&mut self) {
+    fn rollback(mut self) -> Result<(), <Self as Store>::Error> {
         match self.pg_conn.take() {
-            Some(conn) => match conn.transaction_manager().rollback_transaction(&conn) {
-                Ok(()) => {}
-                Err(e) => {
-                    log::warn!("Error while pg transaction rollback : {:?}", e);
-                }
-            },
-            None => {}
+            Some(conn) => Ok(conn.transaction_manager().rollback_transaction(&conn)?),
+            None => Ok(()),
         }
     }
+}
+
+impl Store for DbStore {
+    type Error = failure::Error;
 }
 
 impl MarketStore for DbStore {

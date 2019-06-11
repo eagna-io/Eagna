@@ -7,11 +7,11 @@ use crate::{
 };
 use rouille::{Request, Response};
 
-pub fn get<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
+pub fn get<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + UserStore,
 {
-    let access_token = validate_bearer_header(&mut store, req)?;
+    let access_token = validate_bearer_header(store, req)?;
     let user = match store.query_user(&access_token.user_id)? {
         Some(user) => user,
         None => {

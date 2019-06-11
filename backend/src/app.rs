@@ -43,7 +43,7 @@ impl<F> ApiServer<F> {
             rouille::log_custom(req, log_ok, log_err, || {
                 let res = match self.filter_cors_preflight(req) {
                     Some(res) => res,
-                    None => self.routing(req),
+                    None => self.process_request(req),
                 };
                 self.append_cors_header(res)
             })
@@ -62,42 +62,14 @@ impl<F> ApiServer<F> {
         }
     }
 
-    pub fn routing<S>(&self, req: &Request) -> Response
+    pub fn process_request<S>(&self, req: &Request) -> Response
     where
         F: StoreFactory<S> + Send + Sync + 'static,
         S: AccessTokenStore + MarketStore + UserStore + Send + 'static,
     {
-        let res = router!(req,
-            (GET) (/me/) => {
-                me::get(self.store_factory.establish(), req)
-            },
-            (GET) (/me/markets/) => {
-                me::markets::get(self.store_factory.establish(), req)
-            },
-            (POST) (/users/) => {
-                users::post(self.store_factory.establish(), req)
-            },
-            (POST) (/markets/) => {
-                markets::post(self.store_factory.establish(), req)
-            },
-            (GET) (/markets/{id: MarketId}/) => {
-                markets::get(self.store_factory.establish(), req, id)
-            },
-            (PUT) (/markets/{id: MarketId}/) => {
-                markets::put(self.store_factory.establish(), req, id)
-            },
-            (GET) (/markets/{id: MarketId}/orders/) => {
-                markets::orders::get_all(self.store_factory.establish(), req, id)
-            },
-            (POST) (/markets/{id: MarketId}/orders/) => {
-                markets::orders::post(self.store_factory.establish(), req, id)
-            },
-            (GET) (/cronjob/check_markets/) => {
-                cronjob::check_markets::get(self.store_factory.establish(), req)
-            },
-            _ => Err(FailureResponse::ResourceNotFound)
-        );
-        res.unwrap_or_else(<FailureResponse as Into<Response>>::into)
+        self.store_factory
+            .transaction(|store| routing(store, req))
+            .unwrap_or_else(<FailureResponse as Into<Response>>::into)
     }
 
     pub fn append_cors_header(&self, resp: Response) -> Response {
@@ -106,6 +78,42 @@ impl<F> ApiServer<F> {
             self.access_allow_hosts.clone(),
         )
     }
+}
+
+pub fn routing<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
+where
+    S: AccessTokenStore + MarketStore + UserStore + Send + 'static,
+{
+    router!(req,
+        (GET) (/me/) => {
+            me::get(store, req)
+        },
+        (GET) (/me/markets/) => {
+            me::markets::get(store, req)
+        },
+        (POST) (/users/) => {
+            users::post(store, req)
+        },
+        (POST) (/markets/) => {
+            markets::post(store, req)
+        },
+        (GET) (/markets/{id: MarketId}/) => {
+            markets::get(store, req, id)
+        },
+        (PUT) (/markets/{id: MarketId}/) => {
+            markets::put(store, req, id)
+        },
+        (GET) (/markets/{id: MarketId}/orders/) => {
+            markets::orders::get_all(store, req, id)
+        },
+        (POST) (/markets/{id: MarketId}/orders/) => {
+            markets::orders::post(store, req, id)
+        },
+        (GET) (/cronjob/check_markets/) => {
+            cronjob::check_markets::get(store, req)
+        },
+        _ => Err(FailureResponse::ResourceNotFound)
+    )
 }
 
 fn log_ok(req: &Request, resp: &Response, elap: Duration) {

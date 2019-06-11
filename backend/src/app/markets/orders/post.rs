@@ -11,7 +11,7 @@ use crate::{
 use rouille::{input::json::json_input, Request, Response};
 
 pub fn post<S>(
-    mut store: S,
+    store: &mut S,
     req: &Request,
     market_id: MarketId,
 ) -> Result<Response, FailureResponse>
@@ -25,7 +25,7 @@ where
     }
 
     // 認証チェック
-    let user_id = validate_bearer_header(&mut store, req)?.user_id;
+    let user_id = validate_bearer_header(store, req)?.user_id;
 
     let req_order = NormalOrder::new(
         user_id,
@@ -54,8 +54,6 @@ where
 
         open_market
     };
-
-    store.commit()?;
 
     let (_id, new_order) = open_market.last_normal_order().unwrap();
     let res_data = ResData {

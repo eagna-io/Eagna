@@ -13,7 +13,7 @@ use log::info;
 use rouille::{input::json::json_input, Request, Response};
 
 pub fn get<S>(
-    mut store: S,
+    store: &mut S,
     _req: &Request,
     market_id: MarketId,
 ) -> Result<Response, FailureResponse>
@@ -68,7 +68,7 @@ where
     Ok(Response::json(&RespData::from(market)))
 }
 
-pub fn post<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
+pub fn post<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
 where
     S: MarketStore + UserStore + AccessTokenStore,
 {
@@ -114,7 +114,7 @@ where
         }
     }
 
-    let access_token = validate_bearer_header(&mut store, req)?;
+    let access_token = validate_bearer_header(store, req)?;
     let user = match store.query_user(&access_token.user_id)? {
         Some(user) => user,
         None => {
@@ -131,12 +131,11 @@ where
         FailureResponse::InvalidPayload
     })?;
     let market_id = store.insert_market(req_data.into())?;
-    store.commit()?;
 
     Ok(Response::json(&market_id).with_status_code(201))
 }
 
-pub fn put<S>(mut store: S, req: &Request, market_id: MarketId) -> Result<Response, FailureResponse>
+pub fn put<S>(store: &mut S, req: &Request, market_id: MarketId) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + UserStore + MarketStore,
 {
@@ -146,7 +145,7 @@ where
         settle_token_id: TokenId,
     }
 
-    let access_token = validate_bearer_header(&mut store, req)?;
+    let access_token = validate_bearer_header(store, req)?;
     match store.query_user(&access_token.user_id)? {
         Some(ref user) if user.is_admin => {}
         Some(_) => return Err(FailureResponse::Unauthorized),
@@ -174,7 +173,6 @@ where
         let settled_market = closed_market.settle(req_data.settle_token_id);
         locked_store.update_market_status_to_settle(&settled_market)?;
     }
-    store.commit()?;
 
     Ok(Response::json(&market_id).with_status_code(201))
 }

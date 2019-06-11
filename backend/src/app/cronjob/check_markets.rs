@@ -7,7 +7,7 @@ use crate::{
 };
 use rouille::{Request, Response};
 
-pub fn get<S>(mut store: S, req: &Request) -> Result<Response, FailureResponse>
+pub fn get<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
 where
     S: MarketStore + UserStore,
 {
@@ -19,10 +19,8 @@ where
         return Err(FailureResponse::ResourceNotFound);
     }
 
-    let close_markets = check_close(&mut store)?;
-    let open_markets = check_open(&mut store)?;
-
-    store.commit()?;
+    let close_markets = check_close(store)?;
+    let open_markets = check_open(store)?;
 
     let resp_data = RespData {
         open_markets,
