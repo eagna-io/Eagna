@@ -4,6 +4,7 @@ import {History} from 'history';
 
 import Header from 'components/header';
 import MarketHeader from './market/header';
+import ChartComponent from './market/chart';
 import TokensComponent from './market/tokens';
 import OrderComponent from './market/order';
 import AssetsComponent from './market/assets';
@@ -17,8 +18,8 @@ import {
   Token,
   PublicOrderHistory,
   MyOrderHistory,
-  getTokenDistribution,
-  getTokenPrices,
+  newTokenDistribution,
+  newTokenPrices,
   getMyAssets,
 } from 'models/market';
 import User from 'models/user';
@@ -44,21 +45,50 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
   useEffect(() => {
     getOrders(marketId, user ? user.accessToken : undefined).then(res => {
       setOrders(res.orders);
-      setMyOrders(res.myOrders || null);
+      setMyOrders(res.myOrders || []);
     });
   }, [marketId, user]);
 
-  let tokenDistribution = null;
-  let tokenPrices = null;
-  if (market && orders) {
-    tokenDistribution = getTokenDistribution(market.tokens, orders);
-    tokenPrices = getTokenPrices(market.lmsrB, tokenDistribution);
-  }
+  return (
+    <>
+      {market != null && orders != null && myOrders != null ? (
+        <LoadedMarketPage
+          market={market}
+          initOrders={orders}
+          initMyOrders={myOrders}
+          user={user}
+          history={history}
+        />
+      ) : (
+        <LoadingMarketPage />
+      )}
+    </>
+  );
+};
 
-  let myAssets = null;
-  if (market && myOrders) {
-    myAssets = getMyAssets(market.tokens, myOrders);
-  }
+export default MarketPage;
+
+interface LoadedMarketPageProps {
+  market: Market;
+  initOrders: PublicOrderHistory;
+  initMyOrders: MyOrderHistory;
+  user: User | null;
+  history: History;
+}
+
+const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
+  market,
+  initOrders,
+  initMyOrders,
+  user,
+  history,
+}) => {
+  const [orders, setOrders] = useState(initOrders);
+  const [myOrders, setMyOrders] = useState(initMyOrders);
+
+  const tokenDistribution = newTokenDistribution(market.tokens, orders);
+  const tokenPrices = newTokenPrices(market.lmsrB, tokenDistribution);
+  const myAssets = getMyAssets(market.tokens, myOrders);
 
   const requestOrder = (
     user: User,
@@ -67,7 +97,7 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
     amountCoin: number,
   ): void => {
     postOrder({
-      marketId: marketId,
+      marketId: market.id,
       order: {
         tokenId: token.id,
         amountToken: amountToken,
@@ -83,12 +113,12 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
             `トークン数 : ${amountToken}\n` +
             `コイン数   : ${settledAmountCoin}`,
         );
-        return getOrders(marketId, user.accessToken);
+        return getOrders(market.id, user.accessToken);
       })
       .then(res => {
         setOrders(res.orders);
         if (!res.myOrders) {
-          throw 'Success to create a new Order, but it is not reflected';
+          throw 'Logic error : Success to create a new Order, but it is not reflected';
         } else {
           setMyOrders(res.myOrders);
         }
@@ -101,16 +131,17 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
         <Header history={history} user={user} />
         <MarketHeader market={market} />
         <Contents>
+          <StyledChartComponent
+            tokens={market.tokens}
+            lmsrB={market.lmsrB}
+            startTime={market.openTime}
+            orders={orders}
+          />
           <StyledTokensComponent
-            tokens={market ? market.tokens : []}
+            tokens={market.tokens}
             tokenPrices={tokenPrices}
           />
-          {market &&
-          myOrders &&
-          myAssets &&
-          tokenDistribution &&
-          user &&
-          market.status === MarketStatus.Open ? (
+          {user && market.status === MarketStatus.Open ? (
             <>
               <OrderContainer>
                 <StyledOrderComponent
@@ -160,7 +191,9 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
   );
 };
 
-export default MarketPage;
+const LoadingMarketPage: FC<{}> = () => {
+  return <div>Loading...</div>;
+};
 
 const Page = styled.div`
   width: 100vw;
@@ -172,6 +205,13 @@ const Contents = styled.div`
   max-width: 980px;
   margin: 0 auto;
   padding-bottom: 50px;
+`;
+
+const StyledChartComponent = styled(ChartComponent)`
+  width: 100%;
+  height: 200px;
+  margin-top: 50px;
+  background-color: lightgray;
 `;
 
 const StyledTokensComponent = styled(TokensComponent)`

@@ -86,21 +86,27 @@ export function isSettleOrder(order: Order): order is SettleOrder {
   return order.type === 'Settle';
 }
 
-export function getTokenDistribution(
+export function newTokenDistribution(
   tokens: Token[],
-  orders: NormalOrder[],
+  maybeOrders?: NormalOrder[],
 ): TokenDistribution {
   let distribution = new Map(tokens.map(t => [t.id, 0]));
 
-  orders.forEach(order => {
-    const currentAmount = distribution.get(order.tokenId) || 0;
-    distribution.set(order.tokenId, currentAmount + order.amountToken);
-  });
+  const orders = maybeOrders === undefined ? [] : maybeOrders;
+  orders.forEach(order => addOrderToTokenDistribution(distribution, order));
 
   return distribution;
 }
 
-export function getTokenPrices(
+export function addOrderToTokenDistribution(
+  distribution: TokenDistribution,
+  order: NormalOrder,
+): void {
+  const curAmount = distribution.get(order.tokenId) || 0;
+  distribution.set(order.tokenId, curAmount + order.amountToken);
+}
+
+export function newTokenPrices(
   lmsrB: number,
   distribution: TokenDistribution,
 ): TokenPrices {
@@ -116,6 +122,13 @@ export function getTokenPrices(
       normalize(Math.exp(n / lmsrB) / denom),
     ]),
   );
+}
+
+export function getTokenPrice(
+  prices: TokenPrices,
+  tokenId: TokenId,
+): number {
+  return prices.get(tokenId) || 0;
 }
 
 export function cloneTokenDistribution(
