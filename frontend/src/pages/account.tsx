@@ -4,6 +4,7 @@ import {Link} from 'react-router-dom';
 import {History} from 'history';
 
 import Header from 'components/header';
+import * as table from 'components/table';
 import User from 'models/user';
 import {Market} from 'models/market';
 import {getMyMarkets} from 'api/user';
@@ -57,171 +58,85 @@ const AccountPage: FC<AccountPageProps> = ({history, user}) => {
 export default AccountPage;
 
 const Profile: FC<{me: User}> = ({me}) => {
-  const Container = styled.div`
-    width: 100%;
+  const Table = styled(table.Table)`
     max-width: 300px;
     margin-top: 50px;
-    border: 1px solid #d1d5da;
-    border-radius: 4px;
   `;
 
-  const ContainerHeader = styled.h3`
-    width: 100%;
-    height: 40px;
-    background-color: #f6f8fa;
-    margin: 0;
-    padding-left: 20px;
-    font-size: 14px;
-    color: #586069;
-    line-height: 40px;
-    border-bottom: 1px solid #d1d5da;
-    text-align: left;
-  `;
-
-  const Items = styled.table`
-    width: 100%;
-    table-layout: fixed;
-    border-spacing: 0;
-    border-collapse: collapse;
-    padding: 0;
-    margin: 0;
-  `;
-
-  const Item = styled.tr`
-    width: 100%;
-  `;
-
-  const ItemKey = styled.td`
-    display: inline-block;
+  const LeftItem = styled.div`
     text-align: left;
     font-size: 14px;
-    width: 30%;
-    padding: 10px 0px;
-    padding-left: 20px;
   `;
 
-  const ItemVal = styled.td`
-    display: inline-block;
+  const RightItem = styled.div`
+    width: 100%;
     text-align: right;
     font-size: 14px;
     font-weight: bold;
-    width: 70%;
-    padding: 10px 0px;
-    padding-right: 20px;
+    text-align: right;
   `;
 
   return (
-    <Container>
-      <ContainerHeader>Profile</ContainerHeader>
-      <Items>
-        <tbody>
-          <Item>
-            <ItemKey>Name</ItemKey>
-            <ItemVal>{me.name}</ItemVal>
-          </Item>
-          <Item>
-            <ItemKey>Email</ItemKey>
-            <ItemVal>{me.email}</ItemVal>
-          </Item>
-        </tbody>
-      </Items>
-    </Container>
+    <Table>
+      <table.Header>
+        <table.Cell>Profile</table.Cell>
+      </table.Header>
+      <table.Body>
+        <table.Row>
+          <table.Cell3>
+            <LeftItem>Name</LeftItem>
+          </table.Cell3>
+          <table.Cell7>
+            <RightItem>{me.name}</RightItem>
+          </table.Cell7>
+        </table.Row>
+        <table.Row>
+          <table.Cell3>
+            <LeftItem>Email</LeftItem>
+          </table.Cell3>
+          <table.Cell7>
+            <RightItem>{me.email}</RightItem>
+          </table.Cell7>
+        </table.Row>
+      </table.Body>
+    </Table>
   );
 };
 
 const Markets: FC<{markets: Market[]}> = ({markets}) => {
-  // const markets = me.markets.sort(sortMarket);
-  const Container = styled.div`
-    width: 100%;
-    max-width: 600px;
+  const Table = styled(table.Table)`
+    width: 600px;
     margin-top: 50px;
-    border: 1px solid #d1d5da;
-    border-radius: 4px;
   `;
 
-  const ContainerHeader = styled.h3`
-    width: 100%;
-    height: 40px;
+  const MarketStatus = styled.div`
     font-size: 14px;
-    color: #586069;
-    background-color: #f6f8fa;
-    line-height: 40px;
-    padding-left: 20px;
-    margin: 0px;
-    border-bottom: 1px solid #d1d5da;
   `;
 
-  const Items = styled.table`
-    width: 100%;
-    table-layout: fixed;
-    border-spacing: 0;
-    border-collapse: collapse;
-    padding: 0;
-    margin: 0;
+  const MarketTitle = styled(Link)`
+    font-size: 16px;
+    font-weight: bold;
   `;
 
-  const Item = styled.tr`
-    background-color: white;
-
-    &:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-  `;
-
-  const ItemStatus = styled.td`
-    display: inline-block;
-    text-align: left;
-    font-size: 14px;
-    width: 20%;
-    padding: 20px;
-  `;
-
-  const ItemTitle = styled(Link)`
-    display: inline-block;
-    text-align: left;
-    font-size: 14px;
-    width: 80%;
-  `;
   return (
-    <Container>
-      <ContainerHeader>Markets</ContainerHeader>
-      <Items>
-        <tbody>
-          {markets.map(market => (
-            <Item key={market.id}>
-              <ItemStatus>{market.status}</ItemStatus>
-              <td>
-                <ItemTitle to={`/market/${market.id}`}>
-                  {market.title}
-                </ItemTitle>
-              </td>
-            </Item>
-          ))}
-        </tbody>
-      </Items>
-    </Container>
+    <Table>
+      <table.Header>
+        <table.Cell>Markets</table.Cell>
+      </table.Header>
+      <table.Body>
+        {markets.map(market => (
+          <table.Row key={market.id} striped={true}>
+            <table.Cell3>
+              <MarketStatus>{market.status}</MarketStatus>
+            </table.Cell3>
+            <table.Cell7>
+              <MarketTitle to={`/market/${market.id}`}>
+                {market.title}
+              </MarketTitle>
+            </table.Cell7>
+          </table.Row>
+        ))}
+      </table.Body>
+    </Table>
   );
 };
-
-/*
-function sortMarket(a, b) {
-  const statusScore = status => {
-    switch (status) {
-      case 'open':
-        return 0;
-      case 'preparing':
-        return 1;
-      case 'closed':
-        return 2;
-      case 'settled':
-        return 3;
-    }
-  };
-  const statusDiff = statusScore(a.status) - statusScore(b.status);
-  if (statusDiff === 0) {
-    return a.id - b.id;
-  } else {
-    return statusDiff;
-  }
-}
-*/

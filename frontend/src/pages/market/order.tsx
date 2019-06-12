@@ -150,6 +150,7 @@ function checkBalance(
 
 const Container = styled.div`
   width: 530px;
+  height: 335px;
   border: 1px solid #d1d5da;
   border-radius: 4px;
   padding: 34px;

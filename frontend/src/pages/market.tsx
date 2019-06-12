@@ -54,8 +54,10 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
       {market != null && orders != null && myOrders != null ? (
         <LoadedMarketPage
           market={market}
-          initOrders={orders}
-          initMyOrders={myOrders}
+          orders={orders}
+          setOrders={setOrders}
+          myOrders={myOrders}
+          setMyOrders={setMyOrders}
           user={user}
           history={history}
         />
@@ -70,22 +72,23 @@ export default MarketPage;
 
 interface LoadedMarketPageProps {
   market: Market;
-  initOrders: PublicOrderHistory;
-  initMyOrders: MyOrderHistory;
+  orders: PublicOrderHistory;
+  setOrders(orders: PublicOrderHistory): void;
+  myOrders: MyOrderHistory;
+  setMyOrders(myOrders: MyOrderHistory): void;
   user: User | null;
   history: History;
 }
 
 const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
   market,
-  initOrders,
-  initMyOrders,
+  orders,
+  setOrders,
+  myOrders,
+  setMyOrders,
   user,
   history,
 }) => {
-  const [orders, setOrders] = useState(initOrders);
-  const [myOrders, setMyOrders] = useState(initMyOrders);
-
   const tokenDistribution = newTokenDistribution(market.tokens, orders);
   const tokenPrices = newTokenPrices(market.lmsrB, tokenDistribution);
   const myAssets = getMyAssets(market.tokens, myOrders);
@@ -156,11 +159,13 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
                 <StyledAssetsComponent
                   tokens={market.tokens}
                   myAssets={myAssets}
+                  maxHeight={300}
                 />
               </OrderContainer>
               <StyledHistoryComponent
                 tokens={market.tokens}
                 myOrders={myOrders}
+                maxHeight={300}
               />
             </>
           ) : null}
@@ -173,15 +178,15 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
                   <StyledAssetsComponent
                     tokens={market.tokens}
                     myAssets={myAssets}
+                    maxHeight={300}
                   />
                 ) : null}
               </OrderContainer>
-              {myOrders ? (
-                <StyledHistoryComponent
-                  tokens={market.tokens}
-                  myOrders={myOrders || []}
-                />
-              ) : null}
+              <StyledHistoryComponent
+                tokens={market.tokens}
+                myOrders={myOrders}
+                maxHeight={300}
+              />
             </>
           ) : null}
           <Description content={market ? market.description : ''} />
@@ -211,7 +216,6 @@ const StyledChartComponent = styled(ChartComponent)`
   width: 100%;
   height: 200px;
   margin-top: 50px;
-  background-color: lightgray;
 `;
 
 const StyledTokensComponent = styled(TokensComponent)`
@@ -221,6 +225,7 @@ const StyledTokensComponent = styled(TokensComponent)`
 const OrderContainer = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: start;
 `;
 
 const StyledOrderComponent = styled(OrderComponent)`

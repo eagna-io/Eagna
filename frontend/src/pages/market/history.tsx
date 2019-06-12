@@ -1,31 +1,42 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
 
+import * as table from 'components/table';
 import {Token, MyOrderHistory} from 'models/market';
 
 interface TradeHistoryComponentProps {
   tokens: Token[];
   myOrders: MyOrderHistory;
+  maxHeight?: number;
   className?: string;
 }
 
 const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
   tokens,
   myOrders,
+  maxHeight,
   className,
 }) => {
   return (
-    <Table className={className}>
-      <thead>
-        <Header>
-          <HeaderCol>Time</HeaderCol>
-          <HeaderCol>Types</HeaderCol>
-          <HeaderCol>Token</HeaderCol>
-          <HeaderCol right>Amount Token</HeaderCol>
-          <HeaderCol right>Amount Coin</HeaderCol>
-        </Header>
-      </thead>
-      <tbody>
+    <table.Table className={className} maxHeight={maxHeight}>
+      <table.Header>
+        <table.Cell2 bold small>
+          Time
+        </table.Cell2>
+        <table.Cell2 bold small>
+          Types
+        </table.Cell2>
+        <table.Cell2 bold small>
+          Token
+        </table.Cell2>
+        <table.Cell2 bold small right>
+          Amount Token
+        </table.Cell2>
+        <table.Cell2 bold small right>
+          Amount Coin
+        </table.Cell2>
+      </table.Header>
+      <table.Body>
         {myOrders
           .sort((a, b) => b.time.unix() - a.time.unix())
           .map(order => {
@@ -45,58 +56,18 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
             }
 
             return (
-              <Item bold={order.type !== 'Normal'} key={order.time.unix()}>
-                <ItemCol>{order.time.fromNow()}</ItemCol>
-                <ItemCol>{orderType}</ItemCol>
-                <ItemCol>{tokenName}</ItemCol>
-                <ItemCol right>{order.amountToken}</ItemCol>
-                <ItemCol right>{order.amountCoin}</ItemCol>
-              </Item>
+              <table.Row striped key={order.time.unix()}>
+                <table.Cell2>{order.time.fromNow()}</table.Cell2>
+                <table.Cell2>{orderType}</table.Cell2>
+                <table.Cell2>{tokenName}</table.Cell2>
+                <table.Cell2 right>{order.amountToken}</table.Cell2>
+                <table.Cell2 right>{order.amountCoin}</table.Cell2>
+              </table.Row>
             );
           })}
-      </tbody>
-    </Table>
+      </table.Body>
+    </table.Table>
   );
 };
 
 export default TradeHistoryComponent;
-
-const Table = styled.table`
-  table-layout: fixed;
-  border: 1px solid #d1d5da;
-  border-radius: 4px;
-  border-spacing: 0;
-  border-collapse: collapse;
-`;
-
-const Header = styled.tr`
-  background-color: #f6f8fa;
-  height: 40px;
-  border: none;
-`;
-
-const HeaderCol = styled('th')<{right?: boolean}>`
-  color: #586069;
-  font-size: 12px;
-  font-family: Lucida Grande;
-  text-align: ${props => (props.right ? 'right' : 'left')};
-  padding: 0px 30px;
-`;
-
-const Item = styled('tr')<{bold?: boolean}>`
-  height: 50px;
-  border-top: 1px solid #d1d5da;
-  background-color: white;
-  font-weight: ${props => (props.bold ? 'bold' : 'normal')};
-
-  &:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-`;
-
-const ItemCol = styled('td')<{right?: boolean}>`
-  font-size: 12px;
-  font-family: Lucida Grande;
-  text-align: ${props => (props.right ? 'right' : 'left')};
-  padding: 0px 30px;
-`;
