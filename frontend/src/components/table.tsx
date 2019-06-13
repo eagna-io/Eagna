@@ -87,7 +87,7 @@ export const Cell = styled('td')<{
   large?: boolean;
 }>`
   display: inline-block;
-  height: 48px;
+  min-height: 48px;
   padding: 14px 40px 14px 16px;
   font-size: ${props => (props.small ? '12px' : props.large ? '16px' : '14px')};
   font-weight: ${props => (props.bold ? 'bold' : 'normal')};
