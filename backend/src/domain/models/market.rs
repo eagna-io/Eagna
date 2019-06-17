@@ -163,15 +163,10 @@ impl PreparingMarket {
     ///
     /// ## Panics
     /// まだopen_timeが来ていないとき
-    pub fn open_uncheck(self, users: &Vec<UserId>) -> OpenMarket {
+    pub fn open_uncheck(self) -> OpenMarket {
         let now = Utc::now();
         assert!(self.base.open_time < now);
-        let init_orders = users.iter().map(|user_id| InitialSupplyOrder {
-            user_id: *user_id,
-            amount_coin: INITIAL_SUPPLY_COIN,
-            time: now,
-        });
-        let orders = MarketOrders::new_with_initial_supply_orders(init_orders);
+        let orders = MarketOrders::new();
         OpenMarket {
             base: self.base,
             orders,

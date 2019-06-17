@@ -53,17 +53,8 @@ pub enum OrderType {
 }
 
 impl MarketOrders {
-    /// InitialSupplyOrder で初期化。
-    /// MarketOrdersは、必ず最初にInitialSupplyで初期化される。
-    pub fn new_with_initial_supply_orders<I>(init_orders: I) -> MarketOrders
-    where
-        I: Iterator<Item = InitialSupplyOrder> + ExactSizeIterator,
-    {
-        let mut orders = Vec::with_capacity(init_orders.len());
-        for init_order in init_orders {
-            orders.push(Order::InitialSupply(init_order));
-        }
-        MarketOrders { orders }
+    pub fn new() -> MarketOrders {
+        MarketOrders { orders: Vec::new() }
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (OrderId, &Order)> + DoubleEndedIterator {
