@@ -192,6 +192,27 @@ impl OpenMarket {
         }
     }
 
+    /// ユーザーにInitialSupplyを付与する
+    /// - UserはまだInitialSupplyを受け取っていないか
+    /// をチェックする
+    pub fn try_supply_initial_coin(&mut self, user_id: &UserId) -> Result<(), ()> {
+        log::debug!("Try supply initial coin to {:?}", user_id);
+
+        if self.orders.is_already_supply_initial_coin_to(user_id) {
+            return Err(());
+        }
+
+        let supply = InitialSupplyOrder {
+            user_id: *user_id,
+            amount_coin: INITIAL_SUPPLY_COIN,
+            time: Utc::now(),
+        };
+
+        self.orders.push_valid_order(Order::InitialSupply(supply));
+
+        Ok(())
+    }
+
     /// 新しいNormalOrderを追加する。
     /// - Userの残高が十分にあるか
     /// - Priceは適切に設定されているか

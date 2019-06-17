@@ -84,6 +84,11 @@ impl MarketOrders {
             .sum()
     }
 
+    /// 対象のUserが既にInitialSupplyを受け取っているかどうか
+    pub fn is_already_supply_initial_coin_to(&self, user_id: &UserId) -> bool {
+        self.related_to_user(*user_id).next().is_some()
+    }
+
     /// 末尾に新しいOrderを追加する.
     /// 呼び出し元は、追加するOrderが適切であることを保証しなければならない。
     /// 現在はMarket構造体からのみ呼び出しされる想定
