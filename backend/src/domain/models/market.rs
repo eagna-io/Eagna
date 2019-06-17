@@ -3,7 +3,7 @@ pub use order::{
     InitialSupplyOrder, MarketOrders, NormalOrder, Order, OrderId, OrderType, SettleOrder,
 };
 
-pub const MAX_SPLIT_PERCENT: f64 = 0.05;
+pub const MAX_SPLIT_RATE: f64 = 0.05; // 5 %;
 pub const INITIAL_SUPPLY_COIN: AmountCoin = AmountCoin(10000);
 
 use crate::domain::models::{
@@ -223,7 +223,7 @@ impl OpenMarket {
         let expect_amount_coin = -self.cost_of_token(&order.token_id, order.amount_token);
         if !order
             .amount_coin
-            .is_around(&expect_amount_coin, MAX_SPLIT_PERCENT)
+            .is_around(&expect_amount_coin, MAX_SPLIT_RATE)
         {
             return Err(TryOrderError::PriceOutOfRange);
         }
