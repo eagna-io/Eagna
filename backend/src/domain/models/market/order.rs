@@ -96,13 +96,8 @@ impl MarketOrders {
         self.orders.push(order);
     }
 
-    pub fn last_normal_order(&self) -> Option<(OrderId, &NormalOrder)> {
-        self.iter()
-            .filter_map(|(id, order)| match order {
-                Order::Normal(n) => Some((id, n)),
-                _ => None,
-            })
-            .next_back()
+    pub fn last_order(&self) -> Option<(OrderId, &Order)> {
+        self.iter().next_back()
     }
 }
 

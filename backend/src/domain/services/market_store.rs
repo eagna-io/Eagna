@@ -6,12 +6,13 @@ use chrono::{DateTime, Utc};
 
 pub trait MarketStore: Store + Sized {
     /// 指定されたMarketに対するロックを獲得する。
-    /// ロックはこの構造体がdropされるまで（トランザクションが終わるまで）有効である。
+    /// ロックはトランザクションが終わるまで有効である。
     /// ロックを複数回獲得しても影響はない
     fn lock_market_inner(&mut self, market_id: &MarketId) -> Result<(), Self::Error>;
 
     /// Marketに対するロックを獲得する
-    /// ロックは返された構造体がdropされるまで有効である。
+    /// ロックはトランザクションが終わるまで有効である。
+    /// ロックを複数回獲得しても影響はない
     fn lock_market(
         &mut self,
         market_id: &MarketId,
@@ -91,11 +92,9 @@ where
     /// よって呼び出し元は、Orderを一つ更新するたびにこのメソッドを呼び出す必要がある。
     pub fn update_market_last_order(&mut self, market: &OpenMarket) -> Result<(), S::Error> {
         assert_eq!(self.market_id, market.base.id);
-        let (serial_num, last_order) = market.last_normal_order().unwrap();
-        self.inner.insert_market_orders(
-            &self.market_id,
-            std::iter::once((serial_num, &Order::Normal(*last_order))),
-        )
+        let (serial_num, last_order) = market.last_order().unwrap();
+        self.inner
+            .insert_market_orders(&self.market_id, std::iter::once((serial_num, last_order)))
     }
 
     /// 渡されたOpenMarketのopen処理をstoreに記録する。
@@ -118,7 +117,10 @@ where
     /// このメソッドは、Marketが現在Openかどうかをチェックしない。
     /// よって呼び出し元は、MarketがOpenであり、
     /// ロックされていることを保証する必要がある。
-    pub fn update_market_status_to_closed(&mut self, market: &ClosedMarket) -> Result<(), S::Error> {
+    pub fn update_market_status_to_closed(
+        &mut self,
+        market: &ClosedMarket,
+    ) -> Result<(), S::Error> {
         assert_eq!(self.market_id, market.base.id);
         self.inner
             .update_market_status(&self.market_id, &MarketStatus::Closed)
@@ -130,7 +132,10 @@ where
     /// このメソッドは、Marketが現在Closeかどうかをチェックしない。
     /// よって呼び出し元は、MarketがCloseであり、
     /// ロックされていることを保証する必要がある。
-    pub fn update_market_status_to_settle(&mut self, market: &SettledMarket) -> Result<(), S::Error> {
+    pub fn update_market_status_to_settle(
+        &mut self,
+        market: &SettledMarket,
+    ) -> Result<(), S::Error> {
         assert_eq!(self.market_id, market.base.id);
         let settle_orders = market.orders.iter().filter(|(_id, order)| match order {
             Order::Settle(_) => true,
