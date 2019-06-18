@@ -11,13 +11,14 @@ pub fn query_market_ids_related_to_user(
     conn: &PgConnection,
     user_id: &UserId,
 ) -> Result<Vec<MarketId>, PgError> {
-    let preparing_market_ids = query_preparing_or_open_market_ids(conn)?;
+    let preparing_or_open_markets = query_preparing_or_open_market_ids(conn)?;
     let participated_market_ids = query_participated_market_ids(conn, user_id)?;
 
-    Ok(preparing_market_ids
-        .into_iter()
-        .chain(participated_market_ids)
-        .map(|id| MarketId(id))
+    Ok(participated_market_ids
+        .iter()
+        .filter(|id| !preparing_or_open_markets.contains(id))
+        .chain(preparing_or_open_markets.iter())
+        .map(|id| MarketId(*id))
         .collect())
 }
 
