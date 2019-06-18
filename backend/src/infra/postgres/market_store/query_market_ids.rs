@@ -5,13 +5,13 @@ use crate::{
 use diesel::{pg::PgConnection, prelude::*, result::Error as PgError};
 
 /// 以下の条件を満たすMarketのIDを返す
-/// 1. status が Preparing
+/// 1. status が Preparing または Open
 /// 2. 対象のUserに対してInitialSupplyを配布している
 pub fn query_market_ids_related_to_user(
     conn: &PgConnection,
     user_id: &UserId,
 ) -> Result<Vec<MarketId>, PgError> {
-    let preparing_market_ids = query_preparing_market_ids(conn)?;
+    let preparing_market_ids = query_preparing_or_open_market_ids(conn)?;
     let participated_market_ids = query_participated_market_ids(conn, user_id)?;
 
     Ok(preparing_market_ids
@@ -21,12 +21,13 @@ pub fn query_market_ids_related_to_user(
         .collect())
 }
 
-fn query_preparing_market_ids(conn: &PgConnection) -> Result<Vec<i32>, PgError> {
+fn query_preparing_or_open_market_ids(conn: &PgConnection) -> Result<Vec<i32>, PgError> {
     use crate::infra::postgres::schema::markets::{columns as market, table as markets};
 
     markets
         .select(market::id)
         .filter(market::status.eq(MarketStatus::Preparing))
+        .or_filter(market::status.eq(MarketStatus::Open))
         .load::<i32>(conn)
 }
 

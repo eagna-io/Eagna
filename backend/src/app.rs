@@ -12,7 +12,6 @@ use crate::domain::{
     services::{AccessTokenStore, MarketStore, StoreFactory, UserStore},
 };
 
-use log::{error, info};
 use rouille::{router, Request, Response};
 use std::time::Duration;
 
@@ -117,20 +116,23 @@ where
 }
 
 fn log_ok(req: &Request, resp: &Response, elap: Duration) {
-    info!(
+    log::info!(
         "{} {} {} {} ms",
         resp.status_code,
         req.method(),
         req.raw_url(),
         elap.as_millis()
     );
+    log::debug!("Request : {:?}", req);
+    log::debug!("Response : {:?}", resp);
 }
 
 fn log_err(req: &Request, elap: Duration) {
-    error!(
+    log::error!(
         "Handler panicked: {} {} {} ms",
         req.method(),
         req.raw_url(),
         elap.as_millis()
     );
+    log::debug!("Request : {:?}", req);
 }
