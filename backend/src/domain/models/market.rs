@@ -3,7 +3,7 @@ pub use order::{
     InitialSupplyOrder, MarketOrders, NormalOrder, Order, OrderId, OrderType, SettleOrder,
 };
 
-pub const MAX_SPLIT_PERCENT: f64 = 0.05;
+pub const MAX_SPLIT_RATE: f64 = 0.05; // 5 %;
 pub const INITIAL_SUPPLY_COIN: AmountCoin = AmountCoin(10000);
 
 use crate::domain::models::{
@@ -163,15 +163,10 @@ impl PreparingMarket {
     ///
     /// ## Panics
     /// まだopen_timeが来ていないとき
-    pub fn open_uncheck(self, users: &Vec<UserId>) -> OpenMarket {
+    pub fn open_uncheck(self) -> OpenMarket {
         let now = Utc::now();
         assert!(self.base.open_time < now);
-        let init_orders = users.iter().map(|user_id| InitialSupplyOrder {
-            user_id: *user_id,
-            amount_coin: INITIAL_SUPPLY_COIN,
-            time: now,
-        });
-        let orders = MarketOrders::new_with_initial_supply_orders(init_orders);
+        let orders = MarketOrders::new();
         OpenMarket {
             base: self.base,
             orders,
@@ -197,12 +192,33 @@ impl OpenMarket {
         }
     }
 
+    /// ユーザーにInitialSupplyを付与する
+    /// - UserはまだInitialSupplyを受け取っていないか
+    /// をチェックする
+    pub fn try_supply_initial_coin(&mut self, user_id: &UserId) -> Result<InitialSupplyOrder, ()> {
+        log::debug!("Try supply initial coin to {:?}", user_id);
+
+        if self.orders.is_already_supply_initial_coin_to(user_id) {
+            return Err(());
+        }
+
+        let supply = InitialSupplyOrder {
+            user_id: *user_id,
+            amount_coin: INITIAL_SUPPLY_COIN,
+            time: Utc::now(),
+        };
+
+        self.orders.push_valid_order(Order::InitialSupply(supply));
+
+        Ok(supply)
+    }
+
     /// 新しいNormalOrderを追加する。
     /// - Userの残高が十分にあるか
     /// - Priceは適切に設定されているか
     /// をチェックする.
     /// チェックが通った場合にのみ、NormalOrderを追加する
-    pub fn try_order(&mut self, order: NormalOrder) -> Result<(), TryOrderError> {
+    pub fn try_order(&mut self, order: NormalOrder) -> Result<NormalOrder, TryOrderError> {
         log::debug!("Try a new order : {:?}", order);
 
         // check balance
@@ -228,7 +244,7 @@ impl OpenMarket {
         let expect_amount_coin = -self.cost_of_token(&order.token_id, order.amount_token);
         if !order
             .amount_coin
-            .is_around(&expect_amount_coin, MAX_SPLIT_PERCENT)
+            .is_around(&expect_amount_coin, MAX_SPLIT_RATE)
         {
             return Err(TryOrderError::PriceOutOfRange);
         }
@@ -239,7 +255,7 @@ impl OpenMarket {
             ..order
         };
         self.orders.push_valid_order(Order::Normal(new_order));
-        Ok(())
+        Ok(new_order)
     }
 
     fn token_distribution(&self) -> HashMap<TokenId, AmountToken> {
@@ -275,8 +291,8 @@ impl OpenMarket {
         new_cost - cur_cost
     }
 
-    pub fn last_normal_order(&self) -> Option<(OrderId, &NormalOrder)> {
-        self.orders.last_normal_order()
+    pub fn last_order(&self) -> Option<(OrderId, &Order)> {
+        self.orders.last_order()
     }
 }
 

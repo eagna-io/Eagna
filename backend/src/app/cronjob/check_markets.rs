@@ -38,11 +38,9 @@ struct RespData {
 
 pub fn check_open<S>(store: &mut S) -> Result<Vec<MarketId>, FailureResponse>
 where
-    S: MarketStore + UserStore,
+    S: MarketStore,
 {
     let prepared_market_ids = store.query_market_ids_ready_to_open()?;
-
-    let user_ids = store.query_all_user_ids()?;
 
     let mut open_market_ids = Vec::with_capacity(prepared_market_ids.len());
 
@@ -50,7 +48,7 @@ where
         let mut locked_store = store.lock_market(&market_id)?;
         match locked_store.query_market(&market_id)?.unwrap() {
             Market::Preparing(m) => {
-                let open_market = m.open_uncheck(&user_ids);
+                let open_market = m.open_uncheck();
                 locked_store.update_market_status_to_open(&open_market)?;
                 open_market_ids.push(market_id);
             }

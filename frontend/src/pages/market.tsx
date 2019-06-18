@@ -8,6 +8,7 @@ import ChartComponent from './market/chart';
 import TokensComponent from './market/tokens';
 import OrderComponent from './market/order';
 import AssetsComponent from './market/assets';
+import JoinButtonComponent from './market/joinButton';
 // import ResultComponent from './market/result';
 import HistoryComponent from './market/history';
 import DescComponent from './market/description';
@@ -105,6 +106,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
         tokenId: token.id,
         amountToken: amountToken,
         amountCoin: amountCoin,
+        type: 'normal',
       },
       accessToken: user.accessToken,
     })
@@ -118,6 +120,25 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
         );
         return getOrders(market.id, user.accessToken);
       })
+      .then(res => {
+        setOrders(res.orders);
+        if (!res.myOrders) {
+          throw 'Logic error : Success to create a new Order, but it is not reflected';
+        } else {
+          setMyOrders(res.myOrders);
+        }
+      });
+  };
+
+  const requestJoin = (user: User) => {
+    postOrder({
+      marketId: market.id,
+      order: {
+        type: 'initialSupply',
+      },
+      accessToken: user.accessToken,
+    })
+      .then(() => getOrders(market.id, user.accessToken))
       .then(res => {
         setOrders(res.orders);
         if (!res.myOrders) {
@@ -147,15 +168,21 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
           {user && market.status === MarketStatus.Open ? (
             <>
               <OrderContainer>
-                <StyledOrderComponent
-                  tokens={market.tokens}
-                  lmsrB={market.lmsrB}
-                  tokenDistribution={tokenDistribution}
-                  myAssets={myAssets}
-                  requestOrder={(token, amountToken, amountCoin) =>
-                    requestOrder(user, token, amountToken, amountCoin)
-                  }
-                />
+                {myOrders.length === 0 ? (
+                  <StyledJoinButtonComponent
+                    requestJoin={() => requestJoin(user)}
+                  />
+                ) : (
+                  <StyledOrderComponent
+                    tokens={market.tokens}
+                    lmsrB={market.lmsrB}
+                    tokenDistribution={tokenDistribution}
+                    myAssets={myAssets}
+                    requestOrder={(token, amountToken, amountCoin) =>
+                      requestOrder(user, token, amountToken, amountCoin)
+                    }
+                  />
+                )}
                 <StyledAssetsComponent
                   tokens={market.tokens}
                   myAssets={myAssets}
@@ -226,6 +253,10 @@ const OrderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: start;
+`;
+
+const StyledJoinButtonComponent = styled(JoinButtonComponent)`
+  margin-top: 50px;
 `;
 
 const StyledOrderComponent = styled(OrderComponent)`

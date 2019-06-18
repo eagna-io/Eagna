@@ -53,17 +53,8 @@ pub enum OrderType {
 }
 
 impl MarketOrders {
-    /// InitialSupplyOrder で初期化。
-    /// MarketOrdersは、必ず最初にInitialSupplyで初期化される。
-    pub fn new_with_initial_supply_orders<I>(init_orders: I) -> MarketOrders
-    where
-        I: Iterator<Item = InitialSupplyOrder> + ExactSizeIterator,
-    {
-        let mut orders = Vec::with_capacity(init_orders.len());
-        for init_order in init_orders {
-            orders.push(Order::InitialSupply(init_order));
-        }
-        MarketOrders { orders }
+    pub fn new() -> MarketOrders {
+        MarketOrders { orders: Vec::new() }
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (OrderId, &Order)> + DoubleEndedIterator {
@@ -93,6 +84,11 @@ impl MarketOrders {
             .sum()
     }
 
+    /// 対象のUserが既にInitialSupplyを受け取っているかどうか
+    pub fn is_already_supply_initial_coin_to(&self, user_id: &UserId) -> bool {
+        self.related_to_user(*user_id).next().is_some()
+    }
+
     /// 末尾に新しいOrderを追加する.
     /// 呼び出し元は、追加するOrderが適切であることを保証しなければならない。
     /// 現在はMarket構造体からのみ呼び出しされる想定
@@ -100,13 +96,8 @@ impl MarketOrders {
         self.orders.push(order);
     }
 
-    pub fn last_normal_order(&self) -> Option<(OrderId, &NormalOrder)> {
-        self.iter()
-            .filter_map(|(id, order)| match order {
-                Order::Normal(n) => Some((id, n)),
-                _ => None,
-            })
-            .next_back()
+    pub fn last_order(&self) -> Option<(OrderId, &Order)> {
+        self.iter().next_back()
     }
 }
 

@@ -30,7 +30,7 @@ const App: FC<{}> = () => {
                 // Firebase認証は終わっているが、サーバーには登録されていない
                 if (fbUser.displayName == null || fbUser.email == null) {
                   // TODO
-                  throw 'Cant get name or email from FB login';
+                  throw 'Cant get name or email from Firebase Auth';
                 } else {
                   return createUser({
                     accessToken: token,
