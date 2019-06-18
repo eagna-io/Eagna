@@ -201,31 +201,44 @@ export function postMarket({
 
 interface PostOrderArgs {
   marketId: MarketId;
-  order: {
-    tokenId: TokenId;
-    amountToken: number;
-    amountCoin: number;
-  };
+  order:
+    | {
+        tokenId: TokenId;
+        amountToken: number;
+        amountCoin: number;
+        type: 'normal';
+      }
+    | {
+        type: 'initialSupply';
+      };
   accessToken: string;
 }
 
-interface PartialNormalOrder {
+interface CreatedNormalOrder {
   tokenId: TokenId;
   amountToken: number;
   amountCoin: number;
+  time: Moment;
+  type: 'normal';
+}
+
+interface CreatedInitialSupplyOrder {
+  amountCoin: number;
+  time: Moment;
+  type: 'initialSupply';
 }
 
 export function postOrder({
   marketId,
   order,
   accessToken,
-}: PostOrderArgs): Promise<PartialNormalOrder> {
+}: PostOrderArgs): Promise<CreatedNormalOrder | CreatedInitialSupplyOrder> {
   return request({
     method: Method.POST,
     path: `/markets/${marketId}/orders/`,
     accessToken: accessToken,
     body: order,
-    decoder: partialNormalOrderDecoder,
+    decoder: createdOrderDecoder,
   }).then(res => {
     if (isFailure(res)) {
       // TODO;
@@ -236,8 +249,19 @@ export function postOrder({
   });
 }
 
-const partialNormalOrderDecoder: D.Decoder<PartialNormalOrder> = D.object({
-  tokenId: D.number(),
-  amountToken: D.number(),
-  amountCoin: D.number(),
-});
+const createdOrderDecoder: D.Decoder<
+  CreatedNormalOrder | CreatedInitialSupplyOrder
+> = D.union(
+  D.object({
+    tokenId: D.number(),
+    amountToken: D.number(),
+    amountCoin: D.number(),
+    time: D.string().map(s => moment(s)),
+    type: D.constant('normal'),
+  }),
+  D.object({
+    amountCoin: D.number(),
+    time: D.string().map(s => moment(s)),
+    type: D.constant('initialSupply'),
+  }),
+);
