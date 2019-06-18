@@ -56,13 +56,13 @@ export const marketDecoder: D.Decoder<Market> = D.object({
 function str2status(s: string): MarketStatus {
   switch (s) {
     case 'Preparing':
-      return MarketStatus.Preparing;
+      return MarketStatus.Upcoming;
     case 'Open':
       return MarketStatus.Open;
     case 'Closed':
       return MarketStatus.Closed;
     case 'Settled':
-      return MarketStatus.Settled;
+      return MarketStatus.Resolved;
     default:
       throw `Invalid market status : ${s}`;
   }
