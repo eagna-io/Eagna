@@ -109,6 +109,7 @@ fn to_res_data(order: Order) -> ResData {
 #[serde(tag = "type", rename_all = "camelCase")]
 enum ReqData {
     InitialSupply,
+    #[serde(rename_all = "camelCase")]
     Normal {
         token_id: TokenId,
         amount_token: AmountToken,
