@@ -23,10 +23,10 @@ export interface Token {
 }
 
 export enum MarketStatus {
-  Preparing = 'Preparing',
+  Upcoming = 'Upcoming',
   Open = 'Open',
   Closed = 'Closed',
-  Settled = 'Settled',
+  Resolved = 'Resolved',
 }
 
 export type TokenId = number;

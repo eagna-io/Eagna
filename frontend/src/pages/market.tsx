@@ -198,7 +198,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
           ) : null}
           {market &&
           (market.status === MarketStatus.Closed ||
-            market.status === MarketStatus.Settled) ? (
+            market.status === MarketStatus.Resolved) ? (
             <>
               <OrderContainer>
                 {myAssets ? (
