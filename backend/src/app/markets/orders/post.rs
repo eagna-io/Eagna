@@ -120,10 +120,12 @@ enum ReqData {
 #[derive(Debug, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum ResData {
+    #[serde(rename_all = "camelCase")]
     InitialSupply {
         amount_coin: AmountCoin,
         time: DateTime<Utc>,
     },
+    #[serde(rename_all = "camelCase")]
     Normal {
         token_id: TokenId,
         amount_token: AmountToken,
