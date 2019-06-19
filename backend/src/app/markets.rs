@@ -193,16 +193,23 @@ where
         return Err(FailureResponse::InvalidPayload);
     }
 
-    {
-        let mut locked_store = store.lock_market(&market_id)?;
-        let closed_market = match locked_store.query_market(&market_id)? {
-            Some(Market::Closed(m)) => m,
-            Some(_) => return Err(FailureResponse::ResourceNotFound),
-            None => return Err(FailureResponse::ResourceNotFound),
-        };
-        let settled_market = closed_market.settle(req_data.settle_token_id);
-        locked_store.update_market_status_to_settle(&settled_market)?;
-    }
+    let mut locked_store = store.lock_market(&market_id)?;
+    let closed_market = match locked_store.query_market(&market_id)? {
+        Some(Market::Closed(m)) => m,
+        Some(_) => return Err(FailureResponse::ResourceNotFound),
+        None => return Err(FailureResponse::ResourceNotFound),
+    };
+    let settled_market = closed_market
+        .settle(req_data.settle_token_id)
+        .map_err(|_e| {
+            log::info!(
+                "Try to resolve market {:?} with invalid token {:?}",
+                market_id,
+                req_data.settle_token_id
+            );
+            FailureResponse::InvalidPayload
+        })?;
+    locked_store.update_market_status_to_settle(&settled_market)?;
 
     Ok(Response::json(&market_id).with_status_code(201))
 }
