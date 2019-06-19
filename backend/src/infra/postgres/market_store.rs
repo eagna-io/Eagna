@@ -6,7 +6,7 @@ pub use insert_market::insert_market;
 pub use query_market::query_market;
 pub use query_market_ids::{
     query_market_ids_ready_to_close, query_market_ids_ready_to_open,
-    query_market_ids_related_to_user,
+    query_market_ids_related_to_user, query_market_ids_with_status,
 };
 
 use crate::{

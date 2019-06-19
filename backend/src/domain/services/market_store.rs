@@ -28,7 +28,12 @@ pub trait MarketStore: Store + Sized {
 
     fn query_market(&mut self, market_id: &MarketId) -> Result<Option<Market>, Self::Error>;
 
+    fn query_market_ids_with_status<I>(&mut self, status: I) -> Result<Vec<MarketId>, Self::Error>
+    where
+        I: Iterator<Item = MarketStatus>;
+
     /// 指定されたUserに紐づくMarketのIDのリストを返す。
+    /// つまり、対象のUserに対してInitialSupplyを配布しているMarket。
     fn query_market_ids_related_to_user(
         &mut self,
         user_id: &UserId,

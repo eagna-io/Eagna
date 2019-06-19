@@ -1,7 +1,7 @@
 pub mod orders;
 
 use crate::{
-    app::{validate_bearer_header, FailureResponse},
+    app::{get_params, validate_bearer_header, FailureResponse},
     domain::models::{lmsr, market::*},
     domain::services::{
         market_store::{NewMarket, NewToken},
@@ -20,7 +20,7 @@ pub fn get<S>(
 where
     S: MarketStore,
 {
-    #[derive(Debug, Serialize, Queryable)]
+    #[derive(Debug, Serialize)]
     #[serde(rename_all = "camelCase")]
     struct RespData {
         id: MarketId,
@@ -66,6 +66,32 @@ where
         None => return Err(FailureResponse::ResourceNotFound),
     };
     Ok(Response::json(&RespData::from(market)))
+}
+
+pub fn get_all<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
+where
+    S: MarketStore,
+{
+    let status_iter = get_params(req, "status").filter_map(|s| match s {
+        "upcoming" => Some(MarketStatus::Preparing),
+        "open" => Some(MarketStatus::Open),
+        "closed" => Some(MarketStatus::Closed),
+        "resolved" => Some(MarketStatus::Settled),
+        _ => {
+            log::info!("Received invalid status query : [{}]", s);
+            None
+        }
+    });
+    let market_ids = store.query_market_ids_with_status(status_iter)?;
+
+    #[derive(Debug, Serialize)]
+    struct RespData {
+        market_ids: Vec<MarketId>,
+    }
+
+    let resp_data = RespData { market_ids };
+
+    Ok(Response::json(&resp_data))
 }
 
 pub fn post<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
@@ -135,7 +161,11 @@ where
     Ok(Response::json(&market_id).with_status_code(201))
 }
 
-pub fn put<S>(store: &mut S, req: &Request, market_id: MarketId) -> Result<Response, FailureResponse>
+pub fn put<S>(
+    store: &mut S,
+    req: &Request,
+    market_id: MarketId,
+) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + UserStore + MarketStore,
 {

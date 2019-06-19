@@ -120,6 +120,16 @@ impl MarketStore for DbStore {
         Ok(market_store::query_market(self.pg_conn()?, market_id)?)
     }
 
+    fn query_market_ids_with_status<I>(&mut self, status: I) -> Result<Vec<MarketId>, Self::Error>
+    where
+        I: Iterator<Item = MarketStatus>,
+    {
+        Ok(market_store::query_market_ids_with_status(
+            self.pg_conn()?,
+            status,
+        )?)
+    }
+
     fn query_market_ids_related_to_user(
         &mut self,
         user_id: &UserId,
