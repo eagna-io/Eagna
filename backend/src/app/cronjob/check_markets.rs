@@ -16,6 +16,7 @@ where
     // 開発環境によるcron jobリクエストはloopbackアドレスから
     let source = req.remote_addr().ip();
     if !source.is_loopback() && source != std::net::Ipv4Addr::new(10, 0, 0, 1) {
+        log::info!("cron request from invalid source : {:?}", source);
         return Err(FailureResponse::ResourceNotFound);
     }
 
