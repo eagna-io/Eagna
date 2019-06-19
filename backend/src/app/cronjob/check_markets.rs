@@ -11,14 +11,7 @@ pub fn get<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
 where
     S: MarketStore + UserStore,
 {
-    // 特定のソースからのリクエストかチェック
-    // gcp app engine によるcron jobリクエストは10.0.0.1から
-    // 開発環境によるcron jobリクエストはloopbackアドレスから
-    let source = req.remote_addr().ip();
-    if !source.is_loopback() && source != std::net::Ipv4Addr::new(10, 0, 0, 1) {
-        log::info!("cron request from invalid source : {:?}", source);
-        return Err(FailureResponse::ResourceNotFound);
-    }
+    validate_request(req)?;
 
     let close_markets = check_close(store)?;
     let open_markets = check_open(store)?;
@@ -37,7 +30,15 @@ struct RespData {
     close_markets: Vec<MarketId>,
 }
 
-pub fn check_open<S>(store: &mut S) -> Result<Vec<MarketId>, FailureResponse>
+/// ## Reference
+/// https://cloud.google.com/appengine/docs/flexible/custom-runtimes/scheduling-jobs-with-cron-yaml?hl=ja#validating_cron_requests
+fn validate_request(req: &Request) -> Result<(), FailureResponse> {
+    req.header("X-Appengine-Cron")
+        .ok_or(FailureResponse::ResourceNotFound)
+        .map(|_| ())
+}
+
+fn check_open<S>(store: &mut S) -> Result<Vec<MarketId>, FailureResponse>
 where
     S: MarketStore,
 {
@@ -64,7 +65,7 @@ where
     Ok(open_market_ids)
 }
 
-pub fn check_close<S>(store: &mut S) -> Result<Vec<MarketId>, FailureResponse>
+fn check_close<S>(store: &mut S) -> Result<Vec<MarketId>, FailureResponse>
 where
     S: MarketStore + UserStore,
 {
