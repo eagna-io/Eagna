@@ -1,8 +1,13 @@
 import React, {FC, useState, useEffect} from 'react';
-import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+} from 'react-router-dom';
 import firebase from 'firebase';
 import {createGlobalStyle} from 'styled-components';
 
+import TopPage from 'pages/top';
 import LoginPage from 'pages/login';
 import AccountPage from 'pages/account';
 import MarketPage from 'pages/market';
@@ -51,9 +56,24 @@ const App: FC<{}> = () => {
   const GlobalStyle = createGlobalStyle`
     body {
       margin: 0;
+      font-family: 'Noto Sans JP', sans-serif;
+      color: #1B384E;
+      letter-spacing: 0;
     }
     * {
       box-sizing: border-box;
+    }
+    a {
+      text-decoration: none;
+      outline: none;
+      color: #1B384E;
+    }
+    a: visited {
+      color: #1B384E;
+    }
+    p {
+      margin: 0;
+      padding: 0;
     }
   `;
 
@@ -62,7 +82,7 @@ const App: FC<{}> = () => {
       <GlobalStyle />
       <Router>
         <Switch>
-          <Redirect from="/" to="/login" exact />
+          <Route path="/" exact render={() => <TopPage />} />
           <Route
             path="/login"
             exact
