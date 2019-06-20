@@ -109,6 +109,9 @@ pub enum TryOrderError {
     PriceOutOfRange,
 }
 
+#[derive(Debug, Clone)]
+pub struct InvalidTokenId();
+
 impl std::ops::Deref for Market {
     type Target = BaseInfos;
     fn deref(&self) -> &BaseInfos {
@@ -297,13 +300,13 @@ impl OpenMarket {
 }
 
 impl ClosedMarket {
-    pub fn settle(mut self, settle_token_id: TokenId) -> SettledMarket {
+    pub fn settle(mut self, settle_token_id: TokenId) -> Result<SettledMarket, InvalidTokenId> {
         let settle_token = self
             .base
             .tokens
             .iter()
             .find(|t| t.id == settle_token_id)
-            .expect("Logic error : call ClosedMarket::settle with non-market token_id")
+            .ok_or(InvalidTokenId())?
             .clone();
 
         // Settle orderを発行
@@ -324,11 +327,11 @@ impl ClosedMarket {
             self.orders.push_valid_order(Order::Settle(settle_order));
         }
 
-        SettledMarket {
+        Ok(SettledMarket {
             base: self.base,
             orders: self.orders,
             settle_token,
-        }
+        })
     }
 
     fn token_user_distribution(&self) -> HashMap<(TokenId, UserId), AmountToken> {
