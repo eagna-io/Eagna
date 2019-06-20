@@ -128,7 +128,7 @@ fn log_ok(req: &Request, resp: &Response, elap: Duration) {
         req.raw_url(),
         elap.as_millis()
     );
-    log::debug!("Request : {:?}", req);
+    log::trace!("Request : {:?}", req);
     log::debug!("Response : {:?}", resp);
 }
 

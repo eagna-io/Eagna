@@ -72,6 +72,38 @@ pub fn get_all<S>(store: &mut S, req: &Request) -> Result<Response, FailureRespo
 where
     S: MarketStore,
 {
+    #[derive(Debug, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct RespItem {
+        id: MarketId,
+        title: MarketTitle,
+        organizer: MarketOrganizer,
+        short_desc: MarketShortDesc,
+        description: MarketDesc,
+        lmsr_b: lmsr::B,
+        open_time: DateTime<Utc>,
+        close_time: DateTime<Utc>,
+        tokens: MarketTokens,
+        status: MarketStatus,
+    }
+
+    impl From<Market> for RespItem {
+        fn from(market: Market) -> RespItem {
+            RespItem {
+                id: market.id,
+                title: market.title.clone(),
+                organizer: market.organizer.clone(),
+                short_desc: market.short_desc.clone(),
+                description: market.description.clone(),
+                lmsr_b: market.lmsr_b,
+                open_time: market.open_time,
+                close_time: market.close_time,
+                tokens: market.tokens.clone(),
+                status: market.status(),
+            }
+        }
+    }
+
     let status_iter = get_params(req, "status").filter_map(|s| match s {
         "upcoming" => Some(MarketStatus::Preparing),
         "open" => Some(MarketStatus::Open),
@@ -84,12 +116,11 @@ where
     });
     let market_ids = store.query_market_ids_with_status(status_iter)?;
 
-    #[derive(Debug, Serialize)]
-    struct RespData {
-        market_ids: Vec<MarketId>,
+    let mut resp_data = Vec::with_capacity(market_ids.len());
+    for market_id in market_ids {
+        let market = store.query_market(&market_id)?.unwrap();
+        resp_data.push(RespItem::from(market));
     }
-
-    let resp_data = RespData { market_ids };
 
     Ok(Response::json(&resp_data))
 }
