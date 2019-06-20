@@ -1,38 +1,37 @@
-import React, {FC} from 'react';
+import React, {FC, useState, useCallback} from 'react';
 import styled from 'styled-components';
 
-// 980px 以上
-export const Pc: FC<{}> = ({children}) => {
-  const Container = styled.div`
-    @media (max-width: 979px) {
-      display: none;
-    }
-  `;
+interface ResponsiveProps {
+  renderPc: () => React.ReactNode;
+  renderTablet: () => React.ReactNode;
+  renderMobile: () => React.ReactNode;
+}
 
-  return <Container>{children}</Container>;
+export const Responsive: FC<ResponsiveProps> = ({
+  renderPc,
+  renderTablet,
+  renderMobile,
+}) => {
+  const [VW, setVW] = useState(window.innerWidth);
+
+  const ref = useCallback(node => {
+    if (node !== null) {
+      setVW(node.getBoundingClientRect().width);
+    }
+  }, []);
+
+  console.log(VW);
+
+  return (
+    <View ref={ref}>
+      {VW < 768 ? renderMobile() : VW < 980 ? renderTablet() : renderPc()}
+    </View>
+  );
 };
 
-// 768px以上 980px 未満
-export const Tablet: FC<{}> = ({children}) => {
-  const Container = styled.div`
-    @media (max-width: 767px) {
-      display: none;
-    }
-    @media (min-width: 980px) {
-      display: none;
-    }
-  `;
+export default Responsive;
 
-  return <Container>{children}</Container>;
-};
-
-// 768px未満
-export const Mobile: FC<{}> = ({children}) => {
-  const Container = styled.div`
-    @media (min-width: 767px) {
-      display: none;
-    }
-  `;
-
-  return <Container>{children}</Container>;
-};
+const View = styled.div`
+  width: 100vw;
+  height: 100vh;
+`;
