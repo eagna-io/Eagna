@@ -5,29 +5,21 @@ import {MarketStatus} from 'models/market';
 
 interface StatusBadgeProps {
   status: MarketStatus;
-  width: number;
-  height: number;
   className?: string;
 }
 
 const StatusBadge: FC<StatusBadgeProps> = ({
   status,
-  width,
-  height,
   className,
 }) => {
   const color = statusToColor(status);
 
   const Badge = styled.div`
-    width: ${width}px;
-    height: ${height}px;
     background-color: ${color};
     border-radius: 4px;
 
     color: white;
-    font-size: 15px;
     font-weight: 700;
-    line-height: ${height}px;
     text-align: center;
   `;
   return <Badge className={className}>{status}</Badge>;

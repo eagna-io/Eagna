@@ -3,8 +3,9 @@ import firebase from 'firebase';
 
 import {Market, MarketStatus} from 'models/market';
 import {getMarkets} from 'api/market';
-import {Pc, Mobile, Tablet} from 'components/responsive';
+import Responsive from 'components/responsive';
 import TopPagePc from './top/pc';
+import TopPageMobile from './top/mobile';
 
 interface TopPageProps {}
 
@@ -43,11 +44,17 @@ const TopPage: FC<TopPageProps> = () => {
   };
 
   return (
-    <>
-      <Pc>
+    <Responsive
+      renderMobile={() => (
+        <TopPageMobile uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
+      )}
+      renderTablet={() => (
+        <TopPageMobile uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
+      )}
+      renderPc={() => (
         <TopPagePc uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
-      </Pc>
-    </>
+      )}
+    />
   );
 };
 
