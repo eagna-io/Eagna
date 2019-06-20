@@ -33,10 +33,16 @@ export function getMarket(id: MarketId): Promise<Market> {
   });
 }
 
-export function getMarkets(): Promise<Market[]> {
+export function getMarkets(statusList?: MarketStatus[]): Promise<Market[]> {
   return request({
     method: Method.GET,
     path: '/markets/',
+    params:
+      statusList === undefined
+        ? undefined
+        : {
+            status: statusList.map(s => s.toLowerCase()),
+          },
     decoder: D.array(marketDecoder),
   }).then(res => {
     if (isFailure(res)) {
