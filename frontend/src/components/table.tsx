@@ -23,7 +23,9 @@ export const Table: FC<TableProps> = ({maxHeight, className, children}) => {
   const Inner = styled('table')`
     display: block;
     width: 100%;
-    height: ${maxHeight === undefined || height === undefined || height < maxHeight
+    height: ${maxHeight === undefined ||
+    height === undefined ||
+    height < maxHeight
       ? 'auto'
       : `${maxHeight}px`};
     table-layout: fixed;
@@ -33,9 +35,7 @@ export const Table: FC<TableProps> = ({maxHeight, className, children}) => {
 
   return (
     <Container className={className}>
-      <Inner ref={ref}>
-        {children}
-      </Inner>
+      <Inner ref={ref}>{children}</Inner>
     </Container>
   );
 };

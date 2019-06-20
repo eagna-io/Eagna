@@ -7,14 +7,20 @@ export enum Method {
   POST = 'POST',
 }
 
-export interface RequestParams<T> {
+export interface RequestArgs<T> {
   method: Method;
   path: string;
   accessToken?: string;
-  params?: object;
+  params?: RequestParams;
   body?: object;
   decoder: D.Decoder<T>;
 }
+
+export interface RequestParams {
+  [key: string]: RequestParamVal;
+}
+
+type RequestParamVal = string | number | boolean | Array<string | number>;
 
 export interface Failure {
   error: {
@@ -34,7 +40,7 @@ export function isFailure<T>(v: T | Failure): v is Failure {
   return (v as Failure).error !== undefined;
 }
 
-export function request<T>(args: RequestParams<T>): Promise<T | Failure> {
+export function request<T>(args: RequestArgs<T>): Promise<T | Failure> {
   const url = constructUrl(args.path, args.params);
   let option = {
     method: args.method,
@@ -58,16 +64,41 @@ export function request<T>(args: RequestParams<T>): Promise<T | Failure> {
   });
 }
 
-function constructUrl(path: string, params?: object): string {
+function constructUrl(path: string, params?: RequestParams): string {
   let url = `${base}${path}`;
   if (params == null) {
     return url;
   } else {
     url += '?';
     Object.entries(params).forEach(([key, val]) => {
-      url += `${key}=${val}&`;
+      url += `${key}=${serializeParamVal(val)}&`;
     });
     return url.slice(0, -1);
+  }
+}
+
+// 配列の場合は、","区切りで値を並べ、それをパーセントエンコードする。
+// つまり、"%2C"で区切られる
+function serializeParamVal(v: RequestParamVal): string {
+  if (typeof v === 'string') {
+    return v;
+  } else if (typeof v === 'number') {
+    return String(v);
+  } else if (typeof v === 'boolean') {
+    return String(v);
+  } else {
+    return v
+      .map(toString)
+      .reduce((acc, cur) => acc + cur + '%2C', '')
+      .slice(0, -3);
+  }
+}
+
+function toString(v: string | number): string {
+  if (typeof v === 'string') {
+    return v;
+  } else {
+    return String(v);
   }
 }
 
