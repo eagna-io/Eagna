@@ -33,6 +33,20 @@ export function getMarket(id: MarketId): Promise<Market> {
   });
 }
 
+export function getMarkets(): Promise<Market[]> {
+  return request({
+    method: Method.GET,
+    path: '/markets/',
+    decoder: D.array(marketDecoder),
+  }).then(res => {
+    if (isFailure(res)) {
+      throw `Unexpected failure : ${res.error.message}`;
+    } else {
+      return res;
+    }
+  });
+}
+
 export const marketDecoder: D.Decoder<Market> = D.object({
   id: D.number(),
   title: D.string(),

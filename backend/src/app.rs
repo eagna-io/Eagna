@@ -3,10 +3,12 @@ mod cronjob;
 mod failure_response;
 mod markets;
 mod me;
+mod req;
 mod users;
 
 pub use self::auth::validate_bearer_header;
 pub use self::failure_response::FailureResponse;
+pub use self::req::get_params;
 use crate::domain::{
     models::market::MarketId,
     services::{AccessTokenStore, MarketStore, StoreFactory, UserStore},
@@ -93,6 +95,9 @@ where
         (POST) (/users/) => {
             users::post(store, req)
         },
+        (GET) (/markets/) => {
+            markets::get_all(store, req)
+        },
         (POST) (/markets/) => {
             markets::post(store, req)
         },
@@ -123,7 +128,7 @@ fn log_ok(req: &Request, resp: &Response, elap: Duration) {
         req.raw_url(),
         elap.as_millis()
     );
-    log::debug!("Request : {:?}", req);
+    log::trace!("Request : {:?}", req);
     log::debug!("Response : {:?}", resp);
 }
 

@@ -29,17 +29,3 @@ fn extract_token(header_val: &str) -> Result<AccessTokenId, FailureResponse> {
         .ok_or(FailureResponse::Unauthorized)
         .map(|mat| AccessTokenId::from_str(mat.as_str()))
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn extract_valid_token() {
-        let token = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz+/";
-        let header_val = format!("Bearer: {}", token);
-        let res = extract_token(header_val.as_str());
-        assert!(res.is_ok());
-        assert_eq!(res.unwrap(), token);
-    }
-}

@@ -1,7 +1,7 @@
 pub mod orders;
 
 use crate::{
-    app::{validate_bearer_header, FailureResponse},
+    app::{get_params, validate_bearer_header, FailureResponse},
     domain::models::{lmsr, market::*},
     domain::services::{
         market_store::{NewMarket, NewToken},
@@ -20,7 +20,7 @@ pub fn get<S>(
 where
     S: MarketStore,
 {
-    #[derive(Debug, Serialize, Queryable)]
+    #[derive(Debug, Serialize)]
     #[serde(rename_all = "camelCase")]
     struct RespData {
         id: MarketId,
@@ -66,6 +66,63 @@ where
         None => return Err(FailureResponse::ResourceNotFound),
     };
     Ok(Response::json(&RespData::from(market)))
+}
+
+pub fn get_all<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
+where
+    S: MarketStore,
+{
+    #[derive(Debug, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    struct RespItem {
+        id: MarketId,
+        title: MarketTitle,
+        organizer: MarketOrganizer,
+        short_desc: MarketShortDesc,
+        description: MarketDesc,
+        lmsr_b: lmsr::B,
+        open_time: DateTime<Utc>,
+        close_time: DateTime<Utc>,
+        tokens: MarketTokens,
+        status: MarketStatus,
+    }
+
+    impl From<Market> for RespItem {
+        fn from(market: Market) -> RespItem {
+            RespItem {
+                id: market.id,
+                title: market.title.clone(),
+                organizer: market.organizer.clone(),
+                short_desc: market.short_desc.clone(),
+                description: market.description.clone(),
+                lmsr_b: market.lmsr_b,
+                open_time: market.open_time,
+                close_time: market.close_time,
+                tokens: market.tokens.clone(),
+                status: market.status(),
+            }
+        }
+    }
+
+    let status_iter = get_params(req, "status").filter_map(|s| match s {
+        "upcoming" => Some(MarketStatus::Preparing),
+        "open" => Some(MarketStatus::Open),
+        "closed" => Some(MarketStatus::Closed),
+        "resolved" => Some(MarketStatus::Settled),
+        _ => {
+            log::info!("Received invalid status query : [{}]", s);
+            None
+        }
+    });
+    let market_ids = store.query_market_ids_with_status(status_iter)?;
+
+    let mut resp_data = Vec::with_capacity(market_ids.len());
+    for market_id in market_ids {
+        let market = store.query_market(&market_id)?.unwrap();
+        resp_data.push(RespItem::from(market));
+    }
+
+    Ok(Response::json(&resp_data))
 }
 
 pub fn post<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
@@ -135,7 +192,11 @@ where
     Ok(Response::json(&market_id).with_status_code(201))
 }
 
-pub fn put<S>(store: &mut S, req: &Request, market_id: MarketId) -> Result<Response, FailureResponse>
+pub fn put<S>(
+    store: &mut S,
+    req: &Request,
+    market_id: MarketId,
+) -> Result<Response, FailureResponse>
 where
     S: AccessTokenStore + UserStore + MarketStore,
 {
@@ -163,16 +224,23 @@ where
         return Err(FailureResponse::InvalidPayload);
     }
 
-    {
-        let mut locked_store = store.lock_market(&market_id)?;
-        let closed_market = match locked_store.query_market(&market_id)? {
-            Some(Market::Closed(m)) => m,
-            Some(_) => return Err(FailureResponse::ResourceNotFound),
-            None => return Err(FailureResponse::ResourceNotFound),
-        };
-        let settled_market = closed_market.settle(req_data.settle_token_id);
-        locked_store.update_market_status_to_settle(&settled_market)?;
-    }
+    let mut locked_store = store.lock_market(&market_id)?;
+    let closed_market = match locked_store.query_market(&market_id)? {
+        Some(Market::Closed(m)) => m,
+        Some(_) => return Err(FailureResponse::ResourceNotFound),
+        None => return Err(FailureResponse::ResourceNotFound),
+    };
+    let settled_market = closed_market
+        .settle(req_data.settle_token_id)
+        .map_err(|_e| {
+            log::info!(
+                "Try to resolve market {:?} with invalid token {:?}",
+                market_id,
+                req_data.settle_token_id
+            );
+            FailureResponse::InvalidPayload
+        })?;
+    locked_store.update_market_status_to_settle(&settled_market)?;
 
     Ok(Response::json(&market_id).with_status_code(201))
 }
