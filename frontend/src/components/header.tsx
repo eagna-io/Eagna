@@ -13,22 +13,26 @@ interface HeaderProps {
   user: User | null;
 }
 
-const Header: FC<HeaderProps> = ({history, user}) => {
+export const Pc: FC<HeaderProps> = ({history, user}) => {
   const Container = styled.div`
-    display: flex;
     width: 100vw;
     height: 60px;
     padding: 0 30px;
     background-color: #1c384e;
-    border-bottom: 1px solid #979797;
-    justify-content: space-between;
-    align-items: center;
   `;
 
   const Logo = styled.img`
-    display: block;
+    display: inline-block;
+    position: absolute;
     height: 50px;
-    margin-left: 30px;
+    top: 5px;
+    left: 30px;
+  `;
+
+  const ProfileDropdownContainer = styled.div`
+    position: absolute;
+    top: 15px;
+    right: 30px;
   `;
 
   return (
@@ -36,12 +40,16 @@ const Header: FC<HeaderProps> = ({history, user}) => {
       <Link to="/">
         <Logo src="/img/logo.png" />
       </Link>
-      <ProfileDropdown history={history} user={user} />
+      <ProfileDropdownContainer>
+        <ProfileDropdown history={history} user={user} />
+      </ProfileDropdownContainer>
     </Container>
   );
 };
 
-export default Header;
+export const Mobile = Pc;
+export const Tablet = Pc;
+export default Pc;
 
 interface ProfileDropdownProps {
   history: History;

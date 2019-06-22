@@ -1,4 +1,4 @@
-import React, {FC, useState, useCallback} from 'react';
+import React, {FC, useState} from 'react';
 import styled from 'styled-components';
 
 interface ResponsiveProps {
@@ -14,16 +14,14 @@ export const Responsive: FC<ResponsiveProps> = ({
 }) => {
   const [VW, setVW] = useState(window.innerWidth);
 
-  const ref = useCallback(node => {
-    if (node !== null) {
-      setVW(node.getBoundingClientRect().width);
-    }
-  }, []);
+  const onWindowResize = () => {
+    setVW(window.innerWidth);
+  };
 
-  console.log(VW);
+  window.onresize= onWindowResize;
 
   return (
-    <View ref={ref}>
+    <View>
       {VW < 768 ? renderMobile() : VW < 980 ? renderTablet() : renderPc()}
     </View>
   );
