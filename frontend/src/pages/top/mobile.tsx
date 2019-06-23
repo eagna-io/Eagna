@@ -13,7 +13,10 @@ interface TopPageProps {
   featuredMarkets: Market[];
 }
 
-export const TopPageMobile: FC<TopPageProps> = ({uiConfig, featuredMarkets}) => {
+export const TopPageMobile: FC<TopPageProps> = ({
+  uiConfig,
+  featuredMarkets,
+}) => {
   return (
     <>
       <Header.Mobile />
@@ -25,6 +28,9 @@ export const TopPageMobile: FC<TopPageProps> = ({uiConfig, featuredMarkets}) => 
             uiConfig={uiConfig}
             firebaseAuth={firebase.auth()}
           />
+          <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n017432cef64f">
+            &beta; 版をリリースしました！
+          </AnnounceBetaRelease>
         </MainSectionBgFilter>
       </MainSection>
       <FeaturedMarketsSection>
@@ -79,6 +85,16 @@ const SubMsg = styled.h3`
   margin-top: 13px;
   margin-bottom: 15px;
   padding: 0;
+`;
+
+const AnnounceBetaRelease = styled.a`
+  display: block;
+  width: 100%;
+  margin-top: 30px;
+  font-size: 15px;
+  font-weight: 400;
+  text-align: center;
+  text-decoration: underline;
 `;
 
 const FeaturedMarketsSection = styled.div`

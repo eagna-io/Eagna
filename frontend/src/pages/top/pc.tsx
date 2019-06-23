@@ -25,6 +25,9 @@ export const TopPagePc: FC<PcTopPageProps> = ({uiConfig, featuredMarkets}) => {
             uiConfig={uiConfig}
             firebaseAuth={firebase.auth()}
           />
+          <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n017432cef64f">
+            &beta; 版をリリースしました！
+          </AnnounceBetaRelease>
         </MainSectionBgFilter>
       </MainSection>
       <FeaturedMarketsSection>
@@ -77,6 +80,17 @@ const SubMsg = styled.h3`
   margin-top: 12px;
   margin-bottom: 15px;
   padding: 0;
+`;
+
+const AnnounceBetaRelease = styled.a`
+  display: block;
+  width: 400px;
+  margin: 0 auto;
+  margin-top: 50px;
+  font-size: 18px;
+  font-weight: 400;
+  text-align: center;
+  text-decoration: underline;
 `;
 
 const FeaturedMarketsSection = styled.div`

@@ -36,9 +36,15 @@ export const Pc: FC<{}> = () => {
     <Header>
       <Logo src="/img/logo.png" />
       <HeaderLinks>
-        <HeaderLink>操作説明</HeaderLink>
-        <HeaderLink>Eagnaとは？</HeaderLink>
-        <HeaderLink>予測市場とは？</HeaderLink>
+        <HeaderLink href="https://note.mu/rohan_market/n/n017432cef64f">
+          操作説明
+        </HeaderLink>
+        <HeaderLink href="https://note.mu/rohan_market/n/nba87159eace9">
+          Eagnaとは？
+        </HeaderLink>
+        <HeaderLink href="https://note.mu/rohan_market/n/naed2a34bf6e6">
+          予測市場とは？
+        </HeaderLink>
       </HeaderLinks>
     </Header>
   );
@@ -76,9 +82,15 @@ export const Mobile: FC<{}> = () => {
     <Header>
       <Logo src="/img/logo.png" />
       <HeaderLinks>
-        <HeaderLink>予測市場とは？</HeaderLink>
-        <HeaderLink>Eagnaとは？</HeaderLink>
-        <HeaderLink>操作説明</HeaderLink>
+        <HeaderLink href="https://note.mu/rohan_market/n/n017432cef64f">
+          操作説明
+        </HeaderLink>
+        <HeaderLink href="https://note.mu/rohan_market/n/nba87159eace9">
+          Eagnaとは？
+        </HeaderLink>
+        <HeaderLink href="https://note.mu/rohan_market/n/naed2a34bf6e6">
+          予測市場とは？
+        </HeaderLink>
       </HeaderLinks>
     </Header>
   );
