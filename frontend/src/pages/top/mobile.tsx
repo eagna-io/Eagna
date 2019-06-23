@@ -28,7 +28,7 @@ export const TopPageMobile: FC<TopPageProps> = ({
             uiConfig={uiConfig}
             firebaseAuth={firebase.auth()}
           />
-          <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n017432cef64f">
+          <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n7f8a517c50f6">
             &beta; 版をリリースしました！
           </AnnounceBetaRelease>
         </MainSectionBgFilter>
