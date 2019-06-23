@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import {Link} from 'react-router-dom';
 
 import {Market} from 'models/market';
-import StatusBadge from 'components/status_badge';
+import * as StatusBadge from 'components/status_badge';
 
 interface FeaturedMarketComponentProps {
   market: Market;
@@ -37,13 +37,6 @@ export const Pc: FC<FeaturedMarketComponentProps> = ({market}) => {
     font-weight: 400;
     line-height: 30px;
     margin-top: 10px;
-  `;
-
-  const StyledStatusBadge = styled(StatusBadge)`
-    width: 87px;
-    height: 27px;
-    font-size: 15px;
-    line-height: 27px;
   `;
 
   const HR = styled.hr`
@@ -84,7 +77,7 @@ export const Pc: FC<FeaturedMarketComponentProps> = ({market}) => {
 
   return (
     <Container to={`/market/${market.id}`}>
-      <StyledStatusBadge status={market.status} />
+      <StatusBadge.Pc status={market.status} />
       <Title>{market.title}</Title>
       <HR />
       <TokenContainer>
@@ -113,13 +106,6 @@ export const Mobile: FC<FeaturedMarketComponentProps> = ({market}) => {
     &:first-of-type {
       margin-top: 30px;
     }
-  `;
-
-  const StyledStatusBadge = styled(StatusBadge)`
-    width: 72px;
-    height: 27px;
-    font-size: 11px;
-    line-height: 27px;
   `;
 
   const Title = styled.div`
@@ -168,7 +154,7 @@ export const Mobile: FC<FeaturedMarketComponentProps> = ({market}) => {
 
   return (
     <Container to={`/market/${market.id}`}>
-      <StyledStatusBadge status={market.status} />
+      <StatusBadge.Mobile status={market.status} />
       <Title>{market.title}</Title>
       <HR />
       <TokenContainer>

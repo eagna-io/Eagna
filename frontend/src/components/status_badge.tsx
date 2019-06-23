@@ -27,6 +27,20 @@ const StatusBadge: FC<StatusBadgeProps> = ({
 
 export default StatusBadge;
 
+export const Pc = styled(StatusBadge)`
+  width: 87px;
+  height: 27px;
+  font-size: 15px;
+  line-height: 27px;
+`;
+
+export const Mobile = styled(StatusBadge)`
+  width: 72p;x
+  height: 27px;
+  font-size: 11px;
+  line-height: 27px;
+`;
+
 function statusToColor(s: MarketStatus): string {
   if (s === MarketStatus.Upcoming) {
     return '#D8D212';

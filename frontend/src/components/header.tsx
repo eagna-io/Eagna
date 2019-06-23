@@ -124,6 +124,7 @@ const ProfileDropdown: FC<ProfileDropdownProps> = ({history, user}) => {
     display: ${props => (props.show ? 'block' : 'none')};
     top: 50px;
     right: 20px;
+    z-index: 1000;
     background-color: white;
     border: 1px solid rgba(27, 31, 35, 0.15);
     border-radius: 4px;
