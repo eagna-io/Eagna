@@ -116,7 +116,7 @@ export const Mobile: FC<MarketHeaderComponentProps> = ({market, className}) => {
   `;
 
   const StatusBadgeContainer = styled.div`
-    width: 50px;
+    width: 70px;
     height: 27px;
   `;
 
