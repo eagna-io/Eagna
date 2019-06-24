@@ -9,7 +9,7 @@ import * as TokensComponent from './components/tokens';
 import * as OrderComponent from './components/order';
 import * as AssetsComponent from './components/assets';
 import * as JoinButtonComponent from './components/join_button';
-import ResultComponent from './components/result';
+import * as ResultComponent from './components/result';
 import HistoryComponent from './components/history';
 import DescComponent from './components/description';
 import {
@@ -197,7 +197,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
         (market.status === MarketStatus.Closed ||
           market.status === MarketStatus.Resolved) ? (
           <>
-            <StyledResultComponent
+            <ResultComponent.Mobile
               settleToken={
                 market.settleTokenId === undefined
                   ? undefined
@@ -238,10 +238,6 @@ const Contents = styled.div`
 const StyledChartComponent = styled(ChartComponent)`
   width: 100%;
   height: 200px;
-  margin-top: 50px;
-`;
-
-const StyledResultComponent = styled(ResultComponent)`
   margin-top: 50px;
 `;
 
