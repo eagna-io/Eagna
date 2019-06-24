@@ -11,7 +11,7 @@ import * as AssetsComponent from './components/assets';
 import * as JoinButtonComponent from './components/join_button';
 import * as ResultComponent from './components/result';
 import HistoryComponent from './components/history';
-import DescComponent from './components/description';
+import * as DescComponent from './components/description';
 import {
   Market,
   MarketId,
@@ -218,7 +218,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
             />
           </>
         ) : null}
-        <Description content={market ? market.description : ''} />
+        <DescComponent.Mobile content={market ? market.description : ''} />
       </Contents>
     </>
   );
@@ -243,9 +243,5 @@ const StyledChartComponent = styled(ChartComponent)`
 
 const StyledHistoryComponent = styled(HistoryComponent)`
   width: 100%;
-  margin-top: 50px;
-`;
-
-const Description = styled(DescComponent)`
   margin-top: 50px;
 `;
