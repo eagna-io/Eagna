@@ -31,6 +31,7 @@ export const Table: FC<TableProps> = ({maxHeight, className, children}) => {
     table-layout: fixed;
     border-spacing: 0;
     border-collapse: collapse;
+    overflow: hidden;
   `;
 
   return (
