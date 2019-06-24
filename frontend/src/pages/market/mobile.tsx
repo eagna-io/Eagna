@@ -6,8 +6,8 @@ import * as Header from 'components/header';
 import * as MarketHeader from './components/header';
 import ChartComponent from './components/chart';
 import TokensComponent from './components/tokens';
-import OrderComponent from './components/order';
-import AssetsComponent from './components/assets';
+import * as OrderComponent from './components/order';
+import * as AssetsComponent from './components/assets';
 import JoinButtonComponent from './components/joinButton';
 import ResultComponent from './components/result';
 import HistoryComponent from './components/history';
@@ -166,28 +166,26 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
         />
         {user && market.status === MarketStatus.Open ? (
           <>
-            <OrderContainer>
-              {myOrders.length === 0 ? (
-                <StyledJoinButtonComponent
-                  requestJoin={() => requestJoin(user)}
-                />
-              ) : (
-                <StyledOrderComponent
-                  tokens={market.tokens}
-                  lmsrB={market.lmsrB}
-                  tokenDistribution={tokenDistribution}
-                  myAssets={myAssets}
-                  requestOrder={(token, amountToken, amountCoin) =>
-                    requestOrder(user, token, amountToken, amountCoin)
-                  }
-                />
-              )}
-              <StyledAssetsComponent
-                tokens={market.tokens}
-                myAssets={myAssets}
-                maxHeight={300}
+            {myOrders.length === 0 ? (
+              <StyledJoinButtonComponent
+                requestJoin={() => requestJoin(user)}
               />
-            </OrderContainer>
+            ) : (
+              <OrderComponent.Mobile
+                tokens={market.tokens}
+                lmsrB={market.lmsrB}
+                tokenDistribution={tokenDistribution}
+                myAssets={myAssets}
+                requestOrder={(token, amountToken, amountCoin) =>
+                  requestOrder(user, token, amountToken, amountCoin)
+                }
+              />
+            )}
+            <AssetsComponent.Mobile
+              tokens={market.tokens}
+              myAssets={myAssets}
+              maxHeight={300}
+            />
             <StyledHistoryComponent
               tokens={market.tokens}
               myOrders={myOrders}
@@ -199,22 +197,20 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
         (market.status === MarketStatus.Closed ||
           market.status === MarketStatus.Resolved) ? (
           <>
-            <OrderContainer>
-              <StyledResultComponent
-                settleToken={
-                  market.settleTokenId === undefined
-                    ? undefined
-                    : market.tokens.find(t => t.id === market.settleTokenId)
-                }
+            <StyledResultComponent
+              settleToken={
+                market.settleTokenId === undefined
+                  ? undefined
+                  : market.tokens.find(t => t.id === market.settleTokenId)
+              }
+            />
+            {myAssets ? (
+              <AssetsComponent.Mobile
+                tokens={market.tokens}
+                myAssets={myAssets}
+                maxHeight={300}
               />
-              {myAssets ? (
-                <StyledAssetsComponent
-                  tokens={market.tokens}
-                  myAssets={myAssets}
-                  maxHeight={300}
-                />
-              ) : null}
-            </OrderContainer>
+            ) : null}
             <StyledHistoryComponent
               tokens={market.tokens}
               myOrders={myOrders}
@@ -249,25 +245,11 @@ const StyledTokensComponent = styled(TokensComponent)`
   margin-top: 50px;
 `;
 
-const OrderContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: start;
-`;
-
 const StyledJoinButtonComponent = styled(JoinButtonComponent)`
   margin-top: 50px;
 `;
 
-const StyledOrderComponent = styled(OrderComponent)`
-  margin-top: 50px;
-`;
-
 const StyledResultComponent = styled(ResultComponent)`
-  margin-top: 50px;
-`;
-
-const StyledAssetsComponent = styled(AssetsComponent)`
   margin-top: 50px;
 `;
 

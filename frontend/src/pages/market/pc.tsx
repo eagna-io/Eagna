@@ -6,8 +6,8 @@ import * as Header from 'components/header';
 import * as MarketHeader from './components/header';
 import ChartComponent from './components/chart';
 import TokensComponent from './components/tokens';
-import OrderComponent from './components/order';
-import AssetsComponent from './components/assets';
+import * as OrderComponent from './components/order';
+import * as AssetsComponent from './components/assets';
 import JoinButtonComponent from './components/joinButton';
 import ResultComponent from './components/result';
 import HistoryComponent from './components/history';
@@ -172,7 +172,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
                   requestJoin={() => requestJoin(user)}
                 />
               ) : (
-                <StyledOrderComponent
+                <OrderComponent.Pc
                   tokens={market.tokens}
                   lmsrB={market.lmsrB}
                   tokenDistribution={tokenDistribution}
@@ -182,7 +182,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
                   }
                 />
               )}
-              <StyledAssetsComponent
+              <AssetsComponent.Pc
                 tokens={market.tokens}
                 myAssets={myAssets}
                 maxHeight={300}
@@ -208,7 +208,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
                 }
               />
               {myAssets ? (
-                <StyledAssetsComponent
+                <AssetsComponent.Pc
                   tokens={market.tokens}
                   myAssets={myAssets}
                   maxHeight={300}
@@ -259,15 +259,7 @@ const StyledJoinButtonComponent = styled(JoinButtonComponent)`
   margin-top: 50px;
 `;
 
-const StyledOrderComponent = styled(OrderComponent)`
-  margin-top: 50px;
-`;
-
 const StyledResultComponent = styled(ResultComponent)`
-  margin-top: 50px;
-`;
-
-const StyledAssetsComponent = styled(AssetsComponent)`
   margin-top: 50px;
 `;
 
