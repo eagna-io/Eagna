@@ -5,7 +5,7 @@ import {History} from 'history';
 import * as Header from 'components/header';
 import * as MarketHeader from './components/header';
 import ChartComponent from './components/chart';
-import TokensComponent from './components/tokens';
+import * as TokensComponent from './components/tokens';
 import * as OrderComponent from './components/order';
 import * as AssetsComponent from './components/assets';
 import JoinButtonComponent from './components/joinButton';
@@ -160,7 +160,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
           startTime={market.openTime}
           orders={orders}
         />
-        <StyledTokensComponent
+        <TokensComponent.Mobile
           tokens={market.tokens}
           tokenPrices={tokenPrices}
         />
@@ -238,10 +238,6 @@ const Contents = styled.div`
 const StyledChartComponent = styled(ChartComponent)`
   width: 100%;
   height: 200px;
-  margin-top: 50px;
-`;
-
-const StyledTokensComponent = styled(TokensComponent)`
   margin-top: 50px;
 `;
 
