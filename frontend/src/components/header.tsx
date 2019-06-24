@@ -5,6 +5,7 @@ import {Link} from 'react-router-dom';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUserCircle, faCaretDown} from '@fortawesome/free-solid-svg-icons';
 import {History} from 'history';
+import firebase from 'firebase';
 
 import User from 'models/user';
 
@@ -64,7 +65,12 @@ const ProfileDropdown: FC<ProfileDropdownProps> = ({history, user}) => {
   };
 
   const signOut = () => {
-    alert('unimplemented');
+    firebase
+      .auth()
+      .signOut()
+      .then(function() {
+        history.push('/');
+      });
   };
 
   const signIn = () => {
