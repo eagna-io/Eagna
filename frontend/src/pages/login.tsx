@@ -80,13 +80,12 @@ const Body = styled.div`
 
 const Container = styled.div`
   margin-top: 30vh;
-  margin-left: 30vw;
-  width: 40vw;
 `;
 
 const Logo = styled.img`
   display: block;
-  width: 40%;
+  width: 60%;
+  max-width: 300px;
   margin: 0 auto;
   margin-bottom: 50px;
 `;
