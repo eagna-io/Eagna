@@ -8,7 +8,7 @@ import ChartComponent from './components/chart';
 import * as TokensComponent from './components/tokens';
 import * as OrderComponent from './components/order';
 import * as AssetsComponent from './components/assets';
-import JoinButtonComponent from './components/joinButton';
+import * as JoinButtonComponent from './components/join_button';
 import ResultComponent from './components/result';
 import HistoryComponent from './components/history';
 import DescComponent from './components/description';
@@ -167,7 +167,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
         {user && market.status === MarketStatus.Open ? (
           <>
             {myOrders.length === 0 ? (
-              <StyledJoinButtonComponent
+              <JoinButtonComponent.Mobile
                 requestJoin={() => requestJoin(user)}
               />
             ) : (
@@ -238,10 +238,6 @@ const Contents = styled.div`
 const StyledChartComponent = styled(ChartComponent)`
   width: 100%;
   height: 200px;
-  margin-top: 50px;
-`;
-
-const StyledJoinButtonComponent = styled(JoinButtonComponent)`
   margin-top: 50px;
 `;
 
