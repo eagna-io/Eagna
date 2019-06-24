@@ -225,7 +225,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
 };
 
 export const LoadingMarketPage: FC<{}> = () => {
-  return <div>Loading...</div>;
+  return <div></div>;
 };
 
 const Contents = styled.div`
