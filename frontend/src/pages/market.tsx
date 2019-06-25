@@ -3,7 +3,7 @@ import {History} from 'history';
 
 import {MarketId} from 'models/market';
 import User from 'models/user';
-import Responsive from 'components/responsive';
+import {Pc, Tablet, Mobile} from 'components/responsive';
 import PcMarketPage from './market/pc';
 import MobileMarketPage from './market/mobile';
 
@@ -15,17 +15,17 @@ interface MarketPageProps {
 
 const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
   return (
-    <Responsive
-      renderPc={() => (
+    <>
+      <Pc>
         <PcMarketPage history={history} user={user} marketId={marketId} />
-      )}
-      renderTablet={() => (
+      </Pc>
+      <Tablet>
         <MobileMarketPage history={history} user={user} marketId={marketId} />
-      )}
-      renderMobile={() => (
+      </Tablet>
+      <Mobile>
         <MobileMarketPage history={history} user={user} marketId={marketId} />
-      )}
-    />
+      </Mobile>
+    </>
   );
 };
 

@@ -3,7 +3,7 @@ import firebase from 'firebase';
 
 import {Market, MarketStatus} from 'models/market';
 import {getMarkets} from 'api/market';
-import Responsive from 'components/responsive';
+import {Pc, Tablet, Mobile} from 'components/responsive';
 import TopPagePc from './top/pc';
 import TopPageMobile from './top/mobile';
 
@@ -18,44 +18,46 @@ const TopPage: FC<TopPageProps> = () => {
     );
   }, []);
 
-  const uiConfig = {
-    signInSuccessUrl: '/me',
-    signInOptions: [
-      {
-        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        scopes: ['https://www.googleapis.com/auth/userinfo.email'],
-        customParameters: {
-          prompt: 'select_account',
-        },
-      },
-      {
-        provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        scopes: ['email'],
-      },
-      {
-        provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
-        scopes: ['user:email'],
-      },
-      {
-        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        requireDisplayName: true,
-      },
-    ],
-  };
+  const mobile = (
+    <TopPageMobile uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
+  );
+
+  const pc = (
+    <TopPagePc uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
+  );
 
   return (
-    <Responsive
-      renderMobile={() => (
-        <TopPageMobile uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
-      )}
-      renderTablet={() => (
-        <TopPageMobile uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
-      )}
-      renderPc={() => (
-        <TopPagePc uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
-      )}
-    />
+    <>
+      <Mobile>{mobile}</Mobile>
+      <Tablet>{mobile}</Tablet>
+      <Pc>{pc}</Pc>
+    </>
   );
+};
+
+const uiConfig = {
+  signInSuccessUrl: '/me',
+  signInOptions: [
+    {
+      provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      scopes: ['https://www.googleapis.com/auth/userinfo.email'],
+      customParameters: {
+        prompt: 'select_account',
+      },
+    },
+    {
+      provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      scopes: ['email'],
+    },
+    {
+      provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
+      scopes: ['user:email'],
+    },
+    {
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      requireDisplayName: true,
+    },
+  ],
 };
 
 export default TopPage;

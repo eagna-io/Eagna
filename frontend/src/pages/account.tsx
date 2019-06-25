@@ -6,9 +6,9 @@ import User from 'models/user';
 import {Market, MarketStatus} from 'models/market';
 import {getMyMarkets} from 'api/user';
 import {getMarkets} from 'api/market';
-import Responsive from 'components/responsive';
-import Pc from './account/pc';
-import Mobile from './account/mobile';
+import {Pc, Tablet, Mobile} from 'components/responsive';
+import PcContents from './account/pc';
+import MobileContents from './account/mobile';
 
 interface AccountPageProps {
   history: History;
@@ -31,33 +31,30 @@ const AccountPage: FC<AccountPageProps> = ({history, user}) => {
   if (user === null) {
     return <Redirect to={{pathname: '/login', state: {redirect: '/me'}}} />;
   } else {
-    return (
-      <Responsive
-        renderPc={() => (
-          <Pc
-            history={history}
-            user={user}
-            participatedMarkets={participatedMarkets}
-            featuredMarkets={featuredMarkets}
-          />
-        )}
-        renderTablet={() => (
-          <Mobile
-            history={history}
-            user={user}
-            participatedMarkets={participatedMarkets}
-            featuredMarkets={featuredMarkets}
-          />
-        )}
-        renderMobile={() => (
-          <Mobile
-            history={history}
-            user={user}
-            participatedMarkets={participatedMarkets}
-            featuredMarkets={featuredMarkets}
-          />
-        )}
+    const mobile = (
+      <MobileContents
+        history={history}
+        user={user}
+        participatedMarkets={participatedMarkets}
+        featuredMarkets={featuredMarkets}
       />
+    );
+
+    const pc = (
+      <PcContents
+        history={history}
+        user={user}
+        participatedMarkets={participatedMarkets}
+        featuredMarkets={featuredMarkets}
+      />
+    );
+
+    return (
+      <>
+        <Pc>{pc}</Pc>
+        <Tablet>{mobile}</Tablet>
+        <Mobile>{mobile}</Mobile>
+      </>
     );
   }
 };

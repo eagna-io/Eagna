@@ -27,31 +27,6 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
   }, [user]);
 
   // 認証が成功した後のフローは、app.tsxに戻る
-  const uiConfig = {
-    signInSuccessUrl: '/me',
-    signInOptions: [
-      {
-        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        scopes: ['https://www.googleapis.com/auth/userinfo.email'],
-        customParameters: {
-          prompt: 'select_account',
-        },
-      },
-      {
-        provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        scopes: ['email'],
-      },
-      {
-        provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
-        scopes: ['user:email'],
-      },
-      {
-        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        requireDisplayName: true,
-      },
-    ],
-  };
-
   return (
     <>
       <Body>
@@ -69,6 +44,31 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
 };
 
 export default LoginPage;
+
+const uiConfig = {
+  signInSuccessUrl: '/me',
+  signInOptions: [
+    {
+      provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      scopes: ['https://www.googleapis.com/auth/userinfo.email'],
+      customParameters: {
+        prompt: 'select_account',
+      },
+    },
+    {
+      provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      scopes: ['email'],
+    },
+    {
+      provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
+      scopes: ['user:email'],
+    },
+    {
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      requireDisplayName: true,
+    },
+  ],
+};
 
 const Body = styled.div`
   width: 100vw;

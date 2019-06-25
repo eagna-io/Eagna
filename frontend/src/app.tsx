@@ -3,6 +3,7 @@ import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import firebase from 'firebase';
 import {createGlobalStyle} from 'styled-components';
 
+import {Responsive} from 'components/responsive';
 import TopPage from 'pages/top';
 import LoginPage from 'pages/login';
 import AccountPage from 'pages/account';
@@ -49,7 +50,59 @@ const App: FC<{}> = () => {
     });
   }, []);
 
-  const GlobalStyle = createGlobalStyle`
+  return (
+    <>
+      <GlobalStyle />
+      <Responsive>
+        <Router>
+          <Switch>
+            <Route path="/" exact render={() => <TopPage />} />
+            <Route
+              path="/login"
+              exact
+              render={({history}) => (
+                <LoginPage user={user} history={history} />
+              )}
+            />
+            <Route
+              path="/me"
+              exact
+              render={({history}) => (
+                <AccountPage user={user} history={history} />
+              )}
+            />
+            <Route
+              path="/market/:id"
+              render={({history, match}) => (
+                <MarketPage
+                  user={user}
+                  history={history}
+                  marketId={match.params.id}
+                />
+              )}
+            />
+            <Route
+              path="/admin"
+              exact
+              render={() =>
+                user && user.isAdmin ? (
+                  <AdminPage user={user} />
+                ) : (
+                  <NotFoundPage />
+                )
+              }
+            />
+            <Route render={() => <NotFoundPage />} />
+          </Switch>
+        </Router>
+      </Responsive>
+    </>
+  );
+};
+
+export default App;
+
+const GlobalStyle = createGlobalStyle`
     body {
       margin: 0;
       font-family: 'Noto Sans JP', sans-serif;
@@ -72,51 +125,3 @@ const App: FC<{}> = () => {
       padding: 0;
     }
   `;
-
-  return (
-    <>
-      <GlobalStyle />
-      <Router>
-        <Switch>
-          <Route path="/" exact render={() => <TopPage />} />
-          <Route
-            path="/login"
-            exact
-            render={({history}) => <LoginPage user={user} history={history} />}
-          />
-          <Route
-            path="/me"
-            exact
-            render={({history}) => (
-              <AccountPage user={user} history={history} />
-            )}
-          />
-          <Route
-            path="/market/:id"
-            render={({history, match}) => (
-              <MarketPage
-                user={user}
-                history={history}
-                marketId={match.params.id}
-              />
-            )}
-          />
-          <Route
-            path="/admin"
-            exact
-            render={() =>
-              user && user.isAdmin ? (
-                <AdminPage user={user} />
-              ) : (
-                <NotFoundPage />
-              )
-            }
-          />
-          <Route render={() => <NotFoundPage />} />
-        </Switch>
-      </Router>
-    </>
-  );
-};
-
-export default App;
