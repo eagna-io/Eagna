@@ -1,15 +1,21 @@
-import React, {FC, useState, useEffect} from 'react';
-import firebase from 'firebase';
+import React, {FC, useState, useEffect, useMemo} from 'react';
+import firebase, {User as FBUser} from 'firebase';
+import {History} from 'history';
 
 import {Market, MarketStatus} from 'models/market';
+import User from 'models/user';
 import {getMarkets} from 'api/market';
+import {getMe, createUser} from 'api/user';
 import {Pc, Tablet, Mobile} from 'components/responsive';
 import TopPagePc from './top/pc';
 import TopPageMobile from './top/mobile';
 
-interface TopPageProps {}
+interface TopPageProps {
+  history: History;
+  setUser: (user: User) => void;
+}
 
-const TopPage: FC<TopPageProps> = () => {
+const TopPage: FC<TopPageProps> = ({history, setUser}) => {
   const [featuredMarkets, setFeaturedMarkets] = useState<Market[]>([]);
 
   useEffect(() => {
@@ -18,12 +24,72 @@ const TopPage: FC<TopPageProps> = () => {
     );
   }, []);
 
+  const authConfig = useMemo(
+    () => ({
+      callbacks: {
+        signInSuccessWithAuthResult: (args: {user: FBUser}) => {
+          const fbUser = args.user;
+          fbUser
+            .getIdToken()
+            .then(token =>
+              getMe(token).then(maybeUser => {
+                if (maybeUser !== null) {
+                  return maybeUser;
+                } else {
+                  // Firebase認証は終わっているが、サーバーには登録されていない
+                  if (fbUser.displayName === null || fbUser.email === null) {
+                    // TODO
+                    throw 'Cant get name or email from Firebase Auth';
+                  } else {
+                    return createUser({
+                      accessToken: token,
+                      name: fbUser.displayName,
+                      email: fbUser.email,
+                    });
+                  }
+                }
+              }),
+            )
+            .then(user => {
+              setUser(user);
+              history.push('/me');
+            });
+
+          return false;
+        },
+      },
+      signInSuccessUrl: '/me',
+      signInOptions: [
+        {
+          provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+          scopes: ['https://www.googleapis.com/auth/userinfo.email'],
+          customParameters: {
+            prompt: 'select_account',
+          },
+        },
+        {
+          provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+          scopes: ['email'],
+        },
+        {
+          provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
+          scopes: ['user:email'],
+        },
+        {
+          provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          requireDisplayName: true,
+        },
+      ],
+    }),
+    [history, setUser],
+  );
+
   const mobile = (
-    <TopPageMobile uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
+    <TopPageMobile uiConfig={authConfig} featuredMarkets={featuredMarkets} />
   );
 
   const pc = (
-    <TopPagePc uiConfig={uiConfig} featuredMarkets={featuredMarkets} />
+    <TopPagePc uiConfig={authConfig} featuredMarkets={featuredMarkets} />
   );
 
   return (
@@ -33,31 +99,6 @@ const TopPage: FC<TopPageProps> = () => {
       <Pc>{pc}</Pc>
     </>
   );
-};
-
-const uiConfig = {
-  signInSuccessUrl: '/me',
-  signInOptions: [
-    {
-      provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      scopes: ['https://www.googleapis.com/auth/userinfo.email'],
-      customParameters: {
-        prompt: 'select_account',
-      },
-    },
-    {
-      provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-      scopes: ['email'],
-    },
-    {
-      provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
-      scopes: ['user:email'],
-    },
-    {
-      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      requireDisplayName: true,
-    },
-  ],
 };
 
 export default TopPage;

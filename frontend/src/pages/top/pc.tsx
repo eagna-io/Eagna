@@ -13,7 +13,7 @@ interface PcTopPageProps {
   featuredMarkets: Market[];
 }
 
-export const TopPagePc: FC<PcTopPageProps> = ({uiConfig, featuredMarkets}) => {
+export const TopPagePc: FC<PcTopPageProps> = React.memo(({uiConfig, featuredMarkets}) => {
   return (
     <>
       <Header.Pc />
@@ -41,7 +41,7 @@ export const TopPagePc: FC<PcTopPageProps> = ({uiConfig, featuredMarkets}) => {
       <Footer.Pc />
     </>
   );
-};
+});
 
 export default TopPagePc;
 

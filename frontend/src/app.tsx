@@ -22,33 +22,40 @@ const App: FC<{}> = () => {
       if (fbUser == null) {
         setUser(null);
       } else {
-        fbUser
-          .getIdToken()
-          .then(token =>
-            getMe(token).then(user => {
-              if (user != null) {
-                return user;
-              } else {
-                // Firebase認証は終わっているが、サーバーには登録されていない
-                if (fbUser.displayName == null || fbUser.email == null) {
-                  // TODO
-                  throw 'Cant get name or email from Firebase Auth';
+        if (user === null) {
+          // User取得プロセス
+          fbUser
+            .getIdToken()
+            .then(token =>
+              getMe(token).then(user => {
+                if (user != null) {
+                  return user;
                 } else {
-                  return createUser({
-                    accessToken: token,
-                    name: fbUser.displayName,
-                    email: fbUser.email,
-                  });
+                  // Firebase認証は終わっているが、サーバーには登録されていない
+                  if (fbUser.displayName == null || fbUser.email == null) {
+                    // TODO
+                    throw 'Cant get name or email from Firebase Auth';
+                  } else {
+                    return createUser({
+                      accessToken: token,
+                      name: fbUser.displayName,
+                      email: fbUser.email,
+                    });
+                  }
                 }
-              }
-            }),
-          )
-          .then(user => {
-            setUser(user);
-          });
+              }),
+            )
+            .then(user => {
+              setUser(user);
+            });
+        }
       }
     });
-  }, []);
+
+    return () => {
+      firebase.auth().onAuthStateChanged(() => null);
+    };
+  }, [setUser, user]);
 
   return (
     <>
@@ -56,7 +63,13 @@ const App: FC<{}> = () => {
       <Responsive>
         <Router>
           <Switch>
-            <Route path="/" exact render={() => <TopPage />} />
+            <Route
+              path="/"
+              exact
+              render={({history}) => (
+                <TopPage history={history} setUser={setUser} />
+              )}
+            />
             <Route
               path="/login"
               exact

@@ -13,38 +13,38 @@ interface TopPageProps {
   featuredMarkets: Market[];
 }
 
-export const TopPageMobile: FC<TopPageProps> = ({
-  uiConfig,
-  featuredMarkets,
-}) => {
-  return (
-    <>
-      <Header.Mobile />
-      <MainSection>
-        <MainSectionBgFilter>
-          <MainMsg>未来は僕等の手の中</MainMsg>
-          <SubMsg>今すぐ予測市場を体験しましょう</SubMsg>
-          <StyledFirebaseAuth
-            uiConfig={uiConfig}
-            firebaseAuth={firebase.auth()}
-          />
-          <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n7f8a517c50f6">
-            &beta; 版をリリースしました！
-          </AnnounceBetaRelease>
-        </MainSectionBgFilter>
-      </MainSection>
-      <FeaturedMarketsSection>
-        <SectionTitle>注目のマーケット</SectionTitle>
-        <FeaturedMarketList>
-          {featuredMarkets.map(m => (
-            <FeaturedMarketComponent.Mobile key={m.id} market={m} />
-          ))}
-        </FeaturedMarketList>
-      </FeaturedMarketsSection>
-      <Footer.Mobile />
-    </>
-  );
-};
+export const TopPageMobile: FC<TopPageProps> = React.memo(
+  ({uiConfig, featuredMarkets}) => {
+    console.log('mobile');
+    return (
+      <>
+        <Header.Mobile />
+        <MainSection>
+          <MainSectionBgFilter>
+            <MainMsg>未来は僕等の手の中</MainMsg>
+            <SubMsg>今すぐ予測市場を体験しましょう</SubMsg>
+            <StyledFirebaseAuth
+              uiConfig={uiConfig}
+              firebaseAuth={firebase.auth()}
+            />
+            <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n7f8a517c50f6">
+              &beta; 版をリリースしました！
+            </AnnounceBetaRelease>
+          </MainSectionBgFilter>
+        </MainSection>
+        <FeaturedMarketsSection>
+          <SectionTitle>注目のマーケット</SectionTitle>
+          <FeaturedMarketList>
+            {featuredMarkets.map(m => (
+              <FeaturedMarketComponent.Mobile key={m.id} market={m} />
+            ))}
+          </FeaturedMarketList>
+        </FeaturedMarketsSection>
+        <Footer.Mobile />
+      </>
+    );
+  },
+);
 
 export default TopPageMobile;
 

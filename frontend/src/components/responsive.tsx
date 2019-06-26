@@ -2,40 +2,46 @@ import React, {FC, useState, useEffect, useContext} from 'react';
 import styled from 'styled-components';
 
 enum Device {
-  Mobile,
-  Tablet,
-  Pc,
+  Mobile = 'Mobile',
+  Tablet = 'Tablet',
+  Pc = 'Pc',
 }
 
 const DeviceContext = React.createContext<Device>(Device.Mobile);
 
+function deviceFromWidth(width: number): Device {
+  if (width < 768) {
+    return Device.Mobile;
+  } else if (width < 980) {
+    return Device.Tablet;
+  } else {
+    return Device.Pc;
+  }
+}
+
 export const Responsive: FC<{}> = ({children}) => {
-  const [device, setDevice] = useState(Device.Mobile);
+  const [device, setDevice] = useState(
+    deviceFromWidth(window.parent.screen.width),
+  );
 
   useEffect(() => {
     const resize = () => {
-      const width = window.parent.screen.width;
-      if (width < 768) {
-        if (device !== Device.Mobile) {
-          setDevice(Device.Mobile);
-        }
-      } else if (width < 980) {
-        if (device !== Device.Tablet) {
-          setDevice(Device.Tablet);
-        }
-      } else if (device != Device.Pc) {
-        setDevice(Device.Pc);
+      const curDevice = deviceFromWidth(window.parent.screen.width);
+      if (curDevice !== device) {
+        setDevice(curDevice);
       }
     };
 
+    resize();
+
     window.onresize = resize;
-    window.onload = resize;
 
     return () => {
       window.onresize = null;
-      window.onload = null;
     };
   }, [device, setDevice]);
+
+  console.log(device);
 
   return (
     <DeviceContext.Provider value={device}>{children}</DeviceContext.Provider>
@@ -50,8 +56,6 @@ const genDeviceContent: (device: Device) => FC<ContentProps> = device => ({
   children,
 }) => {
   const curDevice = useContext(DeviceContext);
-
-  console.log(curDevice);
 
   return <>{curDevice === device ? children : null}</>;
 };
