@@ -22,27 +22,21 @@ export const Pc: FC<AssetsComponentProps> = ({
     margin-top: 50px;
   `;
   return (
-    <Table className={className} maxHeight={maxHeight}>
+    <Table className={className} striped>
       <table.Header>
-        <table.Cell6 bold small>
-          コイン / トークン
-        </table.Cell6>
-        <table.Cell4 bold small right>
-          量
-        </table.Cell4>
+        <table.Cell6>コイン / トークン</table.Cell6>
+        <table.Cell4>量</table.Cell4>
       </table.Header>
       <table.Body>
-        <table.Row striped>
-          <table.Cell6 bold>{'Coin'}</table.Cell6>
-          <table.Cell4 bold right>
-            {myAssets.get('Coin')}
-          </table.Cell4>
+        <table.Row>
+          <table.Cell6>{'Coin'}</table.Cell6>
+          <table.Cell4>{myAssets.get('Coin')}</table.Cell4>
         </table.Row>
         {tokens.map(token => {
           return (
-            <table.Row striped key={token.id}>
+            <table.Row key={token.id}>
               <table.Cell6>{token.name}</table.Cell6>
-              <table.Cell4 right>{myAssets.get(token.id)}</table.Cell4>
+              <table.Cell4>{myAssets.get(token.id)}</table.Cell4>
             </table.Row>
           );
         })}
@@ -62,27 +56,21 @@ export const Mobile: FC<AssetsComponentProps> = ({
     margin-top: 50px;
   `;
   return (
-    <Table className={className} maxHeight={maxHeight}>
+    <Table className={className} striped>
       <table.Header>
-        <table.Cell6 bold small>
-          コイン / トークン
-        </table.Cell6>
-        <table.Cell4 bold small right>
-          量
-        </table.Cell4>
+        <table.Cell6>コイン / トークン</table.Cell6>
+        <table.Cell4>量</table.Cell4>
       </table.Header>
       <table.Body>
-        <table.Row striped>
-          <table.Cell6 bold>{'Coin'}</table.Cell6>
-          <table.Cell4 bold right>
-            {myAssets.get('Coin')}
-          </table.Cell4>
+        <table.Row>
+          <table.Cell6>{'Coin'}</table.Cell6>
+          <table.Cell4>{myAssets.get('Coin')}</table.Cell4>
         </table.Row>
         {tokens.map(token => {
           return (
-            <table.Row striped key={token.id}>
+            <table.Row key={token.id}>
               <table.Cell6>{token.name}</table.Cell6>
-              <table.Cell4 right>{myAssets.get(token.id)}</table.Cell4>
+              <table.Cell4>{myAssets.get(token.id)}</table.Cell4>
             </table.Row>
           );
         })}

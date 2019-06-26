@@ -1,101 +1,91 @@
-import React, {FC, useState, useCallback} from 'react';
+import React, {FC, useState, useCallback, useContext} from 'react';
 import styled from 'styled-components';
 
+const TableContext = React.createContext<{
+  striped: boolean;
+}>({
+  striped: true,
+});
+
 interface TableProps {
-  maxHeight?: number;
+  striped?: boolean;
   className?: string;
 }
 
-export const Table: FC<TableProps> = ({maxHeight, className, children}) => {
-  const [height, setHeight] = useState<number | undefined>();
-
-  const ref = useCallback(node => {
-    if (node !== null) {
-      setHeight(node.getBoundingClientRect().height);
-    }
-  }, []);
-
-  const Container = styled.div`
-    border-radius: 4px;
-    border: 1px solid #d1d5da;
-  `;
-
-  const Inner = styled('table')`
-    display: block;
-    width: 100%;
-    height: ${maxHeight === undefined ||
-    height === undefined ||
-    height < maxHeight
-      ? 'auto'
-      : `${maxHeight}px`};
-    table-layout: fixed;
-    border-spacing: 0;
-    border-collapse: collapse;
-    overflow: hidden;
-  `;
+export const Table: FC<TableProps> = ({striped, className, children}) => {
+  const context = {
+    striped: striped || false,
+  };
 
   return (
-    <Container className={className}>
-      <Inner ref={ref}>{children}</Inner>
-    </Container>
+    <TableContainer className={className}>
+      <TableContext.Provider value={context}>{children}</TableContext.Provider>
+    </TableContainer>
   );
 };
+
+const TableContainer = styled.table`
+  display: block;
+  position: relative;
+  width: 100%;
+  table-layout: fixed;
+  border-radius: 4px;
+  border: 1px solid #d1d5da;
+  border-spacing: 0;
+  border-collapse: collapse;
+  overflow: scroll;
+`;
 
 export const Header: FC<{className?: string}> = ({className, children}) => {
-  const Container = styled.thead`
-    display: block;
-    width: 100%;
-    background-color: #f6f8fa;
-    color: #586069;
-    border-bottom: 1px solid #d1d5da;
-  `;
-
   return (
-    <Container className={className}>
+    <HeaderContainer className={className}>
       <Row>{children}</Row>
-    </Container>
+    </HeaderContainer>
   );
 };
 
-export const Body = styled.tbody`
+const HeaderContainer = styled.thead`
   display: block;
   width: 100%;
-  height: calc(100% - 49px);
+  background-color: #f6f8fa;
+  color: #586069;
+  border-bottom: 1px solid #d1d5da;
+`;
+
+export const Body: FC = ({children}) => {
+  return <BodyContainer>{children}</BodyContainer>;
+};
+
+const BodyContainer = styled.tbody`
+  display: block;
+  width: 100%;
   padding: 0;
   margin: 0;
   list-style-type: none;
   overflow: scroll;
 `;
 
-interface RowProps {
-  striped?: boolean;
-  className?: string;
-}
+export const Row: FC = ({children}) => {
+  const {striped} = useContext(TableContext);
 
-export const Row = styled('tr')<{striped?: boolean}>`
+  return <RowContainer striped={striped}>{children}</RowContainer>;
+};
+
+const RowContainer = styled('tr')<{striped: boolean}>`
   display: block;
   width: 100%;
 
   &:nth-child(even) {
-    background-color: ${props => (props.striped ? '#F9F9F9' : 'rgba(0,0,0,0)')};
+    background-color: ${props => (props.striped ? '#F9F9F9' : 'white')};
   }
 `;
 
-export const Cell = styled('td')<{
-  right?: boolean;
-  bold?: boolean;
-  small?: boolean;
-  large?: boolean;
-}>`
+export const Cell = styled.td`
   display: inline-block;
-  min-height: 48px;
-  padding: 14px 40px 14px 16px;
-  font-size: ${props => (props.small ? '12px' : props.large ? '16px' : '14px')};
-  font-weight: ${props => (props.bold ? 'bold' : 'normal')};
-  text-align: ${props => (props.right ? 'right' : 'left')};
+  padding: 3% 3% 3% 3%;
 
   &:last-child {
-    padding-right: 16px;
+    padding-right: 3%;
   }
 `;
 

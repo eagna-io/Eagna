@@ -17,7 +17,7 @@ export const Pc: FC<TokensComponentProps> = ({
 }) => {
   const Table = styled(table.Table)`
     margin-top: 50px;
-  `
+  `;
 
   const TokenName = styled.div`
     color: #37474f;
@@ -33,25 +33,19 @@ export const Pc: FC<TokensComponentProps> = ({
   `;
 
   return (
-    <Table className={className}>
+    <Table className={className} striped>
       <table.Header>
-        <table.Cell3 bold small>
-          Token
-        </table.Cell3>
-        <table.Cell1 bold small right>
-          Price
-        </table.Cell1>
-        <table.Cell6 bold small>
-          Description
-        </table.Cell6>
+        <table.Cell3>Token</table.Cell3>
+        <table.Cell1>Price</table.Cell1>
+        <table.Cell6>Description</table.Cell6>
       </table.Header>
       <table.Body>
         {tokens.map(token => (
-          <table.Row key={token.name} striped>
+          <table.Row key={token.name}>
             <table.Cell3>
               <TokenName>{token.name}</TokenName>
             </table.Cell3>
-            <table.Cell2 right>
+            <table.Cell2>
               <TokenPrice>
                 {tokenPrices ? tokenPrices.get(token.id) : '-'}
               </TokenPrice>
@@ -73,7 +67,7 @@ export const Mobile: FC<TokensComponentProps> = ({
 }) => {
   const Table = styled(table.Table)`
     margin-top: 50px;
-  `
+  `;
 
   const TokenName = styled.div`
     color: #37474f;
@@ -91,25 +85,19 @@ export const Mobile: FC<TokensComponentProps> = ({
   `;
 
   return (
-    <Table className={className}>
+    <Table className={className} striped>
       <table.Header>
-        <table.Cell3 bold small>
-          Token
-        </table.Cell3>
-        <table.Cell2 bold small right>
-          Price
-        </table.Cell2>
-        <table.Cell5 bold small>
-          Description
-        </table.Cell5>
+        <table.Cell3>Token</table.Cell3>
+        <table.Cell2>Price</table.Cell2>
+        <table.Cell5>Description</table.Cell5>
       </table.Header>
       <table.Body>
         {tokens.map(token => (
-          <table.Row key={token.name} striped>
+          <table.Row key={token.name}>
             <table.Cell3>
               <TokenName>{token.name}</TokenName>
             </table.Cell3>
-            <table.Cell2 right>
+            <table.Cell2>
               <TokenPrice>
                 {tokenPrices ? tokenPrices.get(token.id) : '-'}
               </TokenPrice>

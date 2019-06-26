@@ -18,23 +18,13 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
   className,
 }) => {
   return (
-    <table.Table className={className} maxHeight={maxHeight}>
+    <table.Table className={className} striped>
       <table.Header>
-        <table.Cell2 bold small>
-          Time
-        </table.Cell2>
-        <table.Cell2 bold small>
-          Types
-        </table.Cell2>
-        <table.Cell2 bold small>
-          Token
-        </table.Cell2>
-        <table.Cell2 bold small right>
-          Amount Token
-        </table.Cell2>
-        <table.Cell2 bold small right>
-          Amount Coin
-        </table.Cell2>
+        <table.Cell2>Time</table.Cell2>
+        <table.Cell2>Types</table.Cell2>
+        <table.Cell2>Token</table.Cell2>
+        <table.Cell2>Amount Token</table.Cell2>
+        <table.Cell2>Amount Coin</table.Cell2>
       </table.Header>
       <table.Body>
         {myOrders
@@ -56,12 +46,12 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
             }
 
             return (
-              <table.Row striped key={order.time.unix()}>
+              <table.Row key={order.time.unix()}>
                 <table.Cell2>{order.time.fromNow()}</table.Cell2>
                 <table.Cell2>{orderType}</table.Cell2>
                 <table.Cell2>{tokenName}</table.Cell2>
-                <table.Cell2 right>{order.amountToken}</table.Cell2>
-                <table.Cell2 right>{order.amountCoin}</table.Cell2>
+                <table.Cell2>{order.amountToken}</table.Cell2>
+                <table.Cell2>{order.amountCoin}</table.Cell2>
               </table.Row>
             );
           })}

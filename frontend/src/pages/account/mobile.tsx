@@ -26,16 +26,16 @@ const Mobile: FC<AccountPageProps> = ({
       <Header.Mobile history={history} user={user} />
       <Container>
         <ComponentContainer>
-          <ProfileComponent.Pc me={user} />
+          <ProfileComponent.Mobile me={user} />
         </ComponentContainer>
         <ComponentContainer>
-          <MarketsComponent.Pc
+          <MarketsComponent.Mobile
             title="参加しているマーケット"
             markets={participatedMarkets}
           />
         </ComponentContainer>
         <ComponentContainer>
-          <MarketsComponent.Pc
+          <MarketsComponent.Mobile
             title="注目のマーケット"
             markets={featuredMarkets}
           />
