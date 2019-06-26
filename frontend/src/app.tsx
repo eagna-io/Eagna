@@ -9,7 +9,7 @@ import LoginPage from 'pages/login';
 import AccountPage from 'pages/account';
 import MarketPage from 'pages/market';
 import AdminPage from 'pages/admin';
-import PrivacyPolicyPage from 'pages/privacy_policy';
+import PlainTextPage from 'pages/plain_text';
 import NotFoundPage from 'pages/not_found';
 import User from 'models/user';
 import {getMe, createUser} from 'api/user';
@@ -95,7 +95,16 @@ const App: FC<{}> = () => {
                 />
               )}
             />
-            <Route path="/privacy_policy" exact component={PrivacyPolicyPage} />
+            <Route
+              path="/privacy_policy"
+              exact
+              render={() => <PlainTextPage textUrl="/txt/privacy_policy.txt" />}
+            />
+            <Route
+              path="/terms"
+              exact
+              render={() => <PlainTextPage textUrl="/txt/terms.txt" />}
+            />
             <Route
               path="/admin"
               exact

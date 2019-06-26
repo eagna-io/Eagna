@@ -2,11 +2,11 @@ import React, {FC, useState, useEffect} from 'react';
 import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
 
-const PrivacyPolicy: FC = () => {
+const PlainText: FC<{textUrl: string}> = ({textUrl}) => {
   const [text, setText] = useState('');
 
   useEffect(() => {
-    fetch('/txt/privacy_policy.txt')
+    fetch(textUrl)
       .then(res => res.text())
       .then(txt => setText(txt));
   }, []);
@@ -18,7 +18,7 @@ const PrivacyPolicy: FC = () => {
   );
 };
 
-export default PrivacyPolicy;
+export default PlainText;
 
 const Container = styled.div`
   width: 90%;
