@@ -8,9 +8,7 @@ const Component: FC<{me: User}> = ({me}) => {
   return (
     <Table>
       <table.Header>
-        <table.Cell>
-          プロフィール
-        </table.Cell>
+        <table.Cell>プロフィール</table.Cell>
       </table.Header>
       <table.Body>
         <table.Row>
