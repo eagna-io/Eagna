@@ -1,7 +1,8 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
-import firebase from 'firebase';
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
 
 import {Market} from 'models/market';
 import * as Header from './components/header';

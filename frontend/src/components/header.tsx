@@ -5,7 +5,8 @@ import {Link} from 'react-router-dom';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUserCircle, faCaretDown} from '@fortawesome/free-solid-svg-icons';
 import {History} from 'history';
-import firebase from 'firebase';
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
 
 import User from 'models/user';
 

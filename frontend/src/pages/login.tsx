@@ -2,7 +2,8 @@ import React, {FC, useEffect} from 'react';
 import styled from 'styled-components';
 import {History, LocationDescriptor} from 'history';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
-import firebase from 'firebase';
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
 
 import User from 'models/user';
 

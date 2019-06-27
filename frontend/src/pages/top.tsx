@@ -1,5 +1,6 @@
 import React, {FC, useState, useEffect, useMemo} from 'react';
-import firebase, {User as FBUser} from 'firebase';
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import {History} from 'history';
 
 import {Market, MarketStatus} from 'models/market';
@@ -27,7 +28,7 @@ const TopPage: FC<TopPageProps> = ({history, setUser}) => {
   const authConfig = useMemo(
     () => ({
       callbacks: {
-        signInSuccessWithAuthResult: (args: {user: FBUser}) => {
+        signInSuccessWithAuthResult: (args: {user: firebase.User}) => {
           const fbUser = args.user;
           fbUser
             .getIdToken()

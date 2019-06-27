@@ -1,6 +1,7 @@
 import React, {FC, useState, useEffect} from 'react';
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
-import firebase from 'firebase';
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
 import {createGlobalStyle} from 'styled-components';
 
 import {Responsive} from 'components/responsive';
