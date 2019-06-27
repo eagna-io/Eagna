@@ -55,10 +55,17 @@ impl<F> ApiServer<F> {
 
     pub fn filter_cors_preflight(&self, req: &Request) -> Option<Response> {
         match req.method() {
-            "OPTIONS" => Some(Response::text("").with_additional_header(
-                "Access-Control-Allow-Headers",
-                "Authorization, Content-Type",
-            )),
+            "OPTIONS" => Some(
+                Response::text("")
+                    .with_additional_header(
+                        "Access-Control-Allow-Headers",
+                        "Authorization, Content-Type",
+                    )
+                    .with_additional_header(
+                        "Access-Control-Allow-Methods",
+                        "OPTION, GET, POST, PUT",
+                    ),
+            ),
             _ => None,
         }
     }
