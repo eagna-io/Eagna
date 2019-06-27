@@ -1,6 +1,5 @@
-import React, {FC, useState, useEffect} from 'react';
+import React, {FC} from 'react';
 import styled from 'styled-components';
-import {History} from 'history';
 
 import * as Header from 'components/header';
 import * as MarketHeader from './components/header';
@@ -9,217 +8,91 @@ import * as TokensComponent from './components/tokens';
 import * as OrderComponent from './components/order';
 import * as AssetsComponent from './components/assets';
 import * as JoinButtonComponent from './components/join_button';
+import * as SuggestSigninComponent from './components/suggest_signin';
 import * as ResultComponent from './components/result';
 import * as HistoryComponent from './components/history';
 import * as DescComponent from './components/description';
-import {
-  Market,
-  MarketId,
-  MarketStatus,
-  Token,
-  PublicOrderHistory,
-  MyOrderHistory,
-  newTokenDistribution,
-  newTokenPrices,
-  getMyAssets,
-} from 'models/market';
-import User from 'models/user';
-import {
-  getMarket,
-  getOrders,
-  createInitialSupplyOrder,
-  createNormalOrder,
-} from 'api/market';
+import {MarketStatus} from 'models/market';
 
-interface MarketPageProps {
-  history: History;
-  user: User | null;
-  marketId: MarketId;
-}
+import {MarketPageInternalProps} from '../market';
 
-export const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
-  const [market, setMarket] = useState<Market | null>(null);
-  const [orders, setOrders] = useState<PublicOrderHistory | null>(null);
-  const [myOrders, setMyOrders] = useState<MyOrderHistory | null>(null);
-
-  useEffect(() => {
-    getMarket(marketId).then(m => {
-      setMarket(m);
-    });
-  }, [marketId]);
-
-  useEffect(() => {
-    getOrders(marketId, user ? user.accessToken : undefined).then(res => {
-      setOrders(res.orders);
-      setMyOrders(res.myOrders || []);
-    });
-  }, [marketId, user]);
-
-  return (
-    <>
-      {market != null && orders != null && myOrders != null ? (
-        <LoadedMarketPage
-          market={market}
-          orders={orders}
-          setOrders={setOrders}
-          myOrders={myOrders}
-          setMyOrders={setMyOrders}
-          user={user}
-          history={history}
-        />
-      ) : (
-        <LoadingMarketPage />
-      )}
-    </>
-  );
+const MarketPage: FC<MarketPageInternalProps> = ({history, user, market}) => {
+  if (market === null) {
+    return (
+      <>
+        <Header.Pc history={history} user={user} />
+        <h2>ローディング中...</h2>
+      </>
+    );
+  } else {
+    return (
+      <>
+        <Header.Pc history={history} user={user} />
+        <MarketHeader.Pc market={market.data} />
+        <Contents>
+          <StyledChartComponent
+            tokens={market.data.tokens}
+            lmsrB={market.data.lmsrB}
+            startTime={market.data.openTime}
+            orders={market.orders}
+          />
+          <TokensComponent.Pc
+            tokens={market.data.tokens}
+            tokenPrices={market.tokenPrices}
+          />
+          <OrderContainer>
+            {market.data.status === MarketStatus.Open ? (
+              user === null ? (
+                <SuggestSigninComponent.Pc marketId={market.data.id} />
+              ) : market.myOrders.length === 0 ? (
+                <JoinButtonComponent.Pc
+                  requestJoin={() => market.requestInitialSupply(user)}
+                />
+              ) : (
+                <OrderComponent.Pc
+                  tokens={market.data.tokens}
+                  lmsrB={market.data.lmsrB}
+                  tokenDistribution={market.tokenDistribution}
+                  myAssets={market.myAssets}
+                  requestOrder={(token, amountToken, amountCoin) =>
+                    market.requestOrder({
+                      user: user,
+                      token: token,
+                      amountToken: amountToken,
+                      amountCoin: amountCoin,
+                    })
+                  }
+                />
+              )
+            ) : market.data.status === MarketStatus.Closed ||
+              market.data.status === MarketStatus.Resolved ? (
+              <ResultComponent.Pc
+                settleToken={
+                  market.data.settleTokenId === undefined
+                    ? undefined
+                    : market.data.tokens.find(
+                        t => t.id === market.data.settleTokenId,
+                      )
+                }
+              />
+            ) : null}
+            <AssetsComponent.Pc
+              tokens={market.data.tokens}
+              myAssets={market.myAssets}
+            />
+          </OrderContainer>
+          <HistoryComponent.Pc
+            tokens={market.data.tokens}
+            myOrders={market.myOrders}
+          />
+          <DescComponent.Pc content={market.data.description} />
+        </Contents>
+      </>
+    );
+  }
 };
 
 export default MarketPage;
-
-interface LoadedMarketPageProps {
-  market: Market;
-  orders: PublicOrderHistory;
-  setOrders(orders: PublicOrderHistory): void;
-  myOrders: MyOrderHistory;
-  setMyOrders(myOrders: MyOrderHistory): void;
-  user: User | null;
-  history: History;
-}
-
-const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
-  market,
-  orders,
-  setOrders,
-  myOrders,
-  setMyOrders,
-  user,
-  history,
-}) => {
-  const tokenDistribution = newTokenDistribution(market.tokens, orders);
-  const tokenPrices = newTokenPrices(market.lmsrB, tokenDistribution);
-  const myAssets = getMyAssets(market.tokens, myOrders);
-
-  const requestOrder = (
-    user: User,
-    token: Token,
-    amountToken: number,
-    amountCoin: number,
-  ): void => {
-    createNormalOrder({
-      marketId: market.id,
-      order: {
-        tokenId: token.id,
-        amountToken: amountToken,
-        amountCoin: amountCoin,
-      },
-      accessToken: user.accessToken,
-    })
-      .then(res => {
-        if (res === 'PriceSlip') {
-          alert(
-            '指定された価格でオーダーが通りませんでした。\n' +
-              '改めてオーダーをお願いいたします',
-          );
-        } else {
-          alert(
-            'Orderに成功しました！\n' +
-              `トークン   : ${token.name}\n` +
-              `トークン数 : ${amountToken}\n` +
-              `コイン数   : ${res.amountCoin}`,
-          );
-        }
-        return getOrders(market.id, user.accessToken);
-      })
-      .then(res => {
-        setOrders(res.orders);
-        if (!res.myOrders) {
-          throw 'Logic error : Success to create a new Order, but it is not reflected';
-        } else {
-          setMyOrders(res.myOrders);
-        }
-      });
-  };
-
-  const requestJoin = (user: User) => {
-    createInitialSupplyOrder({
-      marketId: market.id,
-      accessToken: user.accessToken,
-    })
-      .then(() => getOrders(market.id, user.accessToken))
-      .then(res => {
-        setOrders(res.orders);
-        if (!res.myOrders) {
-          throw 'Logic error : Success to create a new Order, but it is not reflected';
-        } else {
-          setMyOrders(res.myOrders);
-        }
-      });
-  };
-
-  return (
-    <>
-      <Header.Pc history={history} user={user} />
-      <MarketHeader.Pc market={market} />
-      <Contents>
-        <StyledChartComponent
-          tokens={market.tokens}
-          lmsrB={market.lmsrB}
-          startTime={market.openTime}
-          orders={orders}
-        />
-        <TokensComponent.Pc tokens={market.tokens} tokenPrices={tokenPrices} />
-        {user && market.status === MarketStatus.Open ? (
-          <>
-            <OrderContainer>
-              {myOrders.length === 0 ? (
-                <JoinButtonComponent.Pc requestJoin={() => requestJoin(user)} />
-              ) : (
-                <OrderComponent.Pc
-                  tokens={market.tokens}
-                  lmsrB={market.lmsrB}
-                  tokenDistribution={tokenDistribution}
-                  myAssets={myAssets}
-                  requestOrder={(token, amountToken, amountCoin) =>
-                    requestOrder(user, token, amountToken, amountCoin)
-                  }
-                />
-              )}
-              <AssetsComponent.Pc tokens={market.tokens} myAssets={myAssets} />
-            </OrderContainer>
-            <HistoryComponent.Pc tokens={market.tokens} myOrders={myOrders} />
-          </>
-        ) : null}
-        {market &&
-        (market.status === MarketStatus.Closed ||
-          market.status === MarketStatus.Resolved) ? (
-          <>
-            <OrderContainer>
-              <ResultComponent.Pc
-                settleToken={
-                  market.settleTokenId === undefined
-                    ? undefined
-                    : market.tokens.find(t => t.id === market.settleTokenId)
-                }
-              />
-              {myAssets ? (
-                <AssetsComponent.Pc
-                  tokens={market.tokens}
-                  myAssets={myAssets}
-                />
-              ) : null}
-            </OrderContainer>
-            <HistoryComponent.Pc tokens={market.tokens} myOrders={myOrders} />
-          </>
-        ) : null}
-        <DescComponent.Pc content={market ? market.description : ''} />
-      </Contents>
-    </>
-  );
-};
-
-export const LoadingMarketPage: FC<{}> = () => {
-  return <div />;
-};
 
 const Contents = styled.div`
   width: 90%;
