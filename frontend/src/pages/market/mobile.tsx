@@ -8,6 +8,7 @@ import * as TokensComponent from './components/tokens';
 import * as OrderComponent from './components/order';
 import * as AssetsComponent from './components/assets';
 import * as JoinButtonComponent from './components/join_button';
+import * as SuggestSigninComponent from './components/suggest_signin';
 import * as ResultComponent from './components/result';
 import * as HistoryComponent from './components/history';
 import * as DescComponent from './components/description';
@@ -41,7 +42,7 @@ const MarketPage: FC<MarketPageInternalProps> = ({history, user, market}) => {
           />
           {market.data.status === MarketStatus.Open ? (
             user === null ? (
-              <h4>HOGE</h4>
+              <SuggestSigninComponent.Mobile marketId={market.data.id} />
             ) : market.myOrders.length === 0 ? (
               <JoinButtonComponent.Mobile
                 requestJoin={() => market.requestInitialSupply(user)}
