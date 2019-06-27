@@ -9,6 +9,7 @@ import * as OrderComponent from './components/order';
 import * as AssetsComponent from './components/assets';
 import * as JoinButtonComponent from './components/join_button';
 import * as SuggestSigninComponent from './components/suggest_signin';
+import * as WaitToOpenComponent from './components/wait_open';
 import * as ResultComponent from './components/result';
 import * as HistoryComponent from './components/history';
 import * as DescComponent from './components/description';
@@ -40,7 +41,9 @@ const MarketPage: FC<MarketPageInternalProps> = ({history, user, market}) => {
             tokens={market.data.tokens}
             tokenPrices={market.tokenPrices}
           />
-          {market.data.status === MarketStatus.Open ? (
+          {market.data.status === MarketStatus.Upcoming ? (
+            <WaitToOpenComponent.Mobile />
+          ) : market.data.status === MarketStatus.Open ? (
             user === null ? (
               <SuggestSigninComponent.Mobile marketId={market.data.id} />
             ) : market.myOrders.length === 0 ? (
