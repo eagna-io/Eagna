@@ -5,6 +5,7 @@ const base = process.env.REACT_APP_API_BASE;
 export enum Method {
   GET = 'GET',
   POST = 'POST',
+  PUT = 'PUT',
 }
 
 export interface RequestArgs<T> {

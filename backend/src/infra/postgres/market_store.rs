@@ -38,6 +38,21 @@ pub fn update_market_status(
     Ok(())
 }
 
+pub fn update_market_status_and_settle_token(
+    conn: &PgConnection,
+    market_id: &MarketId,
+    settle_token_id: &TokenId,
+) -> Result<(), failure::Error> {
+    use crate::infra::postgres::schema::markets;
+    diesel::update(markets::table.filter(markets::id.eq(market_id.0)))
+        .set((
+            markets::status.eq(PgMarketStatus::Settled),
+            markets::settle_token_id.eq(settle_token_id.0),
+        ))
+        .execute(conn)?;
+    Ok(())
+}
+
 pub fn insert_market_orders<'a, I>(
     conn: &PgConnection,
     market_id: &MarketId,

@@ -89,6 +89,83 @@ function str2status(s: string): MarketStatus {
 }
 
 /*
+ * ==================
+ * Post Market
+ * =================
+ */
+
+interface PostMarketArgs {
+  market: {
+    title: string;
+    organizer: string;
+    shortDesc: string;
+    description: string;
+    lmsrB: number;
+    openTime: Moment;
+    closeTime: Moment;
+    tokens: {
+      name: string;
+      description: string;
+    }[];
+  };
+  accessToken: string;
+}
+
+export function postMarket({
+  market,
+  accessToken,
+}: PostMarketArgs): Promise<MarketId> {
+  return request({
+    method: Method.POST,
+    path: '/markets/',
+    accessToken: accessToken,
+    body: market,
+    decoder: D.number(),
+  }).then(res => {
+    if (isFailure(res)) {
+      throw `Unexpected error : ${res.error.message}`;
+    } else {
+      return res;
+    }
+  });
+}
+
+/*
+ * =======================
+ * Resolve Market
+ * =======================
+ */
+
+interface ResolveMarketArgs {
+  marketId: number;
+  resolveTokenId: number;
+  accessToken: string;
+}
+
+export function resolveMarket({
+  marketId,
+  resolveTokenId,
+  accessToken,
+}: ResolveMarketArgs): Promise<number> {
+  return request({
+    method: Method.PUT,
+    path: `/markets/${marketId}/`,
+    accessToken: accessToken,
+    body: {
+      status: "Settled",
+      settleTokenId: resolveTokenId,
+    },
+    decoder: D.number(),
+  }).then(res => {
+    if (isFailure(res)) {
+      throw `Unexpected error : ${res.error.message}`;
+    } else {
+      return res;
+    }
+  });
+}
+
+/*
  * ========================
  * Get Orders
  * ========================
@@ -170,48 +247,6 @@ const ordersDecoder: D.Decoder<GetOrdersResp> = D.object({
   orders: obj.orders,
   myOrders: obj.mine ? obj.mine.orders : undefined,
 }));
-
-/*
- * ==================
- * Post Market
- * =================
- */
-
-interface PostMarketArgs {
-  market: {
-    title: string;
-    organizer: string;
-    shortDesc: string;
-    description: string;
-    lmsrB: number;
-    openTime: Moment;
-    closeTime: Moment;
-    tokens: {
-      name: string;
-      description: string;
-    }[];
-  };
-  accessToken: string;
-}
-
-export function postMarket({
-  market,
-  accessToken,
-}: PostMarketArgs): Promise<MarketId> {
-  return request({
-    method: Method.POST,
-    path: '/markets/',
-    accessToken: accessToken,
-    body: market,
-    decoder: D.number(),
-  }).then(res => {
-    if (isFailure(res)) {
-      throw `Unexpected error : ${res.error.message}`;
-    } else {
-      return res;
-    }
-  });
-}
 
 /*
  * ===================

@@ -4,8 +4,19 @@ import moment from 'moment';
 
 import {postMarket} from 'api/market';
 import User from 'models/user';
+import NotFoundPage from 'pages/not_found';
 
-const NotFoundPage: FC<{user: User}> = ({user}) => {
+const AddMarketOrNotFoundPage: FC<{user: User | null}> = ({user}) => {
+  if (user !== null && user.isAdmin) {
+    return <AddMarketPage user={user} />;
+  } else {
+    return <NotFoundPage />;
+  }
+};
+
+export default AddMarketOrNotFoundPage;
+
+const AddMarketPage: FC<{user: User}> = ({user}) => {
   const [title, setTitle] = useState('');
   const [organizer, setOrganizer] = useState('');
   const [shortDesc, setShortDesc] = useState('');
@@ -64,7 +75,7 @@ const NotFoundPage: FC<{user: User}> = ({user}) => {
 
   return (
     <Container>
-      <h2>Admin page</h2>
+      <h2>Add Market</h2>
       <Field>
         <FieldName>Title :</FieldName>
         <FieldInput
@@ -178,8 +189,9 @@ const NotFoundPage: FC<{user: User}> = ({user}) => {
 };
 
 const Container = styled.div`
-  width: 600px;
+  width: 980px;
   margin: 0 auto;
+  padding: 30px;
 `;
 
 const Field = styled.div`
@@ -193,28 +205,28 @@ const FieldName = styled.div`
 `;
 
 const FieldInput = styled.input`
-  width: 350px;
+  width: 670px;
 `;
 
 const FieldInputTextArea = styled.textarea`
-  width: 350px;
+  width: 670px;
   height: 200px;
   vertical-align: top;
 `;
 
 const FieldInputTokens = styled.div`
   display: inline-block;
-  width: 350px;
+  width: 670px;
   vertical-align: top;
 `;
 
 const FieldInputTokenName = styled.input`
-  width: 100px;
+  width: 200px;
   margin-right: 10px;
 `;
 
 const FieldInputTokenDesc = styled.input`
-  width: 200px;
+  width: 400px;
   margin-right: 20px;
 `;
 
@@ -230,5 +242,3 @@ const SubmitButton = styled.button`
   margin: 50px auto;
   text-align: center;
 `;
-
-export default NotFoundPage;
