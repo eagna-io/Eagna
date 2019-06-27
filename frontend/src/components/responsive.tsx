@@ -1,5 +1,4 @@
 import React, {FC, useState, useEffect, useContext} from 'react';
-import styled from 'styled-components';
 
 enum Device {
   Mobile = 'Mobile',
