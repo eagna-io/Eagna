@@ -50,7 +50,7 @@ export default TopPageMobile;
 
 const MainSection = styled.div`
   height: 448px;
-  background-image: url('/img/top/main-bg.png');
+  background-image: url('/img/top/main-bg.jpg');
   background-position: center;
   background-size: cover;
 `;
