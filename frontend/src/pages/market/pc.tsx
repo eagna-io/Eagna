@@ -10,7 +10,7 @@ import * as OrderComponent from './components/order';
 import * as AssetsComponent from './components/assets';
 import * as JoinButtonComponent from './components/join_button';
 import * as ResultComponent from './components/result';
-import HistoryComponent from './components/history';
+import * as HistoryComponent from './components/history';
 import * as DescComponent from './components/description';
 import {
   Market,
@@ -160,17 +160,12 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
           startTime={market.openTime}
           orders={orders}
         />
-        <TokensComponent.Pc
-          tokens={market.tokens}
-          tokenPrices={tokenPrices}
-        />
+        <TokensComponent.Pc tokens={market.tokens} tokenPrices={tokenPrices} />
         {user && market.status === MarketStatus.Open ? (
           <>
             <OrderContainer>
               {myOrders.length === 0 ? (
-                <JoinButtonComponent.Pc
-                  requestJoin={() => requestJoin(user)}
-                />
+                <JoinButtonComponent.Pc requestJoin={() => requestJoin(user)} />
               ) : (
                 <OrderComponent.Pc
                   tokens={market.tokens}
@@ -182,17 +177,9 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
                   }
                 />
               )}
-              <AssetsComponent.Pc
-                tokens={market.tokens}
-                myAssets={myAssets}
-                maxHeight={300}
-              />
+              <AssetsComponent.Pc tokens={market.tokens} myAssets={myAssets} />
             </OrderContainer>
-            <StyledHistoryComponent
-              tokens={market.tokens}
-              myOrders={myOrders}
-              maxHeight={300}
-            />
+            <HistoryComponent.Pc tokens={market.tokens} myOrders={myOrders} />
           </>
         ) : null}
         {market &&
@@ -211,15 +198,10 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
                 <AssetsComponent.Pc
                   tokens={market.tokens}
                   myAssets={myAssets}
-                  maxHeight={300}
                 />
               ) : null}
             </OrderContainer>
-            <StyledHistoryComponent
-              tokens={market.tokens}
-              myOrders={myOrders}
-              maxHeight={300}
-            />
+            <HistoryComponent.Pc tokens={market.tokens} myOrders={myOrders} />
           </>
         ) : null}
         <DescComponent.Pc content={market ? market.description : ''} />
@@ -229,7 +211,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
 };
 
 export const LoadingMarketPage: FC<{}> = () => {
-  return <div></div>;
+  return <div />;
 };
 
 const Contents = styled.div`
@@ -249,9 +231,4 @@ const OrderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: start;
-`;
-
-const StyledHistoryComponent = styled(HistoryComponent)`
-  width: 100%;
-  margin-top: 50px;
 `;

@@ -10,7 +10,7 @@ import * as OrderComponent from './components/order';
 import * as AssetsComponent from './components/assets';
 import * as JoinButtonComponent from './components/join_button';
 import * as ResultComponent from './components/result';
-import HistoryComponent from './components/history';
+import * as HistoryComponent from './components/history';
 import * as DescComponent from './components/description';
 import {
   Market,
@@ -186,7 +186,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
               myAssets={myAssets}
               maxHeight={300}
             />
-            <StyledHistoryComponent
+            <HistoryComponent.Mobile
               tokens={market.tokens}
               myOrders={myOrders}
               maxHeight={300}
@@ -211,7 +211,7 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
                 maxHeight={300}
               />
             ) : null}
-            <StyledHistoryComponent
+            <HistoryComponent.Mobile
               tokens={market.tokens}
               myOrders={myOrders}
               maxHeight={300}
@@ -238,10 +238,5 @@ const Contents = styled.div`
 const StyledChartComponent = styled(ChartComponent)`
   width: 100%;
   height: 200px;
-  margin-top: 50px;
-`;
-
-const StyledHistoryComponent = styled(HistoryComponent)`
-  width: 100%;
   margin-top: 50px;
 `;

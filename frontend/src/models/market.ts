@@ -86,6 +86,16 @@ export function isSettleOrder(order: Order): order is SettleOrder {
   return order.type === 'Settle';
 }
 
+export function orderId(order: Order): string {
+  if (isNormalOrder(order)) {
+    return `normal-${order.time.unix()}-${order.tokenId}`;
+  } else if (isInitialSupplyOrder(order)) {
+    return `supply-${order.time.unix()}`;
+  } else {
+    return `settle-${order.tokenId}`;
+  }
+}
+
 export function newTokenDistribution(
   tokens: Token[],
   maybeOrders?: NormalOrder[],
