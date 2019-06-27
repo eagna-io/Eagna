@@ -9,7 +9,7 @@ const PlainText: FC<{textUrl: string}> = ({textUrl}) => {
     fetch(textUrl)
       .then(res => res.text())
       .then(txt => setText(txt));
-  }, []);
+  }, [textUrl]);
 
   return (
     <Container>
