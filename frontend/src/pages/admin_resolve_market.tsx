@@ -1,6 +1,5 @@
 import React, {FC, useState, useEffect} from 'react';
 import styled from 'styled-components';
-import moment from 'moment';
 
 import {getMarkets, resolveMarket} from 'api/market';
 import User from 'models/user';
