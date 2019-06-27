@@ -6,7 +6,7 @@ use super::{
 use crate::domain::{
     models::{
         access_token::{AccessToken, AccessTokenId},
-        market::{Market, MarketId, MarketStatus, Order, OrderId},
+        market::{Market, MarketId, MarketStatus, Order, OrderId, TokenId},
         user::{User, UserId},
     },
     services::{
@@ -158,6 +158,18 @@ impl MarketStore for DbStore {
         status: &MarketStatus,
     ) -> Result<(), Self::Error> {
         market_store::update_market_status(self.pg_conn()?, market_id, status)
+    }
+
+    fn update_market_status_and_settle_token(
+        &mut self,
+        market_id: &MarketId,
+        settle_token_id: &TokenId,
+    ) -> Result<(), Self::Error> {
+        market_store::update_market_status_and_settle_token(
+            self.pg_conn()?,
+            market_id,
+            settle_token_id,
+        )
     }
 
     fn insert_market_orders<'a, I>(

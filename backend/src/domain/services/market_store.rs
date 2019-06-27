@@ -55,6 +55,14 @@ pub trait MarketStore: Store + Sized {
         status: &MarketStatus,
     ) -> Result<(), Self::Error>;
 
+    /// 指定されたMarketのstatusを Settle に変更し、
+    /// settle_token_id をセットする
+    fn update_market_status_and_settle_token(
+        &mut self,
+        market_id: &MarketId,
+        settle_token_id: &TokenId,
+    ) -> Result<(), Self::Error>;
+
     /// MarketにOrderを追加する。
     ///
     /// ## NOTE
@@ -149,7 +157,7 @@ where
         self.inner
             .insert_market_orders(&self.market_id, settle_orders)?;
         self.inner
-            .update_market_status(&self.market_id, &MarketStatus::Settled)
+            .update_market_status_and_settle_token(&self.market_id, &market.settle_token.id)
     }
 }
 

@@ -201,6 +201,7 @@ where
     S: AccessTokenStore + UserStore + MarketStore,
 {
     #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
     struct ReqData {
         status: MarketStatus,
         settle_token_id: TokenId,
