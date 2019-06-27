@@ -152,7 +152,7 @@ export function resolveMarket({
     path: `/markets/${marketId}/`,
     accessToken: accessToken,
     body: {
-      status: "Settled",
+      status: 'Settled',
       settleTokenId: resolveTokenId,
     },
     decoder: D.number(),
@@ -250,31 +250,13 @@ const ordersDecoder: D.Decoder<GetOrdersResp> = D.object({
 
 /*
  * ===================
- * Post Order
+ * Create Initial Supply Order
  * ===================
  */
 
-interface PostOrderArgs {
+interface CreateInitialSupplyOrderArgs {
   marketId: MarketId;
-  order:
-    | {
-        tokenId: TokenId;
-        amountToken: number;
-        amountCoin: number;
-        type: 'normal';
-      }
-    | {
-        type: 'initialSupply';
-      };
   accessToken: string;
-}
-
-interface CreatedNormalOrder {
-  tokenId: TokenId;
-  amountToken: number;
-  amountCoin: number;
-  time: Moment;
-  type: 'normal';
 }
 
 interface CreatedInitialSupplyOrder {
@@ -283,20 +265,20 @@ interface CreatedInitialSupplyOrder {
   type: 'initialSupply';
 }
 
-export function postOrder({
+export function createInitialSupplyOrder({
   marketId,
-  order,
   accessToken,
-}: PostOrderArgs): Promise<CreatedNormalOrder | CreatedInitialSupplyOrder> {
+}: CreateInitialSupplyOrderArgs): Promise<CreatedInitialSupplyOrder> {
   return request({
     method: Method.POST,
     path: `/markets/${marketId}/orders/`,
     accessToken: accessToken,
-    body: order,
-    decoder: createdOrderDecoder,
+    body: {
+      type: 'initialSupply',
+    },
+    decoder: createdInitialSupplyOrderDecoder,
   }).then(res => {
     if (isFailure(res)) {
-      // TODO;
       throw `Unexpected error : ${res.error.message}`;
     } else {
       return res;
@@ -304,19 +286,70 @@ export function postOrder({
   });
 }
 
-const createdOrderDecoder: D.Decoder<
-  CreatedNormalOrder | CreatedInitialSupplyOrder
-> = D.union(
-  D.object({
-    tokenId: D.number(),
-    amountToken: D.number(),
-    amountCoin: D.number(),
-    time: D.string().map(s => moment(s)),
-    type: D.constant('normal'),
-  }),
-  D.object({
-    amountCoin: D.number(),
-    time: D.string().map(s => moment(s)),
-    type: D.constant('initialSupply'),
-  }),
-);
+const createdInitialSupplyOrderDecoder: D.Decoder<
+  CreatedInitialSupplyOrder
+> = D.object({
+  amountCoin: D.number(),
+  time: D.string().map(s => moment(s)),
+  type: D.constant('initialSupply'),
+});
+
+/*
+ * ===================
+ * Create Normal Order
+ * ===================
+ */
+
+interface CreateNormalOrderArgs {
+  marketId: MarketId;
+  order: {
+    tokenId: TokenId;
+    amountToken: number;
+    amountCoin: number;
+  };
+  accessToken: string;
+}
+
+interface CreatedNormalOrder {
+  tokenId: TokenId;
+  amountToken: number;
+  amountCoin: number;
+  time: Moment;
+}
+
+export function createNormalOrder({
+  marketId,
+  order,
+  accessToken,
+}: CreateNormalOrderArgs): Promise<CreatedNormalOrder | 'PriceSlip'> {
+  return request({
+    method: Method.POST,
+    path: `/markets/${marketId}/orders/`,
+    accessToken: accessToken,
+    body: {
+      type: 'normal',
+      ...order,
+    },
+    decoder: createdNormalOrderDecoder,
+  }).then(res => {
+    if (isFailure(res)) {
+      if (res.error.code === 1) {
+        // code 1 => Invalid payload error
+        // 他の要素は適切（なはず）なので、ここでのエラーは価格スリップエラー
+        return 'PriceSlip';
+      } else {
+        throw `Unexpected error : ${res.error.message}`;
+      }
+    } else {
+      return res;
+    }
+  });
+}
+
+const createdNormalOrderDecoder: D.Decoder<CreatedNormalOrder> = D.object({
+  tokenId: D.number(),
+  amountToken: D.number(),
+  amountCoin: D.number(),
+  time: D.string().map(s => moment(s)),
+  type: D.constant('normal'),
+});

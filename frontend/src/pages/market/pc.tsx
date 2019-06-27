@@ -24,7 +24,12 @@ import {
   getMyAssets,
 } from 'models/market';
 import User from 'models/user';
-import {getMarket, getOrders, postOrder} from 'api/market';
+import {
+  getMarket,
+  getOrders,
+  createInitialSupplyOrder,
+  createNormalOrder,
+} from 'api/market';
 
 interface MarketPageProps {
   history: History;
@@ -100,24 +105,29 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
     amountToken: number,
     amountCoin: number,
   ): void => {
-    postOrder({
+    createNormalOrder({
       marketId: market.id,
       order: {
         tokenId: token.id,
         amountToken: amountToken,
         amountCoin: amountCoin,
-        type: 'normal',
       },
       accessToken: user.accessToken,
     })
       .then(res => {
-        const settledAmountCoin = res.amountCoin;
-        alert(
-          'Orderに成功しました！\n' +
-            `トークン   : ${token.name}\n` +
-            `トークン数 : ${amountToken}\n` +
-            `コイン数   : ${settledAmountCoin}`,
-        );
+        if (res === 'PriceSlip') {
+          alert(
+            '指定された価格でオーダーが通りませんでした。\n' +
+              '改めてオーダーをお願いいたします',
+          );
+        } else {
+          alert(
+            'Orderに成功しました！\n' +
+              `トークン   : ${token.name}\n` +
+              `トークン数 : ${amountToken}\n` +
+              `コイン数   : ${res.amountCoin}`,
+          );
+        }
         return getOrders(market.id, user.accessToken);
       })
       .then(res => {
@@ -131,11 +141,8 @@ const LoadedMarketPage: FC<LoadedMarketPageProps> = ({
   };
 
   const requestJoin = (user: User) => {
-    postOrder({
+    createInitialSupplyOrder({
       marketId: market.id,
-      order: {
-        type: 'initialSupply',
-      },
       accessToken: user.accessToken,
     })
       .then(() => getOrders(market.id, user.accessToken))
