@@ -1,4 +1,4 @@
-import React, {FC, useState, useCallback, useContext} from 'react';
+import React, {FC, useContext} from 'react';
 import styled from 'styled-components';
 
 const TableContext = React.createContext<{
