@@ -192,7 +192,12 @@ export function getOrders(
     decoder: ordersDecoder,
   }).then(res => {
     if (isFailure(res)) {
-      throw `Unexpected failure : ${res.error.message}`;
+      // AccessTokenの有効期限切れ
+      if (res.error.code === 2) {
+        return getOrders(marketId);
+      } else {
+        throw `Unexpected failure : ${res.error.message}`;
+      }
     } else {
       return res;
     }
