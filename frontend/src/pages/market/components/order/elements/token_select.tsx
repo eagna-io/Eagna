@@ -1,24 +1,22 @@
-import React, {FC, useState, useCallback, useMemo} from 'react';
+import React, {FC, useCallback, useMemo} from 'react';
 import styled from 'styled-components';
 import {Token} from 'models/market';
 
 interface Props {
   tokens: Token[];
+  selected: Token;
   onChange(token: Token): void;
 }
 
-const Base: FC<Props> = React.memo(({tokens, onChange}) => {
-  const [selected, setSelected] = useState<Token>(tokens[0]);
-
+const Base: FC<Props> = React.memo(({tokens, selected, onChange}) => {
   const onChangeCallback = useCallback(
     e => {
       const token = tokens.find(t => t.name === e.target.value);
       if (token) {
-        setSelected(token);
         onChange(token);
       }
     },
-    [tokens, onChange, setSelected],
+    [tokens, onChange],
   );
 
   const selectOptions = useMemo(

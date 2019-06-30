@@ -1,30 +1,26 @@
-import React, {FC, useState, useCallback} from 'react';
+import React, {FC, useCallback} from 'react';
 import styled from 'styled-components';
 
 const MAX_QUANTITY = 100;
 
 interface Props {
+  value: number | null;
   onChange(amount: number | null): void;
-  className?: string;
 }
 
-const Base: FC<Props> = React.memo(({onChange, className}) => {
-  const [inputValue, setInputValue] = useState<number | null>(null);
-
+const Base: FC<Props> = React.memo(({onChange, value}) => {
   const onInputChange = useCallback(
     event => {
       const amount = validateAmount(event.target.value);
-      setInputValue(amount);
       onChange(amount);
     },
-    [setInputValue, onChange],
+    [onChange],
   );
 
   return (
     <Container
-      className={className}
       type="text"
-      value={inputValue !== null ? inputValue : ''}
+      value={value !== null ? value : ''}
       placeholder="トークンの量を入力"
       onChange={onInputChange}
     />
