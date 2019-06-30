@@ -2,7 +2,7 @@ import React, {FC} from 'react';
 import styled from 'styled-components';
 
 import * as table from 'components/table';
-import User from 'models/user';
+import {User} from 'models/user';
 
 const Component: FC<{me: User}> = ({me}) => {
   return (

@@ -1,7 +1,7 @@
 import React, {FC, useState, useEffect, useCallback} from 'react';
 import {History} from 'history';
 
-import User from 'models/user';
+import {User, getAccessToken} from 'models/user';
 import {
   Market,
   MarketId,
@@ -67,57 +67,89 @@ const MarketPage: FC<MarketPageProps> = ({history, user, marketId}) => {
   }, [marketId]);
 
   useEffect(() => {
-    getOrders(marketId, user ? user.accessToken : undefined).then(res => {
-      setOrders({orders: res.orders, myOrders: res.myOrders || []});
-    });
-  }, [marketId, user]);
+    if (user) {
+      getAccessToken(user).then(accessToken => {
+        if (accessToken === null) {
+          history.push('/login');
+        } else {
+          getOrders(marketId, accessToken).then(res => {
+            setOrders({orders: res.orders, myOrders: res.myOrders || []});
+          });
+        }
+      });
+    } else {
+      getOrders(marketId).then(res => {
+        setOrders({orders: res.orders, myOrders: res.myOrders || []});
+      });
+    }
+  }, [marketId, user, history]);
 
   const requestOrder: (args: RequestOrderArgs) => void = useCallback(
     ({user, token, amountToken, amountCoin}) => {
-      createNormalOrder({
-        marketId: marketId,
-        order: {
-          tokenId: token.id,
-          amountToken: amountToken,
-          amountCoin: amountCoin,
-        },
-        accessToken: user.accessToken,
-      })
-        .then(res => {
-          if (res === 'PriceSlip') {
-            alert(
-              '指定された価格でオーダーが通りませんでした。\n' +
-                '改めてオーダーをお願いいたします。',
-            );
-          } else {
-            alert(
-              'オーダーに成功しました！\n' +
-                `トークン   : ${token.name}\n` +
-                `トークン数 : ${amountToken}\n` +
-                `コイン数   : ${res.amountCoin}`,
-            );
-          }
-          return getOrders(marketId, user.accessToken);
-        })
-        .then(res => {
-          setOrders({orders: res.orders, myOrders: res.myOrders || []});
-        });
+      getAccessToken(user).then(accessToken => {
+        if (accessToken === null) {
+          alert(
+            'ログインセッションが切れました。再ログインをお願いいたします。',
+          );
+          history.push('/login');
+          // TODO
+          // 再ログイン後に自動的にオーダーを出す
+        } else {
+          createNormalOrder({
+            marketId: marketId,
+            order: {
+              tokenId: token.id,
+              amountToken: amountToken,
+              amountCoin: amountCoin,
+            },
+            accessToken: accessToken,
+          })
+            .then(res => {
+              if (res === 'PriceSlip') {
+                alert(
+                  '指定された価格でオーダーが通りませんでした。\n' +
+                    '改めてオーダーをお願いいたします。',
+                );
+              } else {
+                alert(
+                  'オーダーに成功しました！\n' +
+                    `トークン   : ${token.name}\n` +
+                    `トークン数 : ${amountToken}\n` +
+                    `コイン数   : ${res.amountCoin}`,
+                );
+              }
+              return getOrders(marketId, accessToken);
+            })
+            .then(res => {
+              setOrders({orders: res.orders, myOrders: res.myOrders || []});
+            });
+        }
+      });
     },
-    [marketId, setOrders],
+    [marketId, setOrders, history],
   );
 
   const requestInitialSupply: (user: User) => void = useCallback(
     user => {
-      createInitialSupplyOrder({
-        marketId: marketId,
-        accessToken: user.accessToken,
-      })
-        .then(() => getOrders(marketId, user.accessToken))
-        .then(res => {
-          setOrders({orders: res.orders, myOrders: res.myOrders || []});
-        });
+      getAccessToken(user).then(accessToken => {
+        if (accessToken === null) {
+          alert(
+            'ログインセッションが切れています。再ログインをお願いいたします。',
+          );
+          history.push('/login');
+        } else {
+          createInitialSupplyOrder({
+            marketId: marketId,
+            accessToken: accessToken,
+          })
+            .then(() => getOrders(marketId, accessToken))
+            .then(res => {
+              setOrders({orders: res.orders, myOrders: res.myOrders || []});
+            });
+        }
+      });
     },
-    [marketId],
+    [marketId, history],
   );
 
   let marketDatas = null;

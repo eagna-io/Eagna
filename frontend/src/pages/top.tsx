@@ -4,7 +4,7 @@ import 'firebase/auth';
 import {History} from 'history';
 
 import {Market, MarketStatus} from 'models/market';
-import User from 'models/user';
+import {User} from 'models/user';
 import {getMarkets} from 'api/market';
 import {getMe, createUser} from 'api/user';
 import {Pc, Tablet, Mobile} from 'components/responsive';

@@ -2,7 +2,7 @@ import React, {FC, useState, useEffect} from 'react';
 import {Redirect} from 'react-router-dom';
 import {History} from 'history';
 
-import User from 'models/user';
+import {User, getAccessToken} from 'models/user';
 import {Market, MarketStatus} from 'models/market';
 import {getMyMarkets} from 'api/user';
 import {getMarkets} from 'api/market';
@@ -21,10 +21,16 @@ const AccountPage: FC<AccountPageProps> = ({history, user}) => {
 
   useEffect(() => {
     if (user !== null) {
-      getMyMarkets(user.accessToken).then(ms => setParticipatedMarkets(ms));
-      getMarkets([MarketStatus.Upcoming, MarketStatus.Open]).then(res =>
-        setFeaturedMarkets(res),
-      );
+      getAccessToken(user).then(accessToken => {
+        if (accessToken === null) {
+          history.push('/login');
+        } else {
+          getMyMarkets(accessToken).then(res => setParticipatedMarkets(res));
+          getMarkets([MarketStatus.Upcoming, MarketStatus.Open]).then(res =>
+            setFeaturedMarkets(res),
+          );
+        }
+      });
     }
   }, [user]);
 

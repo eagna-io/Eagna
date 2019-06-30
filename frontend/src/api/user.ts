@@ -1,7 +1,7 @@
 import * as D from '@mojotech/json-type-validation';
 
 import {request, Method, FailureCode, isFailure} from 'api/core';
-import User from 'models/user';
+import {User} from 'models/user';
 import {Market} from 'models/market';
 import {marketDecoder} from 'api/market';
 
@@ -74,7 +74,6 @@ export function createUser({
         name: res.name,
         email: res.email,
         isAdmin: res.isAdmin,
-        accessToken: accessToken,
       };
     }
   });

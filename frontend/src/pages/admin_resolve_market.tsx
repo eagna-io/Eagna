@@ -2,7 +2,7 @@ import React, {FC, useState, useEffect} from 'react';
 import styled from 'styled-components';
 
 import {getMarkets, resolveMarket} from 'api/market';
-import User from 'models/user';
+import {User, getAccessToken} from 'models/user';
 import {Market, MarketStatus} from 'models/market';
 import NotFoundPage from 'pages/not_found';
 
@@ -67,12 +67,18 @@ const ResolveMarketComponent: FC<ResolveMarketComponentProps> = ({
             <TokenName>{token.name}</TokenName>
             <ResolveButton
               onClick={() => {
-                resolveMarket({
-                  marketId: market.id,
-                  resolveTokenId: token.id,
-                  accessToken: user.accessToken,
-                }).then(() => {
-                  onResolved();
+                getAccessToken(user).then(accessToken => {
+                  if (accessToken === null) {
+                    alert('ログインセッションが切れました');
+                  } else {
+                    resolveMarket({
+                      marketId: market.id,
+                      resolveTokenId: token.id,
+                      accessToken: accessToken,
+                    }).then(() => {
+                      onResolved();
+                    });
+                  }
                 });
               }}>
               Resolve

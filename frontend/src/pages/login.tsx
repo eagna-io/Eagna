@@ -5,7 +5,7 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 
-import User from 'models/user';
+import {User} from 'models/user';
 
 interface LoginPageProps {
   history: History<{redirect?: LocationDescriptor}>;

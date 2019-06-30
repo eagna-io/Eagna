@@ -2,7 +2,7 @@ import React, {FC} from 'react';
 import styled from 'styled-components';
 import {History} from 'history';
 
-import User from 'models/user';
+import {User} from 'models/user';
 import {Market} from 'models/market';
 import * as Header from 'components/header';
 import * as ProfileComponent from './components/profile';

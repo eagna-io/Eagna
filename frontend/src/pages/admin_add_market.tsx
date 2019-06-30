@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import moment from 'moment';
 
 import {postMarket} from 'api/market';
-import User from 'models/user';
+import {User, getAccessToken} from 'models/user';
 import NotFoundPage from 'pages/not_found';
 
 const AddMarketOrNotFoundPage: FC<{user: User | null}> = ({user}) => {
@@ -56,20 +56,26 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
   };
 
   const sendRequest = () => {
-    postMarket({
-      market: {
-        title: title,
-        organizer: organizer,
-        shortDesc: shortDesc,
-        description: description,
-        lmsrB: lmsrB,
-        openTime: moment(openTime),
-        closeTime: moment(closeTime),
-        tokens: tokens,
-      },
-      accessToken: user.accessToken,
-    }).then(marketId => {
-      alert(`New market ${marketId} is created`);
+    getAccessToken(user).then(accessToken => {
+      if (accessToken === null) {
+        alert('ログインセッションが切れました');
+      } else {
+        postMarket({
+          market: {
+            title: title,
+            organizer: organizer,
+            shortDesc: shortDesc,
+            description: description,
+            lmsrB: lmsrB,
+            openTime: moment(openTime),
+            closeTime: moment(closeTime),
+            tokens: tokens,
+          },
+          accessToken: accessToken,
+        }).then(marketId => {
+          alert(`New market ${marketId} is created`);
+        });
+      }
     });
   };
 
