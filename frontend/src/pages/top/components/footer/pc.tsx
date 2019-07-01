@@ -7,7 +7,7 @@ const Footer: FC<{}> = React.memo(() => {
       <Logo src="/img/logo.png" />
       <Copyright>&copy; 2019 Eagna inc</Copyright>
       <Contact>ご質問・お問い合わせ</Contact>
-      <Email>marketrohan@gmail.com</Email>
+      <Email>info@eagna.io</Email>
     </Container>
   );
 });
