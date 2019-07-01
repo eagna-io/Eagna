@@ -22,14 +22,14 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
     <Container>
       <table.Table className={className} striped>
         <table.Header>
-          <table.Cell2>Time</table.Cell2>
-          <table.Cell2>Types</table.Cell2>
-          <table.Cell2>Token</table.Cell2>
+          <table.Cell2>時間</table.Cell2>
+          <table.Cell2>種類</table.Cell2>
+          <table.Cell2>トークン</table.Cell2>
           <table.Cell2>
-            <Amount>Amount Token</Amount>
+            <Amount>トークン数</Amount>
           </table.Cell2>
           <table.Cell2>
-            <Amount>Amount Coin</Amount>
+            <Amount>コイン量</Amount>
           </table.Cell2>
         </table.Header>
         <table.Body>

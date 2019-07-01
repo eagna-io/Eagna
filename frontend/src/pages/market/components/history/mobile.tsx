@@ -2,7 +2,8 @@ import React, {FC} from 'react';
 import styled from 'styled-components';
 
 import * as table from 'components/table';
-import {Token, MyOrderHistory, orderId, Order} from 'models/market';
+import {Token, MyOrderHistory, orderId} from 'models/market';
+import {orderTypeStr} from '../history';
 
 interface TradeHistoryComponentProps {
   tokens: Token[];
@@ -76,16 +77,6 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
     </Container>
   );
 };
-
-function orderTypeStr(order: Order): string {
-  if (order.type === 'Normal') {
-    return order.amountToken < 0 ? '売り' : '買い';
-  } else if (order.type === 'InitialSupply') {
-    return '初期配布';
-  } else  {
-    return order.amountCoin === 0 ? '没収' : '報酬';
-  }
-}
 
 const Container = styled.div`
   width: 100%;
