@@ -87,7 +87,7 @@ const OrderButton = styled.button`
   height: 38px;
   border: 0;
   border-radius: 4px;
-  background-color: #00c05e;
+  background-color: #23AC0E;
   color: white;
   font-size: 17px;
   margin-top: 20px;

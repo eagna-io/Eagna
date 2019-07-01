@@ -2,7 +2,7 @@ import React, {FC} from 'react';
 import styled from 'styled-components';
 
 import * as table from 'components/table';
-import {Token, MyOrderHistory, orderId} from 'models/market';
+import {Token, MyOrderHistory, orderId, Order} from 'models/market';
 
 interface TradeHistoryComponentProps {
   tokens: Token[];
@@ -21,25 +21,26 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
     <Container>
       <table.Table className={className} striped>
         <table.Header>
-          <table.Cell2>Time</table.Cell2>
-          <table.Cell2>Types</table.Cell2>
-          <table.Cell2>Token</table.Cell2>
           <table.Cell2>
-            <Amount>Amount Token</Amount>
+            <Item>時間</Item>
           </table.Cell2>
           <table.Cell2>
-            <Amount>Amount Coin</Amount>
+            <Item>種類</Item>
+          </table.Cell2>
+          <table.Cell2>
+            <Item>トークン</Item>
+          </table.Cell2>
+          <table.Cell2>
+            <Item>トークン数</Item>
+          </table.Cell2>
+          <table.Cell2>
+            <Item>コイン量</Item>
           </table.Cell2>
         </table.Header>
         <table.Body>
           {myOrders
             .sort((a, b) => b.time.unix() - a.time.unix())
             .map(order => {
-              let orderType: string = order.type;
-              if (orderType === 'Normal') {
-                orderType = order.amountToken < 0 ? 'Sell' : 'Buy';
-              }
-
               let tokenName = '-';
               if (order.type === 'Normal' || order.type === 'Settle') {
                 const token = tokens.find(t => t.id === order.tokenId);
@@ -52,14 +53,20 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
 
               return (
                 <table.Row key={orderId(order)}>
-                  <table.Cell2>{order.time.fromNow()}</table.Cell2>
-                  <table.Cell2>{orderType}</table.Cell2>
-                  <table.Cell2>{tokenName}</table.Cell2>
                   <table.Cell2>
-                    <Amount>{order.amountToken}</Amount>
+                    <Item>{order.time.fromNow()}</Item>
                   </table.Cell2>
                   <table.Cell2>
-                    <Amount>{order.amountCoin}</Amount>
+                    <Item>{orderTypeStr(order)}</Item>
+                  </table.Cell2>
+                  <table.Cell2>
+                    <Item>{tokenName}</Item>
+                  </table.Cell2>
+                  <table.Cell2>
+                    <Item>{order.amountToken}</Item>
+                  </table.Cell2>
+                  <table.Cell2>
+                    <Item>{order.amountCoin}</Item>
                   </table.Cell2>
                 </table.Row>
               );
@@ -70,6 +77,16 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
   );
 };
 
+function orderTypeStr(order: Order): string {
+  if (order.type === 'Normal') {
+    return order.amountToken < 0 ? '売り' : '買い';
+  } else if (order.type === 'InitialSupply') {
+    return '初期配布';
+  } else  {
+    return order.amountCoin === 0 ? '没収' : '報酬';
+  }
+}
+
 const Container = styled.div`
   width: 100%;
   margin-top: 50px;
@@ -77,6 +94,10 @@ const Container = styled.div`
 
 const Amount = styled.div`
   text-align: right;
+`;
+
+const Item = styled.div`
+  font-size: 11px;
 `;
 
 export default TradeHistoryComponent;

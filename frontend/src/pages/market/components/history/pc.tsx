@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import * as table from 'components/table';
 import {Token, MyOrderHistory, orderId} from 'models/market';
+import {orderTypeStr} from '../history';
 
 interface TradeHistoryComponentProps {
   tokens: Token[];
@@ -35,11 +36,6 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
           {myOrders
             .sort((a, b) => b.time.unix() - a.time.unix())
             .map(order => {
-              let orderType: string = order.type;
-              if (orderType === 'Normal') {
-                orderType = order.amountToken < 0 ? 'Sell' : 'Buy';
-              }
-
               let tokenName = '-';
               if (order.type === 'Normal' || order.type === 'Settle') {
                 const token = tokens.find(t => t.id === order.tokenId);
@@ -53,7 +49,7 @@ const TradeHistoryComponent: FC<TradeHistoryComponentProps> = ({
               return (
                 <table.Row key={orderId(order)}>
                   <table.Cell2>{order.time.fromNow()}</table.Cell2>
-                  <table.Cell2>{orderType}</table.Cell2>
+                  <table.Cell2>{orderTypeStr(order)}</table.Cell2>
                   <table.Cell2>{tokenName}</table.Cell2>
                   <table.Cell2>
                     <Amount>{order.amountToken}</Amount>
