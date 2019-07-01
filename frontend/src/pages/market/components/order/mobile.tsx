@@ -1,8 +1,8 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
-import {Pc as QuantityInputElement} from './elements/quantity_input';
-import {Pc as TokenSelectElement} from './elements/token_select';
-import {Pc as OrderTypeSwitchElement} from './elements/order_type_switch';
+import {Mobile as QuantityInputElement} from './elements/quantity_input';
+import {Mobile as TokenSelectElement} from './elements/token_select';
+import {Mobile as OrderTypeSwitchElement} from './elements/order_type_switch';
 import {InternalComponentProps} from '../order';
 
 const Component: FC<InternalComponentProps> = ({

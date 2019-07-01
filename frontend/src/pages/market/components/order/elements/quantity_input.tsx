@@ -6,9 +6,10 @@ const MAX_QUANTITY = 100;
 interface Props {
   value: number | null;
   onChange(amount: number | null): void;
+  className?: string;
 }
 
-const Base: FC<Props> = React.memo(({onChange, value}) => {
+const Base: FC<Props> = React.memo(({onChange, value, className}) => {
   const onInputChange = useCallback(
     event => {
       const amount = validateAmount(event.target.value);
@@ -23,18 +24,15 @@ const Base: FC<Props> = React.memo(({onChange, value}) => {
       value={value !== null ? value : ''}
       placeholder="トークンの量を入力"
       onChange={onInputChange}
+      className={className}
     />
   );
 });
 
 const Container = styled.input`
-  width: 248px;
-  height: 40px;
   border-radius: 4px;
   border: 1px solid #d1d5da;
-  font-size: 14px;
   color: #979797;
-  padding-left: 20px;
 `;
 
 export const Pc = styled(Base)`
