@@ -54,19 +54,23 @@ function genComponent(
 
     const onOrderButtonClick = () => {
       if (cost === 0) {
-        return 'コストが0の注文は出せません。Quantityを大きくしてください。';
+        setErr('0 Coin の注文は出せません。Quantityを大きくしてください。');
+        return;
       }
       if (amountToken === null || amountToken === 0) {
-        return 'トークンの量を入力してください';
+        setErr('トークンの量を入力してください');
+        return;
       }
       if (orderType === OrderType.Buy) {
         if (getBalance(myAssets, 'Coin') < cost) {
-          return 'Coin の残高が不足しています';
+          setErr('Coin の残高が不足しています');
+          return;
         }
       }
       if (orderType === OrderType.Sell) {
         if (getBalance(myAssets, selectedToken.id) < amountToken) {
-          return 'Token の残高が不足しています';
+          setErr('Token の残高が不足しています');
+          return;
         }
       }
 
