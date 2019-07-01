@@ -49,7 +49,7 @@ export default Component;
 
 const Container = styled.div`
   width: 100%;
-  border: 1px solit #d1d5da;
+  border: 1px solid #d1d5da;
   border-radius: 4px;
   padding: 24px;
   margin-top: 50px;
