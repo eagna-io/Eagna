@@ -45,11 +45,11 @@ export const Pc: FC<TokensComponentProps> = ({
             <table.Cell3>
               <TokenName>{token.name}</TokenName>
             </table.Cell3>
-            <table.Cell2>
+            <table.Cell1>
               <TokenPrice>
                 {tokenPrices ? tokenPrices.get(token.id) : '-'}
               </TokenPrice>
-            </table.Cell2>
+            </table.Cell1>
             <table.Cell5>
               <TokenDesc>{token.description}</TokenDesc>
             </table.Cell5>
