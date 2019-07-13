@@ -1,44 +1,30 @@
 mod auth;
 mod cronjob;
 mod failure_response;
+mod infra_manager;
 mod markets;
-mod me;
 mod req;
 mod users;
 
 pub use self::auth::validate_bearer_header;
 pub use self::failure_response::FailureResponse;
+pub use self::infra_manager::{InfraManager, InfraManagerFactory};
 pub use self::req::get_params;
-use crate::domain::{
-    models::market::MarketId,
-    services::{AccessTokenStore, MarketStore, StoreFactory, UserStore},
-};
+use crate::domain::market::MarketId;
 
 use rouille::{router, Request, Response};
 use std::time::Duration;
 
-#[derive(Debug, Clone)]
-pub struct ApiServer<F> {
-    store_factory: F,
+#[derive(Debug, Clone, Constructor)]
+pub struct ApiServer {
+    infra_factory: InfraManagerFactory,
     access_allow_hosts: String, // comma separated host names
 }
 
-impl<F> ApiServer<F> {
-    pub fn new<S>(store_factory: F, access_allow_hosts: S) -> ApiServer<F>
-    where
-        S: Into<String>,
-    {
-        ApiServer {
-            store_factory,
-            access_allow_hosts: access_allow_hosts.into(),
-        }
-    }
-
-    pub fn run<A, S>(self, addr: A)
+impl ApiServer {
+    pub fn run<A>(self, addr: A)
     where
         A: std::net::ToSocketAddrs,
-        F: StoreFactory<S> + Send + Sync + 'static,
-        S: AccessTokenStore + MarketStore + UserStore + Send + 'static,
     {
         rouille::Server::new(addr, move |req| {
             rouille::log_custom(req, log_ok, log_err, || {
@@ -70,14 +56,9 @@ impl<F> ApiServer<F> {
         }
     }
 
-    pub fn process_request<S>(&self, req: &Request) -> Response
-    where
-        F: StoreFactory<S> + Send + Sync + 'static,
-        S: AccessTokenStore + MarketStore + UserStore + Send + 'static,
-    {
-        self.store_factory
-            .transaction(|store| routing(store, req))
-            .unwrap_or_else(<FailureResponse as Into<Response>>::into)
+    pub fn process_request(&self, req: &Request) -> Response {
+        let infra = self.infra_factory.create();
+        routing(infra, req).unwrap_or_else(<FailureResponse as Into<Response>>::into)
     }
 
     pub fn append_cors_header(&self, resp: Response) -> Response {
@@ -88,40 +69,31 @@ impl<F> ApiServer<F> {
     }
 }
 
-pub fn routing<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
-where
-    S: AccessTokenStore + MarketStore + UserStore + Send + 'static,
-{
+pub fn routing(infra: InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     router!(req,
-        (GET) (/me/) => {
-            me::get(store, req)
-        },
-        (GET) (/me/markets/) => {
-            me::markets::get(store, req)
-        },
         (POST) (/users/) => {
-            users::post(store, req)
+            users::post(infra, req)
         },
         (GET) (/markets/) => {
-            markets::get_all(store, req)
+            markets::get_list(infra, req)
         },
         (POST) (/markets/) => {
-            markets::post(store, req)
+            markets::post(infra, req)
         },
         (GET) (/markets/{id: MarketId}/) => {
-            markets::get(store, req, id)
+            markets::get(infra, req, id)
         },
         (PUT) (/markets/{id: MarketId}/) => {
-            markets::put(store, req, id)
+            markets::put(infra, req, id)
         },
         (GET) (/markets/{id: MarketId}/orders/) => {
-            markets::orders::get_all(store, req, id)
+            markets::orders::get_all(infra, req, id)
         },
         (POST) (/markets/{id: MarketId}/orders/) => {
-            markets::orders::post(store, req, id)
+            markets::orders::post(infra, req, id)
         },
         (GET) (/cronjob/check_markets/) => {
-            cronjob::check_markets::get(store, req)
+            cronjob::check_markets::get(infra, req)
         },
         _ => Err(FailureResponse::ResourceNotFound)
     )

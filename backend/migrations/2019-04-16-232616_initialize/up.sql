@@ -1,83 +1,96 @@
 CREATE TABLE users (
-  id            text PRIMARY KEY,
-  name          text UNIQUE NOT NULL,
+  /* Firebase uid */
+  fb_uid        text PRIMARY KEY,
+  name          text NOT NULL,
   email         text UNIQUE NOT NULL,
   is_admin      boolean NOT NULL DEFAULT False
 );
 
 CREATE TYPE market_status AS ENUM (
-  'preparing',
+  'upcoming',
   'open',
   'closed',
-  'settled'
+  'resolved'
+);
+
+CREATE TABLE organizers (
+  id            uuid PRIMARY KEY,
+  name          text NOT NULL,
+  sumbnail_url  text NOT NULL
 );
 
 CREATE TABLE markets (
-  id                  serial PRIMARY KEY,
+  id                  uuid PRIMARY KEY,
   title               text NOT NULL,
-  organizer           text NOT NULL,
-  short_desc          text NOT NULL,
+  organizer_id        uuid NOT NULL,
   description         text NOT NULL,
   lmsr_b              integer NOT NULL,
-  open_time           timestamptz NOT NULL,
-  close_time          timestamptz NOT NULL,
-  status              market_status NOT NULL DEFAULT 'preparing',
-  settle_token_id     integer DEFAULT NULL, /* MUST NULL if "status" is NOT 'settled' */
+  open                timestamptz NOT NULL,
+  close               timestamptz NOT NULL,
+  status              market_status NOT NULL DEFAULT 'upcoming',
+  /* MUST NULL if "status" is NOT 'resolved' */
+  resolved_token_name text DEFAULT NULL,
 
-  /* If "status" is 'settled', then "settle_token_id" MUST NOT NULL  */
-  CONSTRAINT if_status_is_settled_then_settle_token_id_is_not_null
-    CHECK ( (NOT status = 'settled') OR (settle_token_id IS NOT NULL) ),
-
-  /* If "status" is NOT 'settled', then "settle_token_id" MUST NULL  */
-  CONSTRAINT if_status_is_not_settled_then_settle_token_id_is_null
-    CHECK ( (status = 'settled') OR (settle_token_id IS NULL) )
+  CONSTRAINT market_organizer_fkey FOREIGN KEY(organizer_id)
+    REFERENCES organizers(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE market_tokens (
-  id                  serial PRIMARY KEY,
-  name                text NOT NULL,
-  description         text NOT NULL,
-  market_id           integer NOT NULL,
+  /* Required by diesel. But not used by program */
+  unused_id     serial PRIMARY KEY,
+  /* MUST be locally unique in market */
+  name          text NOT NULL,
+  description   text NOT NULL,
+  sumbnail_url  text NOT NULL,
+  market_id     uuid NOT NULL,
 
+  UNIQUE (market_id, name),
   CONSTRAINT market_tokens_fkey FOREIGN KEY(market_id)
+    REFERENCES markets(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE INDEX ON market_tokens (market_id);
+
+CREATE TABLE market_prizes (
+  /* Required by diesel. But not used by program */
+  unused_id       serial PRIMARY KEY,
+  /* A locally unique number in each market */
+  market_local_id integer NOT NULL,
+  name            text NOT NULL,
+  sumbnail_url    text NOT NULL,
+  target          text NOT NULL,
+  market_id       uuid NOT NULL,
+
+  UNIQUE (market_id, market_local_id),
+  CONSTRAINT market_prizes_fkey FOREIGN KEY(market_id)
     REFERENCES markets(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TYPE order_type AS ENUM (
  'normal',
- 'initial_supply',
- 'settle'
+ 'coin_supply',
+ 'reward'
 );
 
 CREATE TABLE orders (
   /* Required by diesel. But not used by program */
-  id            serial PRIMARY KEY,
-  market_id     integer NOT NULL,
-  /* An serial number used to obtain optimistic lock */
-  market_internal_serial_num  integer NOT NULL,
-  user_id       text NOT NULL,
+  unused            serial PRIMARY KEY,
+  /* A locally unique number in each market */
+  market_local_id   integer NOT NULL,
+  user_id           text NOT NULL,
   /* MUST NULL if "type" is 'initial_supply' */
-  token_id      integer,
-  amount_token  integer NOT NULL,
-  amount_coin   integer NOT NULL,
-  type          order_type NOT NULL DEFAULT 'normal',
-  time          timestamptz NOT NULL DEFAULT now(),
+  token_name        text,
+  amount_token      integer NOT NULL,
+  amount_coin       integer NOT NULL,
+  type              order_type NOT NULL DEFAULT 'normal',
+  time              timestamptz NOT NULL DEFAULT now(),
+  market_id         uuid NOT NULL,
 
-  UNIQUE (market_id, market_internal_serial_num),
+  UNIQUE (market_id, market_local_id),
   CONSTRAINT order_user_fkey FOREIGN KEY(user_id)
-    REFERENCES users(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    REFERENCES users(fb_uid) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT order_market_fkey FOREIGN KEY(market_id)
-    REFERENCES markets(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT order_token_fkey FOREIGN KEY(token_id)
-    REFERENCES market_tokens(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-
-  /* If "type" is 'initial_supply', then "token_id" MUST NULL  */
-  CONSTRAINT if_type_is_initial_supply_then_token_id_is_null
-    CHECK ( (NOT type = 'initial_supply') OR (token_id IS NULL) ),
-
-  /* If "type" is NOT 'initial_supply', then "token_id" MUST NOT NULL  */
-  CONSTRAINT if_type_is_not_initial_supply_then_token_id_is_not_null
-    CHECK ( (type = 'initial_supply') OR (token_id IS NOT NULL) )
+    REFERENCES markets(id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE INDEX ON orders (market_id);

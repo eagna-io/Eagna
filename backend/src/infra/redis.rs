@@ -1,26 +1,60 @@
-use crate::domain::models::{
-    access_token::{AccessToken, AccessTokenId},
-    user::UserId,
-};
-use redis::{Commands, Connection as RedisConn};
+use redis::{Commands, Connection as RedisConn, Client as RedisClient};
+use std::sync::Arc;
 
-pub fn save_access_token(
-    conn: &RedisConn,
-    token: &AccessToken,
-    expire_sec: usize,
-) -> Result<(), failure::Error> {
-    Ok(conn.set_ex(token.id.as_str(), token.user_id.as_str(), expire_sec)?)
+use super::InfraFactory;
+
+pub trait RedisInfra {
+    fn save_access_token(
+        &self,
+        access_token_id: &str,
+        user_id: &str,
+        expire_sec: usize,
+    ) -> Result<(), failure::Error>;
+
+    fn query_user_id_by_access_token(
+        &self,
+        access_token_id: &str,
+    ) -> Result<Option<String>, failure::Error>;
 }
 
-pub fn query_access_token(
-    conn: &RedisConn,
-    token_id: &AccessTokenId,
-) -> Result<Option<AccessToken>, failure::Error> {
-    match conn.get::<_, Option<String>>(token_id.as_str())? {
-        Some(user_id) => Ok(Some(AccessToken {
-            id: token_id.clone(),
-            user_id: UserId::from_str(user_id.as_str()),
-        })),
-        None => Ok(None),
+pub struct Redis {
+    conn: RedisConn,
+}
+
+impl RedisInfra for Redis {
+    fn save_access_token(
+        &self,
+        access_token_id: &str,
+        user_id: &str,
+        expire_sec: usize,
+    ) -> Result<(), failure::Error> {
+        Ok(self.conn.set_ex(access_token_id, user_id, expire_sec)?)
+    }
+
+    fn query_user_id_by_access_token(
+        &self,
+        access_token_id: &str,
+    ) -> Result<Option<String>, failure::Error> {
+        Ok(self.conn.get::<_, Option<String>>(access_token_id)?)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct RedisFactory {
+    url: Arc<String>,
+}
+
+impl RedisFactory {
+    pub fn new(url: String) -> RedisFactory {
+        RedisFactory { url: Arc::new(url) }
+    }
+}
+
+impl InfraFactory<Redis> for RedisFactory {
+    fn create(&self) -> Result<Redis, failure::Error> {
+        let client = RedisClient::open(self.url.as_str())?;
+        Ok(Redis {
+            conn: client.get_connection()?,
+        })
     }
 }

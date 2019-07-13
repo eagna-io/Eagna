@@ -1,114 +1,48 @@
-use crate::{
-    app::{validate_bearer_header, FailureResponse},
-    domain::models::{
-        market::{MarketId, NormalOrder, Order, TokenId, OrderType},
-        num::{AmountCoin, AmountToken},
-    },
-    domain::services::{AccessTokenStore, MarketStore},
-};
-use chrono::{DateTime, Utc};
+use super::ApiOrderModel;
+use crate::app::{get_params, validate_bearer_header, FailureResponse, InfraManager};
+use crate::domain::market::*;
 use rouille::{Request, Response};
 
-pub fn get_all<S>(
-    store: &mut S,
+pub fn get_all(
+    infra: InfraManager,
     req: &Request,
     market_id: MarketId,
-) -> Result<Response, FailureResponse>
-where
-    S: AccessTokenStore + MarketStore,
-{
-    let market = match store.query_market(&market_id)? {
+) -> Result<Response, FailureResponse> {
+    let postgres = infra.get_postgres()?;
+    let market_repo = MarketRepository::from(postgres);
+
+    let market = match market_repo.query_market(&market_id)? {
         Some(m) => m,
         None => return Err(FailureResponse::ResourceNotFound),
     };
 
-    let orders = match market.orders() {
-        Some(orders) => orders,
-        None => return Ok(Response::json(&RespBody::empty())),
-    };
-
-    let maybe_mine = match req.get_param("contains") {
-        Some(ref s) if s.as_str() == "mine" => {
-            let user_id = validate_bearer_header(store, req)?.user_id;
-            let my_orders = orders
-                .related_to_user(user_id)
-                .map(|(_, order)| RespMyOrder {
-                    token_id: order.token_id().cloned(),
-                    amount_token: order.amount_token(),
-                    amount_coin: order.amount_coin(),
-                    time: *order.time(),
-                    type_: order.type_(),
-                })
-                .collect();
-            Some(Mine { orders: my_orders })
-        }
-        _ => None,
-    };
+    let orders = market.orders();
 
     let resp_orders = orders
-        .iter()
-        .filter_map(|(_, order)| match order {
-            Order::Normal(o) => Some(RespNormalOrder::from(*o)),
-            _ => None,
-        })
+        .filter_normal_orders()
+        .map(|o| ApiOrderModel::from(Order::from(o)))
         .collect();
 
-    let resp = RespBody {
+    let mut resp = RespBody {
         orders: resp_orders,
-        mine: maybe_mine,
+        my_orders: None,
     };
+
+    if let Some("mine") = get_params(req, "contains").next() {
+        let access_token = validate_bearer_header(&infra, req)?;
+        let my_orders = orders
+            .related_to_user(&access_token.user_id)
+            .map(ApiOrderModel::from)
+            .collect();
+        resp.my_orders = my_orders;
+    }
+
     Ok(Response::json(&resp))
 }
 
 #[derive(Debug, Serialize)]
 struct RespBody {
-    orders: Vec<RespNormalOrder>,
+    orders: Vec<ApiOrderModel>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    mine: Option<Mine>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct RespNormalOrder {
-    token_id: TokenId,
-    amount_token: AmountToken,
-    amount_coin: AmountCoin,
-    time: DateTime<Utc>,
-}
-
-#[derive(Debug, Serialize)]
-struct Mine {
-    orders: Vec<RespMyOrder>,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct RespMyOrder {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    token_id: Option<TokenId>,
-    amount_token: AmountToken,
-    amount_coin: AmountCoin,
-    time: DateTime<Utc>,
-    #[serde(rename = "type")]
-    type_: OrderType,
-}
-
-impl From<NormalOrder> for RespNormalOrder {
-    fn from(order: NormalOrder) -> RespNormalOrder {
-        RespNormalOrder {
-            token_id: order.token_id,
-            amount_token: order.amount_token,
-            amount_coin: order.amount_coin,
-            time: order.time,
-        }
-    }
-}
-
-impl RespBody {
-    fn empty() -> RespBody {
-        RespBody {
-            orders: Vec::new(),
-            mine: None,
-        }
-    }
+    my_orders: Option<Vec<ApiOrderModel>>,
 }

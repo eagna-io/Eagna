@@ -1,247 +1,250 @@
 pub mod orders;
+pub use get::{get, get_list};
+pub use post::post;
+pub use put::put;
 
-use crate::{
-    app::{get_params, validate_bearer_header, FailureResponse},
-    domain::models::{lmsr, market::*},
-    domain::services::{
-        market_store::{NewMarket, NewToken},
-        AccessTokenStore, MarketStore, UserStore,
-    },
-};
-use chrono::{DateTime, Utc};
-use log::info;
-use rouille::{input::json::json_input, Request, Response};
+mod get {
+    use crate::app::{get_params, FailureResponse, InfraManager};
+    use crate::domain::market::*;
+    use rouille::{Request, Response};
 
-pub fn get<S>(
-    store: &mut S,
-    _req: &Request,
-    market_id: MarketId,
-) -> Result<Response, FailureResponse>
-where
-    S: MarketStore,
-{
-    #[derive(Debug, Serialize)]
+    pub fn get(
+        infra: InfraManager,
+        _req: &Request,
+        market_id: MarketId,
+    ) -> Result<Response, FailureResponse> {
+        let postgres = infra.get_postgres()?;
+        let market_repo = MarketRepository::from(postgres);
+
+        let market = match market_repo.query_market(&market_id)? {
+            Some(market) => market,
+            None => return Err(FailureResponse::ResourceNotFound),
+        };
+        let resolve_token_name = match &market {
+            Market::Resolved(ref m) => Some(&m.resolve_token_name),
+            _ => None,
+        };
+
+        Ok(Response::json(&GetMarketResponse::from(market)))
+    }
+
+    pub fn get_list(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
+        let status_iter = get_params(req, "status").filter_map(|s| match s {
+            "upcoming" => Some(MarketStatus::Preparing),
+            "open" => Some(MarketStatus::Open),
+            "closed" => Some(MarketStatus::Closed),
+            "resolved" => Some(MarketStatus::Settled),
+            _ => {
+                log::info!("Received invalid status query : [{}]", s);
+                None
+            }
+        });
+
+        let market_repo = MarketRepository::from(infra.get_postgres()?);
+        let markets = market_repo.query_markets_with_status(status_iter)?;
+        let resp_data = markets.into_iter().map(GetMarketResponse::from).collect();
+
+        Ok(Response::json(&resp_data))
+    }
+
+    #[derive(Debug, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    struct RespData {
-        id: MarketId,
-        title: MarketTitle,
-        organizer: MarketOrganizer,
-        short_desc: MarketShortDesc,
-        description: MarketDesc,
-        open_time: DateTime<Utc>,
-        close_time: DateTime<Utc>,
-        lmsr_b: lmsr::B,
-        tokens: MarketTokens,
+    struct GetMarketResponse {
+        #[serde(flatten)]
+        attrs: MarketAttrs,
         status: MarketStatus,
         #[serde(skip_serializing_if = "Option::is_none")]
-        settle_token_id: Option<TokenId>,
+        resolve_token_name: Option<TokenName>,
     }
 
-    impl From<Market> for RespData {
-        fn from(market: Market) -> RespData {
-            let settle_token_id = match &market {
-                Market::Preparing(_) => None,
-                Market::Open(_) => None,
-                Market::Closed(_) => None,
-                Market::Settled(m) => Some(m.settle_token.id),
+    impl From<Market> for GetMarketResponse {
+        fn from(market: Market) -> GetMarketResponse {
+            let resolve_token_name = match &market {
+                Market::Resolved(ref m) => Some(m.resolve_token_name.clone()),
+                _ => None,
             };
-            RespData {
-                id: market.id,
-                title: market.title.clone(),
-                organizer: market.organizer.clone(),
-                short_desc: market.short_desc.clone(),
-                description: market.description.clone(),
-                open_time: market.open_time,
-                close_time: market.close_time,
-                lmsr_b: market.lmsr_b,
-                tokens: market.tokens.clone(),
+            GetMarketResponse {
                 status: market.status(),
-                settle_token_id,
+                attrs: market.into_attrs(),
+                resolve_token_name: resolve_token_name,
             }
         }
     }
-
-    let market = match store.query_market(&market_id)? {
-        Some(market) => market,
-        None => return Err(FailureResponse::ResourceNotFound),
-    };
-    Ok(Response::json(&RespData::from(market)))
 }
 
-pub fn get_all<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
-where
-    S: MarketStore,
-{
-    #[derive(Debug, Serialize)]
-    #[serde(rename_all = "camelCase")]
-    struct RespItem {
-        id: MarketId,
-        title: MarketTitle,
-        organizer: MarketOrganizer,
-        short_desc: MarketShortDesc,
-        description: MarketDesc,
-        lmsr_b: lmsr::B,
-        open_time: DateTime<Utc>,
-        close_time: DateTime<Utc>,
-        tokens: MarketTokens,
-        status: MarketStatus,
-    }
+mod post {
+    use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
+    use crate::domain::{market::*, organizer::*, user::*};
+    use crate::infra::PostgresInfra;
+    use rouille::{input::json::json_input, Request, Response};
 
-    impl From<Market> for RespItem {
-        fn from(market: Market) -> RespItem {
-            RespItem {
-                id: market.id,
-                title: market.title.clone(),
-                organizer: market.organizer.clone(),
-                short_desc: market.short_desc.clone(),
-                description: market.description.clone(),
-                lmsr_b: market.lmsr_b,
-                open_time: market.open_time,
-                close_time: market.close_time,
-                tokens: market.tokens.clone(),
-                status: market.status(),
-            }
-        }
-    }
+    pub fn post(infra: InfraManager, req: &Request) -> Result<Response, FailureResponse> {
+        let access_token = validate_bearer_header(&infra, req)?;
 
-    let status_iter = get_params(req, "status").filter_map(|s| match s {
-        "upcoming" => Some(MarketStatus::Preparing),
-        "open" => Some(MarketStatus::Open),
-        "closed" => Some(MarketStatus::Closed),
-        "resolved" => Some(MarketStatus::Settled),
-        _ => {
-            log::info!("Received invalid status query : [{}]", s);
-            None
-        }
-    });
-    let market_ids = store.query_market_ids_with_status(status_iter)?;
+        let postgres = infra.get_postgres()?;
+        let market_id = {
+            let postgres = postgres.transaction();
 
-    let mut resp_data = Vec::with_capacity(market_ids.len());
-    for market_id in market_ids {
-        let market = store.query_market(&market_id)?.unwrap();
-        resp_data.push(RespItem::from(market));
-    }
+            authorize(postgres, &access_token.user_id)?;
 
-    Ok(Response::json(&resp_data))
-}
+            let req_market = json_input::<PostMarketRequest>(req).map_err(|e| {
+                log::info!("Invalid payload error : {:?}", e);
+                FailureResponse::InvalidPayload
+            })?;
 
-pub fn post<S>(store: &mut S, req: &Request) -> Result<Response, FailureResponse>
-where
-    S: MarketStore + UserStore + AccessTokenStore,
-{
-    #[derive(Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    struct ReqData {
-        title: MarketTitle,
-        organizer: MarketOrganizer,
-        short_desc: MarketShortDesc,
-        description: MarketDesc,
-        lmsr_b: lmsr::B,
-        open_time: DateTime<Utc>,
-        close_time: DateTime<Utc>,
-        tokens: Vec<ReqTokenData>,
-    }
+            let organizer = query_organizer(postgres, &req_market.organizer_id)?;
 
-    #[derive(Deserialize)]
-    struct ReqTokenData {
-        name: TokenName,
-        description: TokenDesc,
-    }
-
-    impl Into<NewMarket> for ReqData {
-        fn into(self) -> NewMarket {
-            let tokens: Vec<NewToken> = self
-                .tokens
-                .into_iter()
-                .map(|token| NewToken {
-                    name: token.name,
-                    description: token.description,
-                })
-                .collect();
-            NewMarket {
-                title: self.title,
-                organizer: self.organizer,
-                short_desc: self.short_desc,
-                description: self.description,
-                lmsr_b: self.lmsr_b,
-                open_time: self.open_time,
-                close_time: self.close_time,
-                tokens,
-            }
-        }
-    }
-
-    let access_token = validate_bearer_header(store, req)?;
-    let user = match store.query_user(&access_token.user_id)? {
-        Some(user) => user,
-        None => {
-            log::warn!("User does not exists, but AccessToken exists");
-            return Err(FailureResponse::ServerError);
-        }
-    };
-    if !user.is_admin {
-        return Err(FailureResponse::Unauthorized);
-    }
-
-    let req_data = json_input::<ReqData>(req).map_err(|e| {
-        info!("{:?}", e);
-        FailureResponse::InvalidPayload
-    })?;
-    let market_id = store.insert_market(req_data.into())?;
-
-    Ok(Response::json(&market_id).with_status_code(201))
-}
-
-pub fn put<S>(
-    store: &mut S,
-    req: &Request,
-    market_id: MarketId,
-) -> Result<Response, FailureResponse>
-where
-    S: AccessTokenStore + UserStore + MarketStore,
-{
-    #[derive(Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    struct ReqData {
-        status: MarketStatus,
-        settle_token_id: TokenId,
-    }
-
-    let access_token = validate_bearer_header(store, req)?;
-    match store.query_user(&access_token.user_id)? {
-        Some(ref user) if user.is_admin => {}
-        Some(_) => return Err(FailureResponse::Unauthorized),
-        None => {
-            log::warn!("User does not exists, but AccessToken exists");
-            return Err(FailureResponse::ServerError);
-        }
-    };
-
-    let req_data = json_input::<ReqData>(req).map_err(|e| {
-        info!("Invalid payload : {:?}", e);
-        FailureResponse::InvalidPayload
-    })?;
-    if req_data.status != MarketStatus::Settled {
-        return Err(FailureResponse::InvalidPayload);
-    }
-
-    let mut locked_store = store.lock_market(&market_id)?;
-    let closed_market = match locked_store.query_market(&market_id)? {
-        Some(Market::Closed(m)) => m,
-        Some(_) => return Err(FailureResponse::ResourceNotFound),
-        None => return Err(FailureResponse::ResourceNotFound),
-    };
-    let settled_market = closed_market
-        .settle(req_data.settle_token_id)
-        .map_err(|_e| {
-            log::info!(
-                "Try to resolve market {:?} with invalid token {:?}",
-                market_id,
-                req_data.settle_token_id
+            let new_market = Market::new(
+                req_market.title,
+                &organizer,
+                req_market.desc,
+                req_market.lmsr_b,
+                req_market.open,
+                req_market.close,
+                req_market.tokens,
+                req_market.prizes,
             );
-            FailureResponse::InvalidPayload
-        })?;
-    locked_store.update_market_status_to_settle(&settled_market)?;
+            let market_id = new_market.market_id.clone();
 
-    Ok(Response::json(&market_id).with_status_code(201))
+            let market_repo = MarketRepository::from(postgres);
+            market_repo.save(new_market)?;
+
+            postgres.commit()?;
+
+            market_id
+        };
+
+        Ok(Response::json(&market_id).with_status_code(201))
+    }
+
+    // マーケットを作成する権限があるかチェック
+    fn authorize(postgres: &dyn PostgresInfra, user_id: &UserId) -> Result<(), FailureResponse> {
+        let user_repo = UserRepository::from(postgres);
+
+        match user_repo.query_user(user_id)? {
+            Some(user) => {
+                if user.is_admin {
+                    Ok(())
+                } else {
+                    Err(FailureResponse::Unauthorized)
+                }
+            }
+            None => {
+                log::error!("User does not exists, but AccessToken exists");
+                Err(FailureResponse::ServerError)
+            }
+        };
+    }
+
+    fn query_organizer(
+        postgres: &dyn PostgresInfra,
+        organizer_id: &OrganizerId,
+    ) -> Result<Organizer, FailureResponse> {
+        let organizer_repo = OrganizerRepository::from(postgres);
+
+        match organizer_repo.query_organizer(organizer_id)? {
+            Some(organizer) => Ok(organizer),
+            None => {
+                log::warn!("Client try to create a new market with invalid organizer id");
+                Err(FailureResponse::InvalidPayload)
+            }
+        }
+    }
+
+    #[derive(Debug, Deserialize)]
+    // `id` フィールドは無視される
+    struct PostMarketRequest {
+        #[serde(flatten)]
+        attrs: MarketAttrs,
+    }
+}
+
+mod put {
+    use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
+    use crate::domain::{market::*, user::*};
+    use crate::infra::PostgresInfra;
+    use rouille::{input::json::json_input, Request, Response};
+
+    pub fn put(
+        infra: InfraManager,
+        req: &Request,
+        market_id: MarketId,
+    ) -> Result<Response, FailureResponse> {
+        let access_token = validate_bearer_header(&infra, req)?;
+
+        let postgres = infra.get_postgres()?;
+        {
+            let postgres = postgres.transaction();
+
+            authorize(postgres, &access_token.user_id)?;
+
+            let req_data = json_input::<PutMarketRequest>(req).map_err(|e| {
+                log::info!("Invalid payload : {:?}", e);
+                FailureResponse::InvalidPayload
+            })?;
+
+            if req_data.status != MarketStatus::Settled {
+                log::info!("Only resolving operation is supported");
+                return Err(FailureResponse::InvalidPayload);
+            }
+
+            if req_data.resolve_token_name.is_none() {
+                log::info!("resolve_token_name is not set");
+                return Err(FailureResponse::InvalidPayload);
+            }
+
+            let market_repo = MarketRepository::from(postgres);
+            market_repo.lock_market(&market_id)?;
+
+            let closed_market = match market_repo.query_market(&market_id)? {
+                Some(Market::Closed(m)) => m,
+                Some(_) => {
+                    log::info!("Would resolve market is not closed.");
+                    return Err(FailureResponse::ResourceNotFound);
+                }
+                None => return Err(FailureResponse::ResourceNotFound),
+            };
+
+            let resolved_market = match closed_market.resolve(&req_data.resolve_token_name.unwrap())
+            {
+                Ok(m) => Market::from(m),
+                Err(e) => {
+                    log::info!("Failed to resolve market : {:?}", e);
+                    return Err(FailureResponse::InvalidPayload);
+                }
+            };
+
+            market_repo.save(resolved_market)?;
+
+            postgres.commit()?;
+        };
+
+        Ok(Response::json(&market_id).with_status_code(201))
+    }
+
+    // マーケットを作成する権限があるかチェック
+    fn authorize(postgres: &dyn PostgresInfra, user_id: &UserId) -> Result<(), FailureResponse> {
+        let user_repo = UserRepository::from(postgres);
+
+        match user_repo.query_user(user_id)? {
+            Some(user) => {
+                if user.is_admin {
+                    Ok(())
+                } else {
+                    Err(FailureResponse::Unauthorized)
+                }
+            }
+            None => {
+                log::error!("User does not exists, but AccessToken exists");
+                Err(FailureResponse::ServerError)
+            }
+        };
+    }
+
+    #[derive(Debug, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct PutMarketRequest {
+        status: MarketStatus,
+        resolve_token_name: Option<TokenName>,
+    }
 }

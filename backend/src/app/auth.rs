@@ -1,22 +1,22 @@
 use crate::{
-    app::FailureResponse,
-    domain::models::access_token::{AccessToken, AccessTokenId},
-    domain::services::AccessTokenStore,
+    app::{FailureResponse, InfraManager},
+    domain::access_token::{AccessToken, AccessTokenId, AccessTokenRepository},
 };
 use rouille::Request;
 
-pub fn validate_bearer_header<S>(
-    store: &mut S,
+pub fn validate_bearer_header(
+    infra: &InfraManager,
     req: &Request,
-) -> Result<AccessToken, FailureResponse>
-where
-    S: AccessTokenStore,
-{
+) -> Result<AccessToken, FailureResponse> {
     let header_val = req
         .header("Authorization")
         .ok_or(FailureResponse::Unauthorized)?;
     let token_id = extract_token(header_val)?;
-    match store.validate_access_token(&token_id)? {
+
+    let access_token_repository =
+        AccessTokenRepository::from((infra.get_firebase()?, infra.get_redis()?));
+
+    match access_token_repository.query_access_token(&token_id)? {
         Some(token) => Ok(token),
         None => Err(FailureResponse::Unauthorized),
     }

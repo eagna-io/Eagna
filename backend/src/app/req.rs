@@ -1,9 +1,9 @@
 use rouille::Request;
 
 /// "foo"というkeyのパラメータを取得するとき
-/// - "foo=bar"         => Some(["bar"])
-/// - "foo=bar%2Choge"  => Some(["bar", "hoge"])
-/// - "hoge=bar"        => None
+/// - "foo=bar"         => ["bar"]
+/// - "foo=bar%2Choge"  => ["bar", "hoge"]
+/// - "hoge=bar"        => []
 ///
 /// # NOTE
 /// "%2C"は","のパーセントエンコーディング (","はUTF-8で0x2C)
@@ -33,11 +33,13 @@ mod tests {
 
         let mut param_foo = get_params(&req, "foo").unwrap();
         assert_eq!(param_foo.next(), Some("bar"));
+        assert_eq!(param_foo.next(), None);
 
         let mut param_hoge = get_params(&req, "hoge").unwrap();
         assert_eq!(param_hoge.next(), Some("fuga"));
         assert_eq!(param_hoge.next(), Some("fuga2"));
+        assert_eq!(param_hoge.next(), None);
 
-        assert!(get_params(&req, "hoo").is_none());
+        assert_eq!(get_params(&req, "hoo").next(), None);
     }
 }
