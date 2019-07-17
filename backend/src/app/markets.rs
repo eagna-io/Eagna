@@ -44,6 +44,12 @@ mod get {
                 log::info!("Received invalid status query : [{}]", s);
             }
         });
+        if statuses.len() == 0 {
+            statuses.push(MarketStatus::Upcoming);
+            statuses.push(MarketStatus::Open);
+            statuses.push(MarketStatus::Closed);
+            statuses.push(MarketStatus::Resolved);
+        }
 
         let market_repo = MarketRepository::from(infra.get_postgres()?);
         let market_ids = market_repo.query_market_ids_with_status(statuses.as_slice())?;
