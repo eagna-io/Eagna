@@ -2,7 +2,21 @@ use super::MAX_SLIP_RATE;
 use std::iter::Sum;
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Add, Sub, Neg, Mul, AddAssign, From,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Add,
+    Sub,
+    Neg,
+    Mul,
+    AddAssign,
+    From,
+    Serialize,
+    Deserialize,
 )]
 pub struct AmountToken(pub(super) i32);
 
@@ -27,7 +41,7 @@ macro_rules! impl_sum {
             }
         }
 
-        impl<'a> Sum<$ty> for &'a $ty {
+        impl<'a> Sum<&'a $ty> for $ty {
             fn sum<I>(iter: I) -> $ty
             where
                 I: Iterator<Item = &'a $ty>,
@@ -41,7 +55,21 @@ macro_rules! impl_sum {
 impl_sum!(AmountToken);
 
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Add, Sub, Neg, Mul, AddAssign, From,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Add,
+    Sub,
+    Neg,
+    Mul,
+    AddAssign,
+    From,
+    Serialize,
+    Deserialize,
 )]
 pub struct AmountCoin(pub(super) i32);
 

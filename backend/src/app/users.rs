@@ -1,17 +1,18 @@
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::user::*;
 use rouille::{input::json::json_input, Request, Response};
+use serde::{Deserialize, Serialize};
 
-pub fn post(infra: InfraManager, req: &Request) -> Result<Response, FailureResponse> {
+pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
 
-    let access_token = validate_bearer_header(&infra, req)?;
+    let access_token = validate_bearer_header(infra, req)?;
 
     let new_user = User::new(access_token.user_id, req_data.name, req_data.email);
 
     let user_repo = UserRepository::from(infra.get_postgres()?);
 
-    user_repo.save_user(new_user)?;
+    user_repo.save_user(&new_user)?;
 
     let res_data = ResData {
         id: new_user.id(),

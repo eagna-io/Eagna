@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use super::InfraFactory;
 
-pub trait RedisInfra {
+pub trait RedisInfra: Send + 'static {
     fn save_access_token(
         &self,
         access_token_id: &str,

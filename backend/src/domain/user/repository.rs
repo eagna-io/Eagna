@@ -7,7 +7,7 @@ pub struct UserRepository<'a> {
 }
 
 impl<'a> UserRepository<'a> {
-    pub fn save_user(&self, user: User) -> Result<(), failure::Error> {
+    pub fn save_user(&self, user: &User) -> Result<(), failure::Error> {
         let new_user = NewUser {
             id: user.id.as_str(),
             name: user.name.as_str(),

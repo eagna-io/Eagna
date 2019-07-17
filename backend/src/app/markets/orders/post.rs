@@ -1,23 +1,22 @@
 use super::ApiOrderModel;
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::{market::*, user::*};
+use crate::infra::postgres::transaction;
 use rouille::{input::json::json_input, Request, Response};
 
 pub fn post(
-    infra: InfraManager,
+    infra: &InfraManager,
     req: &Request,
     market_id: MarketId,
 ) -> Result<Response, FailureResponse> {
-    let req_data =
-        json_input::<PostOrderRequest>(req).map_err(|_| FailureResponse::InvalidPayload)?;
+    let req_data = json_input::<ApiOrderModel>(req).map_err(|_| FailureResponse::InvalidPayload)?;
 
-    validate_req_order(&req_data.order)?;
+    validate_req_order(&req_data)?;
 
-    let user_id = validate_bearer_header(&infra, req)?.user_id;
+    let user_id = validate_bearer_header(infra, req)?.user_id;
 
     let postgres = infra.get_postgres()?;
-    {
-        let postgres = postgres.transaction();
+    let added_order = transaction(postgres, || {
         let market_repo = MarketRepository::from(postgres);
 
         market_repo.lock_market(&market_id)?;
@@ -27,16 +26,14 @@ pub fn post(
             _ => return Err(FailureResponse::ResourceNotFound),
         };
 
-        let added_order = add_order(&mut open_market, &user_id, &req_data.order)?;
+        let added_order = add_order(&mut open_market, &user_id, &req_data)?;
 
         market_repo.save_market(&Market::from(open_market))?;
 
-        postgres.commit()?;
-    }
+        Ok(added_order)
+    })?;
 
-    let res_data = PostOrderResponse {
-        order: ApiOrderModel::from(added_order),
-    };
+    let res_data = ApiOrderModel::from(added_order);
 
     Ok(Response::json(&res_data).with_status_code(201))
 }
@@ -71,7 +68,7 @@ fn add_order(
         OrderType::Normal => {
             let new_order = open_market.try_add_normal_order(
                 user_id,
-                &req_order.token_name.unwrap(),
+                req_order.token_name.as_ref().unwrap(),
                 &req_order.amount_token,
             )?;
             if new_order
@@ -88,16 +85,4 @@ fn add_order(
             panic!("Never happens");
         }
     }
-}
-
-#[derive(Debug, Deserialize)]
-struct PostOrderRequest {
-    #[serde(flatten)]
-    order: ApiOrderModel,
-}
-
-#[derive(Debug, Serialize)]
-struct PostOrderResponse {
-    #[serde(flatten)]
-    order: ApiOrderModel,
 }

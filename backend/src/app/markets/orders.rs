@@ -1,11 +1,12 @@
-mod get_all;
+mod get_list;
 mod post;
 
-pub use get_all::get_all;
+pub use get_list::get_list;
 pub use post::post;
 
 use crate::domain::market::*;
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -15,18 +16,19 @@ struct ApiOrderModel {
     amount_token: AmountToken,
     amount_coin: AmountCoin,
     time: DateTime<Utc>,
-    #[serde(reaname = "type")]
+    #[serde(rename = "type")]
     type_: OrderType,
 }
 
 impl From<Order> for ApiOrderModel {
     fn from(order: Order) -> ApiOrderModel {
+        let flat_order = order.flatten();
         ApiOrderModel {
-            token_name: order.token_name(),
-            amount_token: order.amount_token(),
-            amount_coin: order.amount_coin(),
-            time: order.time(),
-            type_: order.order_type(),
+            token_name: flat_order.token_name,
+            amount_token: flat_order.amount_token,
+            amount_coin: flat_order.amount_coin,
+            time: flat_order.time,
+            type_: flat_order.type_,
         }
     }
 }

@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MarketOrders {
-    orders: Vec<Order>,
+    pub(super) orders: Vec<Order>,
 }
 
 impl MarketOrders {
@@ -29,7 +29,11 @@ impl MarketOrders {
         user_id: UserId,
         amount_coin: AmountCoin,
     ) -> &Order {
-        let order = Order::new_coin_supply(self.next_order_id(), user_id, amount_coin);
+        let order = Order::from(CoinSupplyOrder::new(
+            self.next_order_id(),
+            user_id,
+            amount_coin,
+        ));
         self.orders.push(order);
         self.orders.last().unwrap()
     }
@@ -43,13 +47,13 @@ impl MarketOrders {
         amount_token: AmountToken,
         amount_coin: AmountCoin,
     ) -> &Order {
-        let order = Order::new_normal(
+        let order = Order::from(NormalOrder::new(
             self.next_order_id(),
             user_id,
             token_name,
             amount_token,
             amount_coin,
-        );
+        ));
         self.orders.push(order);
         self.orders.last().unwrap()
     }
@@ -62,7 +66,12 @@ impl MarketOrders {
         token_name: TokenName,
         amount_coin: AmountCoin,
     ) -> &Order {
-        let order = Order::new_reward(self.next_order_id(), user_id, token_name, amount_coin);
+        let order = Order::from(RewardOrder::new(
+            self.next_order_id(),
+            user_id,
+            token_name,
+            amount_coin,
+        ));
         self.orders.push(order);
         self.orders.last().unwrap()
     }
@@ -78,7 +87,10 @@ impl MarketOrders {
         self.orders.iter()
     }
 
-    pub fn iter_related_to_user<'a>(&'a self, user_id: &'a UserId) -> impl Iterator<Item = &'a Order> {
+    pub fn iter_related_to_user<'a>(
+        &'a self,
+        user_id: &'a UserId,
+    ) -> impl Iterator<Item = &'a Order> {
         self.iter().filter(move |o| o.user_id() == user_id)
     }
 
@@ -94,6 +106,7 @@ impl MarketOrders {
         token_name: &TokenName,
     ) -> AmountToken {
         self.iter_related_to_user(user_id)
+            .filter(|o| o.token_name() == Some(token_name))
             .map(|order| order.amount_token())
             .sum()
     }
@@ -109,9 +122,11 @@ impl MarketOrders {
     ) -> HashMap<UserId, AmountToken> {
         let mut user_token_map = HashMap::new();
 
-        let iter = self
-            .iter()
-            .filter(|o| o.token_name().filter(|tname| *tname == token_name).is_some());
+        let iter = self.iter().filter(|o| {
+            o.token_name()
+                .filter(|tname| *tname == token_name)
+                .is_some()
+        });
         for order in iter {
             *user_token_map
                 .entry(*order.user_id())
@@ -145,99 +160,105 @@ pub enum Order {
     Reward(RewardOrder),
 }
 
-impl Order {
-    pub fn id(&self) -> &OrderId {
+pub trait AbstractOrder {
+    fn id(&self) -> &OrderId;
+
+    fn user_id(&self) -> &UserId;
+
+    fn token_name(&self) -> Option<&TokenName>;
+
+    fn amount_token(&self) -> AmountToken;
+
+    fn amount_coin(&self) -> AmountCoin;
+
+    fn type_(&self) -> OrderType;
+
+    fn time(&self) -> &DateTime<Utc>;
+
+    fn flatten(self) -> FlattenOrder;
+}
+
+impl AbstractOrder for Order {
+    fn id(&self) -> &OrderId {
         match self {
-            Order::CoinSupply(ref o) => &o.id,
-            Order::Normal(ref o) => &o.id,
-            Order::Reward(ref o) => &o.id,
+            Order::CoinSupply(ref o) => o.id(),
+            Order::Normal(ref o) => o.id(),
+            Order::Reward(ref o) => o.id(),
         }
     }
 
-    pub fn user_id(&self) -> &UserId {
+    fn user_id(&self) -> &UserId {
         match self {
-            Order::CoinSupply(ref o) => &o.user_id,
-            Order::Normal(ref o) => &o.user_id,
-            Order::Reward(ref o) => &o.user_id,
+            Order::CoinSupply(ref o) => o.user_id(),
+            Order::Normal(ref o) => o.user_id(),
+            Order::Reward(ref o) => o.user_id(),
         }
     }
 
-    pub fn token_name(&self) -> Option<&TokenName> {
+    fn token_name(&self) -> Option<&TokenName> {
         match self {
-            Order::CoinSupply(ref o) => None,
-            Order::Normal(ref o) => Some(&o.token_name),
-            Order::Reward(ref o) => Some(&o.token_name),
+            Order::CoinSupply(ref o) => o.token_name(),
+            Order::Normal(ref o) => o.token_name(),
+            Order::Reward(ref o) => o.token_name(),
         }
     }
 
-    pub fn amount_token(&self) -> AmountToken {
+    fn amount_token(&self) -> AmountToken {
         match self {
-            Order::CoinSupply(ref o) => AmountToken(0),
-            Order::Normal(ref o) => o.amount_token,
-            Order::Reward(ref o) => AmountToken(0),
+            Order::CoinSupply(ref o) => o.amount_token(),
+            Order::Normal(ref o) => o.amount_token(),
+            Order::Reward(ref o) => o.amount_token(),
         }
     }
 
-    pub fn amount_coin(&self) -> AmountCoin {
+    fn amount_coin(&self) -> AmountCoin {
         match self {
-            Order::CoinSupply(ref o) => o.amount_coin,
-            Order::Normal(ref o) => o.amount_coin,
-            Order::Reward(ref o) => o.amount_coin,
+            Order::CoinSupply(ref o) => o.amount_coin(),
+            Order::Normal(ref o) => o.amount_coin(),
+            Order::Reward(ref o) => o.amount_coin(),
         }
     }
 
-    pub fn order_type(&self) -> OrderType {
+    fn type_(&self) -> OrderType {
         match self {
-            Order::CoinSupply(_) => OrderType::CoinSupply,
-            Order::Normal(_) => OrderType::Normal,
-            Order::Reward(_) => OrderType::Reward,
+            Order::CoinSupply(ref o) => o.type_(),
+            Order::Normal(ref o) => o.type_(),
+            Order::Reward(ref o) => o.type_(),
         }
     }
 
-    pub fn time(&self) -> DateTime<Utc> {
+    fn time(&self) -> &DateTime<Utc> {
         match self {
-            Order::CoinSupply(ref o) => o.time,
-            Order::Normal(ref o) => o.time,
-            Order::Reward(ref o) => o.time,
+            Order::CoinSupply(ref o) => o.time(),
+            Order::Normal(ref o) => o.time(),
+            Order::Reward(ref o) => o.time(),
         }
     }
 
-    fn new_coin_supply(id: OrderId, user_id: UserId, amount_coin: AmountCoin) -> Order {
-        Order::CoinSupply(CoinSupplyOrder::new(id, user_id, amount_coin))
-    }
-
-    fn new_normal(
-        id: OrderId,
-        user_id: UserId,
-        token_name: TokenName,
-        amount_token: AmountToken,
-        amount_coin: AmountCoin,
-    ) -> Order {
-        Order::Normal(NormalOrder::new(
-            id,
-            user_id,
-            token_name,
-            amount_token,
-            amount_coin,
-        ))
-    }
-
-    fn new_reward(
-        id: OrderId,
-        user_id: UserId,
-        token_name: TokenName,
-        amount_coin: AmountCoin,
-    ) -> Order {
-        Order::Reward(RewardOrder::new(id, user_id, token_name, amount_coin))
+    fn flatten(self) -> FlattenOrder {
+        match self {
+            Order::CoinSupply(o) => o.flatten(),
+            Order::Normal(o) => o.flatten(),
+            Order::Reward(o) => o.flatten(),
+        }
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, From)]
-struct CoinSupplyOrder {
+pub struct FlattenOrder {
     pub id: OrderId,
-    pub user_id: UserId,
+    pub token_name: Option<TokenName>,
+    pub amount_token: AmountToken,
     pub amount_coin: AmountCoin,
     pub time: DateTime<Utc>,
+    pub type_: OrderType,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, From)]
+pub struct CoinSupplyOrder {
+    pub(super) id: OrderId,
+    pub(super) user_id: UserId,
+    pub(super) amount_coin: AmountCoin,
+    pub(super) time: DateTime<Utc>,
 }
 
 impl CoinSupplyOrder {
@@ -251,8 +272,49 @@ impl CoinSupplyOrder {
     }
 }
 
+impl AbstractOrder for CoinSupplyOrder {
+    fn id(&self) -> &OrderId {
+        &self.id
+    }
+
+    fn user_id(&self) -> &UserId {
+        &self.user_id
+    }
+
+    fn token_name(&self) -> Option<&TokenName> {
+        None
+    }
+
+    fn amount_token(&self) -> AmountToken {
+        AmountToken::zero()
+    }
+
+    fn amount_coin(&self) -> AmountCoin {
+        self.amount_coin
+    }
+
+    fn type_(&self) -> OrderType {
+        OrderType::CoinSupply
+    }
+
+    fn time(&self) -> &DateTime<Utc> {
+        &self.time
+    }
+
+    fn flatten(self) -> FlattenOrder {
+        FlattenOrder {
+            id: self.id,
+            token_name: None,
+            amount_token: AmountToken::zero(),
+            amount_coin: self.amount_coin,
+            time: self.time,
+            type_: OrderType::CoinSupply,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, From)]
-struct NormalOrder {
+pub struct NormalOrder {
     pub id: OrderId,
     pub user_id: UserId,
     pub token_name: TokenName,
@@ -280,8 +342,49 @@ impl NormalOrder {
     }
 }
 
+impl AbstractOrder for NormalOrder {
+    fn id(&self) -> &OrderId {
+        &self.id
+    }
+
+    fn user_id(&self) -> &UserId {
+        &self.user_id
+    }
+
+    fn token_name(&self) -> Option<&TokenName> {
+        Some(&self.token_name)
+    }
+
+    fn amount_token(&self) -> AmountToken {
+        self.amount_token
+    }
+
+    fn amount_coin(&self) -> AmountCoin {
+        self.amount_coin
+    }
+
+    fn type_(&self) -> OrderType {
+        OrderType::Normal
+    }
+
+    fn time(&self) -> &DateTime<Utc> {
+        &self.time
+    }
+
+    fn flatten(self) -> FlattenOrder {
+        FlattenOrder {
+            id: self.id,
+            token_name: Some(self.token_name),
+            amount_token: self.amount_token,
+            amount_coin: self.amount_coin,
+            time: self.time,
+            type_: OrderType::Normal,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, From)]
-struct RewardOrder {
+pub struct RewardOrder {
     pub id: OrderId,
     pub user_id: UserId,
     pub token_name: TokenName,
@@ -302,6 +405,47 @@ impl RewardOrder {
             token_name,
             amount_coin,
             time: Utc::now(),
+        }
+    }
+}
+
+impl AbstractOrder for RewardOrder {
+    fn id(&self) -> &OrderId {
+        &self.id
+    }
+
+    fn user_id(&self) -> &UserId {
+        &self.user_id
+    }
+
+    fn token_name(&self) -> Option<&TokenName> {
+        Some(&self.token_name)
+    }
+
+    fn amount_token(&self) -> AmountToken {
+        AmountToken::zero()
+    }
+
+    fn amount_coin(&self) -> AmountCoin {
+        self.amount_coin
+    }
+
+    fn type_(&self) -> OrderType {
+        OrderType::Reward
+    }
+
+    fn time(&self) -> &DateTime<Utc> {
+        &self.time
+    }
+
+    fn flatten(self) -> FlattenOrder {
+        FlattenOrder {
+            id: self.id,
+            token_name: Some(self.token_name),
+            amount_token: AmountToken::zero(),
+            amount_coin: self.amount_coin,
+            time: self.time,
+            type_: OrderType::Reward,
         }
     }
 }

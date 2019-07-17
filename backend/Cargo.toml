@@ -18,10 +18,10 @@ reqwest = "~0.9"
 redis = "~0.10"
 diesel = { version = "~1.4", features = ["postgres", "chrono", "uuid", "uuidv07"] }
 diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
-serde = { version = "~1.0", features = ["rc"] }
-serde_derive = "~1.0"
+serde = { version = "~1.0", features = ["derive", "rc"] }
 chrono = { version = "~0.4", features = ["serde"] }
 arrayvec = { version = "~0.4", features = ["serde-1"] }
+lazycell = "~1.2"
 regex = "~1.1"
 base64 = "~0.10"
 rand = "~0.7"

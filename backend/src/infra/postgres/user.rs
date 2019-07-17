@@ -28,13 +28,13 @@ impl PostgresUserInfra for Postgres {
                 name: new_user.name,
                 email: new_user.email,
             })
-            .execute(&self.conn)
-            .map(|_| ())
+            .execute(&self.conn)?;
+        Ok(())
     }
 
     fn query_user(&self, user_id: &str) -> Result<Option<QueryUser>, failure::Error> {
         match users::table
-            .filter(users::fb_uid.eq(user_id.as_str()))
+            .filter(users::fb_uid.eq(user_id))
             .first::<QueryableUser>(&self.conn)
         {
             Ok(query_res) => Ok(Some(QueryUser {
@@ -44,7 +44,7 @@ impl PostgresUserInfra for Postgres {
                 is_admin: query_res.is_admin,
             })),
             Err(PgError::NotFound) => Ok(None),
-            Err(e) => Err(e),
+            Err(e) => Err(e.into()),
         }
     }
 }
@@ -58,7 +58,6 @@ struct InsertableUser<'a> {
 }
 
 #[derive(Queryable)]
-#[table_name = "users"]
 struct QueryableUser {
     fb_uid: String,
     name: String,

@@ -6,15 +6,18 @@ pub mod types;
 pub mod user;
 
 use super::InfraFactory;
-use diesel::pg::PgConnection;
+use diesel::{
+    connection::{Connection, TransactionManager},
+    pg::PgConnection,
+};
 
 pub trait PostgresInfra:
-    market::PostgresMarketInfra + user::PostgresUserInfra + organizer::PostgresOrganizerInfra
+    market::PostgresMarketInfra
+    + user::PostgresUserInfra
+    + organizer::PostgresOrganizerInfra
+    + Send
+    + 'static
 {
-    fn transaction<'a>(&'a self) -> Result<Transaction<'a>, failure::Error> {
-        Transaction { postgres: self }
-    }
-
     fn begin_transaction(&self) -> Result<(), failure::Error>;
 
     fn commit(&self) -> Result<(), failure::Error>;
@@ -22,32 +25,21 @@ pub trait PostgresInfra:
     fn rollback(&self) -> Result<(), failure::Error>;
 }
 
-#[must_use]
-pub struct Transaction<'a> {
-    postgres: &'a dyn PostgresInfra,
-    is_commit: bool,
-}
-
-impl<'a> Transaction<'a> {
-    pub fn commit(&mut self) -> Result<(), failure::Error> {
-        self.postgres.commit()?;
-        self.is_commit = true;
-    }
-}
-
-impl<'a> Drop for Transaction<'a> {
-    fn drop(&mut self) {
-        if !self.is_commit {
-            self.postgres.rollback()
+pub fn transaction<F, T, E>(pg: &dyn PostgresInfra, f: F) -> Result<T, E>
+where
+    F: FnOnce() -> Result<T, E>,
+    E: From<failure::Error>,
+{
+    pg.begin_transaction()?;
+    match f() {
+        Ok(t) => {
+            pg.commit()?;
+            Ok(t)
         }
-    }
-}
-
-impl<'a> std::ops::Deref for Transaction<'a> {
-    type Target = &'a dyn PostgresInfra;
-
-    fn deref(&self) -> &Self::Target {
-        &self.postgres
+        Err(e) => {
+            pg.rollback()?;
+            Err(e)
+        }
     }
 }
 

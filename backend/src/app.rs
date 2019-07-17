@@ -15,7 +15,7 @@ use crate::domain::market::MarketId;
 use rouille::{router, Request, Response};
 use std::time::Duration;
 
-#[derive(Debug, Clone, Constructor)]
+#[derive(Constructor)]
 pub struct ApiServer {
     infra_factory: InfraManagerFactory,
     access_allow_hosts: String, // comma separated host names
@@ -58,7 +58,7 @@ impl ApiServer {
 
     pub fn process_request(&self, req: &Request) -> Response {
         let infra = self.infra_factory.create();
-        routing(infra, req).unwrap_or_else(<FailureResponse as Into<Response>>::into)
+        routing(&infra, req).unwrap_or_else(<FailureResponse as Into<Response>>::into)
     }
 
     pub fn append_cors_header(&self, resp: Response) -> Response {
@@ -69,7 +69,7 @@ impl ApiServer {
     }
 }
 
-pub fn routing(infra: InfraManager, req: &Request) -> Result<Response, FailureResponse> {
+pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     router!(req,
         (POST) (/users/) => {
             users::post(infra, req)
@@ -87,7 +87,7 @@ pub fn routing(infra: InfraManager, req: &Request) -> Result<Response, FailureRe
             markets::put(infra, req, id)
         },
         (GET) (/markets/{id: MarketId}/orders/) => {
-            markets::orders::get_all(infra, req, id)
+            markets::orders::get_list(infra, req, id)
         },
         (POST) (/markets/{id: MarketId}/orders/) => {
             markets::orders::post(infra, req, id)

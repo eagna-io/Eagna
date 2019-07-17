@@ -3,7 +3,7 @@ use super::{
     Postgres,
 };
 use chrono::{DateTime, Utc};
-use diesel::result::Error as PgError;
+use diesel::{dsl::now, pg::expression::dsl::any, prelude::*};
 use uuid::Uuid;
 
 /*
@@ -35,26 +35,26 @@ pub trait PostgresMarketInfra {
     fn insert_orders<'a>(
         &self,
         market_id: &'a Uuid,
-        orders: &'a dyn Iterator<Item = NewOrder<'a>>,
+        orders: &'a mut dyn Iterator<Item = NewOrder<'a>>,
     ) -> Result<(), failure::Error>;
 
-    fn query_market_by_id(&self, market_id: &Uuid) -> Result<Option<QueryMarket>, failure::Error>;
+    fn query_markets_by_ids(&self, ids: &[Uuid]) -> Result<Vec<QueryMarket>, failure::Error>;
 
-    fn query_orders_by_market_ids<'a>(
-        &'a self,
-        market_ids: &'a dyn Iterator<Item = &'a Uuid>,
+    fn query_orders_by_market_ids(
+        &self,
+        market_ids: &[Uuid],
     ) -> Result<Vec<QueryOrder>, failure::Error>;
 
-    fn query_markets_by_status(
+    fn query_market_ids_by_status(
         &self,
-        status: &dyn Iterator<Item = MarketStatus>,
-    ) -> Result<Vec<QueryMarket>, failure::Error>;
+        status: &[MarketStatus],
+    ) -> Result<Vec<Uuid>, failure::Error>;
 
-    fn query_markets_by_user_id(&self, user_id: &str) -> Result<Vec<QueryMarket>, failure::Error>;
+    fn query_market_ids_by_user_id(&self, user_id: &str) -> Result<Vec<Uuid>, failure::Error>;
 
-    fn query_markets_ready_to_open(&self) -> Result<Vec<QueryMarket>, failure::Error>;
+    fn query_market_ids_ready_to_open(&self) -> Result<Vec<Uuid>, failure::Error>;
 
-    fn query_markets_ready_to_close(&self) -> Result<Vec<QueryMarket>, failure::Error>;
+    fn query_market_ids_ready_to_close(&self) -> Result<Vec<Uuid>, failure::Error>;
 }
 
 pub struct NewMarket<'a> {
@@ -65,8 +65,8 @@ pub struct NewMarket<'a> {
     pub lmsr_b: i32,
     pub open: &'a DateTime<Utc>,
     pub close: &'a DateTime<Utc>,
-    pub tokens: &'a dyn Iterator<Item = NewToken<'a>>,
-    pub prizes: &'a dyn Iterator<Item = NewPrize<'a>>,
+    pub tokens: &'a mut dyn Iterator<Item = NewToken<'a>>,
+    pub prizes: &'a mut dyn Iterator<Item = NewPrize<'a>>,
     // status は常にUpcoming
 }
 
@@ -93,6 +93,7 @@ pub struct NewOrder<'a> {
     pub time: DateTime<Utc>,
 }
 
+#[derive(Debug, Clone)]
 pub struct QueryMarket {
     pub id: Uuid,
     pub title: String,
@@ -107,12 +108,14 @@ pub struct QueryMarket {
     pub prizes: Vec<QueryPrize>,
 }
 
+#[derive(Debug, Clone)]
 pub struct QueryToken {
     pub name: String,
     pub description: String,
     pub sumbnail_url: String,
 }
 
+#[derive(Debug, Clone)]
 pub struct QueryPrize {
     pub local_id: i32,
     pub name: String,
@@ -120,6 +123,7 @@ pub struct QueryPrize {
     pub target: String,
 }
 
+#[derive(Debug, Clone)]
 pub struct QueryOrder {
     pub local_id: i32,
     pub user_id: String,
@@ -143,7 +147,7 @@ impl PostgresMarketInfra for Postgres {
             .select(markets::columns::id)
             .filter(markets::columns::id.eq(market_id))
             .for_update()
-            .first(&self.conn)?;
+            .first::<Uuid>(&self.conn)?;
         Ok(())
     }
 
@@ -152,7 +156,7 @@ impl PostgresMarketInfra for Postgres {
         let insert_market = InsertableMarket {
             id: market.id,
             title: market.title,
-            organizer_id: market.organizer.id,
+            organizer_id: market.organizer_id,
             description: market.description,
             lmsr_b: market.lmsr_b,
             open: market.open,
@@ -162,6 +166,8 @@ impl PostgresMarketInfra for Postgres {
             .values(insert_market)
             .execute(&self.conn)?;
 
+        let market_id = market.id.clone();
+
         // Insert tokens
         let insert_tokens: Vec<_> = market
             .tokens
@@ -169,7 +175,7 @@ impl PostgresMarketInfra for Postgres {
                 name: token.name,
                 description: token.description,
                 sumbnail_url: token.sumbnail_url,
-                market_id: market.id,
+                market_id: &market_id,
             })
             .collect();
         diesel::insert_into(market_tokens::table)
@@ -184,7 +190,7 @@ impl PostgresMarketInfra for Postgres {
                 name: prize.name,
                 sumbnail_url: prize.sumbnail_url,
                 target: prize.target,
-                market_id: market.id,
+                market_id: &market_id,
             })
             .collect();
         diesel::insert_into(market_prizes::table)
@@ -223,97 +229,154 @@ impl PostgresMarketInfra for Postgres {
     fn insert_orders<'a>(
         &self,
         market_id: &'a Uuid,
-        orders: &'a dyn Iterator<Item = NewOrder<'a>>,
+        orders: &'a mut dyn Iterator<Item = NewOrder<'a>>,
     ) -> Result<(), failure::Error> {
-        let insert_orders = orders
+        let insert_orders: Vec<InsertableOrder> = orders
             .map(|order| InsertableOrder {
                 market_local_id: order.local_id,
                 user_id: order.user_id,
                 token_name: order.token_name,
                 amount_token: order.amount_token,
                 amount_coin: order.amount_coin,
+                time: order.time,
                 type_: order.type_,
                 market_id: market_id,
             })
             .collect();
         diesel::insert_into(orders::table)
-            .values()
+            .values(&insert_orders)
             .execute(&self.conn)?;
+        Ok(())
     }
 
-    fn query_market_by_id(&self, market_id: &Uuid) -> Result<Option<QueryMarket>, failure::Error> {
-        // Query market
-        let res = markets::table
-            .find(market_id)
-            .first::<QueryableMarket>(&self.conn);
-        let market = match res {
-            Ok(m) => m,
-            Err(PgError::NotFound) => return Ok(None),
-            Err(e) => return Err(e),
-        };
-
-        // Query market tokens
-        let tokens = market_tokens::table
-            .filter(market_tokens::columns::market_id.eq(market_id))
+    fn query_markets_by_ids(&self, ids: &[Uuid]) -> Result<Vec<QueryMarket>, failure::Error> {
+        let raw_markets = markets::table
+            .filter(markets::columns::id.eq(any(ids)))
+            .order(markets::columns::id.desc())
+            .load::<QueryableMarket>(&self.conn)?;
+        let raw_market_tokens = market_tokens::table
+            .filter(market_tokens::columns::market_id.eq(any(ids)))
+            .order(market_tokens::columns::market_id.desc())
             .load::<QueryableToken>(&self.conn)?;
-
-        // Query market prizes
-        let prizes = market_prizes::table
-            .filter(market_prizes::columns::market_id.eq(market_id))
+        let raw_market_prizes = market_prizes::table
+            .filter(market_prizes::columns::market_id.eq(any(ids)))
+            .order(market_prizes::columns::market_id.desc())
             .load::<QueryablePrize>(&self.conn)?;
 
-        Ok(QueryMarket {
-            id: *market_id,
-            title: market.title,
-            organizer_id: market.organizer_id,
-            description: market.description,
-            lmsr_b: market.lmsr_b,
-            open: market.open,
-            close: market.close,
-            status: market.status,
-            resolved_token_name: market.resolved_token_name,
-            tokens: tokens
-                .map(|token| QueryToken {
-                    name: token.name,
-                    description: token.description,
-                    sumbnail_url: token.sumbnail_url,
-                })
-                .collect(),
-            prizes: prizes
-                .map(|prize| QueryPrize {
-                    local_id: prize.market_local_id,
-                    name: prize.name,
-                    sumbnail_url: prize.sumbnail_url,
-                    target: prize.target,
-                })
-                .collect(),
-        })
+        let mut constructed_markets = Vec::with_capacity(raw_markets.len());
+
+        for raw_market in raw_markets {
+            let market_id = raw_market.id;
+            let corresponding_tokens = raw_market_tokens
+                .iter()
+                .filter(|token| token.market_id == market_id)
+                .cloned();
+            let corresponding_prizes = raw_market_prizes
+                .iter()
+                .filter(|prize| prize.market_id == market_id)
+                .cloned();
+
+            let constructed_market = construct_query_market_from_parts(
+                raw_market,
+                corresponding_tokens,
+                corresponding_prizes,
+            );
+            constructed_markets.push(constructed_market);
+        }
+
+        Ok(constructed_markets)
     }
 
-    fn query_orders_by_market_ids<'a>(
+    fn query_orders_by_market_ids(
         &self,
-        market_id: &'a dyn Iterator<Item = &'a Uuid>,
+        market_ids: &[Uuid],
     ) -> Result<Vec<QueryOrder>, failure::Error> {
-        unimplemented!();
+        Ok(orders::table
+            .filter(orders::columns::market_id.eq(any(market_ids)))
+            .load::<QueryableOrder>(&self.conn)?
+            .into_iter()
+            .map(|raw_order| QueryOrder {
+                local_id: raw_order.market_local_id,
+                user_id: raw_order.user_id,
+                market_id: raw_order.market_id,
+                token_name: raw_order.token_name,
+                amount_token: raw_order.amount_token,
+                amount_coin: raw_order.amount_coin,
+                type_: raw_order.type_,
+                time: raw_order.time,
+            })
+            .collect())
     }
 
-    fn query_markets_by_status(
+    fn query_market_ids_by_status(
         &self,
-        status: &dyn Iterator<Item = MarketStatus>,
-    ) -> Result<Vec<QueryMarket>, failure::Error> {
-        unimplemented!();
+        status: &[MarketStatus],
+    ) -> Result<Vec<Uuid>, failure::Error> {
+        Ok(markets::table
+            .filter(markets::columns::status.eq(any(status)))
+            .select(markets::columns::id)
+            .load::<Uuid>(&self.conn)?)
     }
 
-    fn query_markets_by_user_id(&self, user_id: &str) -> Result<Vec<QueryMarket>, failure::Error> {
-        unimplemented!();
+    fn query_market_ids_by_user_id(&self, user_id: &str) -> Result<Vec<Uuid>, failure::Error> {
+        Ok(orders::table
+            .filter(orders::columns::user_id.eq(user_id))
+            .select(orders::columns::market_id)
+            .distinct()
+            .load::<Uuid>(&self.conn)?)
     }
 
-    fn query_markets_ready_to_open(&self) -> Result<Vec<QueryMarket>, failure::Error> {
-        unimplemented!();
+    fn query_market_ids_ready_to_open(&self) -> Result<Vec<Uuid>, failure::Error> {
+        Ok(markets::table
+            .filter(markets::columns::status.eq(MarketStatus::Upcoming))
+            .filter(markets::columns::open.le(now))
+            .select(markets::columns::id)
+            .load::<Uuid>(&self.conn)?)
     }
 
-    fn query_markets_ready_to_close(&self) -> Result<Vec<QueryMarket>, failure::Error> {
-        unimplemented!();
+    fn query_market_ids_ready_to_close(&self) -> Result<Vec<Uuid>, failure::Error> {
+        Ok(markets::table
+            .filter(markets::columns::status.eq(MarketStatus::Open))
+            .filter(markets::columns::close.le(now))
+            .select(markets::columns::id)
+            .load::<Uuid>(&self.conn)?)
+    }
+}
+
+fn construct_query_market_from_parts<IT, IP>(
+    raw_market: QueryableMarket,
+    raw_tokens: IT,
+    raw_prizes: IP,
+) -> QueryMarket
+where
+    IT: Iterator<Item = QueryableToken>,
+    IP: Iterator<Item = QueryablePrize>,
+{
+    QueryMarket {
+        id: raw_market.id,
+        title: raw_market.title,
+        organizer_id: raw_market.organizer_id,
+        description: raw_market.description,
+        lmsr_b: raw_market.lmsr_b,
+        open: raw_market.open,
+        close: raw_market.close,
+        status: raw_market.status,
+        resolved_token_name: raw_market.resolved_token_name,
+        tokens: raw_tokens
+            .map(|token| QueryToken {
+                name: token.name,
+                description: token.description,
+                sumbnail_url: token.sumbnail_url,
+            })
+            .collect(),
+        prizes: raw_prizes
+            .map(|prize| QueryPrize {
+                local_id: prize.market_local_id,
+                name: prize.name,
+                sumbnail_url: prize.sumbnail_url,
+                target: prize.target,
+            })
+            .collect(),
     }
 }
 
@@ -327,8 +390,8 @@ struct InsertableMarket<'a> {
     organizer_id: &'a Uuid,
     description: &'a str,
     lmsr_b: i32,
-    open: DateTime<Utc>,
-    close: DateTime<Utc>,
+    open: &'a DateTime<Utc>,
+    close: &'a DateTime<Utc>,
 }
 
 #[derive(Insertable)]
@@ -364,7 +427,6 @@ struct InsertableOrder<'a> {
 }
 
 #[derive(Queryable)]
-#[table_name = "markets"]
 struct QueryableMarket {
     id: Uuid,
     title: String,
@@ -377,23 +439,34 @@ struct QueryableMarket {
     resolved_token_name: Option<String>,
 }
 
-#[derive(Queryable)]
-#[table_name = "market_tokens"]
+#[derive(Clone, Queryable)]
 struct QueryableToken {
-    unused_id: i32,
+    _unused_id: i32,
     name: String,
     description: String,
     sumbnail_url: String,
     market_id: Uuid,
 }
 
-#[derive(Queryable)]
-#[table_name = "market_tokens"]
+#[derive(Clone, Queryable)]
 struct QueryablePrize {
-    unused_id: i32,
+    _unused_id: i32,
     market_local_id: i32,
     name: String,
     sumbnail_url: String,
     target: String,
+    market_id: Uuid,
+}
+
+#[derive(Clone, Queryable)]
+struct QueryableOrder {
+    _unused_id: i32,
+    market_local_id: i32,
+    user_id: String,
+    token_name: Option<String>,
+    amount_token: i32,
+    amount_coin: i32,
+    type_: OrderType,
+    time: DateTime<Utc>,
     market_id: Uuid,
 }

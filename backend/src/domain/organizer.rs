@@ -1,4 +1,5 @@
 use crate::infra::PostgresInfra;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize)]
@@ -47,7 +48,7 @@ impl<'a> OrganizerRepository<'a> {
         &self,
         organizer_id: &OrganizerId,
     ) -> Result<Option<Organizer>, failure::Error> {
-        if let Some(query_res) = self.postgres.query_organizer(organizer_id.to_str().as_ref())? {
+        if let Some(query_res) = self.postgres.query_organizer(organizer_id.as_uuid())? {
             Ok(Some(Organizer {
                 id: OrganizerId::from(query_res.id),
                 name: OrganizerName::from(query_res.name),

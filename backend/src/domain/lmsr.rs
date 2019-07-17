@@ -1,4 +1,5 @@
 use crate::domain::market::{AmountCoin, AmountToken};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Serialize, Deserialize, From)]
 pub struct B(u32);

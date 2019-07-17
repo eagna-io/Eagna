@@ -3,7 +3,7 @@ pub use repository::*;
 
 use arrayvec::ArrayString;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialie, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct User {
     id: UserId,
     name: UserName,

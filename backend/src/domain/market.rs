@@ -14,6 +14,7 @@ use crate::domain::{
     organizer::{Organizer, OrganizerId},
     user::UserId,
 };
+use crate::infra::postgres::types::MarketStatus as InfraMarketStatus;
 use chrono::{DateTime, Utc};
 use std::{collections::HashMap, str::FromStr};
 use uuid::Uuid;
@@ -47,7 +48,6 @@ impl Market {
     ) -> Market {
         let id = MarketId::new();
         let attrs = MarketAttrs {
-            id,
             title,
             organizer_id: organizer.id().clone(),
             description: desc,
@@ -57,83 +57,85 @@ impl Market {
             tokens,
             prizes,
         };
-        Market::Upcoming(UpcomingMarket::new(attrs))
+        let orders = MarketOrders::new();
+        Market::Upcoming(UpcomingMarket {
+            id,
+            token_distribution: TokenDistribution::from(&attrs.tokens, &orders),
+            attrs,
+            orders,
+        })
     }
+}
 
-    pub fn id(&self) -> &MarketId {
-        &self.attrs().id
-    }
+pub trait AbstractMarket {
+    fn id(&self) -> &MarketId;
 
-    pub fn status(&self) -> MarketStatus {
-        match self {
-            Market::Upcoming(_) => MarketStatus::Upcoming,
-            Market::Open(_) => MarketStatus::Open,
-            Market::Closed(_) => MarketStatus::Closed,
-            Market::Resolved(_) => MarketStatus::Resolved,
+    fn attrs(&self) -> &MarketAttrs;
+
+    fn status(&self) -> MarketStatus;
+
+    fn token_distribution(&self) -> &TokenDistribution;
+
+    fn orders(&self) -> &MarketOrders;
+
+    fn resolved_token_name(&self) -> Option<&TokenName>;
+
+    fn flatten(self) -> FlattenMarket;
+}
+
+macro_rules! market_inner_fn_ref {
+    ($fn: ident, $ret: ty) => {
+        fn $fn(&self) -> $ret {
+            match self {
+                Market::Upcoming(ref m) => m.$fn(),
+                Market::Open(ref m) => m.$fn(),
+                Market::Closed(ref m) => m.$fn(),
+                Market::Resolved(ref m) => m.$fn(),
+            }
         }
     }
+}
 
-    pub fn attrs(&self) -> &MarketAttrs {
+impl AbstractMarket for Market {
+    market_inner_fn_ref!(id, &MarketId);
+    market_inner_fn_ref!(attrs, &MarketAttrs);
+    market_inner_fn_ref!(status, MarketStatus);
+    market_inner_fn_ref!(token_distribution, &TokenDistribution);
+    market_inner_fn_ref!(orders, &MarketOrders);
+    market_inner_fn_ref!(resolved_token_name, Option<&TokenName>);
+
+    fn flatten(self) -> FlattenMarket {
         match self {
-            Market::Upcoming(ref m) => &m.attrs,
-            Market::Open(ref m) => &m.attrs,
-            Market::Closed(ref m) => &m.attrs,
-            Market::Resolved(ref m) => &m.attrs,
+            Market::Upcoming(m) => m.flatten(),
+            Market::Open(m) => m.flatten(),
+            Market::Closed(m) => m.flatten(),
+            Market::Resolved(m) => m.flatten(),
         }
     }
+}
 
-    pub fn into_attrs(self) -> MarketAttrs {
-        match self {
-            Market::Upcoming(m) => m.attrs,
-            Market::Open(m) => m.attrs,
-            Market::Closed(m) => m.attrs,
-            Market::Resolved(m) => m.attrs,
-        }
-    }
-
-    pub fn orders(&self) -> &MarketOrders {
-        match self {
-            Market::Upcoming(ref m) => &m.orders,
-            Market::Open(ref m) => &m.orders,
-            Market::Closed(ref m) => &m.orders,
-            Market::Resolved(ref m) => &m.orders,
-        }
-    }
-
-    pub fn token_distribution(&self) -> &TokenDistribution {
-        match self {
-            Market::Upcoming(ref m) => &m.token_distribution,
-            Market::Open(ref m) => &m.token_distribution,
-            Market::Closed(ref m) => &m.token_distribution,
-            Market::Resolved(ref m) => &m.token_distribution,
-        }
-    }
+pub struct FlattenMarket {
+    pub id: MarketId,
+    pub attrs: MarketAttrs,
+    pub status: MarketStatus,
+    pub token_distribution: TokenDistribution,
+    pub orders: MarketOrders,
+    pub resolved_token_name: Option<TokenName>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UpcomingMarket {
-    pub attrs: MarketAttrs,
-    pub orders: MarketOrders,
-    pub token_distribution: TokenDistribution,
+    id: MarketId,
+    attrs: MarketAttrs,
+    orders: MarketOrders,
+    token_distribution: TokenDistribution,
 }
 
 impl UpcomingMarket {
-    fn new(attrs: MarketAttrs) -> UpcomingMarket {
-        let orders = MarketOrders::new();
-        UpcomingMarket {
-            attrs,
-            token_distribution: TokenDistribution::from(&attrs.tokens, &orders),
-            orders,
-        }
-    }
-
-    pub fn id(&self) -> &MarketId {
-        &self.attrs.id
-    }
-
     pub fn try_open(self) -> Result<OpenMarket, UpcomingMarket> {
         if self.attrs.open.is_opened() {
             Ok(OpenMarket {
+                id: self.id,
                 attrs: self.attrs,
                 orders: self.orders,
                 token_distribution: self.token_distribution,
@@ -146,6 +148,7 @@ impl UpcomingMarket {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenMarket {
+    id: MarketId,
     attrs: MarketAttrs,
     orders: MarketOrders,
     token_distribution: TokenDistribution,
@@ -161,14 +164,17 @@ pub enum TryOrderError {
     InvalidToken,
 }
 
-impl OpenMarket {
-    pub fn id(&self) -> &MarketId {
-        &self.attrs.id
-    }
+#[derive(Debug, Clone, PartialEq, Eq, Fail)]
+pub enum SupplyInitialCoinError {
+    #[fail(display = "User is already received initial coin")]
+    AlreadyReceived,
+}
 
+impl OpenMarket {
     pub fn try_close(self) -> Result<ClosedMarket, OpenMarket> {
         if self.attrs.close.is_closed() {
             Ok(ClosedMarket {
+                id: self.id,
                 attrs: self.attrs,
                 orders: self.orders,
                 token_distribution: self.token_distribution,
@@ -180,11 +186,14 @@ impl OpenMarket {
 
     /// ユーザーがまだInitialSupplyを受け取っていない場合、
     /// InitialSupplyを付与する
-    pub fn try_supply_initial_coin(&mut self, user_id: &UserId) -> Result<&Order, ()> {
+    pub fn try_supply_initial_coin(
+        &mut self,
+        user_id: &UserId,
+    ) -> Result<&Order, SupplyInitialCoinError> {
         log::debug!("Try supply initial coin to {:?}", user_id);
 
         if self.orders.is_already_supply_initial_coin_to(user_id) {
-            return Err(());
+            return Err(SupplyInitialCoinError::AlreadyReceived);
         }
 
         Ok(self
@@ -242,7 +251,7 @@ impl OpenMarket {
 
         Ok(self
             .orders
-            .add_normal_order(*user_id, *token_name, *amount_token, amount_coin))
+            .add_normal_order(*user_id, token_name.clone(), *amount_token, amount_coin))
     }
 
     /// 指定のTokenを、指定の数量売る/買うとき、増える/減るCoinの量
@@ -254,7 +263,6 @@ impl OpenMarket {
         let lmsr_b = self.attrs.lmsr_b;
 
         let current_cost = lmsr::cost(lmsr_b, self.token_distribution.values().copied());
-        let current_amount_token = self.token_distribution.get(token_name).unwrap();
 
         let new_distribution_values = self.token_distribution.iter().map(|(tname, amt)| {
             if tname == token_name {
@@ -272,6 +280,7 @@ impl OpenMarket {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ClosedMarket {
+    id: MarketId,
     attrs: MarketAttrs,
     orders: MarketOrders,
     token_distribution: TokenDistribution,
@@ -284,10 +293,6 @@ pub enum ResolveMarketError {
 }
 
 impl ClosedMarket {
-    pub fn id(&self) -> &MarketId {
-        &self.attrs.id
-    }
-
     pub fn resolve(
         mut self,
         resolved_token_name: TokenName,
@@ -310,6 +315,7 @@ impl ClosedMarket {
         }
 
         Ok(ResolvedMarket {
+            id: self.id,
             attrs: self.attrs,
             orders: self.orders,
             token_distribution: self.token_distribution,
@@ -320,15 +326,92 @@ impl ClosedMarket {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ResolvedMarket {
+    id: MarketId,
     attrs: MarketAttrs,
     orders: MarketOrders,
     token_distribution: TokenDistribution,
-    pub resolved_token_name: TokenName,
+    resolved_token_name: TokenName,
 }
 
-impl ResolvedMarket {
-    pub fn id(&self) -> &MarketId {
-        &self.attrs.id
+macro_rules! impl_abstract_market_except_for_resolved {
+    ($ty: ty, $status: expr) => {
+        impl AbstractMarket for $ty {
+            fn id(&self) -> &MarketId {
+                &self.id
+            }
+
+            fn attrs(&self) -> &MarketAttrs {
+                &self.attrs
+            }
+
+            fn status(&self) -> MarketStatus {
+                $status
+            }
+
+            fn token_distribution(&self) -> &TokenDistribution {
+                &self.token_distribution
+            }
+
+            fn orders(&self) -> &MarketOrders {
+                &self.orders
+            }
+
+            fn resolved_token_name(&self) -> Option<&TokenName> {
+                None
+            }
+
+            fn flatten(self) -> FlattenMarket {
+                FlattenMarket {
+                    id: self.id,
+                    attrs: self.attrs,
+                    status: $status,
+                    token_distribution: self.token_distribution,
+                    orders: self.orders,
+                    resolved_token_name: None,
+                }
+            }
+        }
+    };
+}
+
+impl_abstract_market_except_for_resolved!(UpcomingMarket, MarketStatus::Upcoming);
+impl_abstract_market_except_for_resolved!(OpenMarket, MarketStatus::Open);
+impl_abstract_market_except_for_resolved!(ClosedMarket, MarketStatus::Closed);
+
+impl AbstractMarket for ResolvedMarket {
+    fn id(&self) -> &MarketId {
+        &self.id
+    }
+
+    fn attrs(&self) -> &MarketAttrs {
+        &self.attrs
+    }
+
+    fn status(&self) -> MarketStatus {
+        MarketStatus::Resolved
+    }
+
+    fn token_distribution(&self) -> &TokenDistribution {
+        &self.token_distribution
+    }
+
+    fn orders(&self) -> &MarketOrders {
+        &self.orders
+    }
+
+    fn resolved_token_name(&self) -> Option<&TokenName> {
+        Some(&self.resolved_token_name)
+    }
+
+    fn flatten(self) -> FlattenMarket {
+        FlattenMarket {
+            id: self.id,
+            attrs: self.attrs,
+            status: MarketStatus::Resolved,
+            token_distribution: self.token_distribution,
+            orders: self.orders,
+            resolved_token_name: Some(self.resolved_token_name),
+        }
     }
 }
 
@@ -339,7 +422,7 @@ impl TokenDistribution {
     fn from(tokens: &MarketTokens, orders: &MarketOrders) -> TokenDistribution {
         let mut map = HashMap::new();
         for token in tokens.iter() {
-            map.insert(token.name, AmountToken::zero());
+            map.insert(token.name.clone(), AmountToken::zero());
         }
 
         let mut token_distribution = TokenDistribution(map);
@@ -373,7 +456,6 @@ impl TokenDistribution {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MarketAttrs {
-    pub id: MarketId,
     pub title: MarketTitle,
     pub organizer_id: OrganizerId,
     pub description: MarketDesc,
@@ -390,7 +472,7 @@ impl MarketAttrs {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, From)]
 pub struct MarketId(Uuid);
 
 impl MarketId {
@@ -466,6 +548,17 @@ pub enum MarketStatus {
     Open,
     Closed,
     Resolved,
+}
+
+impl Into<InfraMarketStatus> for MarketStatus {
+    fn into(self) -> InfraMarketStatus {
+        match self {
+            MarketStatus::Upcoming => InfraMarketStatus::Upcoming,
+            MarketStatus::Open => InfraMarketStatus::Open,
+            MarketStatus::Closed => InfraMarketStatus::Closed,
+            MarketStatus::Resolved => InfraMarketStatus::Resolved,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From)]

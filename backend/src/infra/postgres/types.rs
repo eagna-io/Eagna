@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq, DbEnum)]
+#[derive(Debug, Clone, PartialEq, Eq, DbEnum)]
 #[DieselType = "Market_status"]
 pub enum MarketStatus {
     Upcoming,
@@ -7,7 +7,7 @@ pub enum MarketStatus {
     Resolved,
 }
 
-#[derive(Debug, PartialEq, Eq, DbEnum)]
+#[derive(Debug, Clone, PartialEq, Eq, DbEnum)]
 #[DieselType = "Order_type"]
 pub enum OrderType {
     Normal,

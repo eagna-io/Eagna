@@ -1,10 +1,11 @@
 use crate::infra::{FirebaseInfra, InfraFactory, PostgresInfra, RedisInfra};
+use lazycell::LazyCell;
 use std::sync::Arc;
 
 pub struct InfraManager {
-    firebase: LazyCache<Box<dyn FirebaseInfra>>,
-    redis: LazyCache<Box<dyn RedisInfra>>,
-    postgres: LazyCache<Box<dyn PostgresInfra>>,
+    firebase: LazyInfra<Box<dyn FirebaseInfra>>,
+    redis: LazyInfra<Box<dyn RedisInfra>>,
+    postgres: LazyInfra<Box<dyn PostgresInfra>>,
 }
 
 impl InfraManager {
@@ -50,51 +51,80 @@ impl InfraManagerFactory {
 
     pub fn create(&self) -> InfraManager {
         InfraManager {
-            firebase: LazyCache::new(self.firebase_factory.clone()),
-            redis: LazyCache::new(self.redis_factory.clone()),
-            postgres: LazyCache::new(self.postgres_factory.clone()),
+            firebase: LazyInfra::new(self.firebase_factory.clone()),
+            redis: LazyInfra::new(self.redis_factory.clone()),
+            postgres: LazyInfra::new(self.postgres_factory.clone()),
         }
     }
 }
 
-pub struct LazyCache<I> {
+pub struct LazyInfra<I> {
     factory: Arc<dyn InfraFactory<I>>,
-    infra: Option<I>,
+    infra: LazyCell<I>,
 }
 
-impl<I> LazyCache<I> {
-    pub fn new(factory: Arc<dyn InfraFactory<I>>) -> LazyCache<I> {
-        LazyCache {
+impl<I: Send + 'static> LazyInfra<I> {
+    pub fn new(factory: Arc<dyn InfraFactory<I>>) -> LazyInfra<I> {
+        LazyInfra {
             factory,
-            infra: None,
+            infra: LazyCell::new(),
         }
     }
 
     pub fn get(&self) -> Result<&I, failure::Error> {
-        if let Some(ref infra) = self.infra {
-            return Ok(infra);
+        if !self.infra.filled() {
+            let _never_err = self.infra.fill(self.factory.create()?);
         }
-
-        self.infra = Some(self.factory.create()?);
-        Ok(self.infra.as_ref().unwrap())
+        Ok(self.infra.borrow().unwrap())
     }
 }
 
-struct BoxingInfraFactory<F: ?Sized> {
+struct BoxingInfraFactory<F, I> {
     factory: F,
+    _phantom: std::marker::PhantomData<I>,
 }
 
-impl<F: ?Sized> BoxingInfraFactory<F> {
-    fn new(factory: F) -> BoxingInfraFactory<F> {
-        BoxingInfraFactory { factory }
-    }
-}
+unsafe impl<F, I> Sync for BoxingInfraFactory<F, I> {}
 
-impl<F, I> InfraFactory<Box<I>> for BoxingInfraFactory<F>
+impl<F, I> BoxingInfraFactory<F, I>
 where
     F: InfraFactory<I>,
+    I: Send + 'static,
 {
-    fn create(&self) -> Result<Box<I>, failure::Error> {
+    fn new(factory: F) -> BoxingInfraFactory<F, I> {
+        BoxingInfraFactory {
+            factory,
+            _phantom: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<F, I> InfraFactory<Box<dyn PostgresInfra>> for BoxingInfraFactory<F, I>
+where
+    F: InfraFactory<I>,
+    I: PostgresInfra,
+{
+    fn create(&self) -> Result<Box<dyn PostgresInfra>, failure::Error> {
+        Ok(Box::new(self.factory.create()?))
+    }
+}
+
+impl<F, I> InfraFactory<Box<dyn FirebaseInfra>> for BoxingInfraFactory<F, I>
+where
+    F: InfraFactory<I>,
+    I: FirebaseInfra,
+{
+    fn create(&self) -> Result<Box<dyn FirebaseInfra>, failure::Error> {
+        Ok(Box::new(self.factory.create()?))
+    }
+}
+
+impl<F, I> InfraFactory<Box<dyn RedisInfra>> for BoxingInfraFactory<F, I>
+where
+    F: InfraFactory<I>,
+    I: RedisInfra,
+{
+    fn create(&self) -> Result<Box<dyn RedisInfra>, failure::Error> {
         Ok(Box::new(self.factory.create()?))
     }
 }

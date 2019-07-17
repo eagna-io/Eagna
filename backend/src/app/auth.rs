@@ -13,8 +13,10 @@ pub fn validate_bearer_header(
         .ok_or(FailureResponse::Unauthorized)?;
     let token_id = extract_token(header_val)?;
 
-    let access_token_repository =
-        AccessTokenRepository::from((infra.get_firebase()?, infra.get_redis()?));
+    let firebase = infra.get_firebase()?;
+    let redis = infra.get_redis()?;
+
+    let access_token_repository = AccessTokenRepository::from((firebase, redis));
 
     match access_token_repository.query_access_token(&token_id)? {
         Some(token) => Ok(token),

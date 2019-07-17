@@ -3,8 +3,8 @@ use crate::app::{get_params, validate_bearer_header, FailureResponse, InfraManag
 use crate::domain::market::*;
 use rouille::{Request, Response};
 
-pub fn get_all(
-    infra: InfraManager,
+pub fn get_list(
+    infra: &InfraManager,
     req: &Request,
     market_id: MarketId,
 ) -> Result<Response, FailureResponse> {
@@ -20,7 +20,7 @@ pub fn get_all(
 
     let resp_orders = orders
         .filter_normal_orders()
-        .map(|o| ApiOrderModel::from(Order::from(o)))
+        .map(|o| ApiOrderModel::from(Order::from(o.clone()))) // TODO : stop clone
         .collect();
 
     let mut resp = RespBody {
@@ -29,12 +29,12 @@ pub fn get_all(
     };
 
     if let Some("mine") = get_params(req, "contains").next() {
-        let access_token = validate_bearer_header(&infra, req)?;
+        let access_token = validate_bearer_header(infra, req)?;
         let my_orders = orders
-            .related_to_user(&access_token.user_id)
-            .map(ApiOrderModel::from)
+            .iter_related_to_user(&access_token.user_id)
+            .map(|o| ApiOrderModel::from(o.clone()))
             .collect();
-        resp.my_orders = my_orders;
+        resp.my_orders = Some(my_orders);
     }
 
     Ok(Response::json(&resp))
