@@ -3,7 +3,8 @@ CREATE TABLE users (
   fb_uid        text PRIMARY KEY,
   name          text NOT NULL,
   email         text UNIQUE NOT NULL,
-  is_admin      boolean NOT NULL DEFAULT False
+  is_admin      boolean NOT NULL DEFAULT False,
+  created       timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TYPE market_status AS ENUM (

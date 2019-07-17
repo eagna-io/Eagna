@@ -1,4 +1,5 @@
 use super::{schema::users, Postgres};
+use chrono::{DateTime, Utc};
 use diesel::{prelude::*, result::Error as PgError};
 
 pub trait PostgresUserInfra {
@@ -63,4 +64,5 @@ struct QueryableUser {
     name: String,
     email: String,
     is_admin: bool,
+    _created: DateTime<Utc>,
 }

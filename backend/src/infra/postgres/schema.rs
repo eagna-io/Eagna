@@ -80,6 +80,7 @@ table! {
         name -> Text,
         email -> Text,
         is_admin -> Bool,
+        created -> Timestamptz,
     }
 }
 
