@@ -9,7 +9,7 @@ mod users;
 pub use self::auth::validate_bearer_header;
 pub use self::failure_response::FailureResponse;
 pub use self::infra_manager::{InfraManager, InfraManagerFactory};
-pub use self::req::get_params;
+pub use self::req::{get_param, get_params};
 use crate::domain::market::MarketId;
 
 use rouille::{router, Request, Response};

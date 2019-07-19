@@ -4,7 +4,9 @@ pub use post::post;
 pub use put::put;
 
 mod get {
-    use crate::app::{get_params, FailureResponse, InfraManager};
+    use crate::app::{
+        get_param, get_params, validate_bearer_header, FailureResponse, InfraManager,
+    };
     use crate::domain::market::*;
     use arrayvec::ArrayVec;
     use rouille::{Request, Response};
@@ -26,6 +28,33 @@ mod get {
     }
 
     pub fn get_list(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
+        let market_ids = query_market_ids(infra, req)?;
+        let markets =
+            MarketRepository::from(infra.get_postgres()?).query_markets(market_ids.as_slice())?;
+        let resp_data: Vec<_> = markets.into_iter().map(GetMarketResponse::from).collect();
+
+        Ok(Response::json(&resp_data))
+    }
+
+    fn query_market_ids(
+        infra: &InfraManager,
+        req: &Request,
+    ) -> Result<Vec<MarketId>, FailureResponse> {
+        if let Some("true") = get_param(req, "participated") {
+            // ユーザーが参加している/参加したマーケット一覧を取得
+            let access_token = validate_bearer_header(infra, req)?;
+            Ok(MarketRepository::from(infra.get_postgres()?)
+                .query_market_ids_participated_by_user(&access_token.user_id)?)
+        } else {
+            // 指定されたstatusのマーケット一覧を取得
+            query_market_ids_by_status(infra, req)
+        }
+    }
+
+    fn query_market_ids_by_status(
+        infra: &InfraManager,
+        req: &Request,
+    ) -> Result<Vec<MarketId>, FailureResponse> {
         let mut statuses = ArrayVec::<[MarketStatus; 4]>::new();
         get_params(req, "status").for_each(|s| match s {
             "upcoming" => {
@@ -51,12 +80,8 @@ mod get {
             statuses.push(MarketStatus::Resolved);
         }
 
-        let market_repo = MarketRepository::from(infra.get_postgres()?);
-        let market_ids = market_repo.query_market_ids_with_status(statuses.as_slice())?;
-        let markets = market_repo.query_markets(market_ids.as_slice())?;
-        let resp_data: Vec<_> = markets.into_iter().map(GetMarketResponse::from).collect();
-
-        Ok(Response::json(&resp_data))
+        Ok(MarketRepository::from(infra.get_postgres()?)
+            .query_market_ids_with_status(statuses.as_slice())?)
     }
 
     #[derive(Debug, Serialize, Deserialize)]

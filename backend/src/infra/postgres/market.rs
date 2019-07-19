@@ -50,7 +50,10 @@ pub trait PostgresMarketInfra {
         status: &[MarketStatus],
     ) -> Result<Vec<Uuid>, failure::Error>;
 
-    fn query_market_ids_by_user_id(&self, user_id: &str) -> Result<Vec<Uuid>, failure::Error>;
+    fn query_market_ids_participated_by_user(
+        &self,
+        user_id: &str,
+    ) -> Result<Vec<Uuid>, failure::Error>;
 
     fn query_market_ids_ready_to_open(&self) -> Result<Vec<Uuid>, failure::Error>;
 
@@ -318,7 +321,10 @@ impl PostgresMarketInfra for Postgres {
             .load::<Uuid>(&self.conn)?)
     }
 
-    fn query_market_ids_by_user_id(&self, user_id: &str) -> Result<Vec<Uuid>, failure::Error> {
+    fn query_market_ids_participated_by_user(
+        &self,
+        user_id: &str,
+    ) -> Result<Vec<Uuid>, failure::Error> {
         Ok(orders::table
             .filter(orders::columns::user_id.eq(user_id))
             .select(orders::columns::market_id)

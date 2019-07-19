@@ -23,6 +23,10 @@ pub fn get_params<'a>(req: &'a Request, key: &str) -> impl Iterator<Item = &'a s
         .flatten()
 }
 
+pub fn get_param<'a>(req: &'a Request, key: &str) -> Option<&'a str> {
+    get_params(req, key).next()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

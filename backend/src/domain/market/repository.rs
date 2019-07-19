@@ -164,6 +164,18 @@ impl<'a> MarketRepository<'a> {
             .collect())
     }
 
+    pub fn query_market_ids_participated_by_user(
+        &self,
+        user_id: &UserId,
+    ) -> Result<Vec<MarketId>, failure::Error> {
+        Ok(self
+            .postgres
+            .query_market_ids_participated_by_user(user_id.as_str())?
+            .into_iter()
+            .map(MarketId::from)
+            .collect())
+    }
+
     pub fn query_market_ids_ready_to_open(&self) -> Result<Vec<MarketId>, failure::Error> {
         Ok(self
             .postgres
