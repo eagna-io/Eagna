@@ -3,6 +3,23 @@ use crate::domain::user::*;
 use rouille::{input::json::json_input, Request, Response};
 use serde::{Deserialize, Serialize};
 
+pub fn me(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
+    let access_token = validate_bearer_header(infra, req)?;
+    if let Some(user) =
+        UserRepository::from(infra.get_postgres()?).query_user(&access_token.user_id)?
+    {
+        let res_data = ResData {
+            id: user.id(),
+            name: user.name(),
+            email: user.email(),
+            is_admin: user.is_admin(),
+        };
+        return Ok(Response::json(&res_data));
+    } else {
+        return Err(FailureResponse::ResourceNotFound);
+    }
+}
+
 pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
 
