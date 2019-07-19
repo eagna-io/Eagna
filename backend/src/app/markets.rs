@@ -84,12 +84,13 @@ mod get {
             .query_market_ids_with_status(statuses.as_slice())?)
     }
 
-    #[derive(Debug, Serialize, Deserialize)]
+    #[derive(Debug, Serialize)]
     #[serde(rename_all = "camelCase")]
     struct GetMarketResponse {
         #[serde(flatten)]
         attrs: MarketAttrs,
         status: MarketStatus,
+        token_distribution: TokenDistribution,
         #[serde(skip_serializing_if = "Option::is_none")]
         resolved_token_name: Option<TokenName>,
     }
@@ -100,11 +101,13 @@ mod get {
                 attrs,
                 resolved_token_name,
                 status,
+                token_distribution,
                 ..
             } = market.flatten();
             GetMarketResponse {
                 status,
                 attrs,
+                token_distribution,
                 resolved_token_name,
             }
         }
