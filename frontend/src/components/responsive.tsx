@@ -1,5 +1,20 @@
 import React, {FC, useState, useEffect, useContext} from 'react';
 
+const MinTabletWidth = 768;
+const MinPcWidth = 980;
+
+export function pc(css: string): string {
+  return `@media (min-width: ${MinPcWidth}px) {
+    ${css}
+  }`;
+}
+
+export function tablet(css: string): string {
+  return `@media (min-width: ${MinTabletWidth}px) {
+    ${css}
+  }`;
+}
+
 enum Device {
   Mobile = 'Mobile',
   Tablet = 'Tablet',

@@ -1,7 +1,7 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
 
-import * as Header from 'components/header';
+import Header from 'components/header';
 import * as MarketHeader from './components/header';
 import ChartComponent from './components/chart';
 import * as TokensComponent from './components/tokens';
@@ -21,14 +21,14 @@ const MarketPage: FC<MarketPageInternalProps> = ({history, user, market}) => {
   if (market === null) {
     return (
       <>
-        <Header.Mobile history={history} user={user} />
+        <Header history={history} user={user} />
         <h2>ローディング中...</h2>
       </>
     );
   } else {
     return (
       <>
-        <Header.Mobile history={history} user={user} />
+        <Header history={history} user={user} />
         <MarketHeader.Mobile market={market.data} />
         <Contents>
           <ChartComponent

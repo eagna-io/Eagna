@@ -1,6 +1,7 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
 
+import {pc} from 'components/responsive';
 import {MarketStatus} from 'models/market';
 
 interface StatusBadgeProps {
@@ -8,38 +9,30 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-const StatusBadge: FC<StatusBadgeProps> = ({
-  status,
-  className,
-}) => {
+const StatusBadge: FC<StatusBadgeProps> = ({status, className}) => {
   const color = statusToColor(status);
 
   const Badge = styled.div`
+    width: 72p;
+    height: 27px;
+    line-height: 27px;
+    font-size: 11px;
     background-color: ${color};
     border-radius: 4px;
-
     color: white;
     font-weight: 700;
     text-align: center;
+
+    ${pc(`
+    width: 87px;
+    font-size: 15px;
+  `)}
   `;
+
   return <Badge className={className}>{status}</Badge>;
 };
 
 export default StatusBadge;
-
-export const Pc = styled(StatusBadge)`
-  width: 87px;
-  height: 27px;
-  font-size: 15px;
-  line-height: 27px;
-`;
-
-export const Mobile = styled(StatusBadge)`
-  width: 72p;x
-  height: 27px;
-  font-size: 11px;
-  line-height: 27px;
-`;
 
 function statusToColor(s: MarketStatus): string {
   if (s === MarketStatus.Upcoming) {

@@ -2,7 +2,7 @@ import React, {FC} from 'react';
 import styled from 'styled-components';
 
 import {Market, MarketStatus} from 'models/market';
-import * as StatusBadge from 'components/status_badge';
+import StatusBadge from 'components/status_badge';
 
 interface MarketHeaderComponentProps {
   market: Market | null;
@@ -18,7 +18,7 @@ const Header: FC<MarketHeaderComponentProps> = ({market, className}) => {
           <Desc>{market ? market.shortDesc : '-'}</Desc>
         </LeftContents>
         <StatusBadgeContainer>
-          <StatusBadge.Pc
+          <StatusBadge
             status={market !== null ? market.status : MarketStatus.Upcoming}
           />
         </StatusBadgeContainer>

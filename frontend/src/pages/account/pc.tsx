@@ -4,7 +4,7 @@ import {History} from 'history';
 
 import {User} from 'models/user';
 import {Market} from 'models/market';
-import * as Header from 'components/header';
+import Header from 'components/header';
 import * as ProfileComponent from './components/profile';
 import * as MarketsComponent from './components/markets';
 
@@ -23,7 +23,7 @@ const Pc: FC<AccountPageProps> = ({
 }) => {
   return (
     <>
-      <Header.Pc history={history} user={user} />
+      <Header history={history} user={user} />
       <Container>
         <ProfileContainer>
           <ProfileComponent.Pc me={user} />
