@@ -87,6 +87,7 @@ mod get {
     #[derive(Debug, Serialize)]
     #[serde(rename_all = "camelCase")]
     struct GetMarketResponse {
+        id: MarketId,
         #[serde(flatten)]
         attrs: MarketAttrs,
         status: MarketStatus,
@@ -98,6 +99,7 @@ mod get {
     impl From<Market> for GetMarketResponse {
         fn from(market: Market) -> GetMarketResponse {
             let FlattenMarket {
+                id,
                 attrs,
                 resolved_token_name,
                 status,
@@ -105,6 +107,7 @@ mod get {
                 ..
             } = market.flatten();
             GetMarketResponse {
+                id,
                 status,
                 attrs,
                 token_distribution,
