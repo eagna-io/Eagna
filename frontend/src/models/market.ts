@@ -1,192 +1,137 @@
-import {Moment} from 'moment';
+import {Organizer} from 'models/organizer';
 
-export interface Market {
-  id: MarketId;
-  title: string;
-  organizer: string;
-  shortDesc: string;
-  description: string;
-  openTime: Moment;
-  closeTime: Moment;
-  lmsrB: number;
-  tokens: Token[];
-  status: MarketStatus;
-  settleTokenId?: number;
+/*
+ * ====================
+ *      Market
+ * ====================
+ */
+
+abstract class AbstractMarket {
+  readonly tokenPrices: Map<string, number>;
+
+  constructor(
+    readonly id: MarketId,
+    readonly attrs: MarketAttributes,
+    private tokenDistribution: Map<string, number>,
+  ) {
+    this.tokenPrices = computeLMSRPrices(tokenDistribution);
+  }
+
+  abstract getStatus(): MarketStatus;
 }
 
-export type MarketId = number;
-
-export interface Token {
-  id: number;
-  name: string;
-  description: string;
+export class MarketId {
+  constructor(private id: string) {}
 }
 
-export enum MarketStatus {
-  Upcoming = 'Upcoming',
-  Open = 'Open',
-  Closed = 'Closed',
-  Resolved = 'Resolved',
+export class MarketAttributes {
+  constructor(
+    readonly title: string,
+    readonly organizerId: string,
+    readonly description: string,
+    readonly open: Moment,
+    readonly close: Moment,
+    readonly lmsrB: number,
+    readonly tokens: Token[],
+    readonly prizes: Prize[],
+  ) {}
 }
 
-export type TokenId = number;
+export type MarketStatus = 'Upcoming' | 'Open' | 'Closed' | 'Resolved';
 
-export interface MyMarket {
-  orders: Order[];
-}
+export type Market =
+  | UpcomingMarket
+  | OpenMarket
+  | ClosedMarket
+  | ResolvedMarket;
 
-export type Order = NormalOrder | InitialSupplyOrder | SettleOrder;
+export class UpcomingMarket extends AbstractMarket {
+  constructor(id: MarketId, attrs: MarketAttributes) {
+    const tokenDistribution = attrs.tokens.map(token => [token, 0]);
+    super(id, attrs, tokenDistribution);
+  }
 
-export interface NormalOrder {
-  tokenId: TokenId;
-  amountToken: number;
-  amountCoin: number;
-  time: Moment;
-  type: 'Normal';
-}
-
-export interface InitialSupplyOrder {
-  amountToken: number;
-  amountCoin: number;
-  time: Moment;
-  type: 'InitialSupply';
-}
-
-export interface SettleOrder {
-  tokenId: TokenId;
-  amountToken: number;
-  amountCoin: number;
-  time: Moment;
-  type: 'Settle';
-}
-
-export type PublicOrderHistory = NormalOrder[];
-
-export type MyOrderHistory = Order[];
-
-export type TokenDistribution = Map<TokenId, number>;
-
-export type TokenPrices = Map<TokenId, number>;
-
-export type MyAssets = Map<'Coin' | TokenId, number>;
-
-export const KILO: number = 1000;
-
-export function isNormalOrder(order: Order): order is NormalOrder {
-  return order.type === 'Normal';
-}
-
-export function isInitialSupplyOrder(
-  order: Order,
-): order is InitialSupplyOrder {
-  return order.type === 'InitialSupply';
-}
-
-export function isSettleOrder(order: Order): order is SettleOrder {
-  return order.type === 'Settle';
-}
-
-export function orderId(order: Order): string {
-  if (isNormalOrder(order)) {
-    return `normal-${order.time.unix()}-${order.tokenId}`;
-  } else if (isInitialSupplyOrder(order)) {
-    return `supply-${order.time.unix()}`;
-  } else {
-    return `settle-${order.tokenId}`;
+  getStatus(): MarketStatus {
+    return MarketStatus.Upcoming;
   }
 }
 
-export function newTokenDistribution(
-  tokens: Token[],
-  maybeOrders?: NormalOrder[],
-): TokenDistribution {
-  let distribution = new Map(tokens.map(t => [t.id, 0]));
+export class OpenMarket extends AbstractMarket {
+  constructor(
+    id: MarketId,
+    attrs: MarketAttributes,
+    tokenDistribution: Map<string, number>,
+  ) {
+    super(id, attrs, tokenDistribution);
+  }
 
-  const orders = maybeOrders === undefined ? [] : maybeOrders;
-  orders.forEach(order => addOrderToTokenDistribution(distribution, order));
+  getStatus(): MarketStatus {
+    return MarketStatus.Open;
+  }
 
-  return distribution;
+  // 指定のオーダーで、増える/減る coin の量を計算する
+  // Buy オーダーの時、 amountToken は正の値をとる（トークンの量は増えるため）
+  // Sell オーダーの時、 amountToken は負の値をとる（トークンの量は減るため）
+  computeAmountCoinOfOrder(tokenName: string, amountToken: number): number {
+    const currrentCost = computeLMSRCost(this.lmsrB, this.tokenDistribution);
+
+    const nextTokenDistribution = this.tokenDistribution.map(
+      ([token, amount]) =>
+        token.name === tokenName ? amount + amountToken : amount,
+    );
+    const nextCost = computeLMSRCost(this.lmsrB, nextTokenDistribution);
+
+    // cost が増えた時、 coin は減る. vice versa.
+    return -(nextCost - currrentCost);
+  }
 }
 
-export function addOrderToTokenDistribution(
-  distribution: TokenDistribution,
-  order: NormalOrder,
-): void {
-  const curAmount = distribution.get(order.tokenId) || 0;
-  distribution.set(order.tokenId, curAmount + order.amountToken);
+export class ClosedMarket extends AbstractMarket {
+  constructor(
+    id: MarketId,
+    attrs: MarketAttributes,
+    tokenDistribution: Map<string, number>,
+  ) {
+    super(id, attrs, tokenDistribution);
+  }
+
+  getStatus(): MarketStatus {
+    return MarketStatus.Closed;
+  }
 }
 
-export function newTokenPrices(
-  lmsrB: number,
-  distribution: TokenDistribution,
-): TokenPrices {
-  const distributionArray = Array.from(distribution.entries());
-  const denom = distributionArray.reduce(
-    (acc, [_id, n]) => acc + Math.exp(n / lmsrB),
-    0,
-  );
+export class ResolvedMarket extends AbstractMarket {
+  constructor(
+    id: MarketId,
+    attrs: MarketAttributes,
+    tokenDistribution: Map<string, number>,
+    readonly resolvedTokenName: string,
+  ) {
+    super(id, attrs, tokenDistribution);
+  }
 
-  return new Map(
-    distributionArray.map(([id, n]) => [
-      id,
-      normalize(Math.exp(n / lmsrB) / denom),
-    ]),
-  );
+  getStatus(): MarketStatus {
+    return MarketStatus.Resolved;
+  }
 }
 
-export function getTokenPrice(
-  prices: TokenPrices,
-  tokenId: TokenId,
-): number {
-  return prices.get(tokenId) || 0;
+export class Token {
+  constructor(
+    readonly name: string,
+    readonly desc: string,
+    readonly sumbnailUrl: string,
+  ) {}
 }
 
-export function cloneTokenDistribution(
-  distribution: TokenDistribution,
-): TokenDistribution {
-  return new Map(distribution);
+export class Prize {
+  constructor(
+    readonly id: PrizeId,
+    readonly name: string,
+    readonly target: string,
+    readonly sumbnailUrl: string,
+  ) {}
 }
 
-export function cloneTokenPrices(prices: TokenPrices): TokenPrices {
-  return new Map(prices);
-}
-
-export function distributionCost(
-  lmsrB: number,
-  distribution: TokenDistribution,
-): number {
-  const amountTokenArray = Array.from(distribution.values());
-  const res =
-    lmsrB *
-    Math.log(amountTokenArray.reduce((acc, n) => acc + Math.exp(n / lmsrB), 0));
-  return normalize(res);
-}
-
-function normalize(n: number): number {
-  return Math.floor(n * KILO);
-}
-
-export function getMyAssets(
-  tokens: Token[],
-  myOrders: MyOrderHistory,
-): MyAssets {
-  let assets = new Map<'Coin' | TokenId, number>(tokens.map(t => [t.id, 0]));
-  assets.set('Coin', currentAmountOfCoin(myOrders));
-  tokens.forEach(token =>
-    assets.set(token.id, currentAmountOfToken(myOrders, token.id)),
-  );
-  return assets;
-}
-
-function currentAmountOfCoin(myOrders: MyOrderHistory): number {
-  return myOrders.reduce((acc, order) => acc + order.amountCoin, 0);
-}
-
-function currentAmountOfToken(
-  myOrders: MyOrderHistory,
-  tokenId: TokenId,
-): number {
-  return myOrders
-    .filter(order => !isInitialSupplyOrder(order) && order.tokenId === tokenId)
-    .reduce((acc, order) => acc + order.amountToken, 0);
+export class PrizeId {
+  constructor(private id: number) {}
 }
