@@ -1,4 +1,5 @@
-import {Organizer} from 'models/organizer';
+import {computeLMSRCost, computeLMSRPrices} from 'models/lmsr';
+import {Moment} from 'moment';
 
 /*
  * ====================
@@ -10,18 +11,14 @@ abstract class AbstractMarket {
   readonly tokenPrices: Map<string, number>;
 
   constructor(
-    readonly id: MarketId,
+    readonly id: string,
     readonly attrs: MarketAttributes,
-    private tokenDistribution: Map<string, number>,
+    protected tokenDistribution: Map<string, number>,
   ) {
-    this.tokenPrices = computeLMSRPrices(tokenDistribution);
+    this.tokenPrices = computeLMSRPrices(attrs.lmsrB, tokenDistribution);
   }
 
   abstract getStatus(): MarketStatus;
-}
-
-export class MarketId {
-  constructor(private id: string) {}
 }
 
 export class MarketAttributes {
@@ -46,40 +43,41 @@ export type Market =
   | ResolvedMarket;
 
 export class UpcomingMarket extends AbstractMarket {
-  constructor(id: MarketId, attrs: MarketAttributes) {
-    const tokenDistribution = attrs.tokens.map(token => [token, 0]);
+  constructor(id: string, attrs: MarketAttributes) {
+    const tokenDistribution = new Map(
+      attrs.tokens.map(token => [token.name, 0] as [string, number]),
+    );
     super(id, attrs, tokenDistribution);
   }
 
   getStatus(): MarketStatus {
-    return MarketStatus.Upcoming;
+    return 'Upcoming';
   }
 }
 
 export class OpenMarket extends AbstractMarket {
-  constructor(
-    id: MarketId,
-    attrs: MarketAttributes,
-    tokenDistribution: Map<string, number>,
-  ) {
-    super(id, attrs, tokenDistribution);
-  }
-
   getStatus(): MarketStatus {
-    return MarketStatus.Open;
+    return 'Open';
   }
 
   // 指定のオーダーで、増える/減る coin の量を計算する
   // Buy オーダーの時、 amountToken は正の値をとる（トークンの量は増えるため）
   // Sell オーダーの時、 amountToken は負の値をとる（トークンの量は減るため）
   computeAmountCoinOfOrder(tokenName: string, amountToken: number): number {
-    const currrentCost = computeLMSRCost(this.lmsrB, this.tokenDistribution);
-
-    const nextTokenDistribution = this.tokenDistribution.map(
-      ([token, amount]) =>
-        token.name === tokenName ? amount + amountToken : amount,
+    const currrentCost = computeLMSRCost(
+      this.attrs.lmsrB,
+      this.tokenDistribution,
     );
-    const nextCost = computeLMSRCost(this.lmsrB, nextTokenDistribution);
+
+    const currentAmountToken = this.tokenDistribution.get(tokenName);
+    if (currentAmountToken === undefined) {
+      throw new Error(`Token ${tokenName} does not exist`);
+    }
+
+    const nextTokenDistribution = new Map(this.tokenDistribution);
+    nextTokenDistribution.set(tokenName, currentAmountToken + amountToken);
+
+    const nextCost = computeLMSRCost(this.attrs.lmsrB, nextTokenDistribution);
 
     // cost が増えた時、 coin は減る. vice versa.
     return -(nextCost - currrentCost);
@@ -87,22 +85,14 @@ export class OpenMarket extends AbstractMarket {
 }
 
 export class ClosedMarket extends AbstractMarket {
-  constructor(
-    id: MarketId,
-    attrs: MarketAttributes,
-    tokenDistribution: Map<string, number>,
-  ) {
-    super(id, attrs, tokenDistribution);
-  }
-
   getStatus(): MarketStatus {
-    return MarketStatus.Closed;
+    return 'Closed';
   }
 }
 
 export class ResolvedMarket extends AbstractMarket {
   constructor(
-    id: MarketId,
+    id: string,
     attrs: MarketAttributes,
     tokenDistribution: Map<string, number>,
     readonly resolvedTokenName: string,
@@ -111,7 +101,7 @@ export class ResolvedMarket extends AbstractMarket {
   }
 
   getStatus(): MarketStatus {
-    return MarketStatus.Resolved;
+    return 'Resolved';
   }
 }
 

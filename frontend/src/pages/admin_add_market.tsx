@@ -3,8 +3,10 @@ import styled from 'styled-components';
 import moment from 'moment';
 
 import {postMarket} from 'api/market';
-import {User, getAccessToken} from 'models/user';
+import {User} from 'models/user';
 import NotFoundPage from 'pages/not_found';
+
+const EagnaOrganizerId = 'hogehoge';
 
 const AddMarketOrNotFoundPage: FC<{user: User | null}> = ({user}) => {
   if (user !== null && user.isAdmin) {
@@ -18,61 +20,66 @@ export default AddMarketOrNotFoundPage;
 
 const AddMarketPage: FC<{user: User}> = ({user}) => {
   const [title, setTitle] = useState('');
-  const [organizer, setOrganizer] = useState('');
-  const [shortDesc, setShortDesc] = useState('');
   const [description, setDescription] = useState('');
   const [lmsrB, setLmsrB] = useState(100);
   const [openTime, setOpenTime] = useState(moment().format());
   const [closeTime, setCloseTime] = useState(moment().format());
-  const [tokens, setTokens] = useState([{name: '', description: ''}]);
+  const [tokens, setTokens] = useState([
+    {name: '', description: '', sumbnailUrl: ''},
+  ]);
+  const [prizes, setPrizes] = useState([
+    {name: '', target: '', sumbnailUrl: ''},
+  ]);
 
   const assertNotEmpty = (v: string) => {
     if (v === '') {
       alert('There are empty value!!');
-      throw 'assertNotEmpty failed';
     }
   };
 
   const assertDateString = (v: string) => {
     if (!moment(v).isValid()) {
       alert('date time format is invalid');
-      throw 'assertDateString failed';
     }
   };
 
   const validateValues = (): boolean => {
     assertNotEmpty(title);
-    assertNotEmpty(organizer);
-    assertNotEmpty(shortDesc);
     assertNotEmpty(description);
     assertDateString(openTime);
     assertDateString(closeTime);
-    tokens.forEach(({name, description}) => {
+    tokens.forEach(({name, description, sumbnailUrl}) => {
       assertNotEmpty(name);
       assertNotEmpty(description);
+      assertNotEmpty(sumbnailUrl);
+    });
+    prizes.forEach(({name, target, sumbnailUrl}) => {
+      assertNotEmpty(name);
+      assertNotEmpty(target);
+      assertNotEmpty(sumbnailUrl);
     });
 
     return true;
   };
 
   const sendRequest = () => {
-    getAccessToken(user).then(accessToken => {
+    user.getAccessToken().then(accessToken => {
       if (accessToken === null) {
         alert('ログインセッションが切れました');
       } else {
-        postMarket({
-          market: {
+        postMarket(
+          {
             title: title,
-            organizer: organizer,
-            shortDesc: shortDesc,
+            organizerId: EagnaOrganizerId,
             description: description,
             lmsrB: lmsrB,
-            openTime: moment(openTime),
-            closeTime: moment(closeTime),
+            open: moment(openTime),
+            close: moment(closeTime),
             tokens: tokens,
+            prizes: prizes.map((p, idx) => ({id: idx, ...p})),
           },
-          accessToken: accessToken,
-        }).then(marketId => {
+          accessToken,
+        ).then(marketId => {
           alert(`New market ${marketId} is created`);
         });
       }
@@ -88,22 +95,6 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
           type="text"
           value={title}
           onChange={e => setTitle(e.target.value)}
-        />
-      </Field>
-      <Field>
-        <FieldName>Organization :</FieldName>
-        <FieldInput
-          type="text"
-          value={organizer}
-          onChange={e => setOrganizer(e.target.value)}
-        />
-      </Field>
-      <Field>
-        <FieldName>Short desc :</FieldName>
-        <FieldInput
-          type="text"
-          value={shortDesc}
-          onChange={e => setShortDesc(e.target.value)}
         />
       </Field>
       <Field>
@@ -167,6 +158,16 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
                   setTokens(newTokens);
                 }}
               />
+              <FieldInputTokenSumbnailUrl
+                type="text"
+                value={token.sumbnailUrl}
+                onChange={e => {
+                  const newTokens = tokens.map((t, i) =>
+                    i === idx ? {...t, sumbnailUrl: e.target.value} : t,
+                  );
+                  setTokens(newTokens);
+                }}
+              />
               <FieldRemoveTokenButton
                 onClick={() => {
                   const newTokens = tokens.filter((t, i) => i !== idx);
@@ -179,17 +180,72 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
           <button
             onClick={() => {
               const newTokens = Array.from(tokens);
-              newTokens.push({name: '', description: ''});
+              newTokens.push({name: '', description: '', sumbnailUrl: ''});
               console.log(newTokens);
               setTokens(newTokens);
             }}>
             Add token
           </button>
         </FieldInputTokens>
-        <SubmitButton onClick={() => validateValues() && sendRequest()}>
-          Submit
-        </SubmitButton>
       </Field>
+      <Field>
+        <FieldName>Prizes :</FieldName>
+        <FieldInputPrizes>
+          {prizes.map((prize, idx) => (
+            <div key={idx}>
+              <FieldInputPrizeName
+                type="text"
+                value={prize.name}
+                onChange={e => {
+                  const newPrizes = prizes.map((t, i) =>
+                    i === idx ? {...t, name: e.target.value} : t,
+                  );
+                  setPrizes(newPrizes);
+                }}
+              />
+              <FieldInputPrizeTarget
+                type="text"
+                value={prize.target}
+                onChange={e => {
+                  const newPrizes = prizes.map((t, i) =>
+                    i === idx ? {...t, target: e.target.value} : t,
+                  );
+                  setPrizes(newPrizes);
+                }}
+              />
+              <FieldInputPrizeSumbnailUrl
+                type="text"
+                value={prize.sumbnailUrl}
+                onChange={e => {
+                  const newPrizes = prizes.map((t, i) =>
+                    i === idx ? {...t, sumbnailUrl: e.target.value} : t,
+                  );
+                  setPrizes(newPrizes);
+                }}
+              />
+              <FieldRemovePrizeButton
+                onClick={() => {
+                  const newPrizes = prizes.filter((t, i) => i !== idx);
+                  setPrizes(newPrizes);
+                }}>
+                -
+              </FieldRemovePrizeButton>
+            </div>
+          ))}
+          <button
+            onClick={() => {
+              const newPrizes = Array.from(prizes);
+              newPrizes.push({name: '', target: '', sumbnailUrl: ''});
+              console.log(newPrizes);
+              setPrizes(newPrizes);
+            }}>
+            Add prize
+          </button>
+        </FieldInputPrizes>
+      </Field>
+      <SubmitButton onClick={() => validateValues() && sendRequest()}>
+        Submit
+      </SubmitButton>
     </Container>
   );
 };
@@ -227,16 +283,47 @@ const FieldInputTokens = styled.div`
 `;
 
 const FieldInputTokenName = styled.input`
-  width: 200px;
+  width: 150px;
   margin-right: 10px;
 `;
 
 const FieldInputTokenDesc = styled.input`
-  width: 400px;
+  width: 300px;
+  margin-right: 10px;
+`;
+
+const FieldInputTokenSumbnailUrl = styled.input`
+  width: 150px;
   margin-right: 20px;
 `;
 
 const FieldRemoveTokenButton = styled.button`
+  width: 20px;
+  text-align: center;
+`;
+
+const FieldInputPrizes = styled.div`
+  display: inline-block;
+  width: 670px;
+  vertical-align: top;
+`;
+
+const FieldInputPrizeName = styled.input`
+  width: 200px;
+  margin-right: 10px;
+`;
+
+const FieldInputPrizeTarget = styled.input`
+  width: 200px;
+  margin-right: 10px;
+`;
+
+const FieldInputPrizeSumbnailUrl = styled.input`
+  width: 200px;
+  margin-right: 20px;
+`;
+
+const FieldRemovePrizeButton = styled.button`
   width: 20px;
   text-align: center;
 `;

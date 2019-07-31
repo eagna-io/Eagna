@@ -9,8 +9,8 @@ import {getMe, createUser} from 'api/user';
 import {Responsive} from 'components/responsive';
 import TopPage from 'pages/top';
 import LoginPage from 'pages/login';
-import AccountPage from 'pages/account';
-import MarketPage from 'pages/market';
+// import AccountPage from 'pages/account';
+// import MarketPage from 'pages/market';
 import AdminAddMarketPage from 'pages/admin_add_market';
 import AdminResolveMarketPage from 'pages/admin_resolve_market';
 import PlainTextPage from 'pages/plain_text';
@@ -32,19 +32,17 @@ const App: FC<{}> = () => {
             .getIdToken()
             .then(token =>
               getMe(token).then(user => {
-                if (user != null) {
+                if (user instanceof User) {
                   return user;
                 } else {
                   // Firebase認証は終わっているが、サーバーには登録されていない
                   if (fbUser.displayName == null || fbUser.email == null) {
                     // TODO
-                    throw 'Cant get name or email from Firebase Auth';
+                    throw new Error(
+                      'Cant get name or email from Firebase Auth',
+                    );
                   } else {
-                    return createUser({
-                      accessToken: token,
-                      name: fbUser.displayName,
-                      email: fbUser.email,
-                    });
+                    return createUser(token, fbUser.displayName, fbUser.email);
                   }
                 }
               }),
@@ -79,23 +77,6 @@ const App: FC<{}> = () => {
               exact
               render={({history}) => (
                 <LoginPage user={user} history={history} />
-              )}
-            />
-            <Route
-              path="/me"
-              exact
-              render={({history}) => (
-                <AccountPage user={user} history={history} />
-              )}
-            />
-            <Route
-              path="/market/:id"
-              render={({history, match}) => (
-                <MarketPage
-                  user={user}
-                  history={history}
-                  marketId={match.params.id}
-                />
               )}
             />
             <Route

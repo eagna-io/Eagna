@@ -5,7 +5,7 @@ import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import {History} from 'history';
 
-import {Market, MarketStatus} from 'models/market';
+import {Market} from 'models/market';
 import {User} from 'models/user';
 import {getMarkets} from 'api/market';
 import {getMe, createUser} from 'api/user';
@@ -24,9 +24,7 @@ const TopPage: FC<TopPageProps> = ({history, setUser}) => {
   const [featuredMarkets, setFeaturedMarkets] = useState<Market[]>([]);
 
   useEffect(() => {
-    getMarkets([MarketStatus.Upcoming, MarketStatus.Open]).then(res =>
-      setFeaturedMarkets(res),
-    );
+    getMarkets(['Upcoming', 'Open']).then(res => setFeaturedMarkets(res));
   }, []);
 
   const authConfig = createAuthConfig(history, setUser);
@@ -74,7 +72,7 @@ function createAuthConfig(
           .getIdToken()
           .then(token =>
             getMe(token).then(maybeUser => {
-              if (maybeUser !== null) {
+              if (maybeUser instanceof User) {
                 return maybeUser;
               } else {
                 // Firebase認証は終わっているが、サーバーには登録されていない
@@ -82,11 +80,7 @@ function createAuthConfig(
                   // TODO
                   throw new Error('Cant get name or email from Firebase Auth');
                 } else {
-                  return createUser({
-                    accessToken: token,
-                    name: fbUser.displayName,
-                    email: fbUser.email,
-                  });
+                  return createUser(token, fbUser.displayName, fbUser.email);
                 }
               }
             }),

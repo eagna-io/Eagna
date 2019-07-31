@@ -2,7 +2,18 @@ import moment, {Moment} from 'moment';
 import * as D from '@mojotech/json-type-validation';
 
 import {request, Method, Failure, FailureCode} from 'api/core';
-import {Market, MarketStatus, MarketId} from 'models/market';
+import {
+  Market,
+  UpcomingMarket,
+  OpenMarket,
+  ClosedMarket,
+  ResolvedMarket,
+  MarketAttributes,
+  MarketStatus,
+  Token,
+  Prize,
+  PrizeId,
+} from 'models/market';
 import {Order, NormalOrder, CoinSupplyOrder, RewardOrder} from 'models/order';
 
 /*
@@ -74,7 +85,7 @@ export function getMyMarkets(
 }
 
 export const marketDecoder: D.Decoder<Market> = D.object({
-  id: D.string().map(id => new MarketId(id)),
+  id: D.string(),
   title: D.string(),
   organizerId: D.string(),
   description: D.string(),
@@ -83,7 +94,9 @@ export const marketDecoder: D.Decoder<Market> = D.object({
   lmsrB: D.number(),
   status: D.string().map(str2status),
   resolvedTokenName: D.optional(D.string()),
-  tokenDistribution: D.dict(D.number()).map(dic => new Map(dic)),
+  tokenDistribution: D.dict(D.number()).map(
+    dic => new Map(Object.entries(dic)),
+  ),
   tokens: D.array(
     D.object({
       name: D.string(),
@@ -97,25 +110,25 @@ export const marketDecoder: D.Decoder<Market> = D.object({
       name: D.string(),
       sumbnailUrl: D.string(),
       target: D.string(),
-    }).map(p => new Token(p.id, p.name, p.target, p.sumbnailUrl)),
+    }).map(p => new Prize(p.id, p.name, p.target, p.sumbnailUrl)),
   ),
-}).map(market => {
+}).map(m => {
   const attrs = new MarketAttributes(
-    market.title,
-    market.organizerId,
-    market.description,
-    market.open,
-    market.close,
-    market.lmsrB,
-    market.tokens,
-    market.prizes,
+    m.title,
+    m.organizerId,
+    m.description,
+    m.open,
+    m.close,
+    m.lmsrB,
+    m.tokens,
+    m.prizes,
   );
-  if (market.status === 'Upcoming') {
-    return new UpcomingMarket(market.id, attrs);
-  } else if (market.status === 'Open') {
-    return new OpenMarket(market.id, attrs, m.tokenDistribution);
-  } else if (market.status === 'Closed') {
-    return new ClosedMarket(market.id, attrs, m.tokenDistribution);
+  if (m.status === 'Upcoming') {
+    return new UpcomingMarket(m.id, attrs);
+  } else if (m.status === 'Open') {
+    return new OpenMarket(m.id, attrs, m.tokenDistribution);
+  } else if (m.status === 'Closed') {
+    return new ClosedMarket(m.id, attrs, m.tokenDistribution);
   } else {
     const resolvedTokenName = m.resolvedTokenName;
     if (resolvedTokenName === undefined) {
@@ -124,10 +137,10 @@ export const marketDecoder: D.Decoder<Market> = D.object({
       );
     }
     return new ResolvedMarket(
-      market.id,
+      m.id,
       attrs,
       m.tokenDistribution,
-      resolvedTOkenName,
+      resolvedTokenName,
     );
   }
 });
@@ -172,13 +185,13 @@ interface PostMarketArgs {
 export function postMarket(
   market: PostMarketArgs,
   accessToken: string,
-): Promise<MarketId | 'Unauthorized'> {
+): Promise<string | 'Unauthorized'> {
   return request({
     method: Method.POST,
     path: '/markets/',
     accessToken: accessToken,
     body: market,
-    decoder: D.string().map(s => new MarketId(s)),
+    decoder: D.string(),
   }).then(res => {
     if (res instanceof Failure) {
       if (res.code === FailureCode.Unauthorized) {
@@ -198,17 +211,11 @@ export function postMarket(
  * =======================
  */
 
-interface ResolveMarketArgs {
-  marketId: string;
-  resolvedTokenName: string;
-  accessToken: string;
-}
-
-export function resolveMarket({
-  marketId,
-  resolvedTokenName,
-  accessToken,
-}: ResolveMarketArgs): Promise<string | 'Unauthorized'> {
+export function resolveMarket(
+  marketId: string,
+  resolvedTokenName: string,
+  accessToken: string,
+): Promise<string | 'Unauthorized'> {
   return request({
     method: Method.PUT,
     path: `/markets/${marketId}/`,
@@ -263,11 +270,7 @@ export function getMyOrders(
     },
     accessToken: accessToken,
     decoder: D.array(
-      D.union(
-        normalOrderDecoder,
-        initialSupplyOrderDecoder,
-        settleOrderDecoder,
-      ),
+      D.union(normalOrderDecoder, coinSupplyOrderDecoder, settleOrderDecoder),
     ),
   }).then(res => {
     if (res instanceof Failure) {
@@ -288,7 +291,10 @@ const normalOrderDecoder: D.Decoder<NormalOrder> = D.object({
   amountCoin: D.number(),
   time: D.string().map(s => moment(s)),
   type: D.constant('Normal'),
-}).map(obj => new NormalOrder(tokenName, amountToken, amountCoin));
+}).map(
+  obj =>
+    new NormalOrder(obj.tokenName, obj.amountToken, obj.amountCoin, obj.time),
+);
 
 const coinSupplyOrderDecoder: D.Decoder<CoinSupplyOrder> = D.object({
   amountToken: D.number(),
@@ -369,7 +375,7 @@ export function createNormalOrder(
       } else if (res.code === FailureCode.Unauthorized) {
         return 'Unauthorized';
       } else {
-        throw `Unexpected failure : ${res.message}`;
+        throw new Error(`Unexpected failure : ${res.message}`);
       }
     } else {
       return res;

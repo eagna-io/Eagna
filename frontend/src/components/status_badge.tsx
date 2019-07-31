@@ -35,11 +35,11 @@ const StatusBadge: FC<StatusBadgeProps> = ({status, className}) => {
 export default StatusBadge;
 
 function statusToColor(s: MarketStatus): string {
-  if (s === MarketStatus.Upcoming) {
+  if (s === 'Upcoming') {
     return '#D8D212';
-  } else if (s === MarketStatus.Open) {
+  } else if (s === 'Open') {
     return '#23AC0E';
-  } else if (s === MarketStatus.Closed) {
+  } else if (s === 'Closed') {
     return '#3261AB';
   } else {
     return '#A52175';

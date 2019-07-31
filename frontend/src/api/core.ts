@@ -101,4 +101,4 @@ const failureDecoder: D.Decoder<Failure> = D.object({
     code: D.number(),
     message: D.string(),
   }),
-}).map(obj => new Failure(code, message));
+}).map(obj => new Failure(obj.error.code, obj.error.message));

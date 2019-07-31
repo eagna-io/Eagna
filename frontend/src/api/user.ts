@@ -38,7 +38,7 @@ export function createUser(
     },
   }).then(res => {
     if (res instanceof Failure) {
-      throw `Unexpected failure : ${res.message}`;
+      throw new Error(`Unexpected failure : ${res.message}`);
     } else {
       return res;
     }
@@ -50,4 +50,4 @@ const userDecoder: D.Decoder<User> = D.object({
   name: D.string(),
   email: D.string(),
   isAdmin: D.boolean(),
-}).map(obj => new User(id, name, email, isAdmin));
+}).map(obj => new User(obj.id, obj.name, obj.email, obj.isAdmin));

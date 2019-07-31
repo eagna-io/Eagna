@@ -13,12 +13,12 @@ interface Props {
 const Component: FC<Props> = React.memo(({market}) => {
   return (
     <Container to={`/market/${market.id}`}>
-      <StatusBadge status={market.status} />
-      <Title>{market.title}</Title>
+      <StatusBadge status={market.getStatus()} />
+      <Title>{market.attrs.title}</Title>
       <HR />
       <TokenContainer>
-        {market.tokens.map(token => (
-          <TokenItem key={token.id}>
+        {market.attrs.tokens.map(token => (
+          <TokenItem key={token.name}>
             <TokenName>{token.name}</TokenName>
             <TokenPrice>-</TokenPrice>
           </TokenItem>

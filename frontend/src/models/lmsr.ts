@@ -14,19 +14,19 @@ export function computeLMSRPrices(
   distribution: Map<string, number>,
 ): Map<string, number> {
   const denom = sum(values(distribution).map(n => Math.exp(n / lmsrB)));
-  const prices = entries(distribution).map(([name, n]) => [
-    name,
-    normalize(Math.exp(n / lmsrB) / denom),
-  ]);
+  const prices = entries(distribution).map(
+    ([name, n]) =>
+      [name, normalize(Math.exp(n / lmsrB) / denom)] as [string, number],
+  );
 
   return new Map(prices);
 }
 
-function values(map: Map<Token, number>): number[] {
+function values(map: Map<string, number>): number[] {
   return Array.from(map.values());
 }
 
-function entries(map: Map<Token, number>): [Token, number][] {
+function entries(map: Map<string, number>): [string, number][] {
   return Array.from(map.entries());
 }
 

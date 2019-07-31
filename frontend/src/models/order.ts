@@ -1,8 +1,11 @@
-class PublicOrderHistory {
+import {Moment} from 'moment';
+import {Token} from 'models/market';
+
+export class PublicOrderHistory {
   constructor(readonly orders: NormalOrder[]) {}
 }
 
-class MyAssets {
+export class MyAssets {
   readonly myTokens: Map<string, number>;
   readonly myCoins: number;
 
@@ -10,12 +13,15 @@ class MyAssets {
     this.myCoins = orders.reduce((acc, order) => acc + order.amountCoin, 0);
 
     const amountTokens = new Map(tokens.map(token => [token.name, 0]));
-    for order in order {
+    orders.forEach(order => {
       if (order instanceof NormalOrder) {
         const currentVal = amountTokens.get(order.tokenName);
+        if (currentVal === undefined) {
+          throw new Error(`Token ${order.tokenName} does not exist`);
+        }
         amountTokens.set(order.tokenName, currentVal + order.amountToken);
       }
-    }
+    });
     this.myTokens = amountTokens;
   }
 }

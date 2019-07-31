@@ -2,8 +2,8 @@ import React, {FC, useState, useEffect} from 'react';
 import styled from 'styled-components';
 
 import {getMarkets, resolveMarket} from 'api/market';
-import {User, getAccessToken} from 'models/user';
-import {Market, MarketStatus} from 'models/market';
+import {User} from 'models/user';
+import {Market} from 'models/market';
 import NotFoundPage from 'pages/not_found';
 
 const AdminResolveMarketOrNotFound: FC<{user: User | null}> = ({user}) => {
@@ -20,7 +20,7 @@ const ResolveMarketPage: FC<{user: User}> = ({user}) => {
   const [closedMarkets, setClosedMarkets] = useState<Market[]>([]);
 
   useEffect(() => {
-    getMarkets([MarketStatus.Closed]).then(setClosedMarkets);
+    getMarkets(['Closed']).then(setClosedMarkets);
   }, []);
 
   return (
@@ -60,24 +60,22 @@ const ResolveMarketComponent: FC<ResolveMarketComponentProps> = ({
 }) => {
   return (
     <ResolveMarketContainer>
-      <Title>{market.title}</Title>
+      <Title>{market.attrs.title}</Title>
       <TokenList>
-        {market.tokens.map(token => (
-          <TokenContainer key={token.id}>
+        {market.attrs.tokens.map(token => (
+          <TokenContainer key={token.name}>
             <TokenName>{token.name}</TokenName>
             <ResolveButton
               onClick={() => {
-                getAccessToken(user).then(accessToken => {
+                user.getAccessToken().then(accessToken => {
                   if (accessToken === null) {
                     alert('ログインセッションが切れました');
                   } else {
-                    resolveMarket({
-                      marketId: market.id,
-                      resolveTokenId: token.id,
-                      accessToken: accessToken,
-                    }).then(() => {
-                      onResolved();
-                    });
+                    resolveMarket(market.id, token.name, accessToken).then(
+                      () => {
+                        onResolved();
+                      },
+                    );
                   }
                 });
               }}>
