@@ -1,94 +1,53 @@
 import * as D from '@mojotech/json-type-validation';
 
-import {request, Method, FailureCode, isFailure} from 'api/core';
+import {request, Method, FailureCode, Failure} from 'api/core';
 import {User} from 'models/user';
-import {Market} from 'models/market';
-import {marketDecoder} from 'api/market';
 
-export function getMe(accessToken: string): Promise<User | null> {
+export function getMe(accessToken: string): Promise<User | 'Unauthorized'> {
   return request({
     method: Method.GET,
-    path: '/me/',
+    path: '/users/me/',
     accessToken: accessToken,
-    decoder: userRespDecoder,
+    decoder: userDecoder,
   }).then(res => {
-    if (isFailure(res)) {
-      if (res.error.code === FailureCode.Unauthorized) {
-        return null;
+    if (res instanceof Failure) {
+      if (res.code === FailureCode.Unauthorized) {
+        return 'Unauthorized';
       } else {
-        throw `Unexpected failure : ${res.error.message}`;
+        throw new Error(`Unexpected failure : ${res.message}`);
       }
-    } else {
-      return {
-        uid: res.id,
-        name: res.name,
-        email: res.email,
-        isAdmin: res.isAdmin,
-        accessToken: accessToken,
-      };
-    }
-  });
-}
-
-export function getMyMarkets(accessToken: string): Promise<Market[]> {
-  return request({
-    method: Method.GET,
-    path: '/me/markets/',
-    accessToken: accessToken,
-    decoder: D.array(marketDecoder),
-  }).then(res => {
-    if (isFailure(res)) {
-      throw `Unexpected failure : ${res.error.message}`;
     } else {
       return res;
     }
   });
 }
 
-interface CreateUserArgs {
-  accessToken: string;
-  name: string;
-  email: string;
-}
-
-export function createUser({
-  accessToken,
-  name,
-  email,
-}: CreateUserArgs): Promise<User> {
+export function createUser(
+  accessToken: string,
+  name: string,
+  email: string,
+): Promise<User> {
   return request({
     method: Method.POST,
     path: '/users/',
     accessToken: accessToken,
-    decoder: userRespDecoder,
+    decoder: userDecoder,
     body: {
       name: name,
       email: email,
     },
   }).then(res => {
-    if (isFailure(res)) {
-      throw `Unexpected failure : ${res.error.message}`;
+    if (res instanceof Failure) {
+      throw `Unexpected failure : ${res.message}`;
     } else {
-      return {
-        uid: res.id,
-        name: res.name,
-        email: res.email,
-        isAdmin: res.isAdmin,
-      };
+      return res;
     }
   });
 }
 
-interface UserResp {
-  id: string;
-  name: string;
-  email: string;
-  isAdmin: boolean;
-}
-
-const userRespDecoder: D.Decoder<UserResp> = D.object({
+const userDecoder: D.Decoder<User> = D.object({
   id: D.string(),
   name: D.string(),
   email: D.string(),
   isAdmin: D.boolean(),
-});
+}).map(obj => new User(id, name, email, isAdmin));

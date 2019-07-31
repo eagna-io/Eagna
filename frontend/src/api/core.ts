@@ -23,11 +23,8 @@ export interface RequestParams {
 
 type RequestParamVal = string | number | boolean | Array<string | number>;
 
-export interface Failure {
-  error: {
-    code: number;
-    message: string;
-  };
+export class Failure {
+  constructor(readonly code: number, readonly message: string) {}
 }
 
 export enum FailureCode {
@@ -35,10 +32,6 @@ export enum FailureCode {
   InvalidPayload = 1,
   Unauthorized = 2,
   ServerError = 100,
-}
-
-export function isFailure<T>(v: T | Failure): v is Failure {
-  return (v as Failure).error !== undefined;
 }
 
 export function request<T>(args: RequestArgs<T>): Promise<T | Failure> {
@@ -108,4 +101,4 @@ const failureDecoder: D.Decoder<Failure> = D.object({
     code: D.number(),
     message: D.string(),
   }),
-});
+}).map(obj => new Failure(code, message));
