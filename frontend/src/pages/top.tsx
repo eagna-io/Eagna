@@ -12,6 +12,7 @@ import {getMe, createUser} from 'api/user';
 import {pc} from 'components/responsive';
 
 import Header from './top/components/header';
+import ThreeStepsSection from './top/components/three-steps';
 import FeaturedMarketComponent from './top/components/featured_market';
 import Footer from './top/components/footer';
 
@@ -45,6 +46,7 @@ const TopPage: FC<TopPageProps> = ({history, setUser}) => {
           </AnnounceBetaRelease>
         </MainSectionBgFilter>
       </MainSection>
+      <ThreeStepsSection />
       <FeaturedMarketsSection>
         <SectionTitle>注目のマーケット</SectionTitle>
         <FeaturedMarketList>
@@ -198,6 +200,7 @@ const FeaturedMarketsSection = styled.div`
   width: 100vw;
   padding-top: 31px;
   padding-bottom: 50px;
+  background-color: #F8F8F8;
 
   ${pc(`
     padding-top: 64px;
@@ -221,7 +224,7 @@ const SectionTitle = styled.h3`
   text-align: center;
   line-height: 30px;
   font-size: 20px;
-  font-weight: 100;
+  font-weight: normal;
   text-align: center;
   margin: 0;
   padding: 0;

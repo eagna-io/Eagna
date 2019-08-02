@@ -48,6 +48,8 @@ const Logo = styled.img`
 `;
 
 const HeaderLinks = styled.div`
+  display: flex;
+  flex-direction: row-reverse;
   width: 100%;
   height: 45px;
 
@@ -63,7 +65,7 @@ const HeaderLinks = styled.div`
 const HeaderLink = styled.a`
   display: inline-block;
   height: 45px;
-  width: 33.3%;
+  width: 33.33%;
   font-weight: 300;
   font-size: 13px;
   text-align: center;
