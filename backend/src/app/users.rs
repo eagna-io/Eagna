@@ -16,7 +16,7 @@ pub fn me(infra: &InfraManager, req: &Request) -> Result<Response, FailureRespon
         };
         return Ok(Response::json(&res_data));
     } else {
-        return Err(FailureResponse::ResourceNotFound);
+        return Err(FailureResponse::Unauthorized);
     }
 }
 

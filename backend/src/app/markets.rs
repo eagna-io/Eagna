@@ -193,7 +193,7 @@ mod post {
     }
 
     #[derive(Debug, Deserialize)]
-    // `id` フィールドは無視される
+    #[serde(rename_all = "camelCase")]
     struct PostMarketRequest {
         #[serde(flatten)]
         attrs: MarketAttrs,

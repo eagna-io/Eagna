@@ -455,6 +455,7 @@ impl TokenDistribution {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MarketAttrs {
     pub title: MarketTitle,
     pub organizer_id: OrganizerId,
@@ -571,6 +572,7 @@ impl MarketTokens {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From)]
+#[serde(rename_all = "camelCase")]
 pub struct Token {
     pub name: TokenName,
     pub description: TokenDesc,
@@ -614,6 +616,7 @@ impl MarketPrizes {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Prize {
     pub id: PrizeId,
     pub name: PrizeName,
