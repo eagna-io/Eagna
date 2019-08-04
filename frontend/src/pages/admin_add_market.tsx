@@ -6,7 +6,7 @@ import {postMarket} from 'api/market';
 import {User} from 'models/user';
 import NotFoundPage from 'pages/not_found';
 
-const EagnaOrganizerId = 'hogehoge';
+const EagnaOrganizerId = 'e643a0da-dc5c-4c2d-9585-c2c6da0cf77d';
 
 const AddMarketOrNotFoundPage: FC<{user: User | null}> = ({user}) => {
   if (user !== null && user.isAdmin) {
@@ -31,35 +31,41 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
     {name: '', target: '', sumbnailUrl: ''},
   ]);
 
-  const assertNotEmpty = (v: string) => {
+  const assertNotEmpty = (v: string): boolean => {
     if (v === '') {
       alert('There are empty value!!');
+      return false;
     }
+    return true;
   };
 
-  const assertDateString = (v: string) => {
+  const assertDateString = (v: string): boolean => {
     if (!moment(v).isValid()) {
       alert('date time format is invalid');
+      return false;
     }
+    return true;
   };
 
   const validateValues = (): boolean => {
-    assertNotEmpty(title);
-    assertNotEmpty(description);
-    assertDateString(openTime);
-    assertDateString(closeTime);
-    tokens.forEach(({name, description, sumbnailUrl}) => {
-      assertNotEmpty(name);
-      assertNotEmpty(description);
-      assertNotEmpty(sumbnailUrl);
-    });
-    prizes.forEach(({name, target, sumbnailUrl}) => {
-      assertNotEmpty(name);
-      assertNotEmpty(target);
-      assertNotEmpty(sumbnailUrl);
-    });
-
-    return true;
+    return (
+      assertNotEmpty(title) &&
+      assertNotEmpty(description) &&
+      assertDateString(openTime) &&
+      assertDateString(closeTime) &&
+      tokens.every(
+        ({name, description, sumbnailUrl}) =>
+          assertNotEmpty(name) &&
+          assertNotEmpty(description) &&
+          assertNotEmpty(sumbnailUrl),
+      ) &&
+      prizes.every(
+        ({name, target, sumbnailUrl}) =>
+          assertNotEmpty(name) &&
+          assertNotEmpty(target) &&
+          assertNotEmpty(sumbnailUrl),
+      )
+    );
   };
 
   const sendRequest = () => {
@@ -141,6 +147,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
               <FieldInputTokenName
                 type="text"
                 value={token.name}
+                placeholder="name"
                 onChange={e => {
                   const newTokens = tokens.map((t, i) =>
                     i === idx ? {...t, name: e.target.value} : t,
@@ -151,6 +158,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
               <FieldInputTokenDesc
                 type="text"
                 value={token.description}
+                placeholder="description"
                 onChange={e => {
                   const newTokens = tokens.map((t, i) =>
                     i === idx ? {...t, description: e.target.value} : t,
@@ -161,6 +169,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
               <FieldInputTokenSumbnailUrl
                 type="text"
                 value={token.sumbnailUrl}
+                placeholder="sumbnail url"
                 onChange={e => {
                   const newTokens = tokens.map((t, i) =>
                     i === idx ? {...t, sumbnailUrl: e.target.value} : t,
@@ -196,6 +205,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
               <FieldInputPrizeName
                 type="text"
                 value={prize.name}
+                placeholder="name"
                 onChange={e => {
                   const newPrizes = prizes.map((t, i) =>
                     i === idx ? {...t, name: e.target.value} : t,
@@ -206,6 +216,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
               <FieldInputPrizeTarget
                 type="text"
                 value={prize.target}
+                placeholder="target"
                 onChange={e => {
                   const newPrizes = prizes.map((t, i) =>
                     i === idx ? {...t, target: e.target.value} : t,
@@ -216,6 +227,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
               <FieldInputPrizeSumbnailUrl
                 type="text"
                 value={prize.sumbnailUrl}
+                placeholder="sumbnail url"
                 onChange={e => {
                   const newPrizes = prizes.map((t, i) =>
                     i === idx ? {...t, sumbnailUrl: e.target.value} : t,

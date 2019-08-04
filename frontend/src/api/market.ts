@@ -173,6 +173,7 @@ interface PostMarketArgs {
   tokens: {
     name: string;
     description: string;
+    sumbnailUrl: string;
   }[];
   prizes: {
     id: number;

@@ -55,7 +55,7 @@ const Container = styled(Link)`
     }
 
     &:hover {
-      transform: scale(0.1);
+      transform: scale(1.01);
     }
   `)}
 `;
