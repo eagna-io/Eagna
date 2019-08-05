@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import {getMarkets, resolveMarket} from 'api/market';
 import {User} from 'models/user';
 import {Market} from 'models/market';
-import NotFoundPage from 'pages/not_found';
+import NotFoundPage from 'app/pages/not_found';
 
 const AdminResolveMarketOrNotFound: FC<{user: User | null}> = ({user}) => {
   if (user !== null && user.isAdmin) {

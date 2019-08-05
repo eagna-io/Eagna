@@ -9,7 +9,7 @@ import {Market} from 'models/market';
 import {User} from 'models/user';
 import {getMarkets} from 'api/market';
 import {getMe, createUser} from 'api/user';
-import {pc} from 'components/responsive';
+import {pc} from 'app/components/responsive';
 
 import Header from './top/components/header';
 import ThreeStepsSection from './top/components/three-steps';

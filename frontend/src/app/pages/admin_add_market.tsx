@@ -4,7 +4,7 @@ import moment from 'moment';
 
 import {postMarket} from 'api/market';
 import {User} from 'models/user';
-import NotFoundPage from 'pages/not_found';
+import NotFoundPage from 'app/pages/not_found';
 
 const EagnaOrganizerId = 'e643a0da-dc5c-4c2d-9585-c2c6da0cf77d';
 

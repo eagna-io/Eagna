@@ -3,8 +3,8 @@ import styled from 'styled-components';
 import {Link} from 'react-router-dom';
 
 import {Market} from 'models/market';
-import {pc} from 'components/responsive';
-import StatusBadge from 'components/status_badge';
+import {pc} from 'app/components/responsive';
+import StatusBadge from 'app/components/status_badge';
 
 interface Props {
   market: Market;

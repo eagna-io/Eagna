@@ -1,7 +1,7 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
 
-import {pc} from 'components/responsive';
+import {pc} from 'app/components/responsive';
 
 const Header: FC<{}> = React.memo(() => {
   return (

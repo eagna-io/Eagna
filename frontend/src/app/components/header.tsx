@@ -8,7 +8,7 @@ import {History} from 'history';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 
-import {pc} from 'components/responsive';
+import {pc} from 'app/components/responsive';
 import {User} from 'models/user';
 
 interface HeaderProps {

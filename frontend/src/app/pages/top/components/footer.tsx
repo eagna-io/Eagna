@@ -1,6 +1,6 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
-import {pc} from 'components/responsive';
+import {pc} from 'app/components/responsive';
 
 const Footer: FC<{}> = React.memo(() => {
   return (
