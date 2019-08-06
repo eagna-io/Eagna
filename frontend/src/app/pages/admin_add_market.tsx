@@ -4,19 +4,20 @@ import moment from 'moment';
 
 import {postMarket} from 'api/market';
 import {User} from 'models/user';
+import {withUser, LoginStatus} from 'app/components/user';
 import NotFoundPage from 'app/pages/not_found';
 
 const EagnaOrganizerId = 'e643a0da-dc5c-4c2d-9585-c2c6da0cf77d';
 
-const AddMarketOrNotFoundPage: FC<{user: User | null}> = ({user}) => {
-  if (user !== null && user.isAdmin) {
+const AddMarketOrNotFoundPage: FC<{user: LoginStatus}> = ({user}) => {
+  if (user instanceof User && user.isAdmin) {
     return <AddMarketPage user={user} />;
   } else {
     return <NotFoundPage />;
   }
 };
 
-export default AddMarketOrNotFoundPage;
+export default withUser<{}>(AddMarketOrNotFoundPage);
 
 const AddMarketPage: FC<{user: User}> = ({user}) => {
   const [title, setTitle] = useState('');

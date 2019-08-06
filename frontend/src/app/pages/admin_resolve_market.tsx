@@ -4,17 +4,18 @@ import styled from 'styled-components';
 import {getMarkets, resolveMarket} from 'api/market';
 import {User} from 'models/user';
 import {Market} from 'models/market';
+import {withUser, LoginStatus} from 'app/components/user';
 import NotFoundPage from 'app/pages/not_found';
 
-const AdminResolveMarketOrNotFound: FC<{user: User | null}> = ({user}) => {
-  if (user !== null && user.isAdmin) {
+const AdminResolveMarketOrNotFound: FC<{user: LoginStatus}> = ({user}) => {
+  if (user instanceof User && user.isAdmin) {
     return <ResolveMarketPage user={user} />;
   } else {
     return <NotFoundPage />;
   }
 };
 
-export default AdminResolveMarketOrNotFound;
+export default withUser<{}>(AdminResolveMarketOrNotFound);
 
 const ResolveMarketPage: FC<{user: User}> = ({user}) => {
   const [closedMarkets, setClosedMarkets] = useState<Market[]>([]);

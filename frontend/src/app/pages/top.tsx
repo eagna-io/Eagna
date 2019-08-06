@@ -3,12 +3,9 @@ import styled from 'styled-components';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
-import {History} from 'history';
 
 import {Market} from 'models/market';
-import {User} from 'models/user';
 import {getMarkets} from 'api/market';
-import {getMe, createUser} from 'api/user';
 import {pc} from 'app/components/responsive';
 
 import Header from './top/components/header';
@@ -16,19 +13,12 @@ import ThreeStepsSection from './top/components/three-steps';
 import FeaturedMarketComponent from './top/components/featured_market';
 import Footer from './top/components/footer';
 
-interface TopPageProps {
-  history: History;
-  setUser: (user: User) => void;
-}
-
-const TopPage: FC<TopPageProps> = ({history, setUser}) => {
+const TopPage: FC = () => {
   const [featuredMarkets, setFeaturedMarkets] = useState<Market[]>([]);
 
   useEffect(() => {
     getMarkets(['Upcoming', 'Open']).then(res => setFeaturedMarkets(res));
   }, []);
-
-  const authConfig = createAuthConfig(history, setUser);
 
   return (
     <>
@@ -62,63 +52,30 @@ const TopPage: FC<TopPageProps> = ({history, setUser}) => {
 
 export default TopPage;
 
-function createAuthConfig(
-  history: History,
-  setUser: (user: User) => void,
-): object {
-  return {
-    callbacks: {
-      signInSuccessWithAuthResult: (args: {user: firebase.User}) => {
-        const fbUser = args.user;
-        fbUser
-          .getIdToken()
-          .then(token =>
-            getMe(token).then(maybeUser => {
-              if (maybeUser instanceof User) {
-                return maybeUser;
-              } else {
-                // Firebase認証は終わっているが、サーバーには登録されていない
-                if (fbUser.displayName === null || fbUser.email === null) {
-                  // TODO
-                  throw new Error('Cant get name or email from Firebase Auth');
-                } else {
-                  return createUser(token, fbUser.displayName, fbUser.email);
-                }
-              }
-            }),
-          )
-          .then(user => {
-            setUser(user);
-            history.push('/me');
-          });
-
-        return false;
+const authConfig = {
+  signInSuccessUrl: '/me',
+  signInOptions: [
+    {
+      provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      scopes: ['https://www.googleapis.com/auth/userinfo.email'],
+      customParameters: {
+        prompt: 'select_account',
       },
     },
-    signInSuccessUrl: '/me',
-    signInOptions: [
-      {
-        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        scopes: ['https://www.googleapis.com/auth/userinfo.email'],
-        customParameters: {
-          prompt: 'select_account',
-        },
-      },
-      {
-        provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        scopes: ['email'],
-      },
-      {
-        provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
-        scopes: ['user:email'],
-      },
-      {
-        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        requireDisplayName: true,
-      },
-    ],
-  };
-}
+    {
+      provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      scopes: ['email'],
+    },
+    {
+      provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
+      scopes: ['user:email'],
+    },
+    {
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      requireDisplayName: true,
+    },
+  ],
+};
 
 const MainSection = styled.div`
   height: 448px;
@@ -200,7 +157,7 @@ const FeaturedMarketsSection = styled.div`
   width: 100vw;
   padding-top: 31px;
   padding-bottom: 50px;
-  background-color: #F8F8F8;
+  background-color: #f8f8f8;
 
   ${pc(`
     padding-top: 64px;

@@ -1,31 +1,33 @@
 import React, {FC, useEffect} from 'react';
 import styled from 'styled-components';
-import {History, LocationDescriptor} from 'history';
+import {withRouter} from 'react-router-dom';
+import {History} from 'history';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 
 import {User} from 'models/user';
+import {LoginStatus, withUser} from 'app/components/user';
 
 interface LoginPageProps {
-  history: History<{redirect?: LocationDescriptor}>;
-  user: User | null;
+  history: History;
+  user: LoginStatus;
 }
 
 const LoginPage: FC<LoginPageProps> = ({history, user}) => {
   useEffect(() => {
-    if (user != null) {
+    if (user instanceof User) {
       const redirectLocation =
         history.location.state && history.location.state.redirect;
       if (!redirectLocation) {
-        history.push('/me');
+        history.push('/account');
       } else if (typeof redirectLocation === 'string') {
         history.push(redirectLocation);
       } else {
         history.push(redirectLocation);
       }
     }
-  }, [user]);
+  }, [user, history]);
 
   // 認証が成功した後のフローは、app.tsxに戻る
   return (
@@ -44,7 +46,7 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
   );
 };
 
-export default LoginPage;
+export default withRouter(withUser<{history: History}>(LoginPage));
 
 const uiConfig = {
   signInSuccessUrl: '/me',

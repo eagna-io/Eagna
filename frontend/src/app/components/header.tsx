@@ -1,19 +1,20 @@
 import React, {FC, useState} from 'react';
 import styled from 'styled-components';
 import OutsideClickHandler from 'react-outside-click-handler';
-import {Link} from 'react-router-dom';
+import {Link, withRouter} from 'react-router-dom';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faUserCircle, faCaretDown} from '@fortawesome/free-solid-svg-icons';
 import {History} from 'history';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 
-import {pc} from 'app/components/responsive';
 import {User} from 'models/user';
+import {pc} from 'app/components/responsive';
+import {withUser, LoginStatus} from 'app/components/user';
 
 interface HeaderProps {
   history: History;
-  user: User | null;
+  user: LoginStatus;
 }
 
 const Header: FC<HeaderProps> = ({history, user}) => {
@@ -29,7 +30,7 @@ const Header: FC<HeaderProps> = ({history, user}) => {
   );
 };
 
-export default Header;
+export default withRouter(withUser<{history: History}>(Header));
 
 const Container = styled.div`
   width: 100vw;
@@ -54,7 +55,7 @@ const ProfileDropdownContainer = styled.div`
 
 interface ProfileDropdownProps {
   history: History;
-  user: User | null;
+  user: LoginStatus;
 }
 
 const ProfileDropdown: FC<ProfileDropdownProps> = ({history, user}) => {
@@ -89,7 +90,7 @@ const ProfileDropdown: FC<ProfileDropdownProps> = ({history, user}) => {
         </DropdownCaret>
       </ProfileButton>
       <ProfileMenu show={showMenu}>
-        {user != null ? (
+        {user instanceof User ? (
           <>
             <MenuItem>
               <MenuItemLink to="/me">{user.name}</MenuItemLink>

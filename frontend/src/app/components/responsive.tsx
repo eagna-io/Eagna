@@ -1,7 +1,7 @@
 import React, {FC, useState, useEffect, useContext} from 'react';
 
-const MinTabletWidth = 768;
-const MinPcWidth = 980;
+export const MinTabletWidth = 768;
+export const MinPcWidth = 980;
 
 export function pc(css: string): string {
   return `@media (min-width: ${MinPcWidth}px) {
