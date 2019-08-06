@@ -481,6 +481,7 @@ impl MarketId {
         MarketId(Uuid::new_v4())
     }
 
+    /// ex : "e643a0dadc5c4c2d9585c2c6da0cf77d"
     pub fn to_str(&self) -> impl AsRef<str> {
         let mut str_buf = Uuid::encode_buffer();
         let tmp_str = self.0.to_simple_ref().encode_lower(&mut str_buf);
