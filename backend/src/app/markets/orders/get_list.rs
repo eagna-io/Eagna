@@ -16,33 +16,26 @@ pub fn get_list(
         None => return Err(FailureResponse::ResourceNotFound),
     };
 
-    let orders = market.orders();
-
-    let resp_orders = orders
-        .filter_normal_orders()
-        .map(|o| ApiOrderModel::from(Order::from(o.clone()))) // TODO : stop clone
-        .collect();
-
-    let mut resp = RespBody {
-        orders: resp_orders,
-        my_orders: None,
-    };
-
-    if let Some("mine") = get_params(req, "contains").next() {
+    if let Some("true") = get_params(req, "mine").next() {
         let access_token = validate_bearer_header(infra, req)?;
-        let my_orders = orders
+        let my_orders = market
+            .orders()
             .iter_related_to_user(&access_token.user_id)
             .map(|o| ApiOrderModel::from(o.clone()))
             .collect();
-        resp.my_orders = Some(my_orders);
-    }
+        Ok(Response::json(&RespBody { orders: my_orders }))
+    } else {
+        let orders = market
+            .orders()
+            .filter_normal_orders()
+            .map(|o| ApiOrderModel::from(Order::from(o.clone()))) // TODO : stop clone
+            .collect();
 
-    Ok(Response::json(&resp))
+        Ok(Response::json(&RespBody { orders: orders }))
+    }
 }
 
 #[derive(Debug, Serialize)]
 struct RespBody {
     orders: Vec<ApiOrderModel>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    my_orders: Option<Vec<ApiOrderModel>>,
 }
