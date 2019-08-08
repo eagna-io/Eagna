@@ -78,7 +78,7 @@ const AccountPage: FC<{user: User}> = ({user}) => {
 
 const Container = styled.div`
   width: 95%;
-  max-width: ${MinPcWidth};
+  max-width: ${MinPcWidth}px;
   margin: 0 auto;
   padding-top: 50px;
 `;

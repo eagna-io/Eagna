@@ -12,27 +12,31 @@ interface StatusBadgeProps {
 const StatusBadge: FC<StatusBadgeProps> = ({status, className}) => {
   const color = statusToColor(status);
 
-  const Badge = styled.div`
-    width: 72p;
-    height: 27px;
-    line-height: 27px;
-    font-size: 11px;
-    background-color: ${color};
-    border-radius: 4px;
-    color: white;
-    font-weight: 700;
-    text-align: center;
-
-    ${pc(`
-    width: 87px;
-    font-size: 15px;
-  `)}
-  `;
-
-  return <Badge className={className}>{status}</Badge>;
+  return (
+    <Badge className={className} color={color}>
+      {status}
+    </Badge>
+  );
 };
 
 export default StatusBadge;
+
+const Badge = styled('div')<{color: string}>`
+  width: 72p;
+  height: 27px;
+  line-height: 27px;
+  font-size: 11px;
+  background-color: ${props => props.color};
+  border-radius: 4px;
+  color: white;
+  font-weight: 700;
+  text-align: center;
+
+  ${pc(`
+    width: 87px;
+    font-size: 15px;
+  `)}
+`;
 
 function statusToColor(s: MarketStatus): string {
   if (s === 'Upcoming') {
