@@ -1,11 +1,9 @@
-import React, {FC, useState, useEffect} from 'react';
+import React, {FC} from 'react';
 import styled from 'styled-components';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
-import {Market} from 'models/market';
-import {getMarkets} from 'api/market';
 import {pc} from 'app/components/responsive';
 
 import Header from './top/components/header';
@@ -14,12 +12,6 @@ import FeaturedMarketComponent from './top/components/featured_market';
 import Footer from './top/components/footer';
 
 const TopPage: FC = () => {
-  const [featuredMarkets, setFeaturedMarkets] = useState<Market[]>([]);
-
-  useEffect(() => {
-    getMarkets(['Upcoming', 'Open']).then(res => setFeaturedMarkets(res));
-  }, []);
-
   return (
     <>
       <Header />
@@ -37,14 +29,7 @@ const TopPage: FC = () => {
         </MainSectionBgFilter>
       </MainSection>
       <ThreeStepsSection />
-      <FeaturedMarketsSection>
-        <SectionTitle>注目のマーケット</SectionTitle>
-        <FeaturedMarketList>
-          {featuredMarkets.map(m => (
-            <FeaturedMarketComponent key={m.id} market={m} />
-          ))}
-        </FeaturedMarketList>
-      </FeaturedMarketsSection>
+      <FeaturedMarketComponent />
       <Footer />
     </>
   );
@@ -150,45 +135,5 @@ const AnnounceBetaRelease = styled.a`
     margin: 0 auto;
     margin-top: 50px;
     font-size: 18px;
-  `)}
-`;
-
-const FeaturedMarketsSection = styled.div`
-  width: 100vw;
-  padding-top: 31px;
-  padding-bottom: 50px;
-  background-color: #f8f8f8;
-
-  ${pc(`
-    padding-top: 64px;
-    padding-bottom: 183px;
-  `)}
-`;
-
-const FeaturedMarketList = styled.div`
-  width: 100vw;
-  margin: 0 auto;
-
-  ${pc(`
-    width: 980px;
-    margin: 0 auto;
-  `)}
-`;
-
-const SectionTitle = styled.h3`
-  width: 100%;
-  height: 30px;
-  text-align: center;
-  line-height: 30px;
-  font-size: 20px;
-  font-weight: normal;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-
-  ${pc(`
-    height: 54px;
-    line-height: 54px;
-    font-size: 36px;
   `)}
 `;

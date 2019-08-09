@@ -1,18 +1,72 @@
-import React, {FC} from 'react';
+import React, {FC, useState, useEffect} from 'react';
 import styled from 'styled-components';
 import {Link} from 'react-router-dom';
 
 import {Market} from 'models/market';
-import {pc} from 'app/components/responsive';
+import {getMarkets} from 'api/market';
+import {pc, MinPcWidth} from 'app/components/responsive';
 import StatusBadge from 'app/components/status_badge';
 
-interface Props {
-  market: Market;
-}
+const FeaturedMarketListComponent: FC = () => {
+  const [markets, setMarkets] = useState<Market[]>([]);
 
-const Component: FC<Props> = React.memo(({market}) => {
+  useEffect(() => {
+    getMarkets(['Upcoming', 'Open']).then(setMarkets);
+  }, []);
+
   return (
-    <Container to={`/market/${market.id}`}>
+    <Container>
+      <SectionTitle>注目のマーケット</SectionTitle>
+      <MarketList>
+        {markets.map(m => (
+          <MarketComponent key={m.id} market={m} />
+        ))}
+      </MarketList>
+    </Container>
+  );
+};
+
+const Container = styled.div`
+  width: 100vw;
+  padding-top: 30px;
+  padding-bottom: 50px;
+  background-color: #f8f8f8;
+
+  ${pc(`
+    padding-top: 64px;
+    padding-bottom: 183px;
+  `)}
+`;
+
+const SectionTitle = styled.h3`
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  font-size: 20px;
+  font-weight: normal;
+
+  ${pc(`
+    height: 54px;
+    line-height: 54px;
+    font-size: 36px;
+  `)}
+`;
+
+const MarketList = styled.div`
+  width: 100%;
+
+  ${pc(`
+    width: ${MinPcWidth}px;
+    margin: 0 auto;
+  `)}
+`;
+
+const MarketComponent: FC<{market: Market}> = React.memo(({market}) => {
+  return (
+    <MarketContainer to={`/market/${market.id}`}>
       <StatusBadge status={market.getStatus()} />
       <Title>{market.attrs.title}</Title>
       <HR />
@@ -24,13 +78,13 @@ const Component: FC<Props> = React.memo(({market}) => {
           </TokenItem>
         ))}
       </TokenContainer>
-    </Container>
+    </MarketContainer>
   );
 });
 
-export default Component;
+export default FeaturedMarketListComponent;
 
-const Container = styled(Link)`
+const MarketContainer = styled(Link)`
   display: block;
   width: calc(100% - 40px);
   border: 1px solid #c2c6c9;
@@ -46,12 +100,17 @@ const Container = styled(Link)`
 
   ${pc(`
     display: inline-block;
-    width: 480px;
+    width: calc((100% - 50px) / 2);
     padding: 30px;
+    vertical-align: top;
     transition: transform 0.2s linear;
 
     &:nth-of-type(even) {
       margin-left: 50px;
+    }
+
+    &:first-of-type {
+      margin-top: 45px;
     }
 
     &:hover {
