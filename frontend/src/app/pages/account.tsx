@@ -32,7 +32,7 @@ const AccountPageWrapper: FC<AccountPageProps> = ({history, user}) => {
   }
 };
 
-export default withRouter(withUser<{history: History}>(AccountPageWrapper));
+export default withRouter(withUser(AccountPageWrapper));
 
 const AccountPage: FC<{user: User}> = ({user}) => {
   const [participatedMarkets, setParticipatedMarkets] = useState<Market[]>([]);

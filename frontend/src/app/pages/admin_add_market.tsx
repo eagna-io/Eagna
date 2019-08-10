@@ -17,7 +17,7 @@ const AddMarketOrNotFoundPage: FC<{user: LoginStatus}> = ({user}) => {
   }
 };
 
-export default withUser<{}>(AddMarketOrNotFoundPage);
+export default withUser(AddMarketOrNotFoundPage);
 
 const AddMarketPage: FC<{user: User}> = ({user}) => {
   const [title, setTitle] = useState('');

@@ -15,7 +15,7 @@ const AdminResolveMarketOrNotFound: FC<{user: LoginStatus}> = ({user}) => {
   }
 };
 
-export default withUser<{}>(AdminResolveMarketOrNotFound);
+export default withUser(AdminResolveMarketOrNotFound);
 
 const ResolveMarketPage: FC<{user: User}> = ({user}) => {
   const [closedMarkets, setClosedMarkets] = useState<Market[]>([]);

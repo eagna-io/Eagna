@@ -14,7 +14,6 @@ export const UserContext = createContext<LoginStatus>('Checking');
 export const UserProvider: React.FC = ({children}) => {
   const [fbuser, setFbuser] = useState<firebase.User | null>(null);
   const [loginStatus, setLoginStatus] = useState<LoginStatus>('Checking');
-  console.log(loginStatus);
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(fbuser => {
@@ -75,17 +74,17 @@ export const UserProvider: React.FC = ({children}) => {
   );
 };
 
-export interface UserHOCInjectProps {
+export interface UserProps {
   user: LoginStatus;
 }
 
-export function withUser<P extends {}>(
-  WrappedComponent: React.FC<P & UserHOCInjectProps>,
-): React.FC<P> {
-  const UserHOC: FC<P> = props => {
+export function withUser<P extends UserProps>(
+  WrappedComponent: React.FC<P>,
+): React.FC<Omit<P, keyof UserProps>> {
+  const UserHOC: FC<Omit<P, keyof UserProps>> = props => {
     const loginStatus = useContext(UserContext);
 
-    return <WrappedComponent user={loginStatus} {...props} />;
+    return <WrappedComponent user={loginStatus} {...props as any} />;
   };
 
   return UserHOC;

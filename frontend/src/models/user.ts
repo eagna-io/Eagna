@@ -1,6 +1,7 @@
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 
+// 現在ログインしているユーザー
 export class User {
   constructor(
     readonly uid: string,

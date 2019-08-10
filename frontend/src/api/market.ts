@@ -94,9 +94,7 @@ export const marketDecoder: D.Decoder<Market> = D.object({
   lmsrB: D.number(),
   status: D.string().map(str2status),
   resolvedTokenName: D.optional(D.string()),
-  tokenDistribution: D.dict(D.number()).map(
-    dic => new Map(Object.entries(dic)),
-  ),
+  tokenDistribution: D.dict(D.number()).map(dic => Object.values(dic)),
   tokens: D.array(
     D.object({
       name: D.string(),
@@ -249,12 +247,14 @@ export function getOrders(marketId: string): Promise<NormalOrder[]> {
   return request({
     method: Method.GET,
     path: `/markets/${marketId}/orders/`,
-    decoder: D.array(normalOrderDecoder),
+    decoder: D.object({
+      orders: D.array(normalOrderDecoder),
+    }),
   }).then(res => {
     if (res instanceof Failure) {
       throw new Error(`Unexpected failure : ${res.message}`);
     } else {
-      return res;
+      return res.orders;
     }
   });
 }
@@ -267,12 +267,14 @@ export function getMyOrders(
     method: Method.GET,
     path: `/markets/${marketId}/orders/`,
     params: {
-      contains: 'mine',
+      mine: true,
     },
     accessToken: accessToken,
-    decoder: D.array(
-      D.union(normalOrderDecoder, coinSupplyOrderDecoder, settleOrderDecoder),
-    ),
+    decoder: D.object({
+      orders: D.array(
+        D.union(normalOrderDecoder, coinSupplyOrderDecoder, settleOrderDecoder),
+      ),
+    }),
   }).then(res => {
     if (res instanceof Failure) {
       if (res.code === FailureCode.Unauthorized) {
@@ -281,7 +283,7 @@ export function getMyOrders(
         throw new Error(`Unexpected failure : ${res.message}`);
       }
     } else {
-      return res;
+      return res.orders;
     }
   });
 }

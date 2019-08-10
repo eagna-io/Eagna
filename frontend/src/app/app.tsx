@@ -9,8 +9,8 @@ import {UserProvider} from './components/user';
 import TopPage from './pages/top';
 import LoginPage from './pages/login';
 import AccountPage from './pages/account';
-// import MarketPage from 'pages/market';
 import SpecialSignupPage from './pages/special_signup';
+import MarketPage from './pages/market';
 import AdminAddMarketPage from './pages/admin_add_market';
 import AdminResolveMarketPage from './pages/admin_resolve_market';
 import PlainTextPage from './pages/plain_text';
@@ -32,18 +32,19 @@ const App: FC<{}> = () => {
 const AppRouter: FC = () => (
   <Router>
     <Switch>
-      <Route path="/" exact render={() => <TopPage />} />
-      <Route path="/login" exact render={() => <LoginPage />} />
-      <Route path="/account" exact render={() => <AccountPage />} />
+      <Route path="/" exact component={TopPage} />
+      <Route path="/login" exact component={LoginPage} />
+      <Route path="/account" exact component={AccountPage} />
       <Route
-        path="/admin/add_market"
+        path="/market/:id"
         exact
-        render={() => <AdminAddMarketPage />}
+        render={({match}) => <MarketPage marketId={match.params.id} />}
       />
+      <Route path="/admin/add_market" exact component={AdminAddMarketPage} />
       <Route
         path="/admin/resolve_market"
         exact
-        render={() => <AdminResolveMarketPage />}
+        component={AdminResolveMarketPage}
       />
       <Route
         path="/privacy_policy"

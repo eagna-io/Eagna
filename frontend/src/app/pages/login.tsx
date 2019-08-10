@@ -19,6 +19,7 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
     if (user instanceof User) {
       const redirectLocation =
         history.location.state && history.location.state.redirect;
+      console.log(history.location.state);
       if (!redirectLocation) {
         history.push('/account');
       } else if (typeof redirectLocation === 'string') {
@@ -46,7 +47,7 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
   );
 };
 
-export default withRouter(withUser<{history: History}>(LoginPage));
+export default withRouter(withUser(LoginPage));
 
 const uiConfig = {
   signInSuccessUrl: '/me',

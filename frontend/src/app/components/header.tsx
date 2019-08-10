@@ -30,7 +30,7 @@ const Header: FC<HeaderProps> = ({history, user}) => {
   );
 };
 
-export default withRouter(withUser<{history: History}>(Header));
+export default withRouter(withUser(Header));
 
 const Container = styled.div`
   width: 100vw;

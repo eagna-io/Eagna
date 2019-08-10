@@ -55,8 +55,6 @@ export const Responsive: FC<{}> = ({children}) => {
     };
   }, [device, setDevice]);
 
-  console.log(device);
-
   return (
     <DeviceContext.Provider value={device}>{children}</DeviceContext.Provider>
   );
