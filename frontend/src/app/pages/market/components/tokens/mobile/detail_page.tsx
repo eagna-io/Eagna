@@ -25,29 +25,24 @@ interface Props {
   onClose: () => void;
 }
 
-const TokenDetailPage: FC<Props> = ({
-  token,
-  market,
-  priceHistory,
-  myAssets,
-  user,
-  onClose,
-}) => {
-  return (
-    <Container show={token !== null}>
-      {token ? (
-        <TokenDetailPageContent
-          token={token}
-          market={market}
-          priceHistory={priceHistory}
-          myAssets={myAssets}
-          user={user}
-          onClose={onClose}
-        />
-      ) : null}
-    </Container>
-  );
-};
+const TokenDetailPage: FC<Props> = React.memo(
+  ({token, market, priceHistory, myAssets, user, onClose}) => {
+    return (
+      <Container show={token !== null}>
+        {token ? (
+          <TokenDetailPageContent
+            token={token}
+            market={market}
+            priceHistory={priceHistory}
+            myAssets={myAssets}
+            user={user}
+            onClose={onClose}
+          />
+        ) : null}
+      </Container>
+    );
+  },
+);
 
 export default withUser(TokenDetailPage);
 
@@ -251,15 +246,16 @@ const options = {
 
 const Container = styled('div')<{show: boolean}>`
   position: fixed;
-  width: 100vw;
-  height: 100vh;
-  padding: 20px;
-  z-index: 1;
+  top: 0;
   bottom: 0;
   left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 20px;
   background-color: white;
   overflow-x: hidden;
   overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
   transform: ${props => (props.show ? 'scaleY(1)' : 'scaleY(0)')};
   transition: all 200ms 0s ease-out;
 `;

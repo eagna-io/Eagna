@@ -1,10 +1,10 @@
-import React, {FC, useState, useEffect, useMemo} from 'react';
+import React, {FC, useState, useEffect} from 'react';
 import styled from 'styled-components';
 
 import {User} from 'models/user';
 import {Market} from 'models/market';
 import {Eagna} from 'models/organizer';
-import {PriceHistory, MyAssets, NormalOrder, Order} from 'models/order';
+import {PriceHistory, MyAssets} from 'models/order';
 import {getMarket, getOrders, getMyOrders} from 'api/market';
 import {MinPcWidth} from 'app/components/responsive';
 import Header from 'app/components/header';
@@ -54,63 +54,65 @@ interface MarketPageInnerProps {
   market: Market;
 }
 
-const MarketPageInner: FC<MarketPageInnerProps> = ({user, market}) => {
-  const [priceHistory, setPriceHistory] = useState<PriceHistory | null>(null);
-  const [myAssets, setMyAssets] = useState<MyAssets | null>(null);
+const MarketPageInner: FC<MarketPageInnerProps> = React.memo(
+  ({user, market}) => {
+    const [priceHistory, setPriceHistory] = useState<PriceHistory | null>(null);
+    const [myAssets, setMyAssets] = useState<MyAssets | null>(null);
 
-  useEffect(() => {
-    getOrders(market.id).then(orders => {
-      setPriceHistory(new PriceHistory(market, orders));
-    });
-  }, [market]);
+    useEffect(() => {
+      getOrders(market.id).then(orders => {
+        setPriceHistory(new PriceHistory(market, orders));
+      });
+    }, [market]);
 
-  useEffect(() => {
-    if (user instanceof User) {
-      user
-        .getAccessToken()
-        .then(accessToken => getMyOrders(market.id, accessToken as string))
-        .then(orders => {
-          if (orders === 'Unauthorized') {
-            console.log('Unauthorized');
-          } else {
-            if (orders.length === 0) {
-              setMyAssets(null);
+    useEffect(() => {
+      if (user instanceof User) {
+        user
+          .getAccessToken()
+          .then(accessToken => getMyOrders(market.id, accessToken as string))
+          .then(orders => {
+            if (orders === 'Unauthorized') {
+              console.log('Unauthorized');
             } else {
-              setMyAssets(new MyAssets(market.attrs.tokens, orders));
+              if (orders.length === 0) {
+                setMyAssets(null);
+              } else {
+                setMyAssets(new MyAssets(market.attrs.tokens, orders));
+              }
             }
-          }
-        });
-    }
-  }, [user, market]);
+          });
+      }
+    }, [user, market]);
 
-  return (
-    <>
-      <Header />
-      <MarketHeader market={market} />
-      <Contents>
-        {myAssets === null ? (
-          <>
-            <ParticipateComponent market={market} />
-            <HR />
-          </>
-        ) : null}
-        <TokenListComponent
-          market={market}
-          priceHistory={priceHistory}
-          myAssets={myAssets}
-        />
-        <HR />
-        <OrganizerComponent organizer={Eagna} />
-        <HR />
-        <CoinsComponent myAssets={myAssets} />
-        <HR />
-        <PrizeComponent prizes={market.attrs.prizes} />
-        <HR />
-        <DescComponent desc={market.attrs.description} />
-      </Contents>
-    </>
-  );
-};
+    return (
+      <>
+        <Header />
+        <MarketHeader market={market} />
+        <Contents>
+          {myAssets === null ? (
+            <>
+              <ParticipateComponent market={market} />
+              <HR />
+            </>
+          ) : null}
+          <TokenListComponent
+            market={market}
+            priceHistory={priceHistory}
+            myAssets={myAssets}
+          />
+          <HR />
+          <OrganizerComponent organizer={Eagna} />
+          <HR />
+          <CoinsComponent myAssets={myAssets} />
+          <HR />
+          <PrizeComponent prizes={market.attrs.prizes} />
+          <HR />
+          <DescComponent desc={market.attrs.description} />
+        </Contents>
+      </>
+    );
+  },
+);
 
 const Contents = styled.div`
   width: 90%;

@@ -12,7 +12,7 @@ const PrizeComponent: React.FC<Props> = ({prizes}) => {
   return (
     <Section title="報酬">
       {prizes.map(prize => (
-        <PrizeContainer>
+        <PrizeContainer key="prize.id">
           <PrizeSumbnail src={prize.sumbnailUrl} />
           <PrizeInfo>
             <PrizeName>{prize.name}</PrizeName>
@@ -43,6 +43,7 @@ const PrizeSumbnail = styled.img`
 
 const PrizeInfo = styled.div`
   display: inline-block;
+  width: calc(100% - 95px - 25px);
   margin-left: 25px;
   vertical-align: top;
 `;

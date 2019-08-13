@@ -1,8 +1,7 @@
 import React, {FC, useState} from 'react';
-import styled, {keyframes} from 'styled-components';
+import styled from 'styled-components';
 
 import {Token} from 'models/market';
-import {MyAssets} from 'models/order';
 
 import {TokenListComponentProps} from '../tokens';
 import TokenDetailPage from './mobile/detail_page';

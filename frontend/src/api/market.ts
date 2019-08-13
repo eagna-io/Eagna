@@ -94,7 +94,7 @@ export const marketDecoder: D.Decoder<Market> = D.object({
   lmsrB: D.number(),
   status: D.string().map(str2status),
   resolvedTokenName: D.optional(D.string()),
-  tokenDistribution: D.dict(D.number()).map(dic => Object.values(dic)),
+  tokenDistribution: D.dict(D.number()).map(dic => Object.entries(dic)),
   tokens: D.array(
     D.object({
       name: D.string(),

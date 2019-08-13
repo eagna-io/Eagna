@@ -64,25 +64,33 @@ const AppRouter: FC = () => (
 export default App;
 
 const GlobalStyle = createGlobalStyle`
-    body {
-      margin: 0;
-      font-family: 'Noto Sans JP', sans-serif;
-      color: #1B384E;
-      letter-spacing: 0;
-    }
-    * {
-      box-sizing: border-box;
-    }
-    a {
-      text-decoration: none;
-      outline: none;
-      color: #1B384E;
-    }
-    a: visited {
-      color: #1B384E;
-    }
-    p {
-      margin: 0;
-      padding: 0;
-    }
-  `;
+  body {
+    margin: 0;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: #1B384E;
+    letter-spacing: 0;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  a {
+    text-decoration: none;
+    outline: none;
+    color: #1B384E;
+  }
+  a: visited {
+    color: #1B384E;
+  }
+  p {
+    margin: 0;
+    padding: 0;
+  }
+  button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    padding: 0;
+    appearance: none;
+  }
+`;

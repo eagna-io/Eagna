@@ -1,4 +1,4 @@
-import React, {FC, useEffect} from 'react';
+import React, {FC} from 'react';
 import styled from 'styled-components';
 import {withRouter} from 'react-router-dom';
 import {History} from 'history';
@@ -6,7 +6,6 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 
-import {User} from 'models/user';
 import {LoginStatus, withUser} from 'app/components/user';
 
 interface LoginPageProps {
@@ -15,20 +14,18 @@ interface LoginPageProps {
 }
 
 const LoginPage: FC<LoginPageProps> = ({history, user}) => {
+  const redirectUrl = getRedirectUrl(history);
+  console.log(redirectUrl);
+
+  /*
   useEffect(() => {
     if (user instanceof User) {
-      const redirectLocation =
-        history.location.state && history.location.state.redirect;
-      console.log(history.location.state);
-      if (!redirectLocation) {
-        history.push('/account');
-      } else if (typeof redirectLocation === 'string') {
-        history.push(redirectLocation);
-      } else {
-        history.push(redirectLocation);
-      }
+      history.push(redirectUrl);
     }
   }, [user, history]);
+   */
+
+  const config = createAuthConfig(redirectUrl);
 
   // 認証が成功した後のフローは、app.tsxに戻る
   return (
@@ -37,10 +34,9 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
         <Container>
           <Logo src="/img/logo-big.png" />
           <StyledFirebaseAuth
-            uiConfig={uiConfig}
+            uiConfig={config}
             firebaseAuth={firebase.auth()}
           />
-          <div id="firebaseui-auth-container" />
         </Container>
       </Body>
     </>
@@ -49,30 +45,44 @@ const LoginPage: FC<LoginPageProps> = ({history, user}) => {
 
 export default withRouter(withUser(LoginPage));
 
-const uiConfig = {
-  signInSuccessUrl: '/me',
-  signInOptions: [
-    {
-      provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      scopes: ['https://www.googleapis.com/auth/userinfo.email'],
-      customParameters: {
-        prompt: 'select_account',
+function getRedirectUrl(history: History): string {
+  if (
+    history.location.state &&
+    history.location.state.redirect &&
+    typeof history.location.state.redirect === 'string'
+  ) {
+    return history.location.state.redirect;
+  } else {
+    return '/account';
+  }
+}
+
+function createAuthConfig(redirect: string): any {
+  return {
+    signInSuccessUrl: redirect,
+    signInOptions: [
+      {
+        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        scopes: ['https://www.googleapis.com/auth/userinfo.email'],
+        customParameters: {
+          prompt: 'select_account',
+        },
       },
-    },
-    {
-      provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-      scopes: ['email'],
-    },
-    {
-      provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
-      scopes: ['user:email'],
-    },
-    {
-      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      requireDisplayName: true,
-    },
-  ],
-};
+      {
+        provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+        scopes: ['email'],
+      },
+      {
+        provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
+        scopes: ['user:email'],
+      },
+      {
+        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        requireDisplayName: true,
+      },
+    ],
+  };
+}
 
 const Body = styled.div`
   width: 100vw;

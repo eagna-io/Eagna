@@ -14,12 +14,9 @@ abstract class AbstractMarket {
   constructor(
     readonly id: string,
     readonly attrs: MarketAttributes,
-    rawTokenDistribution: number[],
+    rawTokenDistribution: [string, number][],
   ) {
-    this.tokenDistribution = new TokenDistribution(
-      attrs.tokens.map(t => t.name),
-      rawTokenDistribution,
-    );
+    this.tokenDistribution = new TokenDistribution(rawTokenDistribution);
     this.tokenPrices = this.tokenDistribution.computeLMSRPrices(attrs.lmsrB);
   }
 
@@ -49,7 +46,9 @@ export type Market =
 
 export class UpcomingMarket extends AbstractMarket {
   constructor(id: string, attrs: MarketAttributes) {
-    const rawTokenDistribution = attrs.tokens.map(_t => 0);
+    const rawTokenDistribution = attrs.tokens.map(
+      t => [t.name, 0] as [string, number],
+    );
     super(id, attrs, rawTokenDistribution);
   }
 
@@ -92,7 +91,7 @@ export class ResolvedMarket extends AbstractMarket {
   constructor(
     id: string,
     attrs: MarketAttributes,
-    rawTokenDistribution: number[],
+    rawTokenDistribution: [string, number][],
     readonly resolvedTokenName: string,
   ) {
     super(id, attrs, rawTokenDistribution);
@@ -130,18 +129,24 @@ export class PrizeId {
  * ===================
  */
 export class TokenDistribution {
-  constructor(readonly tokens: string[], readonly rawDistribution: number[]) {}
+  readonly tokens: string[];
+  readonly distribution: number[];
+
+  constructor(rawDistribution: [string, number][]) {
+    this.tokens = rawDistribution.map(([token, _q]) => token);
+    this.distribution = rawDistribution.map(([_t, quantity]) => quantity);
+  }
 
   getUncheck(tokenName: string): number {
     const idx = this.tokens.indexOf(tokenName);
     if (idx === -1) {
       throw new Error(`${tokenName} does not exist`);
     }
-    return this.rawDistribution[idx];
+    return this.distribution[idx];
   }
 
   computeLMSRCost(lmsrB: number): number {
-    return computeLMSRCost(lmsrB, this.rawDistribution);
+    return computeLMSRCost(lmsrB, this.distribution);
   }
 
   computeLMSRPrices(lmsrB: number): TokenPrices {
@@ -159,11 +164,15 @@ export class TokenDistribution {
     if (idx === -1) {
       throw new Error(`${tokenName} does not exist`);
     }
-    this.rawDistribution[idx] += quantity;
+    this.distribution[idx] += quantity;
   }
 
   clone(): TokenDistribution {
-    return new TokenDistribution(this.tokens, Array.from(this.rawDistribution));
+    const rawDistribution = this.tokens.map((token, idx) => [
+      token,
+      this.distribution[idx],
+    ] as [string, number]);
+    return new TokenDistribution(rawDistribution);
   }
 }
 
@@ -173,7 +182,7 @@ export class TokenPrices {
 
   constructor(lmsrB: number, distribution: TokenDistribution) {
     this.tokens = distribution.tokens;
-    this.rawPrices = computeLMSRPrices(lmsrB, distribution.rawDistribution);
+    this.rawPrices = computeLMSRPrices(lmsrB, distribution.distribution);
   }
 
   getUncheck(tokenName: string): number {

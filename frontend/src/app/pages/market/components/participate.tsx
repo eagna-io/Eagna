@@ -1,11 +1,10 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
 import {Link, RouteComponentProps, withRouter} from 'react-router-dom';
-import {Location} from 'history';
 
 import {Market, OpenMarket} from 'models/market';
 import {createInitialSupplyOrder} from 'api/market';
-import {withUser, LoginStatus, UserProps} from 'app/components/user';
+import {withUser, UserProps} from 'app/components/user';
 
 interface Props {
   market: Market;

@@ -8,8 +8,7 @@ export class PriceHistory {
   constructor(market: Market, orders: NormalOrder[]) {
     this.tokens = market.attrs.tokens.map(t => t.name);
     const distribution = new TokenDistribution(
-      this.tokens,
-      this.tokens.map(_n => 0),
+      this.tokens.map(name => [name, 0] as [string, number]),
     );
 
     const lmsrB = market.attrs.lmsrB;
