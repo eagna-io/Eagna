@@ -1,5 +1,5 @@
-import React, {FC, useState} from 'react';
-import styled, {keyframes} from 'styled-components';
+import React, {FC} from 'react';
+import styled from 'styled-components';
 import Chart from 'react-apexcharts';
 import moment from 'moment';
 
@@ -10,12 +10,10 @@ import {
   ClosedMarket,
   ResolvedMarket,
   Token,
-  TokenPrices,
 } from 'models/market';
 import {User} from 'models/user';
 import {PriceHistory, MyAssets, NormalOrder} from 'models/order';
 import {createNormalOrder} from 'api/market';
-import {pc} from 'app/components/responsive';
 import {LoginStatus, withUser} from 'app/components/user';
 
 interface Props {
@@ -334,6 +332,7 @@ const AssetContainer = styled.div`
 
 const AssetLabel = styled.div`
   font-size: 16px;
+  font-weight: bold;
 `;
 
 const AssetIcon = styled.img`

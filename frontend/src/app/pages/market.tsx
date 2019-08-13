@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import {User} from 'models/user';
 import {Market} from 'models/market';
+import {Eagna} from 'models/organizer';
 import {PriceHistory, MyAssets, NormalOrder, Order} from 'models/order';
 import {getMarket, getOrders, getMyOrders} from 'api/market';
 import {MinPcWidth} from 'app/components/responsive';
@@ -13,6 +14,10 @@ import NotFoundPage from 'app/pages/not_found';
 import MarketHeader from './market/components/header';
 import ParticipateComponent from './market/components/participate';
 import TokenListComponent from './market/components/tokens';
+import OrganizerComponent from './market/components/organizer';
+import CoinsComponent from './market/components/coins';
+import PrizeComponent from './market/components/prize';
+import DescComponent from './market/components/description';
 
 interface MarketPageProps {
   user: LoginStatus;
@@ -95,6 +100,13 @@ const MarketPageInner: FC<MarketPageInnerProps> = ({user, market}) => {
           myAssets={myAssets}
         />
         <HR />
+        <OrganizerComponent organizer={Eagna} />
+        <HR />
+        <CoinsComponent myAssets={myAssets} />
+        <HR />
+        <PrizeComponent prizes={market.attrs.prizes} />
+        <HR />
+        <DescComponent desc={market.attrs.description} />
       </Contents>
     </>
   );

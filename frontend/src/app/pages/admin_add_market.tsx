@@ -2,12 +2,11 @@ import React, {FC, useState} from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
 
-import {postMarket} from 'api/market';
 import {User} from 'models/user';
+import {Eagna} from 'models/organizer';
+import {postMarket} from 'api/market';
 import {withUser, LoginStatus} from 'app/components/user';
 import NotFoundPage from 'app/pages/not_found';
-
-const EagnaOrganizerId = 'e643a0da-dc5c-4c2d-9585-c2c6da0cf77d';
 
 const AddMarketOrNotFoundPage: FC<{user: LoginStatus}> = ({user}) => {
   if (user instanceof User && user.isAdmin) {
@@ -77,7 +76,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
         postMarket(
           {
             title: title,
-            organizerId: EagnaOrganizerId,
+            organizerId: Eagna.id,
             description: description,
             lmsrB: lmsrB,
             open: moment(openTime),
