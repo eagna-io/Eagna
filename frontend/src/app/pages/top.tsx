@@ -1,10 +1,8 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
-import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
 import {pc} from 'app/components/responsive';
+import SigninComponent from 'app/components/signin';
 
 import Header from './top/components/header';
 import ThreeStepsSection from './top/components/three-steps';
@@ -19,10 +17,7 @@ const TopPage: FC = () => {
         <MainSectionBgFilter>
           <MainMsg>未来は僕等の手の中</MainMsg>
           <SubMsg>今すぐ予測市場を体験しましょう</SubMsg>
-          <StyledFirebaseAuth
-            uiConfig={authConfig}
-            firebaseAuth={firebase.auth()}
-          />
+          <SigninComponent redirectUrl="/account" autoRedirect />
           <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n7f8a517c50f6">
             &beta; 版をリリースしました！
           </AnnounceBetaRelease>
@@ -36,31 +31,6 @@ const TopPage: FC = () => {
 };
 
 export default TopPage;
-
-const authConfig = {
-  signInSuccessUrl: '/me',
-  signInOptions: [
-    {
-      provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-      scopes: ['https://www.googleapis.com/auth/userinfo.email'],
-      customParameters: {
-        prompt: 'select_account',
-      },
-    },
-    {
-      provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-      scopes: ['email'],
-    },
-    {
-      provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
-      scopes: ['user:email'],
-    },
-    {
-      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      requireDisplayName: true,
-    },
-  ],
-};
 
 const MainSection = styled.div`
   height: 448px;

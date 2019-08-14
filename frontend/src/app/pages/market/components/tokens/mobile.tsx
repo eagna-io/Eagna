@@ -56,9 +56,10 @@ interface TokenComponentProps {
   token: Token;
   tokenPrice: number;
   amountToken: number | null;
+  onClick: () => void;
 }
 
-const TokenComponent: FC<TokenComponentProps & {onClick: () => void}> = ({
+const TokenComponent: FC<TokenComponentProps> = ({
   token,
   tokenPrice,
   amountToken,

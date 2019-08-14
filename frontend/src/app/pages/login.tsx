@@ -2,48 +2,29 @@ import React, {FC} from 'react';
 import styled from 'styled-components';
 import {withRouter} from 'react-router-dom';
 import {History} from 'history';
-import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
 
-import {LoginStatus, withUser} from 'app/components/user';
+import SigninComponent from 'app/components/signin';
 
 interface LoginPageProps {
   history: History;
-  user: LoginStatus;
 }
 
-const LoginPage: FC<LoginPageProps> = ({history, user}) => {
+const LoginPage: FC<LoginPageProps> = ({history}) => {
   const redirectUrl = getRedirectUrl(history);
-  console.log(redirectUrl);
 
-  /*
-  useEffect(() => {
-    if (user instanceof User) {
-      history.push(redirectUrl);
-    }
-  }, [user, history]);
-   */
-
-  const config = createAuthConfig(redirectUrl);
-
-  // 認証が成功した後のフローは、app.tsxに戻る
   return (
     <>
       <Body>
         <Container>
           <Logo src="/img/logo-big.png" />
-          <StyledFirebaseAuth
-            uiConfig={config}
-            firebaseAuth={firebase.auth()}
-          />
+          <SigninComponent redirectUrl={redirectUrl} autoRedirect />
         </Container>
       </Body>
     </>
   );
 };
 
-export default withRouter(withUser(LoginPage));
+export default withRouter(LoginPage);
 
 function getRedirectUrl(history: History): string {
   if (
@@ -55,33 +36,6 @@ function getRedirectUrl(history: History): string {
   } else {
     return '/account';
   }
-}
-
-function createAuthConfig(redirect: string): any {
-  return {
-    signInSuccessUrl: redirect,
-    signInOptions: [
-      {
-        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        scopes: ['https://www.googleapis.com/auth/userinfo.email'],
-        customParameters: {
-          prompt: 'select_account',
-        },
-      },
-      {
-        provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        scopes: ['email'],
-      },
-      {
-        provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
-        scopes: ['user:email'],
-      },
-      {
-        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        requireDisplayName: true,
-      },
-    ],
-  };
 }
 
 const Body = styled.div`
