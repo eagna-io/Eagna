@@ -31,7 +31,7 @@ const MarketPage: FC<MarketPageInternalProps> = ({history, user, market}) => {
         <Header.Mobile history={history} user={user} />
         <MarketHeader.Mobile market={market.data} />
         <Contents>
-          <StyledChartComponent
+          <ChartComponent
             tokens={market.data.tokens}
             lmsrB={market.data.lmsrB}
             startTime={market.data.openTime}
@@ -100,10 +100,4 @@ const Contents = styled.div`
   max-width: 980px;
   margin: 0 auto;
   padding-bottom: 50px;
-`;
-
-const StyledChartComponent = styled(ChartComponent)`
-  width: 100%;
-  height: 200px;
-  margin-top: 50px;
 `;

@@ -1,6 +1,6 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
-import {Chart} from 'react-google-charts';
+import Chart from 'react-apexcharts';
 import {Moment} from 'moment';
 
 import {
@@ -28,48 +28,112 @@ const ChartComponent: FC<ChartComponentProps> = ({
   lmsrB,
   className,
 }) => {
-  const dataLabel = ['Day', ...tokens.map(t => t.name)];
-  const data = tokenPricesHistory(tokens, orders, startTime, lmsrB).map(
-    ([time, prices]) => [
-      time.toDate(),
-      ...tokens.map(t => getTokenPrice(prices, t.id)),
-    ],
+  const series = computeDataSeries(tokens, orders, startTime, lmsrB).map(
+    ({token, data}) => ({
+      name: token.name,
+      data,
+    }),
   );
 
   return (
     <Container className={className}>
-      <Chart
-        width="100%"
-        height="100%"
-        chartType="Line"
-        loader={<div>Loading...</div>}
-        data={[dataLabel, ...data]}
-      />
+      <Chart options={options} series={series} type="area" />
     </Container>
   );
 };
 
 export default ChartComponent;
 
-const Container = styled.div``;
+const options = {
+  chart: {
+    height: '40%',
+    stacked: false,
+    zoom: {
+      type: 'x',
+      enabled: true,
+    },
+    toolbar: {
+      show: false,
+    },
+  },
+  plotOptions: {
+    line: {
+      curve: 'smooth',
+    },
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  markers: {
+    size: 0,
+    style: 'full',
+  },
+  title: {
+    show: false,
+  },
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shadeIntensity: 1,
+      inverseColors: false,
+      opacityFrom: 0.5,
+      opacityTo: 0,
+      stops: [0, 90, 100],
+    },
+  },
+  grid: {
+    show: false,
+  },
+  yaxis: {
+    show: false,
+  },
+  xaxis: {
+    type: 'datetime',
+  },
+  tooltip: {
+    shared: false,
+  },
+};
 
-function tokenPricesHistory(
+const Container = styled.div`
+  width: 100%;
+`;
+
+function computeDataSeries(
   tokens: Token[],
   orders: PublicOrderHistory,
   startTime: Moment,
   lmsrB: number,
-): (readonly [Moment, TokenPrices])[] {
+): DataSeries {
   const distribution = newTokenDistribution(tokens);
-  const priceHistory = [
-    [startTime, newTokenPrices(lmsrB, distribution)] as const,
-  ];
+
+  const series = initDataSeries(tokens);
+  addData(series, startTime, newTokenPrices(lmsrB, distribution));
+
+  orders.sort((a, b) => a.time.diff(b.time));
 
   orders.sort((a, b) => a.time.diff(b.time));
   orders.forEach(order => {
     addOrderToTokenDistribution(distribution, order);
     const prices = newTokenPrices(lmsrB, distribution);
-    priceHistory.push([order.time, prices]);
+    addData(series, order.time, prices);
   });
 
-  return priceHistory;
+  return series;
+}
+
+type DataSeries = {token: Token; data: [Date, number][]}[];
+
+function initDataSeries(tokens: Token[]): DataSeries {
+  return tokens.map(token => ({
+    token,
+    data: [],
+  }));
+}
+
+function addData(series: DataSeries, time: Moment, prices: TokenPrices) {
+  series.forEach(({token, data}) => {
+    const price = prices.get(token.id) as number;
+    data.push([time.toDate(), price]);
+  });
 }
