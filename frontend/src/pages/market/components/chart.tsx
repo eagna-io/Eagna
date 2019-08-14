@@ -64,6 +64,7 @@ function tokenPricesHistory(
     [startTime, newTokenPrices(lmsrB, distribution)] as const,
   ];
 
+  orders.sort((a, b) => a.time.diff(b.time));
   orders.forEach(order => {
     addOrderToTokenDistribution(distribution, order);
     const prices = newTokenPrices(lmsrB, distribution);
