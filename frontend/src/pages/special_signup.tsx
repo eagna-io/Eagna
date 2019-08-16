@@ -72,6 +72,9 @@ export default SpecialSignupPage;
 
 function countConversion(): Promise<Response> {
   const RapidApiKey = process.env.REACT_APP_RAPID_API_KEY;
+  if (RapidApiKey === undefined) {
+    throw new Error('REACT_APP_RAPID_API_KEY is not defined');
+  }
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
   headers.append('X-RapidAPI-Host', 'nanosdk-counters-v1.p.rapidapi.com');
