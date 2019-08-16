@@ -4,6 +4,8 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import {createGlobalStyle} from 'styled-components';
 
+import {User} from 'models/user';
+import {getMe, createUser} from 'api/user';
 import {Responsive} from 'components/responsive';
 import TopPage from 'pages/top';
 import LoginPage from 'pages/login';
@@ -13,8 +15,7 @@ import AdminAddMarketPage from 'pages/admin_add_market';
 import AdminResolveMarketPage from 'pages/admin_resolve_market';
 import PlainTextPage from 'pages/plain_text';
 import NotFoundPage from 'pages/not_found';
-import {User} from 'models/user';
-import {getMe, createUser} from 'api/user';
+import SpecialSignupPage from 'pages/special_signup';
 
 const App: FC<{}> = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -117,6 +118,7 @@ const App: FC<{}> = () => {
               exact
               render={() => <PlainTextPage textUrl="/txt/terms.txt" />}
             />
+            <Route path="/special/signup" exact component={SpecialSignupPage} />
             <Route render={() => <NotFoundPage />} />
           </Switch>
         </Router>
