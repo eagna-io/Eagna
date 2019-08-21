@@ -5,6 +5,7 @@ import {PriceHistory, MyAssets} from 'models/order';
 import {Pc, Mobile, Tablet} from 'app/components/responsive';
 
 import MobileComponent from './tokens/mobile';
+import PcComponent from './tokens/pc';
 
 export interface TokenListComponentProps {
   market: Market;
@@ -22,7 +23,7 @@ const TokenListComponent: FC<TokenListComponentProps> = props => {
         <MobileComponent {...props} />
       </Tablet>
       <Pc>
-        <MobileComponent {...props} />
+        <PcComponent {...props} />
       </Pc>
     </>
   );

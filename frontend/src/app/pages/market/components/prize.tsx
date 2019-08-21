@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import {Prize} from 'models/market';
+import {pc} from 'app/components/responsive';
+
 import Section from './section_skelton';
 
 interface Props {
@@ -39,6 +41,11 @@ const PrizeSumbnail = styled.img`
   display: inline-block;
   width: 95px;
   height: 95px;
+
+  ${pc(`
+    width: 210px;
+    height: 210px;
+  `)}
 `;
 
 const PrizeInfo = styled.div`
@@ -46,6 +53,11 @@ const PrizeInfo = styled.div`
   width: calc(100% - 95px - 25px);
   margin-left: 25px;
   vertical-align: top;
+
+  ${pc(`
+    width: calc(100% - 210px - 50px);
+    margin-left: 50px;
+  `)}
 `;
 
 const PrizeName = styled.h3`
@@ -53,6 +65,10 @@ const PrizeName = styled.h3`
   padding: 0;
   font-weight: bold;
   font-size: 15px;
+
+  ${pc(`
+    font-size: 21px;
+  `)}
 `;
 
 const PrizeTarget = styled.p`
@@ -60,4 +76,8 @@ const PrizeTarget = styled.p`
   padding: 0;
   margin-top: 12px;
   font-size: 10px;
+
+  ${pc(`
+    font-size: 18px;
+  `)}
 `;

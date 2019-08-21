@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import {Organizer} from 'models/organizer';
+import {pc} from 'app/components/responsive';
+
 import Section from './section_skelton';
 
 interface Props {
@@ -24,6 +26,10 @@ const Sumbnail = styled.img`
   width: 125px;
   margin: 0 auto;
   margin-top: 30px;
+
+  ${pc(`
+    width: 300px;
+  `)}
 `;
 
 const Name = styled.h4`
@@ -31,4 +37,8 @@ const Name = styled.h4`
   padding-left: 20px;
   font-weight: bold;
   font-size: 14px;
+
+  ${pc(`
+    font-size: 25px;
+  `)}
 `;

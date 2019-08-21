@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 
 import {MyAssets} from 'models/order';
+import {pc} from 'app/components/responsive';
+
 import Section from './section_skelton';
 
 interface Props {
@@ -34,6 +36,12 @@ const CoinIcon = styled.img`
   height: 28px;
   margin-right: 20px;
   vertical-align: top;
+
+  ${pc(`
+    width: 56px;
+    height: 56px;
+    margin-right: 40px;
+  `)}
 `;
 
 const Volume = styled.p`
@@ -43,9 +51,17 @@ const Volume = styled.p`
   font-weight: bold;
   font-size: 20px;
   text-align: right;
+
+  ${pc(`
+    font-size: 30px;
+  `)}
 `;
 
 const VolumeUnit = styled.span`
   font-weight: normal;
   font-size: 14px;
+
+  ${pc(`
+    font-size: 20px;
+  `)}
 `;

@@ -5,6 +5,7 @@ import {Link, RouteComponentProps, withRouter} from 'react-router-dom';
 import {Market, OpenMarket} from 'models/market';
 import {createInitialSupplyOrder} from 'api/market';
 import {withUser, UserProps} from 'app/components/user';
+import {pc} from 'app/components/responsive';
 
 interface Props {
   market: Market;
@@ -136,4 +137,9 @@ const Message = styled.p`
   font-size: 10px;
   font-weight: bold;
   vertical-align: top;
+
+  ${pc(`
+    font-size: 14px;
+    vertical-align: baseline;
+  `)}
 `;
