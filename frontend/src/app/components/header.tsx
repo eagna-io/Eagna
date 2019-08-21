@@ -93,7 +93,7 @@ const ProfileDropdown: FC<ProfileDropdownProps> = ({history, user}) => {
         {user instanceof User ? (
           <>
             <MenuItem>
-              <MenuItemLink to="/me">{user.name}</MenuItemLink>
+              <MenuItemLink to="/account">{user.name}</MenuItemLink>
             </MenuItem>
             <Line />
             <MenuItem>

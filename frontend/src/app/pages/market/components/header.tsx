@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import {Moment} from 'moment';
 
 import {Market} from 'models/market';
+import {Eagna} from 'models/organizer';
 import {pc, MinPcWidth} from 'app/components/responsive';
 import StatusBadge from 'app/components/status_badge';
 
@@ -13,9 +14,13 @@ interface MarketHeaderProps {
 const MarketHeader: FC<MarketHeaderProps> = ({market}) => {
   return (
     <Container>
-        <StyledStatusBadge status={market.getStatus()} />
-        <MarketPeriod open={market.attrs.open} close={market.attrs.close} />
-        <MarketTitle>{market.attrs.title}</MarketTitle>
+      <StyledStatusBadge status={market.getStatus()} />
+      <MarketPeriod open={market.attrs.open} close={market.attrs.close} />
+      <MarketTitle>{market.attrs.title}</MarketTitle>
+      <MarketCreator>
+        マーケット作成者
+        <MarketCreatorName>{Eagna.name}</MarketCreatorName>
+      </MarketCreator>
     </Container>
   );
 };
@@ -72,7 +77,7 @@ const MarketPeriodText = styled.div`
 
   ${pc(`
     position: absolute;
-    bottom: 35px;
+    bottom: 50px;
     right: calc((100% - ${MinPcWidth}px) / 2);
     font-size: 13px;
     font-weight: bold;
@@ -102,5 +107,31 @@ const MarketTitle = styled.h3`
     width: ${MinPcWidth - 220}px;
     margin-top: 0px;
     font-size: 28px;
+  `)}
+`;
+
+const MarketCreator = styled.div`
+  width: 100%;
+  margin-top: 20px;
+  font-size: 10px;
+  text-align: right;
+
+  ${pc(`
+    position: absolute;
+    bottom: 15px;
+    right: calc((100% - ${MinPcWidth}px) / 2);
+    width: 250px;
+    margin-top: 0px;
+    font-size: 14px;
+  `)}
+`;
+
+const MarketCreatorName = styled.strong`
+  font-size: 16px;
+  font-weight: bold;
+  margin-left: 15px;
+
+  ${pc(`
+    font-size: 18px;
   `)}
 `;
