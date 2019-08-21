@@ -11,21 +11,24 @@ interface Props {
 }
 
 const ChartComponent: FC<Props> = ({token, priceHistory}) => {
-  const chartData: [Date, number][] = priceHistory
-    ? priceHistory.getHistoryOf(token.name)
-    : [];
-  const series = [
-    {
-      name: token.name,
-      data: chartData,
-    },
-  ];
+  const chartData = priceHistory ? priceHistory.getHistoryOf(token.name) : [];
 
-  return (
-    <Container>
-      <Chart options={options} series={series} type="area" />
-    </Container>
-  );
+  if (chartData.length <= 1) {
+    return null;
+  } else {
+    const series = [
+      {
+        name: token.name,
+        data: chartData,
+      },
+    ];
+
+    return (
+      <Container>
+        <Chart options={options} series={series} type="area" />
+      </Container>
+    );
+  }
 };
 
 export default ChartComponent;
