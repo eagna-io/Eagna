@@ -17,6 +17,7 @@ const TopPage: FC = () => {
         <MainSectionBgFilter>
           <MainMsg>未来は僕等の手の中</MainMsg>
           <SubMsg>今すぐ予測市場を体験しましょう</SubMsg>
+          <SubMsg2>どなたでも無料でご利用できます</SubMsg2>
           <SigninComponent redirectUrl="/account" autoRedirect />
           <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n7f8a517c50f6">
             &beta; 版をリリースしました！
@@ -74,19 +75,33 @@ const MainMsg = styled.h2`
 const SubMsg = styled.h3`
   height: 24px;
   width: 100%;
-  top: 12px;
   font-size: 16px;
   font-weight: 300;
   text-align: center;
   line-height: 24px;
-  margin: 0;
-  margin-top: 13px;
-  margin-bottom: 15px;
+  margin: 13px 0 5px 0;
   padding: 0;
 
   ${pc(`
     height: 45px;
-    font-size 30px;
+    font-size: 30px;
+    line-height: 45px;
+  `)}
+`;
+
+const SubMsg2 = styled.h3`
+  height: 24px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 300;
+  text-align: center;
+  line-height: 24px;
+  margin: 10px 0 30px 0;
+  padding: 0;
+
+  ${pc(`
+    height: 45px;
+    font-size: 24px;
     line-height: 45px;
   `)}
 `;
