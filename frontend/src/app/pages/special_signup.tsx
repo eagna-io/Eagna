@@ -1,4 +1,4 @@
-import React, {FC, useEffect} from 'react';
+import React, {FC} from 'react';
 import styled from 'styled-components';
 import {History, LocationDescriptor} from 'history';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';

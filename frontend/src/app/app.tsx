@@ -2,8 +2,6 @@ import React, {FC} from 'react';
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import {createGlobalStyle} from 'styled-components';
 
-import {User} from 'models/user';
-import {getMe, createUser} from 'api/user';
 import {Responsive} from './components/responsive';
 import {UserProvider} from './components/user';
 import TopPage from './pages/top';
@@ -56,6 +54,7 @@ const AppRouter: FC = () => (
         exact
         render={() => <PlainTextPage textUrl="/txt/terms.txt" />}
       />
+      <Route path="/special/signup" exact component={SpecialSignupPage} />
       <Route render={() => <NotFoundPage />} />
     </Switch>
   </Router>
