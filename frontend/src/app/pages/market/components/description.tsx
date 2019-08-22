@@ -40,6 +40,10 @@ const StyledReactMarkdown = styled(ReactMarkdown)<{showMore: boolean}>`
   ${pc(`
     font-size: 16px;
   `)}
+
+  & a {
+    text-decoration: underline;
+  }
 `;
 
 const ReadMoreButton = styled.button`
