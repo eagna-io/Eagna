@@ -20,6 +20,8 @@ export class PriceHistory {
       },
     ];
 
+    orders.sort((a, b) => a.time.valueOf() - b.time.valueOf())
+
     orders.forEach(order => {
       distribution.addAssign(order.tokenName, order.amountToken);
       this.rawHistory.push({
