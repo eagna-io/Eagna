@@ -53,10 +53,6 @@ function config(redirect: string): any {
         scopes: ['email'],
       },
       {
-        provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
-        scopes: ['user:email'],
-      },
-      {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
         requireDisplayName: true,
       },
