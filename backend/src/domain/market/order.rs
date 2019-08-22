@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MarketOrders {
+    /// 時系列順にソートされている必要がある
     pub(super) orders: Vec<Order>,
 }
 

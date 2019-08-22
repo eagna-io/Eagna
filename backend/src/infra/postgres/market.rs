@@ -40,6 +40,8 @@ pub trait PostgresMarketInfra {
 
     fn query_markets_by_ids(&self, ids: &[Uuid]) -> Result<Vec<QueryMarket>, failure::Error>;
 
+    /// 時系列順にソートされた `QueryOrder` を返す。
+    /// 古いものが最初に、新しいものが最後に来る
     fn query_orders_by_market_ids(
         &self,
         market_ids: &[Uuid],
@@ -290,12 +292,15 @@ impl PostgresMarketInfra for Postgres {
         Ok(constructed_markets)
     }
 
+    /// 時系列順にソートされた `QueryOrder` を返す。
+    /// 古いものが最初に、新しいものが最後に来る
     fn query_orders_by_market_ids(
         &self,
         market_ids: &[Uuid],
     ) -> Result<Vec<QueryOrder>, failure::Error> {
         Ok(orders::table
             .filter(orders::columns::market_id.eq(any(market_ids)))
+            .order(orders::columns::time.asc())
             .load::<QueryableOrder>(&self.conn)?
             .into_iter()
             .map(|raw_order| QueryOrder {
