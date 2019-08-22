@@ -64,7 +64,7 @@ const AccountPage: FC<{user: User}> = ({user}) => {
       <Container>
         <ProfileComponent user={user} />
         <MarketsComponent
-          title="参加しているマーケット"
+          title="参加している/参加したマーケット"
           markets={participatedMarkets}
         />
         <MarketsComponent
