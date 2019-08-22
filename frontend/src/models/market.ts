@@ -1,192 +1,195 @@
+import {computeLMSRCost, computeLMSRPrices} from 'models/lmsr';
 import {Moment} from 'moment';
 
-export interface Market {
-  id: MarketId;
-  title: string;
-  organizer: string;
-  shortDesc: string;
-  description: string;
-  openTime: Moment;
-  closeTime: Moment;
-  lmsrB: number;
-  tokens: Token[];
-  status: MarketStatus;
-  settleTokenId?: number;
+/*
+ * ====================
+ *      Market
+ * ====================
+ */
+
+abstract class AbstractMarket {
+  readonly tokenPrices: TokenPrices;
+  readonly tokenDistribution: TokenDistribution;
+
+  constructor(
+    readonly id: string,
+    readonly attrs: MarketAttributes,
+    rawTokenDistribution: [string, number][],
+  ) {
+    this.tokenDistribution = new TokenDistribution(rawTokenDistribution);
+    this.tokenPrices = this.tokenDistribution.computeLMSRPrices(attrs.lmsrB);
+  }
+
+  abstract getStatus(): MarketStatus;
 }
 
-export type MarketId = number;
-
-export interface Token {
-  id: number;
-  name: string;
-  description: string;
+export class MarketAttributes {
+  constructor(
+    readonly title: string,
+    readonly organizerId: string,
+    readonly description: string,
+    readonly open: Moment,
+    readonly close: Moment,
+    readonly lmsrB: number,
+    readonly tokens: Token[],
+    readonly prizes: Prize[],
+  ) {}
 }
 
-export enum MarketStatus {
-  Upcoming = 'Upcoming',
-  Open = 'Open',
-  Closed = 'Closed',
-  Resolved = 'Resolved',
-}
+export type MarketStatus = 'Upcoming' | 'Open' | 'Closed' | 'Resolved';
 
-export type TokenId = number;
+export type Market =
+  | UpcomingMarket
+  | OpenMarket
+  | ClosedMarket
+  | ResolvedMarket;
 
-export interface MyMarket {
-  orders: Order[];
-}
+export class UpcomingMarket extends AbstractMarket {
+  constructor(id: string, attrs: MarketAttributes) {
+    const rawTokenDistribution = attrs.tokens.map(
+      t => [t.name, 0] as [string, number],
+    );
+    super(id, attrs, rawTokenDistribution);
+  }
 
-export type Order = NormalOrder | InitialSupplyOrder | SettleOrder;
-
-export interface NormalOrder {
-  tokenId: TokenId;
-  amountToken: number;
-  amountCoin: number;
-  time: Moment;
-  type: 'Normal';
-}
-
-export interface InitialSupplyOrder {
-  amountToken: number;
-  amountCoin: number;
-  time: Moment;
-  type: 'InitialSupply';
-}
-
-export interface SettleOrder {
-  tokenId: TokenId;
-  amountToken: number;
-  amountCoin: number;
-  time: Moment;
-  type: 'Settle';
-}
-
-export type PublicOrderHistory = NormalOrder[];
-
-export type MyOrderHistory = Order[];
-
-export type TokenDistribution = Map<TokenId, number>;
-
-export type TokenPrices = Map<TokenId, number>;
-
-export type MyAssets = Map<'Coin' | TokenId, number>;
-
-export const KILO: number = 1000;
-
-export function isNormalOrder(order: Order): order is NormalOrder {
-  return order.type === 'Normal';
-}
-
-export function isInitialSupplyOrder(
-  order: Order,
-): order is InitialSupplyOrder {
-  return order.type === 'InitialSupply';
-}
-
-export function isSettleOrder(order: Order): order is SettleOrder {
-  return order.type === 'Settle';
-}
-
-export function orderId(order: Order): string {
-  if (isNormalOrder(order)) {
-    return `normal-${order.time.unix()}-${order.tokenId}`;
-  } else if (isInitialSupplyOrder(order)) {
-    return `supply-${order.time.unix()}`;
-  } else {
-    return `settle-${order.tokenId}`;
+  getStatus(): MarketStatus {
+    return 'Upcoming';
   }
 }
 
-export function newTokenDistribution(
-  tokens: Token[],
-  maybeOrders?: NormalOrder[],
-): TokenDistribution {
-  let distribution = new Map(tokens.map(t => [t.id, 0]));
+export class OpenMarket extends AbstractMarket {
+  getStatus(): MarketStatus {
+    return 'Open';
+  }
 
-  const orders = maybeOrders === undefined ? [] : maybeOrders;
-  orders.forEach(order => addOrderToTokenDistribution(distribution, order));
+  // 指定のオーダーで、増える/減る coin の量を計算する
+  // Buy オーダーの時、
+  //  - amountToken は正の値をとる（トークンの量は増えるため）
+  //  - coinCost は負の値をとる
+  // Sell オーダーの時、
+  //  - amountToken は負の値をとる（トークンの量は減るため）
+  //  - coinCost は正の値をとる
+  computeAmountCoinOfOrder(tokenName: string, amountToken: number): number {
+    const curCost = this.tokenDistribution.computeLMSRCost(this.attrs.lmsrB);
 
-  return distribution;
+    const nextCost = this.tokenDistribution
+      .add(tokenName, amountToken)
+      .computeLMSRCost(this.attrs.lmsrB);
+
+    // cost が増えた時、 coin は減る. vice versa.
+    return -(nextCost - curCost);
+  }
 }
 
-export function addOrderToTokenDistribution(
-  distribution: TokenDistribution,
-  order: NormalOrder,
-): void {
-  const curAmount = distribution.get(order.tokenId) || 0;
-  distribution.set(order.tokenId, curAmount + order.amountToken);
+export class ClosedMarket extends AbstractMarket {
+  getStatus(): MarketStatus {
+    return 'Closed';
+  }
 }
 
-export function newTokenPrices(
-  lmsrB: number,
-  distribution: TokenDistribution,
-): TokenPrices {
-  const distributionArray = Array.from(distribution.entries());
-  const denom = distributionArray.reduce(
-    (acc, [_id, n]) => acc + Math.exp(n / lmsrB),
-    0,
-  );
+export class ResolvedMarket extends AbstractMarket {
+  constructor(
+    id: string,
+    attrs: MarketAttributes,
+    rawTokenDistribution: [string, number][],
+    readonly resolvedTokenName: string,
+  ) {
+    super(id, attrs, rawTokenDistribution);
+  }
 
-  return new Map(
-    distributionArray.map(([id, n]) => [
-      id,
-      normalize(Math.exp(n / lmsrB) / denom),
-    ]),
-  );
+  getStatus(): MarketStatus {
+    return 'Resolved';
+  }
 }
 
-export function getTokenPrice(
-  prices: TokenPrices,
-  tokenId: TokenId,
-): number {
-  return prices.get(tokenId) || 0;
+export class Token {
+  constructor(
+    readonly name: string,
+    readonly desc: string,
+    readonly sumbnailUrl: string,
+  ) {}
 }
 
-export function cloneTokenDistribution(
-  distribution: TokenDistribution,
-): TokenDistribution {
-  return new Map(distribution);
+export class Prize {
+  constructor(
+    readonly id: PrizeId,
+    readonly name: string,
+    readonly target: string,
+    readonly sumbnailUrl: string,
+  ) {}
 }
 
-export function cloneTokenPrices(prices: TokenPrices): TokenPrices {
-  return new Map(prices);
+export class PrizeId {
+  constructor(private id: number) {}
 }
 
-export function distributionCost(
-  lmsrB: number,
-  distribution: TokenDistribution,
-): number {
-  const amountTokenArray = Array.from(distribution.values());
-  const res =
-    lmsrB *
-    Math.log(amountTokenArray.reduce((acc, n) => acc + Math.exp(n / lmsrB), 0));
-  return normalize(res);
+/*
+ * ===================
+ * Token Distribution
+ * ===================
+ */
+export class TokenDistribution {
+  readonly tokens: string[];
+  readonly distribution: number[];
+
+  constructor(rawDistribution: [string, number][]) {
+    this.tokens = rawDistribution.map(([token, _q]) => token);
+    this.distribution = rawDistribution.map(([_t, quantity]) => quantity);
+  }
+
+  getUncheck(tokenName: string): number {
+    const idx = this.tokens.indexOf(tokenName);
+    if (idx === -1) {
+      throw new Error(`${tokenName} does not exist`);
+    }
+    return this.distribution[idx];
+  }
+
+  computeLMSRCost(lmsrB: number): number {
+    return computeLMSRCost(lmsrB, this.distribution);
+  }
+
+  computeLMSRPrices(lmsrB: number): TokenPrices {
+    return new TokenPrices(lmsrB, this);
+  }
+
+  add(tokenName: string, quantity: number): TokenDistribution {
+    const cloned = this.clone();
+    cloned.addAssign(tokenName, quantity);
+    return cloned;
+  }
+
+  addAssign(tokenName: string, quantity: number) {
+    const idx = this.tokens.indexOf(tokenName);
+    if (idx === -1) {
+      throw new Error(`${tokenName} does not exist`);
+    }
+    this.distribution[idx] += quantity;
+  }
+
+  clone(): TokenDistribution {
+    const rawDistribution = this.tokens.map((token, idx) => [
+      token,
+      this.distribution[idx],
+    ] as [string, number]);
+    return new TokenDistribution(rawDistribution);
+  }
 }
 
-function normalize(n: number): number {
-  return Math.floor(n * KILO);
-}
+export class TokenPrices {
+  readonly rawPrices: number[];
+  readonly tokens: string[];
 
-export function getMyAssets(
-  tokens: Token[],
-  myOrders: MyOrderHistory,
-): MyAssets {
-  let assets = new Map<'Coin' | TokenId, number>(tokens.map(t => [t.id, 0]));
-  assets.set('Coin', currentAmountOfCoin(myOrders));
-  tokens.forEach(token =>
-    assets.set(token.id, currentAmountOfToken(myOrders, token.id)),
-  );
-  return assets;
-}
+  constructor(lmsrB: number, distribution: TokenDistribution) {
+    this.tokens = distribution.tokens;
+    this.rawPrices = computeLMSRPrices(lmsrB, distribution.distribution);
+  }
 
-function currentAmountOfCoin(myOrders: MyOrderHistory): number {
-  return myOrders.reduce((acc, order) => acc + order.amountCoin, 0);
-}
-
-function currentAmountOfToken(
-  myOrders: MyOrderHistory,
-  tokenId: TokenId,
-): number {
-  return myOrders
-    .filter(order => !isInitialSupplyOrder(order) && order.tokenId === tokenId)
-    .reduce((acc, order) => acc + order.amountToken, 0);
+  getUncheck(tokenName: string): number {
+    const idx = this.tokens.indexOf(tokenName);
+    if (idx === -1) {
+      throw new Error(`${tokenName} does not exist`);
+    }
+    return this.rawPrices[idx];
+  }
 }

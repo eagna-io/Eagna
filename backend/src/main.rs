@@ -1,4 +1,5 @@
-use libeagna::{app::ApiServer, infra::store::DbStoreFactory};
+use libeagna::app::{ApiServer, InfraManagerFactory};
+use libeagna::infra::{FirebaseFactory, PostgresFactory, RedisFactory};
 use log::info;
 
 fn main() {
@@ -10,11 +11,16 @@ fn main() {
     let bind = get_env_var_or_panic("BIND");
     let access_allow_hosts = get_env_var_or_panic("ACCESS_ALLOW_HOSTS");
 
-    let store_factory = DbStoreFactory::new(pg_url, redis_url, firebase_api_key);
+    let firebase_factory = FirebaseFactory::new(firebase_api_key);
+    let redis_factory = RedisFactory::new(redis_url);
+    let postgres_factory = PostgresFactory::new(pg_url);
+
+    let infra_manager_factory =
+        InfraManagerFactory::new(firebase_factory, redis_factory, postgres_factory);
 
     info!("Server is starting on {}", bind.as_str());
 
-    ApiServer::new(store_factory, access_allow_hosts).run(bind.as_str());
+    ApiServer::new(infra_manager_factory, access_allow_hosts).run(bind.as_str());
 }
 
 fn get_env_var_or_panic(key: &'static str) -> String {

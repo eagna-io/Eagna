@@ -1,17 +1,20 @@
 import moment, {Moment} from 'moment';
 import * as D from '@mojotech/json-type-validation';
 
-import {request, Method, isFailure} from 'api/core';
+import {request, Method, Failure, FailureCode} from 'api/core';
 import {
   Market,
+  UpcomingMarket,
+  OpenMarket,
+  ClosedMarket,
+  ResolvedMarket,
+  MarketAttributes,
   MarketStatus,
-  MarketId,
-  TokenId,
-  Order,
-  NormalOrder,
-  InitialSupplyOrder,
-  SettleOrder,
+  Token,
+  Prize,
+  PrizeId,
 } from 'models/market';
+import {Order, NormalOrder, CoinSupplyOrder, RewardOrder} from 'models/order';
 
 /*
  * ========================
@@ -19,14 +22,18 @@ import {
  * ========================
  */
 
-export function getMarket(id: MarketId): Promise<Market> {
+export function getMarket(id: string): Promise<Market | null> {
   return request({
     method: Method.GET,
     path: `/markets/${id}/`,
     decoder: marketDecoder,
   }).then(res => {
-    if (isFailure(res)) {
-      throw `Unexpected failure : ${res.error.message}`;
+    if (res instanceof Failure) {
+      if (res.code === FailureCode.ResourceNotFound) {
+        return null;
+      } else {
+        throw new Error(`Unexpected failure : ${res.message}`);
+      }
     } else {
       return res;
     }
@@ -45,8 +52,32 @@ export function getMarkets(statusList?: MarketStatus[]): Promise<Market[]> {
           },
     decoder: D.array(marketDecoder),
   }).then(res => {
-    if (isFailure(res)) {
-      throw `Unexpected failure : ${res.error.message}`;
+    if (res instanceof Failure) {
+      throw new Error(`Unexpected failure : ${res.message}`);
+    } else {
+      return res;
+    }
+  });
+}
+
+export function getMyMarkets(
+  accessToken: string,
+): Promise<Market[] | 'Unauthorized'> {
+  return request({
+    method: Method.GET,
+    path: '/markets/',
+    params: {
+      participated: true,
+    },
+    accessToken: accessToken,
+    decoder: D.array(marketDecoder),
+  }).then(res => {
+    if (res instanceof Failure) {
+      if (res.code === FailureCode.Unauthorized) {
+        return 'Unauthorized';
+      } else {
+        throw new Error(`Unexpected failure : ${res.message}`);
+      }
     } else {
       return res;
     }
@@ -54,37 +85,73 @@ export function getMarkets(statusList?: MarketStatus[]): Promise<Market[]> {
 }
 
 export const marketDecoder: D.Decoder<Market> = D.object({
-  id: D.number(),
+  id: D.string(),
   title: D.string(),
-  organizer: D.string(),
-  shortDesc: D.string(),
+  organizerId: D.string(),
   description: D.string(),
-  openTime: D.string().map(s => moment(s)),
-  closeTime: D.string().map(s => moment(s)),
+  open: D.string().map(s => moment(s)),
+  close: D.string().map(s => moment(s)),
   lmsrB: D.number(),
+  status: D.string().map(str2status),
+  resolvedTokenName: D.optional(D.string()),
+  tokenDistribution: D.dict(D.number()).map(dic => Object.entries(dic)),
   tokens: D.array(
     D.object({
-      id: D.number(),
       name: D.string(),
       description: D.string(),
-    }),
+      sumbnailUrl: D.string(),
+    }).map(t => new Token(t.name, t.description, t.sumbnailUrl)),
   ),
-  status: D.string().map(str2status),
-  settleTokenId: D.optional(D.number()),
+  prizes: D.array(
+    D.object({
+      id: D.number().map(id => new PrizeId(id)),
+      name: D.string(),
+      sumbnailUrl: D.string(),
+      target: D.string(),
+    }).map(p => new Prize(p.id, p.name, p.target, p.sumbnailUrl)),
+  ),
+}).map(m => {
+  const attrs = new MarketAttributes(
+    m.title,
+    m.organizerId,
+    m.description,
+    m.open,
+    m.close,
+    m.lmsrB,
+    m.tokens,
+    m.prizes,
+  );
+  if (m.status === 'Upcoming') {
+    return new UpcomingMarket(m.id, attrs);
+  } else if (m.status === 'Open') {
+    return new OpenMarket(m.id, attrs, m.tokenDistribution);
+  } else if (m.status === 'Closed') {
+    return new ClosedMarket(m.id, attrs, m.tokenDistribution);
+  } else {
+    const resolvedTokenName = m.resolvedTokenName;
+    if (resolvedTokenName === undefined) {
+      throw new Error(
+        'Market status is "resolved" but resolved_token_name is missing',
+      );
+    }
+    return new ResolvedMarket(
+      m.id,
+      attrs,
+      m.tokenDistribution,
+      resolvedTokenName,
+    );
+  }
 });
 
 function str2status(s: string): MarketStatus {
   switch (s) {
-    case 'Preparing':
-      return MarketStatus.Upcoming;
+    case 'Upcoming':
     case 'Open':
-      return MarketStatus.Open;
     case 'Closed':
-      return MarketStatus.Closed;
-    case 'Settled':
-      return MarketStatus.Resolved;
+    case 'Resolved':
+      return s;
     default:
-      throw `Invalid market status : ${s}`;
+      throw new Error(`Invalid market status : ${s}`);
   }
 }
 
@@ -95,35 +162,42 @@ function str2status(s: string): MarketStatus {
  */
 
 interface PostMarketArgs {
-  market: {
-    title: string;
-    organizer: string;
-    shortDesc: string;
+  title: string;
+  organizerId: string;
+  description: string;
+  lmsrB: number;
+  open: Moment;
+  close: Moment;
+  tokens: {
+    name: string;
     description: string;
-    lmsrB: number;
-    openTime: Moment;
-    closeTime: Moment;
-    tokens: {
-      name: string;
-      description: string;
-    }[];
-  };
-  accessToken: string;
+    sumbnailUrl: string;
+  }[];
+  prizes: {
+    id: number;
+    name: string;
+    sumbnailUrl: string;
+    target: string;
+  }[];
 }
 
-export function postMarket({
-  market,
-  accessToken,
-}: PostMarketArgs): Promise<MarketId> {
+export function postMarket(
+  market: PostMarketArgs,
+  accessToken: string,
+): Promise<string | 'Unauthorized'> {
   return request({
     method: Method.POST,
     path: '/markets/',
     accessToken: accessToken,
     body: market,
-    decoder: D.number(),
+    decoder: D.string(),
   }).then(res => {
-    if (isFailure(res)) {
-      throw `Unexpected error : ${res.error.message}`;
+    if (res instanceof Failure) {
+      if (res.code === FailureCode.Unauthorized) {
+        return 'Unauthorized';
+      } else {
+        throw new Error(`Unexpected failure : ${res.message}`);
+      }
     } else {
       return res;
     }
@@ -136,29 +210,27 @@ export function postMarket({
  * =======================
  */
 
-interface ResolveMarketArgs {
-  marketId: number;
-  resolveTokenId: number;
-  accessToken: string;
-}
-
-export function resolveMarket({
-  marketId,
-  resolveTokenId,
-  accessToken,
-}: ResolveMarketArgs): Promise<number> {
+export function resolveMarket(
+  marketId: string,
+  resolvedTokenName: string,
+  accessToken: string,
+): Promise<string | 'Unauthorized'> {
   return request({
     method: Method.PUT,
     path: `/markets/${marketId}/`,
     accessToken: accessToken,
     body: {
-      status: 'Settled',
-      settleTokenId: resolveTokenId,
+      status: 'Resolved',
+      resolvedTokenName: resolvedTokenName,
     },
-    decoder: D.number(),
+    decoder: D.string(),
   }).then(res => {
-    if (isFailure(res)) {
-      throw `Unexpected error : ${res.error.message}`;
+    if (res instanceof Failure) {
+      if (res.code === FailureCode.Unauthorized) {
+        return 'Unauthorized';
+      } else {
+        throw new Error(`Unexpected failure : ${res.message}`);
+      }
     } else {
       return res;
     }
@@ -171,87 +243,75 @@ export function resolveMarket({
  * ========================
  */
 
-interface GetOrdersResp {
-  orders: NormalOrder[];
-  myOrders?: Order[];
-}
-
-export function getOrders(
-  marketId: MarketId,
-  accessToken?: string,
-): Promise<GetOrdersResp> {
+export function getOrders(marketId: string): Promise<NormalOrder[]> {
   return request({
     method: Method.GET,
     path: `/markets/${marketId}/orders/`,
-    params: accessToken
-      ? {
-          contains: 'mine',
-        }
-      : undefined,
-    accessToken: accessToken,
-    decoder: ordersDecoder,
+    decoder: D.object({
+      orders: D.array(normalOrderDecoder),
+    }),
   }).then(res => {
-    if (isFailure(res)) {
-      // AccessTokenの有効期限切れ
-      if (res.error.code === 2) {
-        return getOrders(marketId);
+    if (res instanceof Failure) {
+      throw new Error(`Unexpected failure : ${res.message}`);
+    } else {
+      return res.orders;
+    }
+  });
+}
+
+export function getMyOrders(
+  marketId: string,
+  accessToken: string,
+): Promise<Order[] | 'Unauthorized'> {
+  return request({
+    method: Method.GET,
+    path: `/markets/${marketId}/orders/`,
+    params: {
+      mine: true,
+    },
+    accessToken: accessToken,
+    decoder: D.object({
+      orders: D.array(
+        D.union(normalOrderDecoder, coinSupplyOrderDecoder, settleOrderDecoder),
+      ),
+    }),
+  }).then(res => {
+    if (res instanceof Failure) {
+      if (res.code === FailureCode.Unauthorized) {
+        return 'Unauthorized';
       } else {
-        throw `Unexpected failure : ${res.error.message}`;
+        throw new Error(`Unexpected failure : ${res.message}`);
       }
     } else {
-      return res;
+      return res.orders;
     }
   });
 }
 
 const normalOrderDecoder: D.Decoder<NormalOrder> = D.object({
-  tokenId: D.number(),
+  tokenName: D.string(),
   amountToken: D.number(),
   amountCoin: D.number(),
   time: D.string().map(s => moment(s)),
   type: D.constant('Normal'),
-});
+}).map(
+  obj =>
+    new NormalOrder(obj.tokenName, obj.amountToken, obj.amountCoin, obj.time),
+);
 
-const initialSupplyOrderDecoder: D.Decoder<InitialSupplyOrder> = D.object({
+const coinSupplyOrderDecoder: D.Decoder<CoinSupplyOrder> = D.object({
   amountToken: D.number(),
   amountCoin: D.number(),
   time: D.string().map(s => moment(s)),
-  type: D.constant('InitialSupply'),
-});
+  type: D.constant('CoinSupply'),
+}).map(obj => new CoinSupplyOrder(obj.amountCoin, obj.time));
 
-const settleOrderDecoder: D.Decoder<SettleOrder> = D.object({
-  tokenId: D.number(),
-  amountToken: D.number(),
+const settleOrderDecoder: D.Decoder<RewardOrder> = D.object({
+  tokenName: D.string(),
   amountCoin: D.number(),
   time: D.string().map(s => moment(s)),
-  type: D.constant('Settle'),
-});
-
-const ordersDecoder: D.Decoder<GetOrdersResp> = D.object({
-  orders: D.array(
-    D.object({
-      tokenId: D.number(),
-      amountToken: D.number(),
-      amountCoin: D.number(),
-      time: D.string().map(s => moment(s)),
-      type: D.succeed<'Normal'>('Normal'),
-    }),
-  ),
-  mine: D.optional(
-    D.object({
-      orders: D.array(
-        D.union(
-          normalOrderDecoder,
-          initialSupplyOrderDecoder,
-          settleOrderDecoder,
-        ),
-      ),
-    }),
-  ),
-}).map(obj => ({
-  orders: obj.orders,
-  myOrders: obj.mine ? obj.mine.orders : undefined,
-}));
+  type: D.constant('Reward'),
+}).map(obj => new RewardOrder(obj.tokenName, obj.amountCoin, obj.time));
 
 /*
  * ===================
@@ -259,91 +319,27 @@ const ordersDecoder: D.Decoder<GetOrdersResp> = D.object({
  * ===================
  */
 
-interface CreateInitialSupplyOrderArgs {
-  marketId: MarketId;
-  accessToken: string;
-}
-
-interface CreatedInitialSupplyOrder {
-  amountCoin: number;
-  time: Moment;
-  type: 'initialSupply';
-}
-
-export function createInitialSupplyOrder({
-  marketId,
-  accessToken,
-}: CreateInitialSupplyOrderArgs): Promise<CreatedInitialSupplyOrder> {
+export function createInitialSupplyOrder(
+  marketId: string,
+  accessToken: string,
+): Promise<CoinSupplyOrder | 'Unauthorized'> {
   return request({
     method: Method.POST,
     path: `/markets/${marketId}/orders/`,
     accessToken: accessToken,
     body: {
-      type: 'initialSupply',
+      amountToken: 0, // Dont care
+      amountCoin: 10000, // Dont care
+      time: moment(), // Dont care
+      type: 'CoinSupply',
     },
-    decoder: createdInitialSupplyOrderDecoder,
+    decoder: coinSupplyOrderDecoder,
   }).then(res => {
-    if (isFailure(res)) {
-      throw `Unexpected error : ${res.error.message}`;
-    } else {
-      return res;
-    }
-  });
-}
-
-const createdInitialSupplyOrderDecoder: D.Decoder<
-  CreatedInitialSupplyOrder
-> = D.object({
-  amountCoin: D.number(),
-  time: D.string().map(s => moment(s)),
-  type: D.constant('initialSupply'),
-});
-
-/*
- * ===================
- * Create Normal Order
- * ===================
- */
-
-interface CreateNormalOrderArgs {
-  marketId: MarketId;
-  order: {
-    tokenId: TokenId;
-    amountToken: number;
-    amountCoin: number;
-  };
-  accessToken: string;
-}
-
-interface CreatedNormalOrder {
-  tokenId: TokenId;
-  amountToken: number;
-  amountCoin: number;
-  time: Moment;
-}
-
-export function createNormalOrder({
-  marketId,
-  order,
-  accessToken,
-}: CreateNormalOrderArgs): Promise<CreatedNormalOrder | 'PriceSlip'> {
-  return request({
-    method: Method.POST,
-    path: `/markets/${marketId}/orders/`,
-    accessToken: accessToken,
-    body: {
-      type: 'normal',
-      ...order,
-    },
-    decoder: createdNormalOrderDecoder,
-  }).then(res => {
-    if (isFailure(res)) {
-      if (res.error.code === 1) {
-        // code 1 => Invalid payload error
-        // 他の要素は適切（なはず）なので、ここでのエラーは価格スリップエラー
-        return 'PriceSlip';
+    if (res instanceof Failure) {
+      if (res.code === FailureCode.Unauthorized) {
+        return 'Unauthorized';
       } else {
-        throw `Unexpected error : ${res.error.message}`;
+        throw new Error(`Unexpected failure : ${res.message}`);
       }
     } else {
       return res;
@@ -351,10 +347,41 @@ export function createNormalOrder({
   });
 }
 
-const createdNormalOrderDecoder: D.Decoder<CreatedNormalOrder> = D.object({
-  tokenId: D.number(),
-  amountToken: D.number(),
-  amountCoin: D.number(),
-  time: D.string().map(s => moment(s)),
-  type: D.constant('normal'),
-});
+/*
+ * ===================
+ * Create Normal Order
+ * ===================
+ */
+
+export function createNormalOrder(
+  marketId: string,
+  accessToken: string,
+  order: NormalOrder,
+): Promise<NormalOrder | 'PriceSlip' | 'Unauthorized'> {
+  return request({
+    method: Method.POST,
+    path: `/markets/${marketId}/orders/`,
+    accessToken: accessToken,
+    body: {
+      tokenName: order.tokenName,
+      amountToken: order.amountToken,
+      amountCoin: order.amountCoin,
+      time: order.time,
+      type: 'Normal',
+    },
+    decoder: normalOrderDecoder,
+  }).then(res => {
+    if (res instanceof Failure) {
+      if (res.code === FailureCode.InvalidPayload) {
+        // 他の要素は適切（なはず）なので、ここでのエラーは価格スリップエラー
+        return 'PriceSlip';
+      } else if (res.code === FailureCode.Unauthorized) {
+        return 'Unauthorized';
+      } else {
+        throw new Error(`Unexpected failure : ${res.message}`);
+      }
+    } else {
+      return res;
+    }
+  });
+}

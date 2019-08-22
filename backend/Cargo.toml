@@ -16,16 +16,18 @@ path = "src/main.rs"
 rouille = "~3.0"
 reqwest = "~0.9"
 redis = "~0.10"
-diesel = { version = "~1.4", features = ["postgres", "chrono"] }
+diesel = { version = "~1.4", features = ["postgres", "chrono", "uuid", "uuidv07"] }
 diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
-serde = { version = "~1.0", features = ["rc"] }
-serde_derive = "~1.0"
+serde = { version = "~1.0", features = ["derive", "rc"] }
 chrono = { version = "~0.4", features = ["serde"] }
 arrayvec = { version = "~0.4", features = ["serde-1"] }
+lazycell = "~1.2"
 regex = "~1.1"
 base64 = "~0.10"
-rand = "~0.6"
+rand = "~0.7"
 sha2 = "~0.8"
+uuid = { version = "~0.7", features = ["v4", "serde"] }
 failure = "~0.1"
+derive_more = "~0.15"
 log = "~0.4"
 env_logger = "~0.6"
