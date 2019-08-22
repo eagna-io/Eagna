@@ -80,5 +80,5 @@ const Container = styled.div`
   width: 95%;
   max-width: ${MinPcWidth}px;
   margin: 0 auto;
-  padding-top: 50px;
+  padding: 50px 0;
 `;
