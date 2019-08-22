@@ -111,7 +111,7 @@ def move_orders():
 def query_orders():
     with psycopg2.connect(old_url) as conn:
         with conn.cursor() as cur:
-            cur.execute('SELECT markets.title, market_internal_serial_num, user_id, token_id, amount_token, amount_coin, type, time FROM orders INNER JOIN markets ON markets.id = orders.market_id WHERE markets.status = %s', ('settled',))
+            cur.execute('SELECT markets.title, market_internal_serial_num, user_id, token_id, amount_token, amount_coin, type, time FROM orders INNER JOIN markets ON markets.id = orders.market_id')
             return cur.fetchall()
 
 def query_market_id(title):
