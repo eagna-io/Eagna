@@ -76,10 +76,10 @@ const GlobalStyle = createGlobalStyle`
   a {
     text-decoration: none;
     outline: none;
-    color: #1B384E;
+    color: inherit;
   }
   a: visited {
-    color: #1B384E;
+    color: inherit;
   }
   p {
     margin: 0;

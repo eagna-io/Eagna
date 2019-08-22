@@ -1,5 +1,6 @@
 import React, {FC} from 'react';
 import styled from 'styled-components';
+import {HashLink} from 'react-router-hash-link';
 
 import {pc} from 'app/components/responsive';
 
@@ -34,7 +35,9 @@ const ThreeStepsSection: FC = () => {
           コインはいろんな商品やポイントと交換することができます。正確な予測でたくさんの報酬をGETしましょう！
         </StepDesc>
       </StepContainer>
-      <TradeButton>今すぐトレード！</TradeButton>
+      <TradeButton smooth to="#main">
+        今すぐトレード！
+      </TradeButton>
     </Container>
   );
 };
@@ -118,7 +121,7 @@ const StepDesc = styled.p`
   `)}
 `;
 
-const TradeButton = styled.button`
+const TradeButton = styled(HashLink)`
   display: block;
   width: 172px;
   height: 43px;
@@ -130,5 +133,11 @@ const TradeButton = styled.button`
   box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, 0.5);
   font-size: 15px;
   font-weight: bold;
+  text-align: center;
+  line-height: 43px;
   color: white;
+
+  &:visited {
+    color: white;
+  }
 `;

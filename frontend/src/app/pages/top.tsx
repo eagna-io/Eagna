@@ -13,7 +13,7 @@ const TopPage: FC = () => {
   return (
     <>
       <Header />
-      <MainSection>
+      <MainSection id="main">
         <MainSectionBgFilter>
           <MainMsg>未来は僕等の手の中</MainMsg>
           <SubMsg>今すぐ予測市場を体験しましょう</SubMsg>
