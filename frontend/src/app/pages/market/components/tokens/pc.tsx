@@ -83,6 +83,7 @@ const TokenContainer = styled.div`
   background: #ffffff;
   box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, 0.5);
   border-radius: 4px;
+  vertical-align: top;
 
   &:nth-of-type(odd) {
     margin-right: 40px;

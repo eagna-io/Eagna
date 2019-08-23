@@ -66,25 +66,23 @@ const TokenComponent: FC<TokenComponentProps> = ({
   onClick,
 }) => {
   return (
-    <>
-      <TokenContainer onClick={onClick}>
-        <TokenName>{token.name}</TokenName>
-        <TokenSumbnail src={token.sumbnailUrl} />
-        <TokenStatistics>
-          <TokenStatisticsStrong>{tokenPrice}</TokenStatisticsStrong>
-          <br />
-          coin&nbsp;/&nbsp;枚
-        </TokenStatistics>
-        <TokenStatistics>
-          <TokenStatisticsStrong>
-            {amountToken === null ? '-' : amountToken}
-          </TokenStatisticsStrong>
-          &nbsp;枚
-          <br />
-          持っています
-        </TokenStatistics>
-      </TokenContainer>
-    </>
+    <TokenContainer onClick={onClick}>
+      <TokenName>{token.name}</TokenName>
+      <TokenSumbnail src={token.sumbnailUrl} />
+      <TokenStatistics>
+        <TokenStatisticsStrong>{tokenPrice}</TokenStatisticsStrong>
+        <br />
+        coin&nbsp;/&nbsp;枚
+      </TokenStatistics>
+      <TokenStatistics>
+        <TokenStatisticsStrong>
+          {amountToken === null ? '-' : amountToken}
+        </TokenStatisticsStrong>
+        &nbsp;枚
+        <br />
+        持っています
+      </TokenStatistics>
+    </TokenContainer>
   );
 };
 
@@ -95,6 +93,7 @@ const TokenContainer = styled.div`
   background: #ffffff;
   box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, 0.5);
   border-radius: 4px;
+  vertical-align: top;
 
   &:nth-of-type(odd) {
     margin-right: 12px;

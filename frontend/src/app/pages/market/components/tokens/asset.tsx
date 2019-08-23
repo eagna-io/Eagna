@@ -47,10 +47,10 @@ const AssetContainer = styled.div`
 
   ${pc(`
     display: inline-block;
-    width: 170px;
+    width: 180px;
     
     &:first-of-type {
-      margin-right: calc(100% - (170px * 2));
+      margin-right: calc(100% - (180px * 2));
     }
   `)}
 `;
