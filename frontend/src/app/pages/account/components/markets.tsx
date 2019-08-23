@@ -46,6 +46,7 @@ const MarketsContainer = styled.div`
   width: 100%;
 
   ${pc(`
+    white-space: nowrap;
     overflow: scroll;
     padding: 2px;
   `)}
@@ -79,7 +80,9 @@ const MarketContainer = styled(Link)`
     width: 250px;
     height: 270px;
     margin-right: 50px;
+    white-space: normal;
 
+    /* スマホの設定を打ち消す */
     &:nth-of-type(odd) {
       margin-right: 50px;
     }
