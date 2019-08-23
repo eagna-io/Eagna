@@ -13,6 +13,7 @@ export class PriceHistory {
 
     const lmsrB = market.attrs.lmsrB;
 
+    // 初期プライス（全部同じ値段）で初期化
     this.rawHistory = [
       {
         date: market.attrs.open.toDate(),
@@ -22,12 +23,19 @@ export class PriceHistory {
 
     orders.sort((a, b) => a.time.valueOf() - b.time.valueOf());
 
+    // 各オーダーが出された時の価格を算出
     orders.forEach(order => {
       distribution.addAssign(order.tokenName, order.amountToken);
       this.rawHistory.push({
         date: order.time.toDate(),
         prices: distribution.computeLMSRPrices(lmsrB).rawPrices,
       });
+    });
+
+    // 現在価格（最終価格）を追加
+    this.rawHistory.push({
+      date: new Date(),
+      prices: this.rawHistory[this.rawHistory.length - 1].prices,
     });
   }
 
