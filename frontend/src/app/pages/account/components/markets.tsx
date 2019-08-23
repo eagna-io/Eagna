@@ -48,7 +48,6 @@ const MarketsContainer = styled.div`
   ${pc(`
     overflow: scroll;
     padding: 2px;
-    white-space: nowrap;
   `)}
 `;
 
