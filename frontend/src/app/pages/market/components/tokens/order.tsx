@@ -80,9 +80,9 @@ const OrderComponent: FC<OrderComponentProps> = ({
   }
 
   return (
-    <>
+    <Container>
       {msg !== null ? <OrderNote>{msg}</OrderNote> : null}
-      <OrderContainer>
+      <OrderButtonsContainer>
         <OrderButtonContainer>
           <BuyButton disabled={!buyable} onClick={requestBuy}>
             {buyPrice === null ? '-' : buyPrice}
@@ -97,12 +97,17 @@ const OrderComponent: FC<OrderComponentProps> = ({
           </SellButton>
           <OrderButtonDesc>で売却する</OrderButtonDesc>
         </OrderButtonContainer>
-      </OrderContainer>
-    </>
+      </OrderButtonsContainer>
+    </Container>
   );
 };
 
 export default withUser(OrderComponent);
+
+const Container = styled.div`
+  width: 100%;
+  margin-top: 30px;
+`;
 
 const OrderNote = styled.p`
   width: 100%;
@@ -110,7 +115,7 @@ const OrderNote = styled.p`
   color: #ff6666;
   padding: 0;
   margin: 0;
-  margin-top: 30px;
+  margin-bottom: 15px;
   text-align: center;
 
   ${pc(`
@@ -118,11 +123,10 @@ const OrderNote = styled.p`
   `)};
 `;
 
-const OrderContainer = styled.div`
+const OrderButtonsContainer = styled.div`
   display: flex;
   width: 100%;
   justify-content: space-around;
-  margin-top: 15px;
   padding: 0px 2% 25px 2%;
 `;
 
