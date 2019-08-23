@@ -128,6 +128,9 @@ impl<'a> MarketRepository<'a> {
         let raw_ids: Vec<_> = market_ids.iter().map(|id| *id.as_uuid()).collect();
 
         let raw_markets = self.postgres.query_markets_by_ids(raw_ids.as_slice())?;
+
+        // `query_orders_by_market_ids` は time フィールドでasc順にソート
+        // したorderのリストを返す。つまり古いものが最初に来る。
         let raw_orders = self
             .postgres
             .query_orders_by_market_ids(raw_ids.as_slice())?;
@@ -195,6 +198,7 @@ impl<'a> MarketRepository<'a> {
     }
 }
 
+/// `orders` はソート済みでなければならない
 fn build_market<I>(market: QueryMarket, orders: I) -> Market
 where
     I: Iterator<Item = QueryOrder>,
