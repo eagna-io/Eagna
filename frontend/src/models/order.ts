@@ -1,4 +1,4 @@
-import {Moment} from 'moment';
+import moment, {Moment} from 'moment';
 import {Market, Token, TokenDistribution} from 'models/market';
 
 export class PriceHistory {
@@ -32,9 +32,10 @@ export class PriceHistory {
       });
     });
 
-    // 現在価格（最終価格）を追加
+    // 最終価格を追加
+    // 日時は、現在時間とclose時間のうち古い方
     this.rawHistory.push({
-      date: new Date(),
+      date: moment.min(moment(), market.attrs.close).toDate(),
       prices: this.rawHistory[this.rawHistory.length - 1].prices,
     });
   }
