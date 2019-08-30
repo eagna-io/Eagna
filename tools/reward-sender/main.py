@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import psycopg2
 import numpy as np
 import requests
@@ -13,6 +14,8 @@ def main():
     market_id = sys.argv[1]
     gift_link_list = sys.argv[2].split(",")
 
+    validate_gift_link_list(gift_link_list)
+
     users = query_user_coins(market_id)
     lucky_user_list = choice_reward_users(users, len(gift_link_list))
     market_title = query_market_title(market_id)
@@ -20,6 +23,15 @@ def main():
     for (coin, name, email), gift_link in zip(lucky_user_list, gift_link_list):
         send_raward_mail(market_title, gift_link, email)
 
+
+def validate_gift_link_list(link_list):
+    pattern = '^https://giftee.co/r/\w{8}'
+    compiled_pattern = re.compile(pattern)
+    for link in link_list:
+        res = compiled_pattern.match(link)
+        if res is None:
+            print("gift のリンクが不適切です : {link}".format(link = link))
+            sys.exit(1)
 
 
 exclude_user_emails = [
@@ -58,17 +70,17 @@ def choice_reward_users(users, n):
 ## 当選メールを送る
 def send_raward_mail(market_title, gift_link, user_addr):
     FROM = "Eagna 運営 <info@eagna.io>"
-    SUBJECT = "[Eagna] ギフトを贈ります！"
+    SUBJECT = "[Eagna] 予測報酬が届きました！"
     text = """
 Eagnaへのご参加ありがとうございました！
 
-以下のマーケットで予測報酬が当選しましたのでお送り致します。
+以下のマーケットでなされた予測に対して、報酬がありますのでお受け取りください。
 
 「{market}」
 
 今後もEagnaを宜しくお願い致します！
 
-◆こちらのリンクからギフトを受け取ることができます
+◆こちらのリンクからギフトを受け取ることができます。
 {gift_link}
     """.format(market = market_title, gift_link = gift_link).strip()
 
