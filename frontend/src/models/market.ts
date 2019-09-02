@@ -1,5 +1,5 @@
-import {computeLMSRCost, computeLMSRPrices} from 'models/lmsr';
-import {Moment} from 'moment';
+import { computeLMSRCost, computeLMSRPrices } from "models/lmsr";
+import { Moment } from "moment";
 
 /*
  * ====================
@@ -14,7 +14,7 @@ abstract class AbstractMarket {
   constructor(
     readonly id: string,
     readonly attrs: MarketAttributes,
-    rawTokenDistribution: [string, number][],
+    rawTokenDistribution: [string, number][]
   ) {
     this.tokenDistribution = new TokenDistribution(rawTokenDistribution);
     this.tokenPrices = this.tokenDistribution.computeLMSRPrices(attrs.lmsrB);
@@ -32,11 +32,11 @@ export class MarketAttributes {
     readonly close: Moment,
     readonly lmsrB: number,
     readonly tokens: Token[],
-    readonly prizes: Prize[],
+    readonly prizes: Prize[]
   ) {}
 }
 
-export type MarketStatus = 'Upcoming' | 'Open' | 'Closed' | 'Resolved';
+export type MarketStatus = "Upcoming" | "Open" | "Closed" | "Resolved";
 
 export type Market =
   | UpcomingMarket
@@ -47,19 +47,19 @@ export type Market =
 export class UpcomingMarket extends AbstractMarket {
   constructor(id: string, attrs: MarketAttributes) {
     const rawTokenDistribution = attrs.tokens.map(
-      t => [t.name, 0] as [string, number],
+      t => [t.name, 0] as [string, number]
     );
     super(id, attrs, rawTokenDistribution);
   }
 
   getStatus(): MarketStatus {
-    return 'Upcoming';
+    return "Upcoming";
   }
 }
 
 export class OpenMarket extends AbstractMarket {
   getStatus(): MarketStatus {
-    return 'Open';
+    return "Open";
   }
 
   // 指定のオーダーで、増える/減る coin の量を計算する
@@ -83,7 +83,7 @@ export class OpenMarket extends AbstractMarket {
 
 export class ClosedMarket extends AbstractMarket {
   getStatus(): MarketStatus {
-    return 'Closed';
+    return "Closed";
   }
 }
 
@@ -92,13 +92,13 @@ export class ResolvedMarket extends AbstractMarket {
     id: string,
     attrs: MarketAttributes,
     rawTokenDistribution: [string, number][],
-    readonly resolvedTokenName: string,
+    readonly resolvedTokenName: string
   ) {
     super(id, attrs, rawTokenDistribution);
   }
 
   getStatus(): MarketStatus {
-    return 'Resolved';
+    return "Resolved";
   }
 }
 
@@ -106,7 +106,7 @@ export class Token {
   constructor(
     readonly name: string,
     readonly desc: string,
-    readonly sumbnailUrl: string,
+    readonly sumbnailUrl: string
   ) {}
 }
 
@@ -115,7 +115,7 @@ export class Prize {
     readonly id: PrizeId,
     readonly name: string,
     readonly target: string,
-    readonly sumbnailUrl: string,
+    readonly sumbnailUrl: string
   ) {}
 }
 
@@ -168,10 +168,9 @@ export class TokenDistribution {
   }
 
   clone(): TokenDistribution {
-    const rawDistribution = this.tokens.map((token, idx) => [
-      token,
-      this.distribution[idx],
-    ] as [string, number]);
+    const rawDistribution = this.tokens.map(
+      (token, idx) => [token, this.distribution[idx]] as [string, number]
+    );
     return new TokenDistribution(rawDistribution);
   }
 }
