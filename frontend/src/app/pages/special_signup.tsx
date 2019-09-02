@@ -1,70 +1,74 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
-import {History, LocationDescriptor} from 'history';
-import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
+import React, { FC } from "react";
+import styled from "styled-components";
+import { History, LocationDescriptor } from "history";
+import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
+import * as firebase from "firebase/app";
+import "firebase/auth";
 
-import {User} from 'models/user';
+import { User } from "models/user";
+import Header from "app/components/header";
 
 interface Props {
-  history: History<{redirect?: LocationDescriptor}>;
+  history: History<{ redirect?: LocationDescriptor }>;
   user: User | null;
 }
 
-const SpecialSignupPage: FC<Props> = ({history, user}) => {
+const SpecialSignupPage: FC<Props> = ({ history, user }) => {
   const uiConfig = {
     callbacks: {
       signInSuccessWithAuthResult: (result: firebase.auth.UserCredential) => {
         if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
-          countConversion().then(() => history.push('/me'));
+          countConversion().then(() => history.push("/me"));
           return false;
         }
         return true;
-      },
+      }
     },
-    signInSuccessUrl: '/me',
-    signInFlow: 'popup',
+    signInSuccessUrl: "/me",
+    signInFlow: "popup",
     signInOptions: [
       {
         provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        scopes: ['https://www.googleapis.com/auth/userinfo.email'],
+        scopes: ["https://www.googleapis.com/auth/userinfo.email"],
         customParameters: {
-          prompt: 'select_account',
-        },
+          prompt: "select_account"
+        }
       },
       {
         provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        scopes: ['email'],
+        scopes: ["email"]
       },
       {
         provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
-        scopes: ['user:email'],
+        scopes: ["user:email"]
       },
       {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        requireDisplayName: true,
-      },
-    ],
+        requireDisplayName: true
+      }
+    ]
   };
 
   return (
-    <Body>
-      <Container>
-        <LogoContainer>
-          <Logo src="/img/logo-big.png" />
-          <With>with</With>
-          <Logo src="/img/special-signup-logo.png" />
-        </LogoContainer>
-        <Desc>
-          「有益なスタートアップ関連情報まとめ」からEagnaをお知りになった方はこちらのページからご登録ください。
-        </Desc>
-        <StyledFirebaseAuth
-          uiConfig={uiConfig}
-          firebaseAuth={firebase.auth()}
-        />
-      </Container>
-    </Body>
+    <>
+      <Header />
+      <Body>
+        <Container>
+          <LogoContainer>
+            <Logo src="/img/logo-big.png" />
+            <With>with</With>
+            <Logo src="/img/special-signup-logo.png" />
+          </LogoContainer>
+          <Desc>
+            「有益なスタートアップ関連情報まとめ」からEagnaをお知りになった方はこちらのページからご登録ください。
+          </Desc>
+          <StyledFirebaseAuth
+            uiConfig={uiConfig}
+            firebaseAuth={firebase.auth()}
+          />
+        </Container>
+      </Body>
+    </>
   );
 };
 
@@ -73,19 +77,19 @@ export default SpecialSignupPage;
 function countConversion(): Promise<Response> {
   const RapidApiKey = process.env.REACT_APP_RAPID_API_KEY;
   if (RapidApiKey === undefined) {
-    throw new Error('REACT_APP_RAPID_API_KEY is not defined');
+    throw new Error("REACT_APP_RAPID_API_KEY is not defined");
   }
   const headers = new Headers();
-  headers.append('Content-Type', 'application/json');
-  headers.append('X-RapidAPI-Host', 'nanosdk-counters-v1.p.rapidapi.com');
-  headers.append('X-RapidAPI-Key', RapidApiKey);
+  headers.append("Content-Type", "application/json");
+  headers.append("X-RapidAPI-Host", "nanosdk-counters-v1.p.rapidapi.com");
+  headers.append("X-RapidAPI-Key", RapidApiKey);
 
   return fetch(
-    'https://nanosdk-counters-v1.p.rapidapi.com/counters/special-signup',
+    "https://nanosdk-counters-v1.p.rapidapi.com/counters/special-signup",
     {
-      method: 'PUT',
-      headers,
-    },
+      method: "PUT",
+      headers
+    }
   );
 }
 
