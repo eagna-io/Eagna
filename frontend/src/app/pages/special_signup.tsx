@@ -52,22 +52,20 @@ const SpecialSignupPage: FC<Props> = ({ history, user }) => {
   return (
     <>
       <Header />
-      <Body>
-        <Container>
-          <LogoContainer>
-            <Logo src="/img/logo-big.png" />
-            <With>with</With>
-            <Logo src="/img/special-signup-logo.png" />
-          </LogoContainer>
-          <Desc>
-            「有益なスタートアップ関連情報まとめ」からEagnaをお知りになった方はこちらのページからご登録ください。
-          </Desc>
-          <StyledFirebaseAuth
-            uiConfig={uiConfig}
-            firebaseAuth={firebase.auth()}
-          />
-        </Container>
-      </Body>
+      <Container>
+        <LogoContainer>
+          <Logo src="/img/logo-big.png" />
+          <With>with</With>
+          <Logo src="/img/special-signup-logo.png" />
+        </LogoContainer>
+        <Desc>
+          「有益なスタートアップ関連情報まとめ」からEagnaをお知りになった方はこちらのページからご登録ください。
+        </Desc>
+        <StyledFirebaseAuth
+          uiConfig={uiConfig}
+          firebaseAuth={firebase.auth()}
+        />
+      </Container>
     </>
   );
 };
@@ -92,14 +90,6 @@ function countConversion(): Promise<Response> {
     }
   );
 }
-
-const Body = styled.div`
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-`;
 
 const Container = styled.div`
   margin-top: 10vh;
