@@ -1,17 +1,19 @@
-import React, {FC, useState, useEffect} from 'react';
-import styled from 'styled-components';
-import {Link} from 'react-router-dom';
+import React, { FC, useState, useEffect } from "react";
+import styled from "styled-components";
+import { Link } from "react-router-dom";
 
-import {Market} from 'models/market';
-import {getMarkets} from 'api/market';
-import {pc, MinPcWidth} from 'app/components/responsive';
-import StatusBadge from 'app/components/status_badge';
+import { Market, MarketStatus, MarketRepository } from "models/market";
+import { pc, MinPcWidth } from "app/components/responsive";
+import StatusBadge from "app/components/status_badge";
 
 const FeaturedMarketListComponent: FC = () => {
   const [markets, setMarkets] = useState<Market[]>([]);
 
   useEffect(() => {
-    getMarkets(['Upcoming', 'Open']).then(setMarkets);
+    MarketRepository.queryListOfStatus([
+      MarketStatus.Upcoming,
+      MarketStatus.Open
+    ]).then(markets => setMarkets(markets.map(({ market }) => market)));
   }, []);
 
   return (
@@ -64,10 +66,10 @@ const MarketList = styled.div`
   `)}
 `;
 
-const MarketComponent: FC<{market: Market}> = React.memo(({market}) => {
+const MarketComponent: FC<{ market: Market }> = React.memo(({ market }) => {
   return (
     <MarketContainer to={`/market/${market.id}`}>
-      <StatusBadge status={market.getStatus()} />
+      <StatusBadge status={market.status} />
       <Title>{market.attrs.title}</Title>
       <HR />
       <TokenContainer>

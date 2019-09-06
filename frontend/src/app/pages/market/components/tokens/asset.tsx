@@ -1,21 +1,26 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
-import {pc} from 'app/components/responsive';
+import {MarketToken} from 'models/market';
+import { pc } from "app/components/responsive";
+
+import { useMarket } from "../data_provider";
 
 interface Props {
-  amountToken: number | null;
-  amountCoin: number | null;
+  token: MarketToken;
 }
 
-const AssetComponent: React.FC<Props> = ({amountToken, amountCoin}) => {
+const AssetComponent: React.FC<Props> = ({ token }) => {
+  const { myHistory } = useMarket();
+  const myAssets = myHistory ? myHistory.assets : undefined;
+
   return (
     <Container>
       <AssetContainer>
         <Label>所持枚数</Label>
         <Amount>
           <Icon src="/img/market/tokens.svg" />
-          {amountToken === null ? '-' : amountToken}&nbsp;
+          {myAssets ? myAssets.getToken(token.name) : "-"}&nbsp;
           <AmountUnit>枚</AmountUnit>
         </Amount>
       </AssetContainer>
@@ -23,7 +28,7 @@ const AssetComponent: React.FC<Props> = ({amountToken, amountCoin}) => {
         <Label>所持コイン</Label>
         <Amount>
           <Icon src="/img/market/coins.svg" />
-          {amountCoin === null ? '-' : amountCoin}&nbsp;
+          {myAssets ? myAssets.getCoin() : "-"}&nbsp;
           <AmountUnit>coin</AmountUnit>
         </Amount>
       </AssetContainer>

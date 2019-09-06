@@ -2,6 +2,12 @@ import * as D from "@mojotech/json-type-validation";
 
 const base = process.env.REACT_APP_API_BASE;
 
+export enum Method {
+  GET = "GET",
+  POST = "POST",
+  PUT = "PUT"
+}
+
 export interface RequestArgs<T> {
   path: string;
   accessToken?: string;
@@ -30,7 +36,7 @@ export class EagnaBackendApi {
     const err = new Error();
     const url = constructUrl(args.path, args.params);
     let option = {
-      method: args.method,
+      method: method,
       headers: new Headers({
         Accept: "application/json"
       })
@@ -52,12 +58,6 @@ export class EagnaBackendApi {
       throw err;
     }
   }
-}
-
-enum Method {
-  GET = "GET",
-  POST = "POST",
-  PUT = "PUT"
 }
 
 export interface RequestParams {

@@ -1,29 +1,21 @@
-import React, {FC} from 'react';
+import React, { FC } from "react";
 
-import {Market} from 'models/market';
-import {PriceHistory, MyAssets} from 'models/order';
-import {Pc, Mobile, Tablet} from 'app/components/responsive';
+import { Pc, Mobile, Tablet } from "app/components/responsive";
 
-import MobileComponent from './tokens/mobile';
-import PcComponent from './tokens/pc';
+import MobileComponent from "./tokens/mobile";
+import PcComponent from "./tokens/pc";
 
-export interface TokenListComponentProps {
-  market: Market;
-  priceHistory: PriceHistory | null;
-  myAssets: MyAssets | null;
-}
-
-const TokenListComponent: FC<TokenListComponentProps> = props => {
+const TokenListComponent: FC = () => {
   return (
     <>
       <Mobile>
-        <MobileComponent {...props} />
+        <MobileComponent />
       </Mobile>
       <Tablet>
-        <MobileComponent {...props} />
+        <MobileComponent />
       </Tablet>
       <Pc>
-        <PcComponent {...props} />
+        <PcComponent />
       </Pc>
     </>
   );

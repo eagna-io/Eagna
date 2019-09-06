@@ -2,9 +2,9 @@ import React, {FC, useState} from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
 
+import {EagnaMarketApi} from 'infra/eagna/market';
 import {User} from 'models/user';
 import {Eagna} from 'models/organizer';
-import {postMarket} from 'api/market';
 import {withUser, LoginStatus} from 'app/components/user';
 import NotFoundPage from 'app/pages/not_found';
 
@@ -73,7 +73,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
       if (accessToken === null) {
         alert('ログインセッションが切れました');
       } else {
-        postMarket(
+        EagnaMarketApi.create(
           {
             title: title,
             organizerId: Eagna.id,

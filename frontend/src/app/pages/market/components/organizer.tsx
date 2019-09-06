@@ -1,19 +1,17 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
-import {Organizer} from 'models/organizer';
-import {pc} from 'app/components/responsive';
+import { Eagna } from "models/organizer";
+import { pc } from "app/components/responsive";
 
-import Section from './section_skelton';
+import Section from "./section_skelton";
 
-interface Props {
-  organizer: Organizer;
-}
+const OrganizerComponent: React.FC = () => {
+  const organizer = Eagna;
 
-const OrganizerComponent: React.FC<Props> = ({organizer}) => {
   return (
     <Section title="マーケット作成者">
-      <Sumbnail src={organizer.sumbnailUrl} />
+      <Sumbnail src={organizer.thumbnailUrl} />
       <Name>{organizer.name}</Name>
     </Section>
   );

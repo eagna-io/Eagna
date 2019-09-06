@@ -1,17 +1,21 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
-import Chart from 'react-apexcharts';
+import React, { FC } from "react";
+import styled from "styled-components";
+import Chart from "react-apexcharts";
 
-import {Token} from 'models/market';
-import {PriceHistory} from 'models/order';
+import { MarketToken } from "models/market";
+
+import { useMarket } from "../data_provider";
 
 interface Props {
-  token: Token;
-  priceHistory: PriceHistory | null;
+  token: MarketToken;
 }
 
-const ChartComponent: FC<Props> = ({token, priceHistory}) => {
-  const chartData = priceHistory ? priceHistory.getHistoryOf(token.name) : [];
+const ChartComponent: FC<Props> = ({ token }) => {
+  const { publicHistory } = useMarket();
+  const priceHistory = publicHistory.price.get(token.name);
+  const chartData = priceHistory.map(
+    ({ date, price }) => [date.toDate(), price] as const
+  );
 
   if (chartData.length <= 1) {
     return null;
@@ -19,8 +23,8 @@ const ChartComponent: FC<Props> = ({token, priceHistory}) => {
     const series = [
       {
         name: token.name,
-        data: chartData,
-      },
+        data: chartData
+      }
     ];
 
     return (
@@ -43,48 +47,48 @@ const options = {
   chart: {
     stacked: false,
     zoom: {
-      type: 'x',
-      enabled: true,
+      type: "x",
+      enabled: true
     },
     toolbar: {
-      show: false,
-    },
+      show: false
+    }
   },
   plotOptions: {
     line: {
-      curve: 'smooth',
-    },
+      curve: "smooth"
+    }
   },
   dataLabels: {
-    enabled: false,
+    enabled: false
   },
   markers: {
     size: 0,
-    style: 'full',
+    style: "full"
   },
   title: {
-    show: false,
+    show: false
   },
   fill: {
-    type: 'gradient',
+    type: "gradient",
     gradient: {
       shadeIntensity: 1,
       inverseColors: false,
       opacityFrom: 0.5,
       opacityTo: 0,
-      stops: [0, 90, 100],
-    },
+      stops: [0, 90, 100]
+    }
   },
   grid: {
-    show: false,
+    show: false
   },
   yaxis: {
-    show: false,
+    show: false
   },
   xaxis: {
-    type: 'datetime',
+    type: "datetime"
   },
   tooltip: {
-    shared: false,
-  },
+    shared: false
+  }
 };

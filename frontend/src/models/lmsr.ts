@@ -1,22 +1,39 @@
 const RewardCoin = 1000;
 
-export function computeLMSRCost(lmsrB: number, distribution: number[]): number {
-  const raw = lmsrB * Math.log(sum(distribution.map(q => Math.exp(q / lmsrB))));
-  return normalize(raw);
-}
+export class LMSR {
+  // CostとPriceを計算するときに必要な計算をキャッシュしておく。
+  // 具体的には sum(exp(q / B)) (qは各トークンの発行量)
+  private cachePriceDenom: number;
+  constructor(
+    readonly distribution: { name: string; amount: number }[],
+    readonly B: number
+  ) {
+    this.cachePriceDenom = sum(
+      distribution.map(({ amount }) => Math.exp(amount / B))
+    );
+  }
 
-export function computeLMSRPrices(
-  lmsrB: number,
-  distribution: number[],
-): number[] {
-  const denom = sum(distribution.map(q => Math.exp(q / lmsrB)));
-  return distribution.map(q => normalize(Math.exp(q / lmsrB) / denom));
+  computeCost(): number {
+    return this.normalize(this.B * Math.log(this.cachePriceDenom));
+  }
+
+  computePrice(tokenName: string): number {
+    const token = this.distribution.find(
+      ({ name }) => name === tokenName
+    );
+    if (token === undefined) {
+      throw new Error(`${tokenName} is not found`);
+    }
+    return this.normalize(
+      Math.exp(token.amount / this.B) / this.cachePriceDenom
+    );
+  }
+
+  private normalize(n: number): number {
+    return Math.floor(n * RewardCoin);
+  }
 }
 
 function sum(array: number[]): number {
   return array.reduce((acc, n) => acc + n, 0);
-}
-
-function normalize(n: number): number {
-  return Math.floor(n * RewardCoin);
 }

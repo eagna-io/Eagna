@@ -1,17 +1,17 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
-import {Link} from 'react-router-dom';
+import React, { FC } from "react";
+import styled from "styled-components";
+import { Link } from "react-router-dom";
 
-import {pc} from 'app/components/responsive';
-import StatusBadge from 'app/components/status_badge';
-import {Market} from 'models/market';
+import { Market } from "models/market";
+import { pc } from "app/components/responsive";
+import StatusBadge from "app/components/status_badge";
 
 interface MarketsComponentProps {
   title: string;
   markets: Market[];
 }
 
-const MarketsComponent: FC<MarketsComponentProps> = ({title, markets}) => {
+const MarketsComponent: FC<MarketsComponentProps> = ({ title, markets }) => {
   return (
     <Container>
       <Title>{title}</Title>
@@ -52,11 +52,13 @@ const MarketsContainer = styled.div`
   `)}
 `;
 
-const MarketComponent: FC<{market: Market}> = ({market}) => {
+const MarketComponent: FC<{
+  market: Market;
+}> = ({ market }) => {
   return (
     <MarketContainer to={`/market/${market.id}`}>
       <MarketImage src={market.attrs.tokens[0].sumbnailUrl} />
-      <MarketStatusBadge status={market.getStatus()} />
+      <MarketStatusBadge status={market.status} />
       <MarketTitle>{market.attrs.title}</MarketTitle>
     </MarketContainer>
   );
@@ -89,7 +91,7 @@ const MarketContainer = styled(Link)`
   `)}
 `;
 
-const MarketImage = styled('div')<{src: string}>`
+const MarketImage = styled("div")<{ src: string }>`
   display: block;
   width: 100%;
   height: 120px;

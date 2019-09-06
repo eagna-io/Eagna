@@ -1,20 +1,19 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
-import {Moment} from 'moment';
+import React, { FC } from "react";
+import styled from "styled-components";
+import { Moment } from "moment";
 
-import {Market} from 'models/market';
-import {Eagna} from 'models/organizer';
-import {pc, MinPcWidth} from 'app/components/responsive';
-import StatusBadge from 'app/components/status_badge';
+import { Eagna } from "models/organizer";
+import { pc, MinPcWidth } from "app/components/responsive";
+import StatusBadge from "app/components/status_badge";
 
-interface MarketHeaderProps {
-  market: Market;
-}
+import { useMarket } from "./data_provider";
 
-const MarketHeader: FC<MarketHeaderProps> = ({market}) => {
+const MarketHeader: FC = () => {
+  const { market } = useMarket();
+
   return (
     <Container>
-      <StyledStatusBadge status={market.getStatus()} />
+      <StyledStatusBadge status={market.status} />
       <MarketPeriod open={market.attrs.open} close={market.attrs.close} />
       <MarketTitle>{market.attrs.title}</MarketTitle>
       <MarketCreator>
@@ -57,14 +56,14 @@ const StyledStatusBadge = styled(StatusBadge)`
   `)}
 `;
 
-const MarketPeriod: FC<{open: Moment; close: Moment}> = ({open, close}) => {
+const MarketPeriod: FC<{ open: Moment; close: Moment }> = ({ open, close }) => {
   return (
     <MarketPeriodText>
-      <MarketPeriodDate>{open.format('M/D')}</MarketPeriodDate>
-      {open.format(' (ddd) HH:mm')}
+      <MarketPeriodDate>{open.format("M/D")}</MarketPeriodDate>
+      {open.format(" (ddd) HH:mm")}
       &nbsp;~&nbsp;
-      <MarketPeriodDate>{close.format('M/D')}</MarketPeriodDate>
-      {close.format(' (ddd) HH:mm')}
+      <MarketPeriodDate>{close.format("M/D")}</MarketPeriodDate>
+      {close.format(" (ddd) HH:mm")}
     </MarketPeriodText>
   );
 };

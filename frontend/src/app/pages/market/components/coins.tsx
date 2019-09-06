@@ -1,22 +1,20 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
-import {MyAssets} from 'models/order';
-import {pc} from 'app/components/responsive';
+import { pc } from "app/components/responsive";
 
-import Section from './section_skelton';
+import { useMarket } from "./data_provider";
+import Section from "./section_skelton";
 
-interface Props {
-  myAssets: MyAssets | null;
-}
+const CoinsComponent: React.FC = () => {
+  const { myHistory } = useMarket();
 
-const CoinsComponent: React.FC<Props> = ({myAssets}) => {
   return (
     <Section title="所持コイン">
       <AssetContainer>
         <CoinIcon src="/img/market/coins.svg" />
         <Volume>
-          {myAssets ? myAssets.getCoin() : '-'}
+          {myHistory ? myHistory.assets.getCoin() : "-"}
           <VolumeUnit>&nbsp;coins</VolumeUnit>
         </Volume>
       </AssetContainer>

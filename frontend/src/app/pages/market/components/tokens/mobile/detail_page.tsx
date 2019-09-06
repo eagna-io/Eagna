@@ -1,82 +1,52 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
+import React, { FC } from "react";
+import styled from "styled-components";
 
-import {Market, Token} from 'models/market';
-import {PriceHistory, MyAssets} from 'models/order';
-import {LoginStatus, withUser} from 'app/components/user';
+import { MarketToken } from "models/market";
+import { LoginStatus, withUser } from "app/components/user";
 
-import ChartComponent from '../chart';
-import AssetComponent from '../asset';
-import OrderComponent from '../order';
+import ChartComponent from "../chart";
+import AssetComponent from "../asset";
+import OrderComponent from "../order";
 
 interface Props {
-  token: Token | null;
-  market: Market;
-  priceHistory: PriceHistory | null;
-  myAssets: MyAssets | null;
+  token: MarketToken | null;
   user: LoginStatus;
   onClose: () => void;
 }
 
-const TokenDetailPage: FC<Props> = React.memo(
-  ({token, market, priceHistory, myAssets, user, onClose}) => {
-    return (
-      <Container show={token !== null}>
-        {token ? (
-          <TokenDetailPageContent
-            token={token}
-            market={market}
-            priceHistory={priceHistory}
-            myAssets={myAssets}
-            user={user}
-            onClose={onClose}
-          />
-        ) : null}
-      </Container>
-    );
-  },
-);
+const TokenDetailPage: FC<Props> = React.memo(({ token, user, onClose }) => {
+  return (
+    <Container show={token !== null}>
+      {token ? (
+        <TokenDetailPageContent token={token} user={user} onClose={onClose} />
+      ) : null}
+    </Container>
+  );
+});
 
 export default withUser(TokenDetailPage);
 
 interface ContentProps {
-  token: Token;
-  market: Market;
-  priceHistory: PriceHistory | null;
-  myAssets: MyAssets | null;
+  token: MarketToken;
   user: LoginStatus;
   onClose: () => void;
 }
 
-const TokenDetailPageContent: FC<ContentProps> = ({
-  token,
-  market,
-  priceHistory,
-  myAssets,
-  user,
-  onClose,
-}) => {
+const TokenDetailPageContent: FC<ContentProps> = ({ token, user, onClose }) => {
   return (
     <>
       <CloseButton onClick={onClose} />
       <TokenName>{token.name}</TokenName>
       <Sumbnail src={token.sumbnailUrl} />
-      <Description>{token.desc}</Description>
-      <ChartComponent token={token} priceHistory={priceHistory} />
-      <AssetComponent
-        amountToken={myAssets ? myAssets.getTokenUncheck(token.name) : null}
-        amountCoin={myAssets ? myAssets.getCoin() : null}
-      />
-      <OrderComponent
-        token={token}
-        market={market}
-        myAssets={myAssets}
-      />
+      <Description>{token.description}</Description>
+      <ChartComponent token={token} />
+      <AssetComponent token={token} />
+      <OrderComponent token={token} />
     </>
   );
 };
 
-const Container = styled('div')<{show: boolean}>`
+const Container = styled("div")<{ show: boolean }>`
   position: fixed;
   top: 0;
   bottom: 0;
@@ -88,7 +58,7 @@ const Container = styled('div')<{show: boolean}>`
   overflow-x: hidden;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
-  transform: ${props => (props.show ? 'scaleY(1)' : 'scaleY(0)')};
+  transform: ${props => (props.show ? "scaleY(1)" : "scaleY(0)")};
   transition: all 200ms 0s ease-out;
 `;
 
@@ -106,7 +76,7 @@ const CloseButton = styled.div`
     position: absolute;
     left: 14px;
     top: 4px;
-    content: ' ';
+    content: " ";
     height: 22px;
     width: 3px;
     background-color: white;
@@ -125,7 +95,7 @@ const TokenName = styled.h2`
   margin-top: 50px;
 `;
 
-const Sumbnail = styled('div')<{src: string}>`
+const Sumbnail = styled("div")<{ src: string }>`
   width: 100%;
   height: 135px;
   margin-top: 15px;

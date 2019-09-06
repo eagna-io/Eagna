@@ -1,29 +1,38 @@
-import { computeLMSRCost, computeLMSRPrices } from "models/lmsr";
 import { Moment } from "moment";
+
+import {
+  EagnaMarketApi,
+  Market as InfraMarket,
+  MarketAttrs as InfraMarketAttrs,
+  MarketStatus as InfraMarketStatus,
+  MarketToken as InfraMarketToken,
+  MarketPrize as InfraMarketPrize
+} from "infra/eagna/market";
+import { User } from "models/user";
+import { LMSR } from "models/lmsr";
 
 /*
  * ====================
  *      Market
  * ====================
  */
-
-abstract class AbstractMarket {
-  readonly tokenPrices: TokenPrices;
-  readonly tokenDistribution: TokenDistribution;
-
+export class Market {
   constructor(
     readonly id: string,
-    readonly attrs: MarketAttributes,
-    rawTokenDistribution: [string, number][]
-  ) {
-    this.tokenDistribution = new TokenDistribution(rawTokenDistribution);
-    this.tokenPrices = this.tokenDistribution.computeLMSRPrices(attrs.lmsrB);
-  }
+    readonly attrs: MarketAttrs,
+    readonly status: MarketStatus
+  ) {}
 
-  abstract getStatus(): MarketStatus;
+  static fromInfra(market: InfraMarket): Market {
+    return new Market(
+      market.id,
+      MarketAttrs.fromInfra(market.attrs),
+      fromInfraMarketStatus(market.status)
+    );
+  }
 }
 
-export class MarketAttributes {
+export class MarketAttrs {
   constructor(
     readonly title: string,
     readonly organizerId: string,
@@ -31,164 +40,179 @@ export class MarketAttributes {
     readonly open: Moment,
     readonly close: Moment,
     readonly lmsrB: number,
-    readonly tokens: Token[],
-    readonly prizes: Prize[]
+    readonly tokens: MarketToken[],
+    readonly prizes: MarketPrize[],
+    readonly resolvedTokenName?: string
   ) {}
-}
 
-export type MarketStatus = "Upcoming" | "Open" | "Closed" | "Resolved";
-
-export type Market =
-  | UpcomingMarket
-  | OpenMarket
-  | ClosedMarket
-  | ResolvedMarket;
-
-export class UpcomingMarket extends AbstractMarket {
-  constructor(id: string, attrs: MarketAttributes) {
-    const rawTokenDistribution = attrs.tokens.map(
-      t => [t.name, 0] as [string, number]
+  static fromInfra(attrs: InfraMarketAttrs): MarketAttrs {
+    return new MarketAttrs(
+      attrs.title,
+      attrs.organizerId,
+      attrs.description,
+      attrs.open,
+      attrs.close,
+      attrs.lmsrB,
+      attrs.tokens.map(MarketToken.fromInfra),
+      attrs.prizes.map(MarketPrize.fromInfra),
+      attrs.resolvedTokenName
     );
-    super(id, attrs, rawTokenDistribution);
-  }
-
-  getStatus(): MarketStatus {
-    return "Upcoming";
   }
 }
 
-export class OpenMarket extends AbstractMarket {
-  getStatus(): MarketStatus {
-    return "Open";
-  }
+export enum MarketStatus {
+  Upcoming = "Upcoming",
+  Open = "Open",
+  Closed = "Closed",
+  Resolved = "Resolved"
+}
 
-  // 指定のオーダーで、増える/減る coin の量を計算する
-  // Buy オーダーの時、
-  //  - amountToken は正の値をとる（トークンの量は増えるため）
-  //  - coinCost は負の値をとる
-  // Sell オーダーの時、
-  //  - amountToken は負の値をとる（トークンの量は減るため）
-  //  - coinCost は正の値をとる
-  computeAmountCoinOfOrder(tokenName: string, amountToken: number): number {
-    const curCost = this.tokenDistribution.computeLMSRCost(this.attrs.lmsrB);
-
-    const nextCost = this.tokenDistribution
-      .add(tokenName, amountToken)
-      .computeLMSRCost(this.attrs.lmsrB);
-
-    // cost が増えた時、 coin は減る. vice versa.
-    return -(nextCost - curCost);
+function fromInfraMarketStatus(status: InfraMarketStatus): MarketStatus {
+  switch (status) {
+    case InfraMarketStatus.Upcoming:
+      return MarketStatus.Upcoming;
+    case InfraMarketStatus.Open:
+      return MarketStatus.Open;
+    case InfraMarketStatus.Closed:
+      return MarketStatus.Closed;
+    case InfraMarketStatus.Resolved:
+      return MarketStatus.Resolved;
   }
 }
 
-export class ClosedMarket extends AbstractMarket {
-  getStatus(): MarketStatus {
-    return "Closed";
-  }
-}
-
-export class ResolvedMarket extends AbstractMarket {
-  constructor(
-    id: string,
-    attrs: MarketAttributes,
-    rawTokenDistribution: [string, number][],
-    readonly resolvedTokenName: string
-  ) {
-    super(id, attrs, rawTokenDistribution);
-  }
-
-  getStatus(): MarketStatus {
-    return "Resolved";
-  }
-}
-
-export class Token {
+export class MarketToken {
   constructor(
     readonly name: string,
-    readonly desc: string,
+    readonly description: string,
     readonly sumbnailUrl: string
   ) {}
+
+  static fromInfra(token: InfraMarketToken): MarketToken {
+    return new MarketToken(token.name, token.description, token.sumbnailUrl);
+  }
 }
 
-export class Prize {
+export class MarketPrize {
   constructor(
-    readonly id: PrizeId,
+    readonly id: number,
     readonly name: string,
     readonly target: string,
     readonly sumbnailUrl: string
   ) {}
+
+  static fromInfra(prize: InfraMarketPrize): MarketPrize {
+    return new MarketPrize(
+      prize.id,
+      prize.name,
+      prize.target,
+      prize.sumbnailUrl
+    );
+  }
 }
 
-export class PrizeId {
-  constructor(private id: number) {}
-}
-
-/*
- * ===================
- * Token Distribution
- * ===================
- */
 export class TokenDistribution {
-  readonly tokens: string[];
-  readonly distribution: number[];
+  constructor(readonly rawDistribution: { name: string; amount: number }[]) {}
 
-  constructor(rawDistribution: [string, number][]) {
-    this.tokens = rawDistribution.map(([token, _q]) => token);
-    this.distribution = rawDistribution.map(([_t, quantity]) => quantity);
-  }
-
-  getUncheck(tokenName: string): number {
-    const idx = this.tokens.indexOf(tokenName);
-    if (idx === -1) {
-      throw new Error(`${tokenName} does not exist`);
+  get(tokenName: string): number {
+    const token = this.rawDistribution.find(({ name }) => name === tokenName);
+    if (!token) {
+      throw new Error(`Token ${tokenName} is not found`);
     }
-    return this.distribution[idx];
+    return token.amount;
   }
 
-  computeLMSRCost(lmsrB: number): number {
-    return computeLMSRCost(lmsrB, this.distribution);
+  lmsr(lmsrB: number): LMSR {
+    return new LMSR(this.rawDistribution, lmsrB);
   }
 
-  computeLMSRPrices(lmsrB: number): TokenPrices {
-    return new TokenPrices(lmsrB, this);
+  add(tokenName: string, tokenAmount: number): TokenDistribution {
+    const distribution = this.clone();
+    distribution.addAssign(tokenName, tokenAmount);
+    return distribution;
   }
 
-  add(tokenName: string, quantity: number): TokenDistribution {
-    const cloned = this.clone();
-    cloned.addAssign(tokenName, quantity);
-    return cloned;
-  }
-
-  addAssign(tokenName: string, quantity: number) {
-    const idx = this.tokens.indexOf(tokenName);
-    if (idx === -1) {
-      throw new Error(`${tokenName} does not exist`);
-    }
-    this.distribution[idx] += quantity;
+  addAssign(tokenName: string, tokenAmount: number) {
+    this.rawDistribution.forEach(({ name, amount }, idx, array) => {
+      if (name === tokenName) {
+        array[idx].amount = amount + tokenAmount;
+      }
+    });
   }
 
   clone(): TokenDistribution {
-    const rawDistribution = this.tokens.map(
-      (token, idx) => [token, this.distribution[idx]] as [string, number]
+    return new TokenDistribution(
+      this.rawDistribution.map(({ name, amount }) => ({ name, amount }))
     );
-    return new TokenDistribution(rawDistribution);
   }
 }
 
-export class TokenPrices {
-  readonly rawPrices: number[];
-  readonly tokens: string[];
-
-  constructor(lmsrB: number, distribution: TokenDistribution) {
-    this.tokens = distribution.tokens;
-    this.rawPrices = computeLMSRPrices(lmsrB, distribution.distribution);
+/*
+ * ===============
+ * Repository
+ * ===============
+ */
+export class MarketRepository {
+  static async queryById(
+    id: string
+  ): Promise<{ market: Market; distribution: TokenDistribution }> {
+    const infraMarket = await EagnaMarketApi.queryById(id);
+    return MarketRepository.convertInfraMarket(infraMarket);
   }
 
-  getUncheck(tokenName: string): number {
-    const idx = this.tokens.indexOf(tokenName);
-    if (idx === -1) {
-      throw new Error(`${tokenName} does not exist`);
-    }
-    return this.rawPrices[idx];
+  static async queryList(): Promise<
+    { market: Market; distribution: TokenDistribution }[]
+  > {
+    const infraMarketList = await EagnaMarketApi.queryList();
+    return infraMarketList.map(MarketRepository.convertInfraMarket);
+  }
+
+  static async queryListOfStatus(
+    statusList: MarketStatus[]
+  ): Promise<{ market: Market; distribution: TokenDistribution }[]> {
+    const infraMarketList = await EagnaMarketApi.queryListOfStatus(statusList);
+    return infraMarketList.map(MarketRepository.convertInfraMarket);
+  }
+
+  static async queryListOfMine(
+    user: User
+  ): Promise<{ market: Market; distribution: TokenDistribution }[]> {
+    const accessToken = await user.getAccessToken();
+    const infraMarketList = await EagnaMarketApi.queryListOfMine(accessToken);
+    return infraMarketList.map(MarketRepository.convertInfraMarket);
+  }
+
+  static convertInfraMarket(
+    infraMarket: InfraMarket
+  ): { market: Market; distribution: TokenDistribution } {
+    const market = Market.fromInfra(infraMarket);
+    const rawDistribution = Object.entries(infraMarket.tokenDistribution).map(
+      ([name, amount]) => ({
+        name,
+        amount
+      })
+    );
+    const distribution = new TokenDistribution(rawDistribution);
+    return {
+      market,
+      distribution
+    };
+  }
+
+  static async create(market: MarketAttrs, user: User): Promise<string> {
+    const accessToken = await user.getAccessToken();
+    return await EagnaMarketApi.create(market, accessToken);
+  }
+
+  static async resolve(
+    market: Market,
+    resolvedTokenName: string,
+    user: User
+  ): Promise<string> {
+    const accessToken = await user.getAccessToken();
+    return await EagnaMarketApi.resolve(
+      market.id,
+      resolvedTokenName,
+      accessToken
+    );
   }
 }

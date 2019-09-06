@@ -1,13 +1,12 @@
-import React, {FC, useState, useEffect} from 'react';
-import styled from 'styled-components';
+import React, { FC, useState, useEffect } from "react";
+import styled from "styled-components";
 
-import {getMarkets, resolveMarket} from 'api/market';
-import {User} from 'models/user';
-import {Market} from 'models/market';
-import {withUser, LoginStatus} from 'app/components/user';
-import NotFoundPage from 'app/pages/not_found';
+import { User } from "models/user";
+import { Market, MarketStatus, MarketRepository } from "models/market";
+import { withUser, LoginStatus } from "app/components/user";
+import NotFoundPage from "app/pages/not_found";
 
-const AdminResolveMarketOrNotFound: FC<{user: LoginStatus}> = ({user}) => {
+const AdminResolveMarketOrNotFound: FC<{ user: LoginStatus }> = ({ user }) => {
   if (user instanceof User && user.isAdmin) {
     return <ResolveMarketPage user={user} />;
   } else {
@@ -17,11 +16,16 @@ const AdminResolveMarketOrNotFound: FC<{user: LoginStatus}> = ({user}) => {
 
 export default withUser(AdminResolveMarketOrNotFound);
 
-const ResolveMarketPage: FC<{user: User}> = ({user}) => {
+const ResolveMarketPage: FC<{ user: User }> = ({ user }) => {
   const [closedMarkets, setClosedMarkets] = useState<Market[]>([]);
 
   useEffect(() => {
-    getMarkets(['Closed']).then(setClosedMarkets);
+    (async () => {
+      const markets = await MarketRepository.queryListOfStatus([
+        MarketStatus.Closed
+      ]);
+      setClosedMarkets(markets.map(({ market }) => market));
+    })();
   }, []);
 
   return (
@@ -57,7 +61,7 @@ interface ResolveMarketComponentProps {
 const ResolveMarketComponent: FC<ResolveMarketComponentProps> = ({
   market,
   onResolved,
-  user,
+  user
 }) => {
   return (
     <ResolveMarketContainer>
@@ -68,18 +72,11 @@ const ResolveMarketComponent: FC<ResolveMarketComponentProps> = ({
             <TokenName>{token.name}</TokenName>
             <ResolveButton
               onClick={() => {
-                user.getAccessToken().then(accessToken => {
-                  if (accessToken === null) {
-                    alert('ログインセッションが切れました');
-                  } else {
-                    resolveMarket(market.id, token.name, accessToken).then(
-                      () => {
-                        onResolved();
-                      },
-                    );
-                  }
+                MarketRepository.resolve(market, token.name, user).then(() => {
+                  onResolved();
                 });
-              }}>
+              }}
+            >
               Resolve
             </ResolveButton>
           </TokenContainer>

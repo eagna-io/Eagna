@@ -1,98 +1,155 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
-import moment from 'moment';
+import React, { FC } from "react";
+import styled from "styled-components";
 
-import {
-  Market,
-  UpcomingMarket,
-  OpenMarket,
-  ClosedMarket,
-  ResolvedMarket,
-  Token,
-} from 'models/market';
-import {User} from 'models/user';
-import {MyAssets, NormalOrder} from 'models/order';
-import {createNormalOrder} from 'api/market';
-import {LoginStatus, withUser} from 'app/components/user';
-import {pc} from 'app/components/responsive';
+import { User } from "models/user";
+import { MarketStatus, MarketToken } from "models/market";
+import { Order, OrderRepository } from "models/order";
+import { LoginStatus, withUser } from "app/components/user";
+import { pc } from "app/components/responsive";
+
+import { useMarket } from "../data_provider";
 
 interface OrderComponentProps {
-  token: Token;
-  market: Market;
-  myAssets: MyAssets | null;
+  token: MarketToken;
   user: LoginStatus;
 }
 
-const OrderComponent: FC<OrderComponentProps> = ({
-  token,
-  market,
-  myAssets,
-  user,
-}) => {
-  let msg: string | null = null;
-  let buyPrice: number | null = null;
-  let buyable = false;
-  let sellPrice: number | null = null;
-  let sellable = false;
-  let requestBuy: () => void = () => {};
-  let requestSell: () => void = () => {};
+const OrderComponent: FC<OrderComponentProps> = ({ token, user }) => {
+  const { market, distribution, lmsr, myHistory } = useMarket();
 
-  if (market instanceof UpcomingMarket) {
-    msg = 'マーケットがOpen状態になると、取引が行えるようになります';
-  } else if (market instanceof OpenMarket) {
-    const buyAmountCoin = market.computeAmountCoinOfOrder(token.name, 1);
-    const sellAmountCoin = market.computeAmountCoinOfOrder(token.name, -1);
-    buyPrice = -buyAmountCoin;
-    sellPrice = sellAmountCoin;
+  const currentCost = lmsr.computeCost();
 
-    if (myAssets === null) {
-      msg = '「参加する」ボタンを押すと取引ができるようになります';
-    } else {
-      buyable = myAssets.getCoin() >= buyPrice;
-      sellable = myAssets.getTokenUncheck(token.name) >= 1;
-    }
+  const buyPrice =
+    distribution
+      .add(token.name, 1)
+      .lmsr(lmsr.B)
+      .computeCost() - currentCost;
 
-    if (user instanceof User) {
-      const requestOrder = (amountToken: number, amountCoin: number) => {
-        user.getAccessToken().then(accessToken => {
-          if (accessToken === null) {
-            alert('もう一度ログインをお願いいたします。');
-          } else {
-            createNormalOrder(
-              market.id,
-              accessToken,
-              new NormalOrder(token.name, amountToken, amountCoin, moment()),
-            ).then(res => {
-              console.log(res);
-              window.location.reload();
-            });
-          }
-        });
-      };
-      requestBuy = () => requestOrder(1, buyAmountCoin);
-      requestSell = () => requestOrder(-1, sellAmountCoin);
-    }
-  } else if (
-    market instanceof ClosedMarket ||
-    market instanceof ResolvedMarket
-  ) {
-    msg = 'マーケットはすでにCloseしています';
+  let sellPrice = undefined;
+  if (distribution.get(token.name) > 0) {
+    sellPrice =
+      currentCost -
+      distribution
+        .add(token.name, -1)
+        .lmsr(lmsr.B)
+        .computeCost();
   }
+  console.log(sellPrice);
 
+  if (market.status === MarketStatus.Upcoming) {
+    return (
+      <BaseOrderComponent
+        token={token}
+        msg="マーケットがOpen状態になると、取引が行えるようになります"
+        buyPrice={buyPrice}
+      />
+    );
+  } else if (
+    market.status === MarketStatus.Closed ||
+    market.status === MarketStatus.Resolved
+  ) {
+    return (
+      <BaseOrderComponent
+        token={token}
+        msg="マーケットはすでにCloseしています"
+        buyPrice={buyPrice}
+        sellPrice={sellPrice}
+      />
+    );
+  } else {
+    if (!myHistory) {
+      // マーケットに未参加状態
+      return (
+        <BaseOrderComponent
+          token={token}
+          msg="「参加する」ボタンを押すと取引ができるようになります"
+          buyPrice={buyPrice}
+          sellPrice={sellPrice}
+        />
+      );
+    } else {
+      if (!(user instanceof User)) {
+        return (
+          <BaseOrderComponent
+            token={token}
+            msg="ログインが必要です"
+            buyPrice={buyPrice}
+            sellPrice={sellPrice}
+          />
+        );
+      } else {
+        const buyable = myHistory.assets.getCoin() >= buyPrice;
+        const sellable = myHistory.assets.getToken(token.name) >= 1;
+        const requestOrder = async (
+          amountToken: number,
+          amountCoin: number
+        ) => {
+          const order = Order.normal({
+            tokenName: token.name,
+            amountToken,
+            amountCoin
+          });
+          const res = await OrderRepository.create(market, user, order);
+          console.log(res);
+          // TODO
+          window.location.reload();
+        };
+        return (
+          <BaseOrderComponent
+            token={token}
+            buyable={buyable}
+            sellable={sellable}
+            buyPrice={buyPrice}
+            sellPrice={sellPrice}
+            requestOrder={requestOrder}
+          />
+        );
+      }
+    }
+  }
+};
+
+export default withUser(OrderComponent);
+
+interface BaseOrderComponentProps {
+  token: MarketToken;
+  msg?: string;
+  buyable?: boolean;
+  sellable?: boolean;
+  buyPrice: number;
+  sellPrice?: number;
+  requestOrder?: (amountToken: number, amountCoin: number) => void;
+}
+
+const BaseOrderComponent: FC<BaseOrderComponentProps> = ({
+  token,
+  msg,
+  buyable = false,
+  sellable = false,
+  buyPrice,
+  sellPrice,
+  requestOrder = () => {}
+}) => {
   return (
     <Container>
-      {msg !== null ? <OrderNote>{msg}</OrderNote> : null}
+      {msg ? <OrderNote>{msg}</OrderNote> : null}
       <OrderButtonsContainer>
         <OrderButtonContainer>
-          <BuyButton disabled={!buyable} onClick={requestBuy}>
-            {buyPrice === null ? '-' : buyPrice}
+          <BuyButton
+            disabled={!buyable}
+            onClick={() => requestOrder(1, -buyPrice)}
+          >
+            {buyPrice}
             <OrderButtonTextUnit>coin</OrderButtonTextUnit>
           </BuyButton>
           <OrderButtonDesc>で購入する</OrderButtonDesc>
         </OrderButtonContainer>
         <OrderButtonContainer>
-          <SellButton disabled={!sellable} onClick={requestSell}>
-            {sellPrice === null ? '-' : sellPrice}
+          <SellButton
+            disabled={!sellable}
+            onClick={() => requestOrder(-1, sellPrice || 0)}
+          >
+            {sellPrice || "-"}
             <OrderButtonTextUnit>coin</OrderButtonTextUnit>
           </SellButton>
           <OrderButtonDesc>で売却する</OrderButtonDesc>
@@ -101,8 +158,6 @@ const OrderComponent: FC<OrderComponentProps> = ({
     </Container>
   );
 };
-
-export default withUser(OrderComponent);
 
 const Container = styled.div`
   width: 100%;

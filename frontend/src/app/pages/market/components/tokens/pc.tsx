@@ -1,36 +1,19 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
+import React, { FC } from "react";
+import styled from "styled-components";
 
-import {Market, Token} from 'models/market';
-import {MyAssets, PriceHistory} from 'models/order';
+import { MarketToken } from "models/market";
 
-import {TokenListComponentProps} from '../tokens';
-import ChartComponent from './chart';
-import AssetComponent from './asset';
-import OrderComponent from './order';
+import { useMarket } from "../data_provider";
+import ChartComponent from "./chart";
+import AssetComponent from "./asset";
+import OrderComponent from "./order";
 
-const TokenListComponent: FC<TokenListComponentProps> = ({
-  market,
-  priceHistory,
-  myAssets,
-}) => {
+const TokenListComponent: FC = () => {
+  const { market } = useMarket();
   return (
     <Container>
       {market.attrs.tokens.map(token => {
-        const tokenPrice = market.tokenPrices.getUncheck(token.name);
-        if (tokenPrice === undefined) {
-          throw new Error(`${token.name} does not exist in tokenPrice`);
-        }
-        return (
-          <TokenComponent
-            key={token.name}
-            market={market}
-            token={token}
-            tokenPrice={tokenPrice}
-            myAssets={myAssets}
-            priceHistory={priceHistory}
-          />
-        );
+        return <TokenComponent key={token.name} token={token} />;
       })}
     </Container>
   );
@@ -43,33 +26,20 @@ const Container = styled.div`
 `;
 
 interface TokenComponentProps {
-  market: Market;
-  token: Token;
-  tokenPrice: number;
-  myAssets: MyAssets | null;
-  priceHistory: PriceHistory | null;
+  token: MarketToken;
 }
 
-const TokenComponent: FC<TokenComponentProps> = ({
-  market,
-  token,
-  tokenPrice,
-  myAssets,
-  priceHistory,
-}) => {
+const TokenComponent: FC<TokenComponentProps> = ({ token }) => {
   return (
     <>
       <TokenContainer>
         <TokenSumbnail src={token.sumbnailUrl} />
         <TokenContents>
           <TokenName>{token.name}</TokenName>
-          <TokenDesc>{token.desc}</TokenDesc>
-          <ChartComponent token={token} priceHistory={priceHistory} />
-          <AssetComponent
-            amountToken={myAssets ? myAssets.getTokenUncheck(token.name) : null}
-            amountCoin={myAssets ? myAssets.getCoin() : null}
-          />
-          <OrderComponent token={token} market={market} myAssets={myAssets} />
+          <TokenDesc>{token.description}</TokenDesc>
+          <ChartComponent token={token} />
+          <AssetComponent token={token} />
+          <OrderComponent token={token} />
         </TokenContents>
       </TokenContainer>
     </>
@@ -90,7 +60,7 @@ const TokenContainer = styled.div`
   }
 `;
 
-const TokenSumbnail = styled('div')<{src: string}>`
+const TokenSumbnail = styled("div")<{ src: string }>`
   width: 100%;
   height: 250px;
   background-image: url(${props => props.src});

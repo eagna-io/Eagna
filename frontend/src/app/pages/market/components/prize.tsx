@@ -1,19 +1,17 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
-import {Prize} from 'models/market';
-import {pc} from 'app/components/responsive';
+import { pc } from "app/components/responsive";
 
-import Section from './section_skelton';
+import { useMarket } from "./data_provider";
+import Section from "./section_skelton";
 
-interface Props {
-  prizes: Prize[];
-}
+const PrizeComponent: React.FC = () => {
+  const { market } = useMarket();
 
-const PrizeComponent: React.FC<Props> = ({prizes}) => {
   return (
     <Section title="報酬">
-      {prizes.map(prize => (
+      {market.attrs.prizes.map(prize => (
         <PrizeContainer key="prize.id">
           <PrizeSumbnail src={prize.sumbnailUrl} />
           <PrizeInfo>

@@ -1,80 +1,92 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
-import {Link, RouteComponentProps, withRouter} from 'react-router-dom';
+import React, { FC } from "react";
+import styled from "styled-components";
+import { Link, RouteComponentProps, withRouter } from "react-router-dom";
 
-import {Market, OpenMarket} from 'models/market';
-import {createInitialSupplyOrder} from 'api/market';
-import {withUser, UserProps} from 'app/components/user';
-import {pc} from 'app/components/responsive';
+import { User } from "models/user";
+import { MarketStatus } from "models/market";
+import { Order, OrderRepository } from "models/order";
+import { withUser, UserProps } from "app/components/user";
+import { pc } from "app/components/responsive";
 
-interface Props {
-  market: Market;
-}
+import { useMarket } from "./data_provider";
 
-const ParticipateComponent: FC<Props & RouteComponentProps & UserProps> = ({
-  market,
+const ParticipateComponent: FC<RouteComponentProps & UserProps> = ({
   user,
-  location,
+  location
 }) => {
-  if (market instanceof OpenMarket) {
-    if (user === 'Checking') {
-      return (
-        <Container>
-          <CheckingDialog>Checking...</CheckingDialog>
-          <Message>取引を行うにはログインする必要があります。</Message>
-        </Container>
-      );
+  const { market } = useMarket();
+  if (market.status === MarketStatus.Open) {
+    if (user === "Checking") {
+      return <LoginCheckingComponent />;
     } else if (user === null) {
-      return (
-        <Container>
-          <LoginButton
-            to={{
-              pathname: '/login',
-              state: {redirect: location.pathname},
-            }}>
-            ログイン
-          </LoginButton>
-          <Message>取引を行うにはログインする必要があります。</Message>
-        </Container>
-      );
+      return <NeedLoginComponent here={location.pathname} />;
     } else {
-      const requestParticipate = () => {
-        user.getAccessToken().then(accessToken => {
-          if (accessToken === null) {
-            alert('すでにログアウトしています');
-          } else {
-            createInitialSupplyOrder(market.id, accessToken).then(res =>
-              window.location.reload(),
-            );
-          }
-        });
-      };
-      return (
-        <Container>
-          <ParticipateButton onClick={requestParticipate}>
-            参加する
-          </ParticipateButton>
-          <Message>
-            「参加する」ボタンを押すと、コインが配布され取引をできるようになります
-          </Message>
-        </Container>
-      );
+      return <RequestParticipateComponent user={user} />;
     }
+  } else if (market.status === MarketStatus.Upcoming) {
+    return <MarketIsUpcomingComponent />;
   } else {
-    return (
-      <Container>
-        <InactiveParticipateButton>
-          参加する
-        </InactiveParticipateButton>
-        <Message>
-          マーケットがOpen状態になると、「参加する」ボタンが押せるようになります。
-        </Message>
-      </Container>
-    );
+    return <MarketIsClosedComponent />;
   }
 };
 
 export default withRouter(withUser(ParticipateComponent));
+
+const LoginCheckingComponent: React.FC = () => (
+  <Container>
+    <CheckingDialog>Checking...</CheckingDialog>
+    <Message>取引を行うにはログインする必要があります。</Message>
+  </Container>
+);
+
+const NeedLoginComponent: React.FC<{ here: string }> = ({ here }) => (
+  <Container>
+    <LoginButton
+      to={{
+        pathname: "/login",
+        state: { redirect: here }
+      }}
+    >
+      ログイン
+    </LoginButton>
+    <Message>取引を行うにはログインする必要があります。</Message>
+  </Container>
+);
+
+const RequestParticipateComponent: React.FC<{ user: User }> = ({ user }) => {
+  const { market } = useMarket();
+  const requestParticipate = async () => {
+    await OrderRepository.create(market, user, Order.coinSupply());
+    // TODO
+    window.location.reload();
+  };
+  return (
+    <Container>
+      <ParticipateButton onClick={requestParticipate}>
+        参加する
+      </ParticipateButton>
+      <Message>
+        「参加する」ボタンを押すと、コインが配布され取引をできるようになります
+      </Message>
+    </Container>
+  );
+};
+
+const MarketIsUpcomingComponent: React.FC = () => (
+  <Container>
+    <InactiveParticipateButton>参加する</InactiveParticipateButton>
+    <Message>
+      マーケットがOpen状態になると、「参加する」ボタンが押せるようになります。
+    </Message>
+  </Container>
+);
+
+const MarketIsClosedComponent: React.FC = () => (
+  <Container>
+    <InactiveParticipateButton>参加する</InactiveParticipateButton>
+    <Message>マーケットはすでに閉じています。</Message>
+  </Container>
+);
 
 const Container = styled.div`
   width: 100%;
@@ -108,7 +120,7 @@ const ParticipateButton = styled.button`
 `;
 
 const InactiveParticipateButton = styled(ParticipateButton)`
-  background-color: #9B9B9B;
+  background-color: #9b9b9b;
   color: white;
 `;
 

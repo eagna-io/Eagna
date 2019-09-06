@@ -1,35 +1,23 @@
-import React, {FC, useState} from 'react';
-import styled from 'styled-components';
+import React, { FC, useState } from "react";
+import styled from "styled-components";
 
-import {Token} from 'models/market';
+import { MarketToken } from "models/market";
 
-import {TokenListComponentProps} from '../tokens';
-import TokenDetailPage from './mobile/detail_page';
+import { useMarket } from "../data_provider";
+import TokenDetailPage from "./mobile/detail_page";
 
-const TokenListComponent: FC<TokenListComponentProps> = ({
-  market,
-  priceHistory,
-  myAssets,
-}) => {
-  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
+const TokenListComponent: FC = () => {
+  const { market } = useMarket();
+  const [selectedToken, setSelectedToken] = useState<MarketToken | null>(null);
 
   return (
     <>
       <Container>
         {market.attrs.tokens.map(token => {
-          const tokenPrice = market.tokenPrices.getUncheck(token.name);
-          if (tokenPrice === undefined) {
-            throw new Error(`${token.name} does not exist in tokenPrice`);
-          }
-          const amountToken = myAssets
-            ? myAssets.getTokenUncheck(token.name)
-            : null;
           return (
             <TokenComponent
               key={token.name}
               token={token}
-              tokenPrice={tokenPrice}
-              amountToken={amountToken}
               onClick={() => setSelectedToken(token)}
             />
           );
@@ -37,9 +25,6 @@ const TokenListComponent: FC<TokenListComponentProps> = ({
       </Container>
       <TokenDetailPage
         token={selectedToken}
-        market={market}
-        priceHistory={priceHistory}
-        myAssets={myAssets}
         onClose={() => setSelectedToken(null)}
       />
     </>
@@ -53,18 +38,14 @@ const Container = styled.div`
 `;
 
 interface TokenComponentProps {
-  token: Token;
-  tokenPrice: number;
-  amountToken: number | null;
+  token: MarketToken;
   onClick: () => void;
 }
 
-const TokenComponent: FC<TokenComponentProps> = ({
-  token,
-  tokenPrice,
-  amountToken,
-  onClick,
-}) => {
+const TokenComponent: FC<TokenComponentProps> = ({ token, onClick }) => {
+  const { lmsr, myHistory } = useMarket();
+  const tokenPrice = lmsr.computePrice(token.name);
+  const amountToken = myHistory ? myHistory.assets.getToken(token.name) : null;
   return (
     <TokenContainer onClick={onClick}>
       <TokenName>{token.name}</TokenName>
@@ -76,7 +57,7 @@ const TokenComponent: FC<TokenComponentProps> = ({
       </TokenStatistics>
       <TokenStatistics>
         <TokenStatisticsStrong>
-          {amountToken === null ? '-' : amountToken}
+          {amountToken === null ? "-" : amountToken}
         </TokenStatisticsStrong>
         &nbsp;枚
         <br />
@@ -107,7 +88,7 @@ const TokenName = styled.h4`
   font-weight: normal;
 `;
 
-const TokenSumbnail = styled('div')<{src: string}>`
+const TokenSumbnail = styled("div")<{ src: string }>`
   width: 100%;
   height: 80px;
   background-image: url(${props => props.src});

@@ -1,26 +1,7 @@
 import moment, { Moment } from "moment";
 import * as D from "@mojotech/json-type-validation";
 
-import { request, Method, Failure, FailureCode } from "api/core";
-import {
-  Market,
-  UpcomingMarket,
-  OpenMarket,
-  ClosedMarket,
-  ResolvedMarket,
-  MarketAttributes,
-  MarketStatus,
-  Token,
-  Prize,
-  PrizeId
-} from "models/market";
-import { Order, NormalOrder, CoinSupplyOrder, RewardOrder } from "models/order";
-
-/*
- * ========================
- * Get Market
- * ========================
- */
+import { EagnaBackendApi } from "../eagna";
 
 export class EagnaMarketApi {
   static queryById(id: string): Promise<Market> {
@@ -49,7 +30,7 @@ export class EagnaMarketApi {
 
   static queryListOfMine(accessToken: string): Promise<Market[]> {
     return EagnaBackendApi.get({
-      path: "/markets",
+      path: "/markets/",
       params: {
         participated: true
       },
@@ -80,70 +61,6 @@ export class EagnaMarketApi {
         resolvedTokenName: resolvedTokenName
       },
       decoder: D.string()
-    });
-  }
-
-  static async getOrders(marketId: string): Promise<NormalOrder[]> {
-    const res = await request({
-      method: Method.GET,
-      path: `/markets/${marketId}/orders/`,
-      decoder: D.object({
-        orders: D.array(orderDecoder)
-      })
-    });
-    return res.orders;
-  }
-
-  static async getMyOrders(
-    marketId: string,
-    accessToken: string
-  ): Promise<Order[]> {
-    const res = await EagnaBackendApi.get({
-      path: `/markets/${marketId}/orders/`,
-      params: {
-        mine: true
-      },
-      accessToken: accessToken,
-      decoder: D.object({
-        orders: D.array(orderDecoder)
-      })
-    });
-    return res.orders;
-  }
-
-  static createInitialSupplyOrder(
-    marketId: string,
-    accessToken: string
-  ): Promise<Order> {
-    return EagnaBackendApi.post({
-      path: `/markets/${marketId}/orders/`,
-      accessToken: accessToken,
-      body: {
-        amountToken: 0, // Dont care
-        amountCoin: 10000, // Dont care
-        time: moment(), // Dont care
-        type: "CoinSupply"
-      },
-      decoder: orderDecoder
-    });
-  }
-
-  static createNormalOrder(
-    marketId: string,
-    accessToken: string,
-    order: NormalOrder
-  ): Promise<NormalOrder> {
-    return EagnaBackendApi.post({
-      path: `/markets/${marketId}/orders/`,
-      accessToken: accessToken,
-      body: {
-        tokenName: order.tokenName,
-        amountToken: order.amountToken,
-        amountCoin: order.amountCoin,
-        time: order.time,
-        type: "Normal"
-      },
-      decoder: orderDecoder
     });
   }
 }
@@ -197,7 +114,7 @@ const marketDecoder: D.Decoder<Market> = D.object({
   lmsrB: D.number(),
   status: D.string().map(str2status),
   resolvedTokenName: D.optional(D.string()),
-  tokenDistribution: D.dict(D.number()).map(dic => Object.entries(dic)),
+  tokenDistribution: D.dict(D.number()),
   tokens: D.array(
     D.object({
       name: D.string(),
@@ -213,7 +130,37 @@ const marketDecoder: D.Decoder<Market> = D.object({
       sumbnailUrl: D.string()
     })
   )
-});
+}).map(
+  ({
+    id,
+    title,
+    organizerId,
+    description,
+    open,
+    close,
+    lmsrB,
+    status,
+    resolvedTokenName,
+    tokenDistribution,
+    tokens,
+    prizes
+  }) => ({
+    id,
+    attrs: {
+      title,
+      organizerId,
+      description,
+      open,
+      close,
+      lmsrB,
+      tokens,
+      prizes
+    },
+    status,
+    resolvedTokenName,
+    tokenDistribution
+  })
+);
 
 function str2status(s: string): MarketStatus {
   switch (s) {
@@ -227,39 +174,5 @@ function str2status(s: string): MarketStatus {
       return MarketStatus.Resolved;
     default:
       throw new Error(`Invalid market status : ${s}`);
-  }
-}
-
-interface Order {
-  token_name?: string;
-  amount_token: number;
-  amount_coin: number;
-  time: Moment;
-  type: OrderType;
-}
-
-export enum OrderType {
-  Normal = "Normal",
-  CoinSupply = "CoinSupply",
-  Reward = "Reward"
-}
-
-const orderDecoder: D.Decoder<Order> = D.object({
-  tokenName: D.optional(D.string()),
-  amountCoin: D.number(),
-  time: D.string().map(s => moment(s)),
-  type: D.string().map(s => str2orderType)
-});
-
-function str2orderType(s: string): OrderType {
-  switch (s) {
-    case "Normal":
-      return OrderType.Normal;
-    case "CoinSupply":
-      return OrderType.CoinSupply;
-    case "Reward":
-      return OrderType.Reward;
-    default:
-      throw new Error(`Invalid order type : ${s}`);
   }
 }

@@ -1,83 +1,199 @@
-import moment, {Moment} from 'moment';
-import {Market, Token, TokenDistribution} from 'models/market';
+import moment, { Moment } from "moment";
+import {
+  EagnaOrderApi,
+  Order as InfraOrder,
+  OrderType as InfraOrderType
+} from "infra/eagna/order";
+import { Market, TokenDistribution } from "models/market";
+import { LMSR } from "models/lmsr";
+import { User } from "models/user";
 
-export class PriceHistory {
-  readonly rawHistory: {date: Date; prices: number[]}[];
-  readonly tokens: string[];
+export enum OrderType {
+  CoinSupply = "CoinSupply",
+  Normal = "Normal",
+  Reward = "Reward"
+}
 
-  constructor(market: Market, orders: NormalOrder[]) {
-    this.tokens = market.attrs.tokens.map(t => t.name);
-    const distribution = new TokenDistribution(
-      this.tokens.map(name => [name, 0] as [string, number]),
-    );
+export class Order {
+  readonly uniqueString: string;
 
-    const lmsrB = market.attrs.lmsrB;
-
-    // 初期プライス（全部同じ値段）で初期化
-    this.rawHistory = [
-      {
-        date: market.attrs.open.toDate(),
-        prices: distribution.computeLMSRPrices(lmsrB).rawPrices,
-      },
-    ];
-
-    orders.sort((a, b) => a.time.valueOf() - b.time.valueOf());
-
-    // 各オーダーが出された時の価格を算出
-    orders.forEach(order => {
-      distribution.addAssign(order.tokenName, order.amountToken);
-      this.rawHistory.push({
-        date: order.time.toDate(),
-        prices: distribution.computeLMSRPrices(lmsrB).rawPrices,
-      });
-    });
-
-    // 最終価格を追加
-    // 日時は、現在時間とclose時間のうち古い方
-    this.rawHistory.push({
-      date: moment.min(moment(), market.attrs.close).toDate(),
-      prices: this.rawHistory[this.rawHistory.length - 1].prices,
-    });
+  constructor(
+    readonly amountToken: number,
+    readonly amountCoin: number,
+    readonly time: Moment,
+    readonly type: OrderType,
+    readonly tokenName?: string
+  ) {
+    const randomNum = Math.floor(Math.random() * 100000);
+    this.uniqueString = `${time.unix()}-${randomNum}`;
   }
 
-  getHistoryOf(tokenName: string): [Date, number][] {
-    const idx = this.tokens.indexOf(tokenName);
-    if (idx === -1) {
-      throw new Error(`${tokenName} does not exist`);
-    }
-    return this.rawHistory.map(
-      ({date, prices}) => [date, prices[idx]] as [Date, number],
+  static coinSupply(): Order {
+    return new Order(0, 10000, moment(), OrderType.CoinSupply);
+  }
+
+  static normal(order: {
+    tokenName: string;
+    amountToken: number;
+    amountCoin: number;
+  }): Order {
+    return new Order(
+      order.amountToken,
+      order.amountCoin,
+      moment(),
+      OrderType.Normal,
+      order.tokenName
+    );
+  }
+
+  static fromInfra(order: InfraOrder): Order {
+    return new Order(
+      order.amountToken,
+      order.amountCoin,
+      order.time,
+      fromInfraOrderType(order.type),
+      order.tokenName
     );
   }
 }
 
-export class MyAssets {
-  readonly myTokens: number[];
-  readonly myCoins: number;
-  readonly tokens: string[];
+function fromInfraOrderType(type: InfraOrderType): OrderType {
+  switch (type) {
+    case InfraOrderType.CoinSupply:
+      return OrderType.CoinSupply;
+    case InfraOrderType.Normal:
+      return OrderType.Normal;
+    case InfraOrderType.Reward:
+      return OrderType.Reward;
+  }
+}
 
-  constructor(tokens: Token[], orders: Order[]) {
-    this.tokens = tokens.map(t => t.name);
-    this.myCoins = orders.reduce((acc, order) => acc + order.amountCoin, 0);
+function toInfraOrderType(type: OrderType): InfraOrderType {
+  switch (type) {
+    case OrderType.CoinSupply:
+      return InfraOrderType.CoinSupply;
+    case OrderType.Normal:
+      return InfraOrderType.Normal;
+    case OrderType.Reward:
+      return InfraOrderType.Reward;
+  }
+}
 
-    this.myTokens = this.tokens.map(_n => 0);
-    orders.forEach(order => {
-      if (order instanceof NormalOrder) {
-        const idx = this.tokens.indexOf(order.tokenName);
-        if (idx === -1) {
-          throw new Error(`Token ${order.tokenName} does not exist`);
-        }
-        this.myTokens[idx] += order.amountToken;
+export class DistributionHistory {
+  constructor(
+    readonly rawHistory: {
+      date: Moment;
+      distribution: TokenDistribution;
+    }[]
+  ) {}
+
+  static fromPublicOrders(
+    market: Market,
+    publicOrders: Order[]
+  ): DistributionHistory {
+    // 最初のトークン配布量で初期化
+    const initialDistribution = new TokenDistribution(
+      market.attrs.tokens.map(token => ({ name: token.name, amount: 0 }))
+    );
+    const history = [
+      {
+        date: market.attrs.open,
+        distribution: initialDistribution
+      }
+    ];
+
+    publicOrders.sort((a, b) => a.time.valueOf() - b.time.valueOf());
+
+    // 各オーダーが出された時の価格を算出
+    const distribution = initialDistribution.clone();
+    publicOrders.forEach(order => {
+      // publicOrdersは必ずtokenNameを持っているはずだが
+      // 一応キャストではなくif文を使う
+      if (order.tokenName) {
+        distribution.addAssign(order.tokenName, order.amountToken);
+        history.push({
+          date: order.time,
+          distribution: distribution.clone()
+        });
       }
     });
+
+    // 最終価格を追加
+    // 日時は、現在時間とclose時間のうち古い方
+    const lastDistribution = history[history.length - 1].distribution;
+    history.push({
+      date: moment.min(moment(), market.attrs.close),
+      distribution: lastDistribution
+    });
+
+    console.log(history);
+
+    return new DistributionHistory(history);
+  }
+}
+
+export class PriceHistory {
+  constructor(readonly rawHistory: { date: Moment; lmsr: LMSR }[]) {}
+
+  static fromDistributionHistory(
+    distributionHistory: DistributionHistory,
+    lmsrB: number
+  ): PriceHistory {
+    const history = distributionHistory.rawHistory.map(
+      ({ date, distribution }) => ({
+        date,
+        lmsr: new LMSR(distribution.rawDistribution, lmsrB)
+      })
+    );
+    return new PriceHistory(history);
   }
 
-  getTokenUncheck(tokenName: string): number {
-    const idx = this.tokens.indexOf(tokenName);
-    if (idx === -1) {
-      throw new Error(`Token ${tokenName} does not exist`);
+  get(tokenName: string): { date: Moment; price: number }[] {
+    return this.rawHistory.map(({ date, lmsr }) => ({
+      date,
+      price: lmsr.computePrice(tokenName)
+    }));
+  }
+}
+
+export class MyAssets {
+  constructor(
+    readonly myTokens: {
+      name: string;
+      amount: number;
+    }[],
+    readonly myCoins: number
+  ) {}
+
+  static fromMyOrders(myOrders: Order[]): MyAssets {
+    const myCoins = myOrders.reduce((acc, order) => acc + order.amountCoin, 0);
+
+    const myTokens: { name: string; amount: number }[] = [];
+    myOrders.forEach(order => {
+      if (order.type === OrderType.Normal) {
+        const tokenName = order.tokenName as string;
+        const myToken = myTokens.find(({ name }) => name === tokenName);
+        if (myToken) {
+          myToken.amount += order.amountToken;
+        } else {
+          myTokens.push({
+            name: tokenName,
+            amount: order.amountToken
+          });
+        }
+      }
+    });
+
+    return new MyAssets(myTokens, myCoins);
+  }
+
+  getToken(tokenName: string): number {
+    const token = this.myTokens.find(({ name }) => name === tokenName);
+    if (token) {
+      return token.amount;
+    } else {
+      return 0;
     }
-    return this.myTokens[idx];
   }
 
   getCoin(): number {
@@ -85,60 +201,41 @@ export class MyAssets {
   }
 }
 
-abstract class AbstractOrder {
-  readonly uniqueString: string;
-
-  constructor(
-    readonly amountToken: number,
-    readonly amountCoin: number,
-    readonly time: Moment,
-  ) {
-    const randomNum = Math.floor(Math.random() * 100000);
-    this.uniqueString = `${time.unix()}-${randomNum}`;
+export class OrderRepository {
+  static async queryList(market: Market): Promise<Order[]> {
+    const infraOrders = await EagnaOrderApi.queryList(market.id);
+    return infraOrders.map(Order.fromInfra);
   }
 
-  abstract getType(): OrderType;
-}
-
-export enum OrderType {
-  CoinSupply,
-  Normal,
-  Reward,
-}
-
-export type Order = CoinSupplyOrder | NormalOrder | RewardOrder;
-
-export class CoinSupplyOrder extends AbstractOrder {
-  constructor(amountCoin: number, time: Moment) {
-    super(0, amountCoin, time);
+  static async queryListOfMine(market: Market, user: User): Promise<Order[]> {
+    const accessToken = await user.getAccessToken();
+    const infraOrders = await EagnaOrderApi.queryListOfMine(
+      market.id,
+      accessToken
+    );
+    return infraOrders.map(Order.fromInfra);
   }
 
-  getType(): OrderType {
-    return OrderType.CoinSupply;
-  }
-}
-
-export class NormalOrder extends AbstractOrder {
-  constructor(
-    readonly tokenName: string,
-    amountToken: number,
-    amountCoin: number,
-    time: Moment,
-  ) {
-    super(amountToken, amountCoin, time);
-  }
-
-  getType(): OrderType {
-    return OrderType.Normal;
-  }
-}
-
-export class RewardOrder extends AbstractOrder {
-  constructor(readonly tokenName: string, amountCoin: number, time: Moment) {
-    super(0, amountCoin, time);
-  }
-
-  getType(): OrderType {
-    return OrderType.Reward;
+  // 引数のOrderと返り値のOrderは異なる可能性がある。
+  // 価格スリップが発生する可能性があるため。
+  static async create(
+    market: Market,
+    user: User,
+    order: Order
+  ): Promise<Order> {
+    const accessToken = await user.getAccessToken();
+    const reqOrder = {
+      tokenName: order.tokenName,
+      amountToken: order.amountToken,
+      amountCoin: order.amountCoin,
+      time: order.time,
+      type: toInfraOrderType(order.type)
+    };
+    const newOrder = await EagnaOrderApi.create(
+      market.id,
+      accessToken,
+      reqOrder
+    );
+    return Order.fromInfra(newOrder);
   }
 }
