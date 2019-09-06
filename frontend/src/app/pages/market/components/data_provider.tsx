@@ -11,7 +11,7 @@ import {
   OrderRepository
 } from "models/order";
 
-interface MarketContext {
+interface MarketData {
   market: Market;
   distribution: TokenDistribution;
   lmsr: LMSR;
@@ -25,6 +25,12 @@ interface MarketContext {
     assets: MyAssets;
   };
 }
+
+interface MarketOps {
+  updateMarket: () => Promise<void>;
+}
+
+type MarketContext = MarketData & MarketOps;
 
 const MarketContextObject = React.createContext<MarketContext | null>(null);
 
@@ -46,12 +52,12 @@ const DataProvider: React.FC<ComponentProps> = ({
   loadingView,
   notfoundView
 }) => {
-  const [dataSource, setMarket] = React.useState<
+  const [dataSource, setDataSource] = React.useState<
     "Loading" | "Notfound" | MarketDataSource
   >("Loading");
 
   React.useEffect(() => {
-    MarketDataSource.queryPublic(marketId).then(setMarket);
+    MarketDataSource.queryPublic(marketId).then(setDataSource);
   }, [marketId]);
 
   React.useEffect(() => {
@@ -60,17 +66,33 @@ const DataProvider: React.FC<ComponentProps> = ({
       !dataSource.myOrders &&
       user instanceof User
     ) {
-      dataSource.queryPrivate(user).then(setMarket);
+      dataSource.queryPrivate(user).then(setDataSource);
     }
   }, [dataSource, user]);
 
   const marketContext = React.useMemo(() => {
     if (dataSource instanceof MarketDataSource) {
-      return dataSource.computeMarketContext();
+      const data = dataSource.computeMarketData();
+      const ops = {
+        updateMarket: async () => {
+          const newSource = (await MarketDataSource.queryPublic(
+            data.market.id
+          )) as MarketDataSource;
+          if (user instanceof User) {
+            setDataSource(await newSource.queryPrivate(user));
+          } else {
+            setDataSource(newSource);
+          }
+        }
+      };
+      return {
+        ...data,
+        ...ops
+      };
     } else {
       return null;
     }
-  }, [dataSource]);
+  }, [dataSource, user]);
 
   console.log(marketContext);
 
@@ -121,7 +143,7 @@ class MarketDataSource {
     );
   }
 
-  computeMarketContext(): MarketContext {
+  computeMarketData(): MarketData {
     const distributionHistory = DistributionHistory.fromPublicOrders(
       this.market,
       this.publicOrders

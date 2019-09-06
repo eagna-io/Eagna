@@ -15,7 +15,8 @@ interface OrderComponentProps {
 }
 
 const OrderComponent: FC<OrderComponentProps> = ({ token, user }) => {
-  const { market, distribution, lmsr, myHistory } = useMarket();
+  const { market, distribution, lmsr, myHistory, updateMarket } = useMarket();
+  const [requesting, setRequesting] = React.useState();
 
   const currentCost = lmsr.computeCost();
 
@@ -84,6 +85,7 @@ const OrderComponent: FC<OrderComponentProps> = ({ token, user }) => {
           amountToken: number,
           amountCoin: number
         ) => {
+          setRequesting(true);
           const order = Order.normal({
             tokenName: token.name,
             amountToken,
@@ -91,8 +93,8 @@ const OrderComponent: FC<OrderComponentProps> = ({ token, user }) => {
           });
           const res = await OrderRepository.create(market, user, order);
           console.log(res);
-          // TODO
-          window.location.reload();
+          await updateMarket();
+          setRequesting(false);
         };
         return (
           <BaseOrderComponent
@@ -102,6 +104,7 @@ const OrderComponent: FC<OrderComponentProps> = ({ token, user }) => {
             buyPrice={buyPrice}
             sellPrice={sellPrice}
             requestOrder={requestOrder}
+            requesting={requesting}
           />
         );
       }
@@ -119,6 +122,7 @@ interface BaseOrderComponentProps {
   buyPrice: number;
   sellPrice?: number;
   requestOrder?: (amountToken: number, amountCoin: number) => void;
+  requesting?: boolean;
 }
 
 const BaseOrderComponent: FC<BaseOrderComponentProps> = ({
@@ -128,7 +132,8 @@ const BaseOrderComponent: FC<BaseOrderComponentProps> = ({
   sellable = false,
   buyPrice,
   sellPrice,
-  requestOrder = () => {}
+  requestOrder = () => {},
+  requesting
 }) => {
   return (
     <Container>
@@ -136,7 +141,7 @@ const BaseOrderComponent: FC<BaseOrderComponentProps> = ({
       <OrderButtonsContainer>
         <OrderButtonContainer>
           <BuyButton
-            disabled={!buyable}
+            disabled={!buyable || requesting}
             onClick={() => requestOrder(1, -buyPrice)}
           >
             {buyPrice}
@@ -146,7 +151,7 @@ const BaseOrderComponent: FC<BaseOrderComponentProps> = ({
         </OrderButtonContainer>
         <OrderButtonContainer>
           <SellButton
-            disabled={!sellable}
+            disabled={!sellable || requesting}
             onClick={() => requestOrder(-1, sellPrice || 0)}
           >
             {sellPrice || "-"}
