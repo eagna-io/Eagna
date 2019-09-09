@@ -18,7 +18,7 @@ const TopPage: FC = () => {
           <MainMsg>未来は僕等の手の中</MainMsg>
           <SubMsg>今すぐ予測市場を体験しましょう</SubMsg>
           <SubMsg2>どなたでも無料でご利用できます</SubMsg2>
-          <SigninComponent redirectUrl="/account" autoRedirect />
+          <SigninComponent redirectUrl="/account" />
           <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n7f8a517c50f6">
             &beta; 版をリリースしました！
           </AnnounceBetaRelease>

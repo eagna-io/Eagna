@@ -15,6 +15,7 @@ const ParticipateComponent: FC<RouteComponentProps & UserProps> = ({
   location
 }) => {
   const { market } = useMarket();
+
   if (market.status === MarketStatus.Open) {
     if (user === "Checking") {
       return <LoginCheckingComponent />;

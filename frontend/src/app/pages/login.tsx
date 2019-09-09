@@ -1,26 +1,22 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
-import {withRouter} from 'react-router-dom';
-import {History} from 'history';
+import React, { FC } from "react";
+import styled from "styled-components";
+import { withRouter } from "react-router-dom";
+import { History } from "history";
 
-import SigninComponent from 'app/components/signin';
+import SigninComponent from "app/components/signin";
 
 interface LoginPageProps {
   history: History;
 }
 
-const LoginPage: FC<LoginPageProps> = ({history}) => {
+const LoginPage: FC<LoginPageProps> = ({ history }) => {
   const redirectUrl = getRedirectUrl(history);
 
   return (
-    <>
-      <Body>
-        <Container>
-          <Logo src="/img/logo-big.png" />
-          <SigninComponent redirectUrl={redirectUrl} autoRedirect />
-        </Container>
-      </Body>
-    </>
+    <Container>
+      <Logo src="/img/logo-big.png" />
+      <SigninComponent redirectUrl={redirectUrl} autoRedirect />
+    </Container>
   );
 };
 
@@ -30,21 +26,13 @@ function getRedirectUrl(history: History): string {
   if (
     history.location.state &&
     history.location.state.redirect &&
-    typeof history.location.state.redirect === 'string'
+    typeof history.location.state.redirect === "string"
   ) {
     return history.location.state.redirect;
   } else {
-    return '/account';
+    return "/account";
   }
 }
-
-const Body = styled.div`
-  width: 100vw;
-  height: 100vh;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-`;
 
 const Container = styled.div`
   margin-top: 30vh;
