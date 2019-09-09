@@ -161,12 +161,13 @@ class MarketDataSource {
         distribution: distributionHistory,
         price: priceHistory
       },
-      myHistory: this.myOrders
-        ? {
-            orders: this.myOrders,
-            assets: MyAssets.fromMyOrders(this.myOrders)
-          }
-        : undefined
+      myHistory:
+        this.myOrders && this.myOrders.length > 0
+          ? {
+              orders: this.myOrders,
+              assets: MyAssets.fromMyOrders(this.myOrders)
+            }
+          : undefined
     };
   }
 }
