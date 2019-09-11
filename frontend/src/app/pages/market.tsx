@@ -58,11 +58,10 @@ const MarketPageInner: FC = () => {
             <HR />
           </>
         ) : null}
+        <CoinsComponent />
         <TokenListComponent />
         <HR />
         <OrganizerComponent />
-        <HR />
-        <CoinsComponent />
         <HR />
         <PrizeComponent />
         <HR />
