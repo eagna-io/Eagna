@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import styled from "styled-components";
+import ReactGA from "react-ga";
 
 import { User } from "models/user";
 import { MinPcWidth } from "app/components/responsive";
@@ -24,6 +25,10 @@ interface MarketPageProps {
 }
 
 const MarketPage: FC<MarketPageProps> = ({ user, marketId }) => {
+  React.useEffect(() => {
+    ReactGA.pageview(`/market/${marketId}`);
+  }, [marketId]);
+
   return (
     <MarketDataProvider
       marketId={marketId}

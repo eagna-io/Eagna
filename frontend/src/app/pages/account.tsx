@@ -2,12 +2,9 @@ import React, { FC, useState, useEffect } from "react";
 import styled from "styled-components";
 import { withRouter } from "react-router-dom";
 import { History } from "history";
+import ReactGA from "react-ga";
 
-import {
-  Market,
-  MarketStatus,
-  MarketRepository,
-} from "models/market";
+import { Market, MarketStatus, MarketRepository } from "models/market";
 import { User } from "models/user";
 import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
@@ -22,6 +19,10 @@ interface AccountPageProps {
 }
 
 const AccountPageWrapper: FC<AccountPageProps> = ({ history, user }) => {
+  useEffect(() => {
+    ReactGA.pageview("/account");
+  }, []);
+
   useEffect(() => {
     if (user === null) {
       history.push("/login");

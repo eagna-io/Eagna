@@ -2,6 +2,7 @@ import React, { FC } from "react";
 import styled from "styled-components";
 import { withRouter } from "react-router-dom";
 import { History } from "history";
+import ReactGA from "react-ga";
 
 import SigninComponent from "app/components/signin";
 
@@ -10,6 +11,9 @@ interface LoginPageProps {
 }
 
 const LoginPage: FC<LoginPageProps> = ({ history }) => {
+  React.useEffect(() => {
+    ReactGA.pageview("/login");
+  }, []);
   const redirectUrl = getRedirectUrl(history);
 
   return (

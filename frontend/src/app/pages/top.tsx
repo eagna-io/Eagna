@@ -1,15 +1,19 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
+import React, { FC } from "react";
+import styled from "styled-components";
+import ReactGA from "react-ga";
 
-import {pc} from 'app/components/responsive';
-import SigninComponent from 'app/components/signin';
+import { pc } from "app/components/responsive";
+import SigninComponent from "app/components/signin";
 
-import Header from './top/components/header';
-import ThreeStepsSection from './top/components/three-steps';
-import FeaturedMarketComponent from './top/components/featured_market';
-import Footer from './top/components/footer';
+import Header from "./top/components/header";
+import ThreeStepsSection from "./top/components/three-steps";
+import FeaturedMarketComponent from "./top/components/featured_market";
+import Footer from "./top/components/footer";
 
 const TopPage: FC = () => {
+  React.useEffect(() => {
+    ReactGA.pageview("/");
+  }, []);
   return (
     <>
       <Header />
@@ -35,7 +39,7 @@ export default TopPage;
 
 const MainSection = styled.div`
   height: 448px;
-  background-image: url('/img/top/main-bg.jpg');
+  background-image: url("/img/top/main-bg.jpg");
   background-position: center;
   background-size: cover;
 
