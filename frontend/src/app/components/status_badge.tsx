@@ -1,19 +1,26 @@
-import React, {FC} from 'react';
-import styled from 'styled-components';
+import React, { FC } from "react";
+import styled from "styled-components";
 
-import {pc} from 'app/components/responsive';
-import {MarketStatus} from 'models/market';
+import {
+  Color,
+  UpcomingMarketColor,
+  OpenMarketColor,
+  ClosedMarketColor,
+  ResolvedMarketColor
+} from "app/components/color";
+import { pc } from "app/components/responsive";
+import { MarketStatus } from "models/market";
 
 interface StatusBadgeProps {
   status: MarketStatus;
   className?: string;
 }
 
-const StatusBadge: FC<StatusBadgeProps> = ({status, className}) => {
+const StatusBadge: FC<StatusBadgeProps> = ({ status, className }) => {
   const color = statusToColor(status);
 
   return (
-    <Badge className={className} color={color}>
+    <Badge className={className} bgcolor={color}>
       {status}
     </Badge>
   );
@@ -21,12 +28,12 @@ const StatusBadge: FC<StatusBadgeProps> = ({status, className}) => {
 
 export default StatusBadge;
 
-const Badge = styled('div')<{color: string}>`
+const Badge = styled("div")<{ bgcolor: Color }>`
   width: 72p;
   height: 27px;
   line-height: 27px;
   font-size: 11px;
-  background-color: ${props => props.color};
+  background-color: ${props => props.bgcolor.hex};
   border-radius: 4px;
   color: white;
   font-weight: 700;
@@ -38,14 +45,14 @@ const Badge = styled('div')<{color: string}>`
   `)}
 `;
 
-function statusToColor(s: MarketStatus): string {
-  if (s === 'Upcoming') {
-    return '#D8D212';
-  } else if (s === 'Open') {
-    return '#23AC0E';
-  } else if (s === 'Closed') {
-    return '#3261AB';
+function statusToColor(s: MarketStatus): Color {
+  if (s === "Upcoming") {
+    return UpcomingMarketColor;
+  } else if (s === "Open") {
+    return OpenMarketColor;
+  } else if (s === "Closed") {
+    return ClosedMarketColor;
   } else {
-    return '#A52175';
+    return ResolvedMarketColor;
   }
 }

@@ -11,6 +11,7 @@ import NotFoundPage from "app/pages/not_found";
 import MarketDataProvider, {
   useMarket
 } from "./market/components/data_provider";
+import MessageComponent from './market/components/message';
 import MarketHeader from "./market/components/header";
 import ParticipateComponent from "./market/components/participate";
 import TokenListComponent from "./market/components/tokens";
@@ -48,6 +49,7 @@ const MarketPageInner: FC = () => {
   return (
     <>
       <Header />
+      <MessageComponent />
       <MarketHeader />
       <Contents>
         {!myHistory ? (
