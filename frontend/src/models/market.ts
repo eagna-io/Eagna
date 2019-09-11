@@ -156,6 +156,7 @@ export class MarketRepository {
     id: string
   ): Promise<{ market: Market; distribution: TokenDistribution }> {
     const infraMarket = await EagnaMarketApi.queryById(id);
+    console.log(infraMarket);
     return MarketRepository.convertInfraMarket(infraMarket);
   }
 

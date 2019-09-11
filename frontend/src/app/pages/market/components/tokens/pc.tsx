@@ -1,12 +1,13 @@
 import React, { FC } from "react";
 import styled from "styled-components";
 
-import { MarketToken } from "models/market";
+import { MarketToken, MarketStatus } from "models/market";
 
 import { useMarket } from "../data_provider";
 import ChartComponent from "./chart";
 import AssetComponent from "./asset";
 import OrderComponent from "./order";
+import ResolvedMark from "./resolved_mark";
 
 const TokenListComponent: FC = () => {
   const { market } = useMarket();
@@ -30,11 +31,17 @@ interface TokenComponentProps {
 }
 
 const TokenComponent: FC<TokenComponentProps> = ({ token }) => {
+  const { market } = useMarket();
+  const isResolved =
+    market.status === MarketStatus.Resolved &&
+    market.attrs.resolvedTokenName === token.name;
+
   return (
     <>
       <TokenContainer>
         <TokenSumbnail src={token.sumbnailUrl} />
         <TokenContents>
+          {isResolved ? <ResolvedMark /> : null}
           <TokenName>{token.name}</TokenName>
           <TokenDesc>{token.description}</TokenDesc>
           <ChartComponent token={token} />
@@ -69,6 +76,7 @@ const TokenSumbnail = styled("div")<{ src: string }>`
 `;
 
 const TokenContents = styled.div`
+  position: relative;
   width: 100%;
   padding: 30px 22px;
 `;

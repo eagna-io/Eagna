@@ -154,10 +154,10 @@ const marketDecoder: D.Decoder<Market> = D.object({
       close,
       lmsrB,
       tokens,
-      prizes
+      prizes,
+      resolvedTokenName
     },
     status,
-    resolvedTokenName,
     tokenDistribution
   })
 );

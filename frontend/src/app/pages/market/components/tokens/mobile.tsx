@@ -1,10 +1,11 @@
 import React, { FC, useState } from "react";
 import styled from "styled-components";
 
-import { MarketToken } from "models/market";
+import { MarketToken, MarketStatus } from "models/market";
 
 import { useMarket } from "../data_provider";
 import TokenDetailPage from "./mobile/detail_page";
+import ResolvedMark from "./resolved_mark";
 
 const TokenListComponent: FC = () => {
   const { market } = useMarket();
@@ -43,11 +44,16 @@ interface TokenComponentProps {
 }
 
 const TokenComponent: FC<TokenComponentProps> = ({ token, onClick }) => {
-  const { lmsr, myHistory } = useMarket();
+  const { market, lmsr, myHistory } = useMarket();
   const tokenPrice = lmsr.computePrice(token.name);
   const amountToken = myHistory ? myHistory.assets.getToken(token.name) : null;
+  const isResolved =
+    market.status === MarketStatus.Resolved &&
+    market.attrs.resolvedTokenName === token.name;
+
   return (
     <TokenContainer onClick={onClick}>
+      {isResolved ? <ResolvedMark /> : null}
       <TokenName>{token.name}</TokenName>
       <TokenSumbnail src={token.sumbnailUrl} />
       <TokenStatistics>
@@ -68,6 +74,7 @@ const TokenComponent: FC<TokenComponentProps> = ({ token, onClick }) => {
 };
 
 const TokenContainer = styled.div`
+  position: relative;
   display: inline-block;
   width: calc(50% - 6px);
   margin-top: 20px;
