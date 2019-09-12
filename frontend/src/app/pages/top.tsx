@@ -4,6 +4,7 @@ import ReactGA from "react-ga";
 
 import { pc } from "app/components/responsive";
 import SigninComponent from "app/components/signin";
+import TwitterFeed from "app/components/twitter";
 
 import Header from "./top/components/header";
 import ThreeStepsSection from "./top/components/three-steps";
@@ -30,6 +31,7 @@ const TopPage: FC = () => {
       </MainSection>
       <ThreeStepsSection />
       <FeaturedMarketComponent />
+      <TwitterFeed center />
       <Footer />
     </>
   );
