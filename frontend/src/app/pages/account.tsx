@@ -9,7 +9,6 @@ import { User } from "models/user";
 import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
 import { withUser, LoginStatus } from "app/components/user";
-import TwitterFeed from "app/components/twitter";
 
 import ProfileComponent from "./account/components/profile";
 import MarketsComponent from "./account/components/markets";

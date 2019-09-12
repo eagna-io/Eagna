@@ -36,14 +36,15 @@ export class UserRepository {
     }
   }
 
-  static async create(): Promise<User | null> {
+  static async create(): Promise<User> {
     const fbuser = firebase.auth().currentUser;
     if (!fbuser || !fbuser.displayName || !fbuser.email) {
-      return null;
+      console.log(fbuser);
+      throw new Error(`invalid firebase user : ${fbuser}`);
     } else {
       const newUser = {
         name: fbuser.displayName,
-        email: fbuser.displayName
+        email: fbuser.email
       };
       const accessToken = await fbuser.getIdToken();
       const user = await EagnaUserApi.create(newUser, accessToken);
