@@ -25,6 +25,8 @@ function fromHex(hex: string): number {
   return parseInt(hex, 16);
 }
 
+export const NavyBlue = Color.fromHex("#1C384E");
+
 export const UpcomingMarketColor = Color.fromHex("#D8D212");
 export const OpenMarketColor = Color.fromHex("#23AC0E");
 export const ClosedMarketColor = Color.fromHex("#3261AB");
