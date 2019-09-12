@@ -22,6 +22,7 @@ export const UserProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(fbuser => {
+      console.log(fbuser);
       setFbuser(fbuser);
     });
     return unsubscribe;
@@ -32,11 +33,10 @@ export const UserProvider: React.FC = ({ children }) => {
       if (fbuser !== null) {
         (async () => {
           // 'Checking' から User へ移行するパターン
-          const user = await UserRepository.queryMe();
-          if (user) {
-            // すでに登録済み。そのままログインする。
+          try {
+            const user = await UserRepository.queryMe();
             setLoginStatus(user);
-          } else {
+          } catch (e) {
             const user = await UserRepository.create();
             setLoginStatus(user);
           }
