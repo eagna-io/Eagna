@@ -39,6 +39,7 @@ table! {
         description -> Text,
         sumbnail_url -> Text,
         market_id -> Uuid,
+        idx -> Int4,
     }
 }
 
