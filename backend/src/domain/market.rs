@@ -563,6 +563,8 @@ impl Into<InfraMarketStatus> for MarketStatus {
     }
 }
 
+/// MarketTokens は、DB の market_tokens テーブルに保存されている
+/// idx カラムの値でソートされている。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From)]
 pub struct MarketTokens(Vec<Token>);
 

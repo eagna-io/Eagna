@@ -38,13 +38,13 @@ pub trait PostgresMarketInfra {
         orders: &'a mut dyn Iterator<Item = NewOrder<'a>>,
     ) -> Result<(), failure::Error>;
 
-    fn query_markets_by_ids(&self, ids: &[Uuid]) -> Result<Vec<QueryMarket>, failure::Error>;
+    fn query_market_by_id(&self, id: &Uuid) -> Result<Option<QueryMarket>, failure::Error>;
 
     /// 時系列順にソートされた `QueryOrder` を返す。
     /// 古いものが最初に、新しいものが最後に来る
-    fn query_orders_by_market_ids(
+    fn query_orders_by_market_id(
         &self,
-        market_ids: &[Uuid],
+        market_ids: &Uuid,
     ) -> Result<Vec<QueryOrder>, failure::Error>;
 
     fn query_market_ids_by_status(
@@ -70,6 +70,7 @@ pub struct NewMarket<'a> {
     pub lmsr_b: i32,
     pub open: &'a DateTime<Utc>,
     pub close: &'a DateTime<Utc>,
+    // tokenのidxカラムは、この順序で設定される。
     pub tokens: &'a mut dyn Iterator<Item = NewToken<'a>>,
     pub prizes: &'a mut dyn Iterator<Item = NewPrize<'a>>,
     // status は常にUpcoming
@@ -79,6 +80,7 @@ pub struct NewToken<'a> {
     pub name: &'a str,
     pub description: &'a str,
     pub sumbnail_url: &'a str,
+    pub idx: i32,
 }
 
 pub struct NewPrize<'a> {
@@ -109,6 +111,7 @@ pub struct QueryMarket {
     pub close: DateTime<Utc>,
     pub status: MarketStatus,
     pub resolved_token_name: Option<String>,
+    // tokenのidxカラム順にソートされている
     pub tokens: Vec<QueryToken>,
     pub prizes: Vec<QueryPrize>,
 }
@@ -181,6 +184,7 @@ impl PostgresMarketInfra for Postgres {
                 description: token.description,
                 sumbnail_url: token.sumbnail_url,
                 market_id: &market_id,
+                idx: token.idx,
             })
             .collect();
         diesel::insert_into(market_tokens::table)
@@ -254,52 +258,43 @@ impl PostgresMarketInfra for Postgres {
         Ok(())
     }
 
-    fn query_markets_by_ids(&self, ids: &[Uuid]) -> Result<Vec<QueryMarket>, failure::Error> {
-        let raw_markets = markets::table
-            .filter(markets::columns::id.eq(any(ids)))
-            .order(markets::columns::id.desc())
-            .load::<QueryableMarket>(&self.conn)?;
+    // # NOTE
+    // tokens は market_tokens テーブルの idx カラムの順に取り出される。
+    fn query_market_by_id(&self, id: &Uuid) -> Result<Option<QueryMarket>, failure::Error> {
+        // QueryableMarket を取得
+        let raw_market = match markets::table
+            .find(id)
+            .first::<QueryableMarket>(&self.conn)
+            .optional()?
+        {
+            None => return Ok(None),
+            Some(m) => m,
+        };
+
+        // idxカラムの順にQueryableTokenを取得
         let raw_market_tokens = market_tokens::table
-            .filter(market_tokens::columns::market_id.eq(any(ids)))
-            .order(market_tokens::columns::market_id.desc())
+            .filter(market_tokens::columns::market_id.eq(id))
+            .order(market_tokens::columns::idx.asc())
             .load::<QueryableToken>(&self.conn)?;
+
+        // QueryablePrize を取得
         let raw_market_prizes = market_prizes::table
-            .filter(market_prizes::columns::market_id.eq(any(ids)))
-            .order(market_prizes::columns::market_id.desc())
+            .filter(market_prizes::columns::market_id.eq(id))
             .load::<QueryablePrize>(&self.conn)?;
 
-        let mut constructed_markets = Vec::with_capacity(raw_markets.len());
+        let market = QueryMarket::from_parts(raw_market, raw_market_tokens, raw_market_prizes);
 
-        for raw_market in raw_markets {
-            let market_id = raw_market.id;
-            let corresponding_tokens = raw_market_tokens
-                .iter()
-                .filter(|token| token.market_id == market_id)
-                .cloned();
-            let corresponding_prizes = raw_market_prizes
-                .iter()
-                .filter(|prize| prize.market_id == market_id)
-                .cloned();
-
-            let constructed_market = construct_query_market_from_parts(
-                raw_market,
-                corresponding_tokens,
-                corresponding_prizes,
-            );
-            constructed_markets.push(constructed_market);
-        }
-
-        Ok(constructed_markets)
+        Ok(Some(market))
     }
 
     /// 時系列順にソートされた `QueryOrder` を返す。
     /// 古いものが最初に、新しいものが最後に来る
-    fn query_orders_by_market_ids(
+    fn query_orders_by_market_id(
         &self,
-        market_ids: &[Uuid],
+        market_id: &Uuid,
     ) -> Result<Vec<QueryOrder>, failure::Error> {
         Ok(orders::table
-            .filter(orders::columns::market_id.eq(any(market_ids)))
+            .filter(orders::columns::market_id.eq(market_id))
             .order(orders::columns::time.asc())
             .load::<QueryableOrder>(&self.conn)?
             .into_iter()
@@ -354,40 +349,40 @@ impl PostgresMarketInfra for Postgres {
     }
 }
 
-fn construct_query_market_from_parts<IT, IP>(
-    raw_market: QueryableMarket,
-    raw_tokens: IT,
-    raw_prizes: IP,
-) -> QueryMarket
-where
-    IT: Iterator<Item = QueryableToken>,
-    IP: Iterator<Item = QueryablePrize>,
-{
-    QueryMarket {
-        id: raw_market.id,
-        title: raw_market.title,
-        organizer_id: raw_market.organizer_id,
-        description: raw_market.description,
-        lmsr_b: raw_market.lmsr_b,
-        open: raw_market.open,
-        close: raw_market.close,
-        status: raw_market.status,
-        resolved_token_name: raw_market.resolved_token_name,
-        tokens: raw_tokens
-            .map(|token| QueryToken {
-                name: token.name,
-                description: token.description,
-                sumbnail_url: token.sumbnail_url,
-            })
-            .collect(),
-        prizes: raw_prizes
-            .map(|prize| QueryPrize {
-                local_id: prize.market_local_id,
-                name: prize.name,
-                sumbnail_url: prize.sumbnail_url,
-                target: prize.target,
-            })
-            .collect(),
+impl QueryMarket {
+    fn from_parts(
+        raw_market: QueryableMarket,
+        raw_tokens: Vec<QueryableToken>,
+        raw_prizes: Vec<QueryablePrize>,
+    ) -> QueryMarket {
+        QueryMarket {
+            id: raw_market.id,
+            title: raw_market.title,
+            organizer_id: raw_market.organizer_id,
+            description: raw_market.description,
+            lmsr_b: raw_market.lmsr_b,
+            open: raw_market.open,
+            close: raw_market.close,
+            status: raw_market.status,
+            resolved_token_name: raw_market.resolved_token_name,
+            tokens: raw_tokens
+                .into_iter()
+                .map(|token| QueryToken {
+                    name: token.name,
+                    description: token.description,
+                    sumbnail_url: token.sumbnail_url,
+                })
+                .collect(),
+            prizes: raw_prizes
+                .into_iter()
+                .map(|prize| QueryPrize {
+                    local_id: prize.market_local_id,
+                    name: prize.name,
+                    sumbnail_url: prize.sumbnail_url,
+                    target: prize.target,
+                })
+                .collect(),
+        }
     }
 }
 
@@ -412,6 +407,7 @@ struct InsertableToken<'a> {
     description: &'a str,
     sumbnail_url: &'a str,
     market_id: &'a Uuid,
+    idx: i32,
 }
 
 #[derive(Insertable)]
@@ -457,6 +453,7 @@ struct QueryableToken {
     description: String,
     sumbnail_url: String,
     market_id: Uuid,
+    idx: i32,
 }
 
 #[derive(Clone, Queryable)]

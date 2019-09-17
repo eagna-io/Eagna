@@ -35,11 +35,18 @@ impl<'a> MarketRepository<'a> {
     }
 
     fn save_upcoming_market(&self, market: &UpcomingMarket) -> Result<(), failure::Error> {
-        let mut new_tokens = market.attrs().tokens.iter().map(|token| NewToken {
-            name: token.name.as_str(),
-            description: token.description.as_str(),
-            sumbnail_url: token.sumbnail_url.as_str(),
-        });
+        // marketに保存されている順にTokenを保存する。
+        let mut new_tokens = market
+            .attrs()
+            .tokens
+            .iter()
+            .enumerate()
+            .map(|(idx, token)| NewToken {
+                name: token.name.as_str(),
+                description: token.description.as_str(),
+                sumbnail_url: token.sumbnail_url.as_str(),
+                idx: idx as i32,
+            });
         let mut new_prizes = market
             .attrs()
             .prizes
@@ -121,33 +128,26 @@ impl<'a> MarketRepository<'a> {
     }
 
     pub fn query_market(&self, market_id: &MarketId) -> Result<Option<Market>, failure::Error> {
-        self.query_markets(&[*market_id]).map(|mut res| res.pop())
+        let raw_market = match self.postgres.query_market_by_id(market_id.as_uuid())? {
+            None => return Ok(None),
+            Some(m) => m,
+        };
+        let raw_orders = self
+            .postgres
+            .query_orders_by_market_id(market_id.as_uuid())?;
+        Ok(Some(build_market(raw_market, raw_orders)))
     }
 
     pub fn query_markets(&self, market_ids: &[MarketId]) -> Result<Vec<Market>, failure::Error> {
-        let raw_ids: Vec<_> = market_ids.iter().map(|id| *id.as_uuid()).collect();
-
-        let raw_markets = self.postgres.query_markets_by_ids(raw_ids.as_slice())?;
-
-        // `query_orders_by_market_ids` は time フィールドでasc順にソート
-        // したorderのリストを返す。つまり古いものが最初に来る。
-        let raw_orders = self
-            .postgres
-            .query_orders_by_market_ids(raw_ids.as_slice())?;
-
-        let mut constructed_markets = Vec::with_capacity(raw_markets.len());
-
-        for raw_market in raw_markets {
-            let market_id = raw_market.id.clone();
-            let corresponding_orders = raw_orders
-                .iter()
-                .filter(|o| o.market_id == market_id)
-                .cloned();
-            let market = build_market(raw_market, corresponding_orders);
-            constructed_markets.push(market);
+        let mut markets = Vec::with_capacity(market_ids.len());
+        // TODO
+        // Parallelに実行できるようにする
+        for market_id in market_ids {
+            if let Some(market) = self.query_market(market_id)? {
+                markets.push(market);
+            }
         }
-
-        Ok(constructed_markets)
+        Ok(markets)
     }
 
     pub fn query_market_ids_with_status(
@@ -199,17 +199,14 @@ impl<'a> MarketRepository<'a> {
 }
 
 /// `orders` はソート済みでなければならない
-fn build_market<I>(market: QueryMarket, orders: I) -> Market
-where
-    I: Iterator<Item = QueryOrder>,
-{
+fn build_market(market: QueryMarket, orders: Vec<QueryOrder>) -> Market {
     let market_status = market.status.clone();
     let resolved_token_name = market.resolved_token_name.clone().map(|n| TokenName(n));
     let id = MarketId::from(market.id.clone());
     let market_attrs = build_market_attrs(market);
 
     let market_orders = MarketOrders {
-        orders: orders.map(build_order).collect(),
+        orders: orders.into_iter().map(build_order).collect(),
     };
 
     let token_distribution = TokenDistribution::from(&market_attrs.tokens, &market_orders);
