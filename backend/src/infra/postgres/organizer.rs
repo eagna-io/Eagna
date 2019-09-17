@@ -3,14 +3,16 @@ use diesel::{prelude::*, result::Error as PgError};
 use uuid::Uuid;
 
 pub trait PostgresOrganizerInfra {
-    fn query_organizer(&self, organizer_id: &Uuid)
-        -> Result<Option<QueryOrganizer>, failure::Error>;
+    fn query_organizer(
+        &self,
+        organizer_id: &Uuid,
+    ) -> Result<Option<QueryOrganizer>, failure::Error>;
 }
 
 pub struct QueryOrganizer {
     pub id: Uuid,
     pub name: String,
-    pub sumbnail_url: String,
+    pub thumbnail_url: String,
 }
 
 impl PostgresOrganizerInfra for Postgres {
@@ -25,7 +27,7 @@ impl PostgresOrganizerInfra for Postgres {
             Ok(query_res) => Ok(Some(QueryOrganizer {
                 id: query_res.id,
                 name: query_res.name,
-                sumbnail_url: query_res.sumbnail_url,
+                thumbnail_url: query_res.thumbnail_url,
             })),
             Err(PgError::NotFound) => Ok(None),
             Err(e) => Err(e.into()),
@@ -37,5 +39,5 @@ impl PostgresOrganizerInfra for Postgres {
 struct QueryableOrganizer {
     id: Uuid,
     name: String,
-    sumbnail_url: String,
+    thumbnail_url: String,
 }

@@ -94,14 +94,14 @@ export enum MarketStatus {
 export interface MarketToken {
   name: string;
   description: string;
-  sumbnailUrl: string;
+  thumbnailUrl: string;
 }
 
 export interface MarketPrize {
   id: number;
   name: string;
   target: string;
-  sumbnailUrl: string;
+  thumbnailUrl: string;
 }
 
 const marketDecoder: D.Decoder<Market> = D.object({
@@ -119,7 +119,7 @@ const marketDecoder: D.Decoder<Market> = D.object({
     D.object({
       name: D.string(),
       description: D.string(),
-      sumbnailUrl: D.string()
+      thumbnailUrl: D.string()
     })
   ),
   prizes: D.array(
@@ -127,7 +127,7 @@ const marketDecoder: D.Decoder<Market> = D.object({
       id: D.number(),
       name: D.string(),
       target: D.string(),
-      sumbnailUrl: D.string()
+      thumbnailUrl: D.string()
     })
   )
 }).map(

@@ -25,10 +25,10 @@ const AddMarketPage: FC<{ user: User }> = ({ user }) => {
   const [openTime, setOpenTime] = useState(moment().format());
   const [closeTime, setCloseTime] = useState(moment().format());
   const [tokens, setTokens] = useState([
-    { name: "", description: "", sumbnailUrl: "" }
+    { name: "", description: "", thumbnailUrl: "" }
   ]);
   const [prizes, setPrizes] = useState([
-    { name: "", target: "", sumbnailUrl: "" }
+    { name: "", target: "", thumbnailUrl: "" }
   ]);
 
   const assertNotEmpty = (v: string): boolean => {
@@ -54,16 +54,16 @@ const AddMarketPage: FC<{ user: User }> = ({ user }) => {
       assertDateString(openTime) &&
       assertDateString(closeTime) &&
       tokens.every(
-        ({ name, description, sumbnailUrl }) =>
+        ({ name, description, thumbnailUrl }) =>
           assertNotEmpty(name) &&
           assertNotEmpty(description) &&
-          assertNotEmpty(sumbnailUrl)
+          assertNotEmpty(thumbnailUrl)
       ) &&
       prizes.every(
-        ({ name, target, sumbnailUrl }) =>
+        ({ name, target, thumbnailUrl }) =>
           assertNotEmpty(name) &&
           assertNotEmpty(target) &&
-          assertNotEmpty(sumbnailUrl)
+          assertNotEmpty(thumbnailUrl)
       )
     );
   };
@@ -169,11 +169,11 @@ const AddMarketPage: FC<{ user: User }> = ({ user }) => {
               />
               <FieldInputTokenThumbnailUrl
                 type="text"
-                value={token.sumbnailUrl}
-                placeholder="sumbnail url"
+                value={token.thumbnailUrl}
+                placeholder="thumbnail url"
                 onChange={e => {
                   const newTokens = tokens.map((t, i) =>
-                    i === idx ? { ...t, sumbnailUrl: e.target.value } : t
+                    i === idx ? { ...t, thumbnailUrl: e.target.value } : t
                   );
                   setTokens(newTokens);
                 }}
@@ -191,7 +191,7 @@ const AddMarketPage: FC<{ user: User }> = ({ user }) => {
           <FieldAddTokenButton
             onClick={() => {
               const newTokens = Array.from(tokens);
-              newTokens.push({ name: "", description: "", sumbnailUrl: "" });
+              newTokens.push({ name: "", description: "", thumbnailUrl: "" });
               console.log(newTokens);
               setTokens(newTokens);
             }}
@@ -229,11 +229,11 @@ const AddMarketPage: FC<{ user: User }> = ({ user }) => {
               />
               <FieldInputPrizeThumbnailUrl
                 type="text"
-                value={prize.sumbnailUrl}
-                placeholder="sumbnail url"
+                value={prize.thumbnailUrl}
+                placeholder="thumbnail url"
                 onChange={e => {
                   const newPrizes = prizes.map((t, i) =>
-                    i === idx ? { ...t, sumbnailUrl: e.target.value } : t
+                    i === idx ? { ...t, thumbnailUrl: e.target.value } : t
                   );
                   setPrizes(newPrizes);
                 }}
@@ -251,7 +251,7 @@ const AddMarketPage: FC<{ user: User }> = ({ user }) => {
           <FieldAddPrizeButton
             onClick={() => {
               const newPrizes = Array.from(prizes);
-              newPrizes.push({ name: "", target: "", sumbnailUrl: "" });
+              newPrizes.push({ name: "", target: "", thumbnailUrl: "" });
               console.log(newPrizes);
               setPrizes(newPrizes);
             }}

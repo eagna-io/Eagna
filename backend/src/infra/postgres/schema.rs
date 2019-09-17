@@ -6,7 +6,7 @@ table! {
         unused_id -> Int4,
         market_local_id -> Int4,
         name -> Text,
-        sumbnail_url -> Text,
+        thumbnail_url -> Text,
         target -> Text,
         market_id -> Uuid,
     }
@@ -37,7 +37,7 @@ table! {
         unused_id -> Int4,
         name -> Text,
         description -> Text,
-        sumbnail_url -> Text,
+        thumbnail_url -> Text,
         market_id -> Uuid,
         idx -> Int4,
     }
@@ -68,7 +68,7 @@ table! {
     organizers (id) {
         id -> Uuid,
         name -> Text,
-        sumbnail_url -> Text,
+        thumbnail_url -> Text,
     }
 }
 

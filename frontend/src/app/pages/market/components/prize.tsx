@@ -13,7 +13,7 @@ const PrizeComponent: React.FC = () => {
     <Section title="報酬">
       {market.attrs.prizes.map(prize => (
         <PrizeContainer key="prize.id">
-          <PrizeSumbnail src={prize.sumbnailUrl} />
+          <PrizeSumbnail src={prize.thumbnailUrl} />
           <PrizeInfo>
             <PrizeName>{prize.name}</PrizeName>
             <PrizeTarget>{prize.target}</PrizeTarget>

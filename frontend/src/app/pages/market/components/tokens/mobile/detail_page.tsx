@@ -37,7 +37,7 @@ const TokenDetailPageContent: FC<ContentProps> = ({ token, user, onClose }) => {
     <>
       <CloseButton onClick={onClose} />
       <TokenName>{token.name}</TokenName>
-      <Sumbnail src={token.sumbnailUrl} />
+      <Sumbnail src={token.thumbnailUrl} />
       <Description>{token.description}</Description>
       <ChartComponent token={token} />
       <AssetComponent token={token} />

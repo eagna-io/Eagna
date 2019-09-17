@@ -79,14 +79,14 @@ pub struct NewMarket<'a> {
 pub struct NewToken<'a> {
     pub name: &'a str,
     pub description: &'a str,
-    pub sumbnail_url: &'a str,
+    pub thumbnail_url: &'a str,
     pub idx: i32,
 }
 
 pub struct NewPrize<'a> {
     pub local_id: i32,
     pub name: &'a str,
-    pub sumbnail_url: &'a str,
+    pub thumbnail_url: &'a str,
     pub target: &'a str,
 }
 
@@ -120,14 +120,14 @@ pub struct QueryMarket {
 pub struct QueryToken {
     pub name: String,
     pub description: String,
-    pub sumbnail_url: String,
+    pub thumbnail_url: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct QueryPrize {
     pub local_id: i32,
     pub name: String,
-    pub sumbnail_url: String,
+    pub thumbnail_url: String,
     pub target: String,
 }
 
@@ -182,7 +182,7 @@ impl PostgresMarketInfra for Postgres {
             .map(|token| InsertableToken {
                 name: token.name,
                 description: token.description,
-                sumbnail_url: token.sumbnail_url,
+                thumbnail_url: token.thumbnail_url,
                 market_id: &market_id,
                 idx: token.idx,
             })
@@ -197,7 +197,7 @@ impl PostgresMarketInfra for Postgres {
             .map(|prize| InsertablePrize {
                 market_local_id: prize.local_id,
                 name: prize.name,
-                sumbnail_url: prize.sumbnail_url,
+                thumbnail_url: prize.thumbnail_url,
                 target: prize.target,
                 market_id: &market_id,
             })
@@ -370,7 +370,7 @@ impl QueryMarket {
                 .map(|token| QueryToken {
                     name: token.name,
                     description: token.description,
-                    sumbnail_url: token.sumbnail_url,
+                    thumbnail_url: token.thumbnail_url,
                 })
                 .collect(),
             prizes: raw_prizes
@@ -378,7 +378,7 @@ impl QueryMarket {
                 .map(|prize| QueryPrize {
                     local_id: prize.market_local_id,
                     name: prize.name,
-                    sumbnail_url: prize.sumbnail_url,
+                    thumbnail_url: prize.thumbnail_url,
                     target: prize.target,
                 })
                 .collect(),
@@ -405,7 +405,7 @@ struct InsertableMarket<'a> {
 struct InsertableToken<'a> {
     name: &'a str,
     description: &'a str,
-    sumbnail_url: &'a str,
+    thumbnail_url: &'a str,
     market_id: &'a Uuid,
     idx: i32,
 }
@@ -415,7 +415,7 @@ struct InsertableToken<'a> {
 struct InsertablePrize<'a> {
     market_local_id: i32,
     name: &'a str,
-    sumbnail_url: &'a str,
+    thumbnail_url: &'a str,
     target: &'a str,
     market_id: &'a Uuid,
 }
@@ -451,7 +451,7 @@ struct QueryableToken {
     _unused_id: i32,
     name: String,
     description: String,
-    sumbnail_url: String,
+    thumbnail_url: String,
     market_id: Uuid,
     idx: i32,
 }
@@ -461,7 +461,7 @@ struct QueryablePrize {
     _unused_id: i32,
     market_local_id: i32,
     name: String,
-    sumbnail_url: String,
+    thumbnail_url: String,
     target: String,
     market_id: Uuid,
 }

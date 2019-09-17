@@ -579,7 +579,7 @@ impl MarketTokens {
 pub struct Token {
     pub name: TokenName,
     pub description: TokenDesc,
-    pub sumbnail_url: TokenSumbnailUrl,
+    pub thumbnail_url: TokenThumbnailUrl,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, From)]
@@ -601,9 +601,9 @@ impl TokenDesc {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From)]
-pub struct TokenSumbnailUrl(String);
+pub struct TokenThumbnailUrl(String);
 
-impl TokenSumbnailUrl {
+impl TokenThumbnailUrl {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
     }
@@ -623,7 +623,7 @@ impl MarketPrizes {
 pub struct Prize {
     pub id: PrizeId,
     pub name: PrizeName,
-    pub sumbnail_url: PrizeSumbnailUrl,
+    pub thumbnail_url: PrizeThumbnailUrl,
     pub target: PrizeTarget,
 }
 
@@ -640,9 +640,9 @@ impl PrizeName {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From)]
-pub struct PrizeSumbnailUrl(String);
+pub struct PrizeThumbnailUrl(String);
 
-impl PrizeSumbnailUrl {
+impl PrizeThumbnailUrl {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
     }

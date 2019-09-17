@@ -44,7 +44,7 @@ impl<'a> MarketRepository<'a> {
             .map(|(idx, token)| NewToken {
                 name: token.name.as_str(),
                 description: token.description.as_str(),
-                sumbnail_url: token.sumbnail_url.as_str(),
+                thumbnail_url: token.thumbnail_url.as_str(),
                 idx: idx as i32,
             });
         let mut new_prizes = market
@@ -55,7 +55,7 @@ impl<'a> MarketRepository<'a> {
             .map(|(i, prize)| NewPrize {
                 local_id: i as i32,
                 name: prize.name.as_str(),
-                sumbnail_url: prize.sumbnail_url.as_str(),
+                thumbnail_url: prize.thumbnail_url.as_str(),
                 target: prize.target.as_str(),
             });
         let new_market = NewMarket {
@@ -269,7 +269,7 @@ fn build_market_token(token: QueryToken) -> Token {
     Token {
         name: TokenName(token.name),
         description: TokenDesc(token.description),
-        sumbnail_url: TokenSumbnailUrl(token.sumbnail_url),
+        thumbnail_url: TokenThumbnailUrl(token.thumbnail_url),
     }
 }
 
@@ -277,7 +277,7 @@ fn build_market_prize(prize: QueryPrize) -> Prize {
     Prize {
         id: PrizeId(prize.local_id),
         name: PrizeName(prize.name),
-        sumbnail_url: PrizeSumbnailUrl(prize.sumbnail_url),
+        thumbnail_url: PrizeThumbnailUrl(prize.thumbnail_url),
         target: PrizeTarget(prize.target),
     }
 }

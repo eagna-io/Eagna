@@ -39,7 +39,7 @@ const TokenComponent: FC<TokenComponentProps> = ({ token }) => {
   return (
     <>
       <TokenContainer>
-        <TokenSumbnail src={token.sumbnailUrl} />
+        <TokenSumbnail src={token.thumbnailUrl} />
         <TokenContents>
           {isResolved ? <ResolvedMark /> : null}
           <TokenName>{token.name}</TokenName>

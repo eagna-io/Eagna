@@ -8,7 +8,7 @@ use uuid::Uuid;
 pub struct Organizer {
     id: OrganizerId,
     name: OrganizerName,
-    sumbnail_url: OrganizerSumbnailUrl,
+    thumbnail_url: OrganizerThumbnailUrl,
 }
 
 impl Organizer {
@@ -36,7 +36,7 @@ impl OrganizerId {
 pub struct OrganizerName(String);
 
 #[derive(Debug, Serialize, From)]
-pub struct OrganizerSumbnailUrl(String);
+pub struct OrganizerThumbnailUrl(String);
 
 #[derive(From)]
 pub struct OrganizerRepository<'a> {
@@ -52,7 +52,7 @@ impl<'a> OrganizerRepository<'a> {
             Ok(Some(Organizer {
                 id: OrganizerId::from(query_res.id),
                 name: OrganizerName::from(query_res.name),
-                sumbnail_url: OrganizerSumbnailUrl::from(query_res.sumbnail_url),
+                thumbnail_url: OrganizerThumbnailUrl::from(query_res.thumbnail_url),
             }))
         } else {
             Ok(None)

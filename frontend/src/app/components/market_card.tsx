@@ -13,7 +13,7 @@ interface Props {
 export default ({ market }: Props) => {
   return (
     <MarketContainer to={`/market/${market.id}`}>
-      <MarketImage src={market.attrs.tokens[0].sumbnailUrl} />
+      <MarketImage src={market.attrs.tokens[0].thumbnailUrl} />
       <MarketStatusBadge status={market.status} />
       <MarketTitle>{market.attrs.title}</MarketTitle>
     </MarketContainer>

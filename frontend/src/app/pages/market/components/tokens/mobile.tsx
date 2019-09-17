@@ -55,7 +55,7 @@ const TokenComponent: FC<TokenComponentProps> = ({ token, onClick }) => {
     <TokenContainer onClick={onClick}>
       {isResolved ? <ResolvedMark /> : null}
       <TokenName>{token.name}</TokenName>
-      <TokenSumbnail src={token.sumbnailUrl} />
+      <TokenSumbnail src={token.thumbnailUrl} />
       <TokenStatistics>
         <TokenStatisticsStrong>{tokenPrice}</TokenStatisticsStrong>
         <br />

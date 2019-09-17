@@ -84,11 +84,11 @@ export class MarketToken {
   constructor(
     readonly name: string,
     readonly description: string,
-    readonly sumbnailUrl: string
+    readonly thumbnailUrl: string
   ) {}
 
   static fromInfra(token: InfraMarketToken): MarketToken {
-    return new MarketToken(token.name, token.description, token.sumbnailUrl);
+    return new MarketToken(token.name, token.description, token.thumbnailUrl);
   }
 }
 
@@ -97,7 +97,7 @@ export class MarketPrize {
     readonly id: number,
     readonly name: string,
     readonly target: string,
-    readonly sumbnailUrl: string
+    readonly thumbnailUrl: string
   ) {}
 
   static fromInfra(prize: InfraMarketPrize): MarketPrize {
@@ -105,7 +105,7 @@ export class MarketPrize {
       prize.id,
       prize.name,
       prize.target,
-      prize.sumbnailUrl
+      prize.thumbnailUrl
     );
   }
 }
