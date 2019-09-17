@@ -1,14 +1,14 @@
-import React, {FC, useState} from 'react';
-import styled from 'styled-components';
-import moment from 'moment';
+import React, { FC, useState } from "react";
+import styled from "styled-components";
+import moment from "moment";
 
-import {EagnaMarketApi} from 'infra/eagna/market';
-import {User} from 'models/user';
-import {Eagna} from 'models/organizer';
-import {withUser, LoginStatus} from 'app/components/user';
-import NotFoundPage from 'app/pages/not_found';
+import { EagnaMarketApi } from "infra/eagna/market";
+import { User } from "models/user";
+import { Eagna } from "models/organizer";
+import { withUser, LoginStatus } from "app/components/user";
+import NotFoundPage from "app/pages/not_found";
 
-const AddMarketOrNotFoundPage: FC<{user: LoginStatus}> = ({user}) => {
+const AddMarketOrNotFoundPage: FC<{ user: LoginStatus }> = ({ user }) => {
   if (user instanceof User && user.isAdmin) {
     return <AddMarketPage user={user} />;
   } else {
@@ -18,22 +18,22 @@ const AddMarketOrNotFoundPage: FC<{user: LoginStatus}> = ({user}) => {
 
 export default withUser(AddMarketOrNotFoundPage);
 
-const AddMarketPage: FC<{user: User}> = ({user}) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+const AddMarketPage: FC<{ user: User }> = ({ user }) => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [lmsrB, setLmsrB] = useState(100);
   const [openTime, setOpenTime] = useState(moment().format());
   const [closeTime, setCloseTime] = useState(moment().format());
   const [tokens, setTokens] = useState([
-    {name: '', description: '', sumbnailUrl: ''},
+    { name: "", description: "", sumbnailUrl: "" }
   ]);
   const [prizes, setPrizes] = useState([
-    {name: '', target: '', sumbnailUrl: ''},
+    { name: "", target: "", sumbnailUrl: "" }
   ]);
 
   const assertNotEmpty = (v: string): boolean => {
-    if (v === '') {
-      alert('There are empty value!!');
+    if (v === "") {
+      alert("There are empty value!!");
       return false;
     }
     return true;
@@ -41,7 +41,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
 
   const assertDateString = (v: string): boolean => {
     if (!moment(v).isValid()) {
-      alert('date time format is invalid');
+      alert("date time format is invalid");
       return false;
     }
     return true;
@@ -54,16 +54,16 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
       assertDateString(openTime) &&
       assertDateString(closeTime) &&
       tokens.every(
-        ({name, description, sumbnailUrl}) =>
+        ({ name, description, sumbnailUrl }) =>
           assertNotEmpty(name) &&
           assertNotEmpty(description) &&
-          assertNotEmpty(sumbnailUrl),
+          assertNotEmpty(sumbnailUrl)
       ) &&
       prizes.every(
-        ({name, target, sumbnailUrl}) =>
+        ({ name, target, sumbnailUrl }) =>
           assertNotEmpty(name) &&
           assertNotEmpty(target) &&
-          assertNotEmpty(sumbnailUrl),
+          assertNotEmpty(sumbnailUrl)
       )
     );
   };
@@ -71,7 +71,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
   const sendRequest = () => {
     user.getAccessToken().then(accessToken => {
       if (accessToken === null) {
-        alert('ログインセッションが切れました');
+        alert("ログインセッションが切れました");
       } else {
         EagnaMarketApi.create(
           {
@@ -82,9 +82,9 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
             open: moment(openTime),
             close: moment(closeTime),
             tokens: tokens,
-            prizes: prizes.map((p, idx) => ({id: idx, ...p})),
+            prizes: prizes.map((p, idx) => ({ id: idx, ...p }))
           },
-          accessToken,
+          accessToken
         ).then(marketId => {
           alert(`New market ${marketId} is created`);
         });
@@ -97,7 +97,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
       <h2>Add Market</h2>
       <Field>
         <FieldName>Title :</FieldName>
-        <FieldInput
+        <FieldInputLong
           type="text"
           value={title}
           onChange={e => setTitle(e.target.value)}
@@ -112,7 +112,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
       </Field>
       <Field>
         <FieldName>LMSR β :</FieldName>
-        <FieldInput
+        <FieldInputLong
           type="text"
           value={lmsrB}
           onChange={e => {
@@ -125,7 +125,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
       </Field>
       <Field>
         <FieldName>Open time :</FieldName>
-        <FieldInput
+        <FieldInputLong
           type="text"
           value={openTime}
           onChange={e => setOpenTime(e.target.value)}
@@ -133,7 +133,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
       </Field>
       <Field>
         <FieldName>Close time :</FieldName>
-        <FieldInput
+        <FieldInputLong
           type="text"
           value={closeTime}
           onChange={e => setCloseTime(e.target.value)}
@@ -144,13 +144,14 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
         <FieldInputTokens>
           {tokens.map((token, idx) => (
             <div key={idx}>
+              <FieldInputTokenIndex>{idx} :</FieldInputTokenIndex>
               <FieldInputTokenName
                 type="text"
                 value={token.name}
                 placeholder="name"
                 onChange={e => {
                   const newTokens = tokens.map((t, i) =>
-                    i === idx ? {...t, name: e.target.value} : t,
+                    i === idx ? { ...t, name: e.target.value } : t
                   );
                   setTokens(newTokens);
                 }}
@@ -161,18 +162,18 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
                 placeholder="description"
                 onChange={e => {
                   const newTokens = tokens.map((t, i) =>
-                    i === idx ? {...t, description: e.target.value} : t,
+                    i === idx ? { ...t, description: e.target.value } : t
                   );
                   setTokens(newTokens);
                 }}
               />
-              <FieldInputTokenSumbnailUrl
+              <FieldInputTokenThumbnailUrl
                 type="text"
                 value={token.sumbnailUrl}
                 placeholder="sumbnail url"
                 onChange={e => {
                   const newTokens = tokens.map((t, i) =>
-                    i === idx ? {...t, sumbnailUrl: e.target.value} : t,
+                    i === idx ? { ...t, sumbnailUrl: e.target.value } : t
                   );
                   setTokens(newTokens);
                 }}
@@ -181,20 +182,22 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
                 onClick={() => {
                   const newTokens = tokens.filter((t, i) => i !== idx);
                   setTokens(newTokens);
-                }}>
+                }}
+              >
                 -
               </FieldRemoveTokenButton>
             </div>
           ))}
-          <button
+          <FieldAddTokenButton
             onClick={() => {
               const newTokens = Array.from(tokens);
-              newTokens.push({name: '', description: '', sumbnailUrl: ''});
+              newTokens.push({ name: "", description: "", sumbnailUrl: "" });
               console.log(newTokens);
               setTokens(newTokens);
-            }}>
+            }}
+          >
             Add token
-          </button>
+          </FieldAddTokenButton>
         </FieldInputTokens>
       </Field>
       <Field>
@@ -208,7 +211,7 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
                 placeholder="name"
                 onChange={e => {
                   const newPrizes = prizes.map((t, i) =>
-                    i === idx ? {...t, name: e.target.value} : t,
+                    i === idx ? { ...t, name: e.target.value } : t
                   );
                   setPrizes(newPrizes);
                 }}
@@ -219,18 +222,18 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
                 placeholder="target"
                 onChange={e => {
                   const newPrizes = prizes.map((t, i) =>
-                    i === idx ? {...t, target: e.target.value} : t,
+                    i === idx ? { ...t, target: e.target.value } : t
                   );
                   setPrizes(newPrizes);
                 }}
               />
-              <FieldInputPrizeSumbnailUrl
+              <FieldInputPrizeThumbnailUrl
                 type="text"
                 value={prize.sumbnailUrl}
                 placeholder="sumbnail url"
                 onChange={e => {
                   const newPrizes = prizes.map((t, i) =>
-                    i === idx ? {...t, sumbnailUrl: e.target.value} : t,
+                    i === idx ? { ...t, sumbnailUrl: e.target.value } : t
                   );
                   setPrizes(newPrizes);
                 }}
@@ -239,20 +242,22 @@ const AddMarketPage: FC<{user: User}> = ({user}) => {
                 onClick={() => {
                   const newPrizes = prizes.filter((t, i) => i !== idx);
                   setPrizes(newPrizes);
-                }}>
+                }}
+              >
                 -
               </FieldRemovePrizeButton>
             </div>
           ))}
-          <button
+          <FieldAddPrizeButton
             onClick={() => {
               const newPrizes = Array.from(prizes);
-              newPrizes.push({name: '', target: '', sumbnailUrl: ''});
+              newPrizes.push({ name: "", target: "", sumbnailUrl: "" });
               console.log(newPrizes);
               setPrizes(newPrizes);
-            }}>
+            }}
+          >
             Add prize
-          </button>
+          </FieldAddPrizeButton>
         </FieldInputPrizes>
       </Field>
       <SubmitButton onClick={() => validateValues() && sendRequest()}>
@@ -279,7 +284,13 @@ const FieldName = styled.div`
 `;
 
 const FieldInput = styled.input`
-  width: 670px;
+  padding: 2px 5px;
+  border: 1px solid lightgray;
+  border-radius: 4px;
+`;
+
+const FieldInputLong = styled(FieldInput)`
+  width: calc(100% - 250px);
 `;
 
 const FieldInputTextArea = styled.textarea`
@@ -294,17 +305,25 @@ const FieldInputTokens = styled.div`
   vertical-align: top;
 `;
 
-const FieldInputTokenName = styled.input`
+const FieldInputTokenIndex = styled.span`
+  width: 20px;
+  margin-right: 5px;
+  font-size: 12px;
+  color: gray;
+  text-align: center;
+`;
+
+const FieldInputTokenName = styled(FieldInput)`
   width: 150px;
   margin-right: 10px;
 `;
 
-const FieldInputTokenDesc = styled.input`
-  width: 300px;
+const FieldInputTokenDesc = styled(FieldInput)`
+  width: 270px;
   margin-right: 10px;
 `;
 
-const FieldInputTokenSumbnailUrl = styled.input`
+const FieldInputTokenThumbnailUrl = styled(FieldInput)`
   width: 150px;
   margin-right: 20px;
 `;
@@ -314,23 +333,30 @@ const FieldRemoveTokenButton = styled.button`
   text-align: center;
 `;
 
+const FieldAddTokenButton = styled.button`
+  margin-top: 10px;
+  padding: 2px 5px;
+  border: 1px solid gray;
+  border-radius: 4px;
+`;
+
 const FieldInputPrizes = styled.div`
   display: inline-block;
   width: 670px;
   vertical-align: top;
 `;
 
-const FieldInputPrizeName = styled.input`
+const FieldInputPrizeName = styled(FieldInput)`
   width: 200px;
   margin-right: 10px;
 `;
 
-const FieldInputPrizeTarget = styled.input`
+const FieldInputPrizeTarget = styled(FieldInput)`
   width: 200px;
   margin-right: 10px;
 `;
 
-const FieldInputPrizeSumbnailUrl = styled.input`
+const FieldInputPrizeThumbnailUrl = styled(FieldInput)`
   width: 200px;
   margin-right: 20px;
 `;
@@ -338,6 +364,13 @@ const FieldInputPrizeSumbnailUrl = styled.input`
 const FieldRemovePrizeButton = styled.button`
   width: 20px;
   text-align: center;
+`;
+
+const FieldAddPrizeButton = styled.button`
+  margin-top: 10px;
+  padding: 2px 5px;
+  border: 1px solid gray;
+  border-radius: 4px;
 `;
 
 const SubmitButton = styled.button`
