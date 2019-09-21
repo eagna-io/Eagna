@@ -95,7 +95,9 @@ table! {
         unused_id -> Int4,
         user_id -> Text,
         prize_id -> Uuid,
+        price -> Int4,
         time -> Timestamptz,
+        status -> Prize_trade_status,
     }
 }
 

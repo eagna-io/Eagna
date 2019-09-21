@@ -27,7 +27,6 @@ COMMENT ON COLUMN user_reward_point_history.unused_id IS
 COMMENT ON COLUMN user_reward_point_history.point IS
   '獲得したポイント量。0より大きい。0の場合はレコードを追加しない';
 
--- ユーザーがポイントと交換可能なprize
 CREATE TABLE prizes (
   id            uuid NOT NULL PRIMARY KEY,
   name          text NOT NULL,
@@ -46,15 +45,25 @@ COMMENT ON TABLE prizes IS
 COMMENT ON COLUMN prizes.price IS
   'prizeを交換するのに必要なポイント量。0より大きい';
 
+
+CREATE TYPE prize_trade_status as ENUM (
+  'requested',
+  'processed'
+);
+
 CREATE TABLE user_prize_trade_history (
   -- アプリ的に使用することはないが、dieselのために必要
   unused_id     serial PRIMARY KEY,
   user_id       text NOT NULL,
   prize_id      uuid NOT NULL,
+  -- 消費したポイント。0より大きい。
+  price         integer NOT NULL,
   time          timestamptz NOT NULL DEFAULT now(),
+  status        prize_trade_status NOT NULL DEFAULT 'requested',
 
   CONSTRAINT user_prize_trade_history_user_fkey FOREIGN KEY(user_id)
     REFERENCES users(fb_uid) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT user_prize_trade_history_prize_fkey FOREIGN KEY(prize_id)
-    REFERENCES prizes(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    REFERENCES prizes(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+  CONSTRAINT price_larger_than_zero CHECK ( price > 0 )
 );

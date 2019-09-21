@@ -1,11 +1,16 @@
-use super::{schema::users, Postgres};
+use super::{
+    schema::{user_prize_trade_history, user_reward_point_history, users},
+    Postgres,
+};
 use chrono::{DateTime, Utc};
-use diesel::{prelude::*, result::Error as PgError};
+use diesel::{dsl::sum, prelude::*, result::Error as PgError};
 
 pub trait PostgresUserInfra {
     fn save_user<'a>(&self, new_user: NewUser<'a>) -> Result<(), failure::Error>;
 
     fn query_user(&self, user_id: &str) -> Result<Option<QueryUser>, failure::Error>;
+
+    fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error>;
 }
 
 pub struct NewUser<'a> {
@@ -47,6 +52,21 @@ impl PostgresUserInfra for Postgres {
             Err(PgError::NotFound) => Ok(None),
             Err(e) => Err(e.into()),
         }
+    }
+
+    fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error> {
+        let earned = user_reward_point_history::table
+            .filter(user_reward_point_history::columns::user_id.eq(user_id))
+            .select(sum(user_reward_point_history::columns::point))
+            .first::<Option<i64>>(&self.conn)?
+            .unwrap_or(0);
+        let consumed = user_prize_trade_history::table
+            .filter(user_prize_trade_history::columns::user_id.eq(user_id))
+            .select(sum(user_prize_trade_history::columns::price))
+            .first::<Option<i64>>(&self.conn)?
+            .unwrap_or(0);
+        assert!(earned > consumed);
+        return Ok((earned - consumed) as u32);
     }
 }
 

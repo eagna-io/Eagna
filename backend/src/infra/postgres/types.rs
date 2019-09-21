@@ -14,3 +14,10 @@ pub enum OrderType {
     CoinSupply,
     Reward,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, DbEnum)]
+#[DieselType = "Prize_trade_status"]
+pub enum PrizeTradeStatus {
+    Requested,
+    Processed,
+}
