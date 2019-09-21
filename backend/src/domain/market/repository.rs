@@ -1,5 +1,5 @@
 use super::*;
-use crate::domain::organizer::OrganizerId;
+use crate::domain::{organizer::OrganizerId, point::Point};
 use crate::infra::postgres::{
     market::*,
     types::{MarketStatus as InfraMarketStatus, OrderType as InfraOrderType},
@@ -64,6 +64,7 @@ impl<'a> MarketRepository<'a> {
             organizer_id: market.attrs().organizer_id.as_uuid(),
             description: market.attrs().description.as_str(),
             lmsr_b: market.attrs().lmsr_b.to_u32() as i32,
+            total_reward_point: market.attrs().total_reward_point.as_u32() as i32,
             open: market.attrs().open.as_date_time(),
             close: market.attrs().close.as_date_time(),
             tokens: &mut new_tokens,
@@ -246,6 +247,7 @@ fn build_market_attrs(market: QueryMarket) -> MarketAttrs {
         organizer_id: OrganizerId::from(market.organizer_id),
         description: MarketDesc::from(market.description),
         lmsr_b: lmsr::B::from(market.lmsr_b as u32),
+        total_reward_point: Point::from(market.total_reward_point as u32),
         open: MarketOpenTime::from(market.open),
         close: MarketCloseTime::from(market.close),
         tokens: MarketTokens::from(

@@ -142,6 +142,7 @@ mod post {
                 &organizer,
                 req_market.attrs.description,
                 req_market.attrs.lmsr_b,
+                req_market.attrs.total_reward_point,
                 req_market.attrs.open,
                 req_market.attrs.close,
                 req_market.attrs.tokens,

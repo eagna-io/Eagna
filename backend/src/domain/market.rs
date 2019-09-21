@@ -12,6 +12,7 @@ pub const REWARD_COIN_PER_TOKEN: AmountCoin = AmountCoin(1000);
 use crate::domain::{
     lmsr,
     organizer::{Organizer, OrganizerId},
+    point::Point,
     user::UserId,
 };
 use crate::infra::postgres::types::MarketStatus as InfraMarketStatus;
@@ -33,7 +34,7 @@ impl Market {
     /// 新規にマーケットエンティティを作成する。
     /// 「新規作成」と「再構築」は違うことに注意。
     /// このメソッドはOrganizerを要求するが、それはオーガナイザーが
-    /// 実際に存在することを矯正するため。
+    /// 実際に存在することを強制するため。
     /// Organizer は OrganizerRepository から取得するしかないので
     /// Organizer 構造体が存在するなら対応するオーガナイザーが存在する
     pub fn new(
@@ -41,6 +42,7 @@ impl Market {
         organizer: &Organizer,
         desc: MarketDesc,
         lmsr_b: lmsr::B,
+        total_reward_point: Point,
         open: MarketOpenTime,
         close: MarketCloseTime,
         tokens: MarketTokens,
@@ -52,6 +54,7 @@ impl Market {
             organizer_id: organizer.id().clone(),
             description: desc,
             lmsr_b,
+            total_reward_point,
             open,
             close,
             tokens,
@@ -461,6 +464,7 @@ pub struct MarketAttrs {
     pub organizer_id: OrganizerId,
     pub description: MarketDesc,
     pub lmsr_b: lmsr::B,
+    pub total_reward_point: Point,
     pub open: MarketOpenTime,
     pub close: MarketCloseTime,
     pub tokens: MarketTokens,
