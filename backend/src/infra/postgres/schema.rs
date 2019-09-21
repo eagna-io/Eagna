@@ -26,6 +26,7 @@ table! {
         close -> Timestamptz,
         status -> Market_status,
         resolved_token_name -> Nullable<Text>,
+        total_reward_point -> Int4,
     }
 }
 
@@ -76,6 +77,45 @@ table! {
     use diesel::sql_types::*;
     use crate::infra::postgres::types::*;
 
+    prizes (id) {
+        id -> Uuid,
+        name -> Text,
+        description -> Text,
+        thumbnail_url -> Text,
+        price -> Int4,
+        available -> Bool,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::infra::postgres::types::*;
+
+    user_prize_trade_history (unused_id) {
+        unused_id -> Int4,
+        user_id -> Text,
+        prize_id -> Uuid,
+        time -> Timestamptz,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::infra::postgres::types::*;
+
+    user_reward_point_history (unused_id) {
+        unused_id -> Int4,
+        user_id -> Text,
+        market_id -> Uuid,
+        point -> Int4,
+        time -> Timestamptz,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::infra::postgres::types::*;
+
     users (fb_uid) {
         fb_uid -> Text,
         name -> Text,
@@ -90,6 +130,10 @@ joinable!(market_tokens -> markets (market_id));
 joinable!(markets -> organizers (organizer_id));
 joinable!(orders -> markets (market_id));
 joinable!(orders -> users (user_id));
+joinable!(user_prize_trade_history -> prizes (prize_id));
+joinable!(user_prize_trade_history -> users (user_id));
+joinable!(user_reward_point_history -> markets (market_id));
+joinable!(user_reward_point_history -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     market_prizes,
@@ -97,5 +141,8 @@ allow_tables_to_appear_in_same_query!(
     market_tokens,
     orders,
     organizers,
+    prizes,
+    user_prize_trade_history,
+    user_reward_point_history,
     users,
 );
