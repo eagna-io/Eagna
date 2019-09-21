@@ -64,7 +64,7 @@ impl<'a> MarketRepository<'a> {
             organizer_id: market.attrs().organizer_id.as_uuid(),
             description: market.attrs().description.as_str(),
             lmsr_b: market.attrs().lmsr_b.to_u32() as i32,
-            total_reward_point: market.attrs().total_reward_point.as_u32() as i32,
+            total_reward_point: market.attrs().total_reward_point.as_u32(),
             open: market.attrs().open.as_date_time(),
             close: market.attrs().close.as_date_time(),
             tokens: &mut new_tokens,

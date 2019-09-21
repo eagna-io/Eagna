@@ -68,7 +68,8 @@ pub struct NewMarket<'a> {
     pub organizer_id: &'a Uuid,
     pub description: &'a str,
     pub lmsr_b: i32,
-    pub total_reward_point: i32,
+    // total_reward_point がnegativeにならないことはDB制約で担保している
+    pub total_reward_point: u32,
     pub open: &'a DateTime<Utc>,
     pub close: &'a DateTime<Utc>,
     // tokenのidxカラムは、この順序で設定される。
@@ -108,7 +109,8 @@ pub struct QueryMarket {
     pub organizer_id: Uuid,
     pub description: String,
     pub lmsr_b: i32,
-    pub total_reward_point: i32,
+    // total_reward_point がnegativeにならないことはDB制約で担保している
+    pub total_reward_point: u32,
     pub open: DateTime<Utc>,
     pub close: DateTime<Utc>,
     pub status: MarketStatus,
@@ -169,7 +171,7 @@ impl PostgresMarketInfra for Postgres {
             organizer_id: market.organizer_id,
             description: market.description,
             lmsr_b: market.lmsr_b,
-            total_reward_point: market.total_reward_point,
+            total_reward_point: market.total_reward_point as i32,
             open: market.open,
             close: market.close,
         };
@@ -364,7 +366,7 @@ impl QueryMarket {
             organizer_id: raw_market.organizer_id,
             description: raw_market.description,
             lmsr_b: raw_market.lmsr_b,
-            total_reward_point: raw_market.total_reward_point,
+            total_reward_point: raw_market.total_reward_point as u32,
             open: raw_market.open,
             close: raw_market.close,
             status: raw_market.status,
