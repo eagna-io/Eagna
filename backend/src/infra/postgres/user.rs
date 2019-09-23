@@ -54,6 +54,8 @@ impl PostgresUserInfra for Postgres {
         }
     }
 
+    /// Userの現在の保有コインを取得する。
+    /// Userが存在しない場合は0を返す。
     fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error> {
         let earned = user_reward_point_history::table
             .filter(user_reward_point_history::columns::user_id.eq(user_id))
