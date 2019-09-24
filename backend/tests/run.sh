@@ -25,7 +25,7 @@ psql -f "tests/init_data.sql" "${PG_URL}"
 # サーバーの起動
 export BIND="0.0.0.0:8081"
 export RUN_MODE="test"
-export RUST_LOG="warn,libeagna=debug,eagna=debug"
+export RUST_LOG="warn"
 
 cargo build
 cargo run &
@@ -33,6 +33,8 @@ server_pid=$!
 echo ${server_pid} > ${TEST_SERVER_PID_FILE}
 
 sleep 2
+
+echo "running test scenario..."
 
 # シナリオテスト
 python3 tests/scenario_01.py

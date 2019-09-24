@@ -42,7 +42,6 @@ def create_market_test():
         'tokens': [],
         'prizes': [],
     }
-    print(json.dumps(invalid_payload))
     res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
     assert res.status_code == 201, f"found status code {res.status_code}"
 
