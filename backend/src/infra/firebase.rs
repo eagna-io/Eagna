@@ -1,5 +1,6 @@
 use super::InfraFactory;
-use std::sync::Arc;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 const API_BASE: &str = "https://www.googleapis.com/identitytoolkit/v3/relyingparty";
 
@@ -76,6 +77,44 @@ impl InfraFactory<Firebase> for FirebaseFactory {
     fn create(&self) -> Result<Firebase, failure::Error> {
         Ok(Firebase {
             api_key: self.api_key.clone(),
+        })
+    }
+}
+
+/*
+ * TEST 用
+ */
+
+pub struct MockFirebase {
+    // access_token と user_id のHashMap
+    data: Arc<Mutex<HashMap<String, String>>>,
+}
+
+impl FirebaseInfra for MockFirebase {
+    fn query_user_by_access_token(
+        &self,
+        access_token_id: &str,
+    ) -> Result<Option<String>, failure::Error> {
+        Ok(self.data.lock().unwrap().get(access_token_id).cloned())
+    }
+}
+
+pub struct MockFirebaseFactory {
+    data: Arc<Mutex<HashMap<String, String>>>,
+}
+
+impl MockFirebaseFactory {
+    pub fn new(initial_data: HashMap<String, String>) -> MockFirebaseFactory {
+        MockFirebaseFactory {
+            data: Arc::new(Mutex::new(initial_data)),
+        }
+    }
+}
+
+impl InfraFactory<MockFirebase> for MockFirebaseFactory {
+    fn create(&self) -> Result<MockFirebase, failure::Error> {
+        Ok(MockFirebase {
+            data: self.data.clone(),
         })
     }
 }

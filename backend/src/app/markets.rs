@@ -218,7 +218,7 @@ mod put {
             authorize(postgres, &access_token.user_id)?;
 
             let req_data = json_input::<PutMarketRequest>(req).map_err(|e| {
-                log::info!("Invalid payload : {:?}", e);
+                log::warn!("Invalid payload : {:?}", e);
                 FailureResponse::InvalidPayload
             })?;
 
