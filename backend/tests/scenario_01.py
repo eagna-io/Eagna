@@ -38,6 +38,7 @@ def create_market_test():
         'lmsrB': 0,
         'open': datetime.utcnow().isoformat() + 'Z',
         'close': datetime.utcnow().isoformat() + 'Z',
+        'totalRewardPoint': 10000,
         'tokens': [],
         'prizes': [],
     }
