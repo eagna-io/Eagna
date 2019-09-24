@@ -19,6 +19,7 @@ export default ({ center }: Props) => {
       <a
         className="twitter-timeline"
         data-theme="light"
+        data-height="500"
         href="https://twitter.com/eagna_io?ref_src=twsrc%5Etfw"
       >
         Tweets from Eagna
