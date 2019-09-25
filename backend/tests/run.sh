@@ -25,7 +25,12 @@ psql -f "tests/init_data.sql" "${PG_URL}"
 # サーバーの起動
 export BIND="0.0.0.0:8081"
 export RUN_MODE="test"
-export RUST_LOG="warn"
+if [ -z "${TEST_VERBOSE}" ]; then
+  export RUST_LOG="warn"
+else
+  export RUST_LOG="warn,libeagna=debug,eagna=debug"
+  export RUST_BACKTRACE=1
+fi
 
 cargo build
 cargo run &
