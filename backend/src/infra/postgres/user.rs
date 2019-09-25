@@ -89,7 +89,7 @@ impl PostgresUserInfra for Postgres {
             .select(sum(user_prize_trade_history::columns::price))
             .first::<Option<i64>>(&self.conn)?
             .unwrap_or(0);
-        assert!(earned > consumed);
+        assert!(earned >= consumed);
         return Ok((earned - consumed) as u32);
     }
 
