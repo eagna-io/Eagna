@@ -78,18 +78,65 @@ def create_market_test():
     res = requests.post(url("/markets/"), headers=headers)
     assert_eq(res.status_code, 400)
 
-    # Valid request
-    # でも↓ははじくように修正する必要ある
+    # 不正なペイロード。タイトルが空文字列は許可しない
     headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
     invalid_payload = {
         'title': "",
-        'description': "",
+        'description': "hoge",
         'organizerId': "ec2966c5-d661-4a9b-b377-9e00f21d7dd4",
         'lmsrB': 0,
         'open': datetime.utcnow().isoformat() + 'Z',
         'close': datetime.utcnow().isoformat() + 'Z',
         'totalRewardPoint': 10000,
         'tokens': [],
+        'prizes': [],
+    }
+    res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
+    assert_eq(res.status_code, 400)
+
+    # 不正なペイロード。トークンが空配列は許可しない
+    headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
+    invalid_payload = {
+        'title': "hoge",
+        'description': "hoge",
+        'organizerId': "ec2966c5-d661-4a9b-b377-9e00f21d7dd4",
+        'lmsrB': 0,
+        'open': datetime.utcnow().isoformat() + 'Z',
+        'close': datetime.utcnow().isoformat() + 'Z',
+        'totalRewardPoint': 10000,
+        'tokens': [],
+        'prizes': [],
+    }
+    res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
+    assert_eq(res.status_code, 400)
+
+    # 不正なペイロード。トークン名が空文字列は許可しない
+    headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
+    invalid_payload = {
+        'title': "hoge",
+        'description': "",
+        'organizerId': "ec2966c5-d661-4a9b-b377-9e00f21d7dd4",
+        'lmsrB': 0,
+        'open': datetime.utcnow().isoformat() + 'Z',
+        'close': datetime.utcnow().isoformat() + 'Z',
+        'totalRewardPoint': 10000,
+        'tokens': [{"name": "", "description": "", "thumbnailUrl": ""}],
+        'prizes': [],
+    }
+    res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
+    assert_eq(res.status_code, 400)
+
+    # 適格なペイロード
+    headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
+    invalid_payload = {
+        'title': "hoge",
+        'description': "",
+        'organizerId': "ec2966c5-d661-4a9b-b377-9e00f21d7dd4",
+        'lmsrB': 0,
+        'open': datetime.utcnow().isoformat() + 'Z',
+        'close': datetime.utcnow().isoformat() + 'Z',
+        'totalRewardPoint': 10000,
+        'tokens': [{"name": "hoge", "description": "", "thumbnailUrl": ""}],
         'prizes': [],
     }
     res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)

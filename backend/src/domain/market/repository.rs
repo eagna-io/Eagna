@@ -202,7 +202,10 @@ impl<'a> MarketRepository<'a> {
 /// `orders` はソート済みでなければならない
 fn build_market(market: QueryMarket, orders: Vec<QueryOrder>) -> Market {
     let market_status = market.status.clone();
-    let resolved_token_name = market.resolved_token_name.clone().map(|n| TokenName(n));
+    let resolved_token_name = market
+        .resolved_token_name
+        .clone()
+        .map(|n| TokenName::from_str(n).unwrap());
     let id = MarketId::from(market.id.clone());
     let market_attrs = build_market_attrs(market);
 
@@ -243,20 +246,21 @@ fn build_market(market: QueryMarket, orders: Vec<QueryOrder>) -> Market {
 
 fn build_market_attrs(market: QueryMarket) -> MarketAttrs {
     MarketAttrs {
-        title: MarketTitle::from(market.title),
+        title: MarketTitle::from_str(market.title).unwrap(),
         organizer_id: OrganizerId::from(market.organizer_id),
         description: MarketDesc::from(market.description),
         lmsr_b: lmsr::B::from(market.lmsr_b as u32),
         total_reward_point: Point::from(market.total_reward_point as u32),
         open: MarketOpenTime::from(market.open),
         close: MarketCloseTime::from(market.close),
-        tokens: MarketTokens::from(
+        tokens: MarketTokens::from_vec(
             market
                 .tokens
                 .into_iter()
                 .map(build_market_token)
                 .collect::<Vec<_>>(),
-        ),
+        )
+        .unwrap(),
         prizes: MarketPrizes::from(
             market
                 .prizes
@@ -269,7 +273,7 @@ fn build_market_attrs(market: QueryMarket) -> MarketAttrs {
 
 fn build_market_token(token: QueryToken) -> Token {
     Token {
-        name: TokenName(token.name),
+        name: TokenName::from_str(token.name).unwrap(),
         description: TokenDesc(token.description),
         thumbnail_url: TokenThumbnailUrl(token.thumbnail_url),
     }
@@ -278,7 +282,7 @@ fn build_market_token(token: QueryToken) -> Token {
 fn build_market_prize(prize: QueryPrize) -> Prize {
     Prize {
         id: PrizeId(prize.local_id),
-        name: PrizeName(prize.name),
+        name: PrizeName::from_str(prize.name).unwrap(),
         thumbnail_url: PrizeThumbnailUrl(prize.thumbnail_url),
         target: PrizeTarget(prize.target),
     }
@@ -295,7 +299,7 @@ fn build_order(order: QueryOrder) -> Order {
         InfraOrderType::Normal => Order::from(NormalOrder {
             id: OrderId::from(order.local_id),
             user_id: UserId::from_str(order.user_id.as_str()),
-            token_name: TokenName::from(order.token_name.unwrap()),
+            token_name: TokenName::from_str(order.token_name.unwrap()).unwrap(),
             amount_token: AmountToken::from(order.amount_token),
             amount_coin: AmountCoin::from(order.amount_coin),
             time: order.time,
@@ -303,7 +307,7 @@ fn build_order(order: QueryOrder) -> Order {
         InfraOrderType::Reward => Order::from(RewardOrder {
             id: OrderId::from(order.local_id),
             user_id: UserId::from_str(order.user_id.as_str()),
-            token_name: TokenName::from(order.token_name.unwrap()),
+            token_name: TokenName::from_str(order.token_name.unwrap()).unwrap(),
             amount_coin: AmountCoin::from(order.amount_coin),
             time: order.time,
         }),

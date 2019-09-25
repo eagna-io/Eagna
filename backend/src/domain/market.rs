@@ -16,6 +16,7 @@ use crate::domain::{
     user::UserId,
 };
 use crate::infra::postgres::types::MarketStatus as InfraMarketStatus;
+use crate::primitive::{EmptyStringError, EmptyVecError, NonEmptyString, NonEmptyVec};
 use chrono::{DateTime, Utc};
 use std::{collections::HashMap, str::FromStr};
 use uuid::Uuid;
@@ -505,11 +506,15 @@ impl FromStr for MarketId {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From)]
-pub struct MarketTitle(String);
+pub struct MarketTitle(NonEmptyString);
 
 impl MarketTitle {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
+    }
+
+    pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
+        Ok(MarketTitle(NonEmptyString::from_str(s)?))
     }
 }
 
@@ -570,11 +575,15 @@ impl Into<InfraMarketStatus> for MarketStatus {
 /// MarketTokens は、DB の market_tokens テーブルに保存されている
 /// idx カラムの値でソートされている。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From)]
-pub struct MarketTokens(Vec<Token>);
+pub struct MarketTokens(NonEmptyVec<Token>);
 
 impl MarketTokens {
     pub fn iter(&self) -> impl Iterator<Item = &Token> {
-        self.0.iter()
+        self.0.as_slice().iter()
+    }
+
+    pub fn from_vec(vec: Vec<Token>) -> Result<Self, EmptyVecError> {
+        Ok(MarketTokens(NonEmptyVec::from_vec(vec)?))
     }
 }
 
@@ -587,11 +596,15 @@ pub struct Token {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, From)]
-pub struct TokenName(String);
+pub struct TokenName(NonEmptyString);
 
 impl TokenName {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
+    }
+
+    pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
+        Ok(TokenName(NonEmptyString::from_str(s)?))
     }
 }
 
@@ -635,11 +648,15 @@ pub struct Prize {
 pub struct PrizeId(i32);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From)]
-pub struct PrizeName(String);
+pub struct PrizeName(NonEmptyString);
 
 impl PrizeName {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
+    }
+
+    pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
+        Ok(PrizeName(NonEmptyString::from_str(s)?))
     }
 }
 

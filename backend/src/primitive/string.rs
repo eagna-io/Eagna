@@ -1,6 +1,6 @@
 use serde::de::{Deserialize, Deserializer, Error, Unexpected};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Deref)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, Deref)]
 pub struct NonEmptyString(#[serde(deserialize_with = "error_when_empty_string")] String);
 
 impl NonEmptyString {
