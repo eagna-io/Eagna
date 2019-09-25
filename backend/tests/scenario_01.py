@@ -3,12 +3,43 @@ from datetime import datetime
 import json
 
 AdminAccessToken = "test_admin_access_token"
+UserAccessToken = "test_user_access_token"
 
 def main():
+    get_user_test_1()
+    create_user_test()
+    get_user_test_2()
+
     get_markets_test_1()
     create_market_test()
 
     print("[ OK ]")
+
+
+# ユーザーがまだ作られていないことをテストする
+# Firebaseには登録済みで、AccessTokenは取得している
+def get_user_test_1():
+    headers = bearer_token({}, UserAccessToken)
+    res = requests.get(url("/users/me/"), headers=headers)
+    assert res.status_code == 401
+
+def create_user_test():
+    payload = {
+        "name": "Hoge Hogeo",
+        "email": "hoge@eagna.io",
+    }
+    headers = content_type_json(bearer_token({}, UserAccessToken))
+    res = requests.post(url("/users/"), json.dumps(payload), headers=headers,)
+    assert res.status_code == 201, f"found status code {res.status_code}"
+
+def get_user_test_2():
+    headers = bearer_token({}, UserAccessToken)
+    res = requests.get(url("/users/me/"), headers=headers)
+    assert res.status_code == 200
+    assert res.json()["name"] == "Hoge Hogeo"
+    assert res.json()["email"] == "hoge@eagna.io"
+    assert res.json()["isAdmin"] == False
+    assert res.json()["point"] == 0
 
 
 def get_markets_test_1():
