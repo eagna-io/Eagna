@@ -9,6 +9,7 @@ extern crate derive_more;
 #[macro_use]
 extern crate failure;
 
-pub mod infra;
 pub mod app;
 pub mod domain;
+pub mod infra;
+pub mod primitive;

@@ -24,6 +24,24 @@ def get_user_test_1():
     assert_eq(res.status_code, 401)
 
 def create_user_test():
+    # 不正なペイロード。名前が空文字列は許可しない
+    payload = {
+        "name": "",
+        "email": "hoge@eagna.io",
+    }
+    headers = content_type_json(bearer_token({}, UserAccessToken))
+    res = requests.post(url("/users/"), json.dumps(payload), headers=headers,)
+    assert_eq(res.status_code, 400)
+
+    # 不正なペイロード。メアドが空文字列は許可しない
+    payload = {
+        "name": "Hoge Hogeo",
+        "email": "",
+    }
+    headers = content_type_json(bearer_token({}, UserAccessToken))
+    res = requests.post(url("/users/"), json.dumps(payload), headers=headers,)
+    assert_eq(res.status_code, 400)
+
     # valid payload
     payload = {
         "name": "Hoge Hogeo",

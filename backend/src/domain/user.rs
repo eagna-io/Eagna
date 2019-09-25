@@ -1,6 +1,7 @@
 pub mod repository;
 pub use repository::*;
 
+use crate::primitive::{EmptyStringError, NonEmptyString};
 use arrayvec::ArrayString;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -56,20 +57,28 @@ impl UserId {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From, Deref)]
-pub struct UserName(String);
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Deref, From)]
+pub struct UserName(NonEmptyString);
 
 impl UserName {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
     }
+
+    pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
+        Ok(UserName(NonEmptyString::from_str(s)?))
+    }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, From, Deref)]
-pub struct UserEmail(String);
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Deref, From)]
+pub struct UserEmail(NonEmptyString);
 
 impl UserEmail {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
+    }
+
+    pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
+        Ok(UserEmail(NonEmptyString::from_str(s)?))
     }
 }

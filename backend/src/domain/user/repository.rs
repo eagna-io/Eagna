@@ -21,8 +21,8 @@ impl<'a> UserRepository<'a> {
             None => Ok(None),
             Some(res) => Ok(Some(User {
                 id: *user_id,
-                name: UserName::from(res.name),
-                email: UserEmail::from(res.email),
+                name: UserName::from_str(res.name)?,
+                email: UserEmail::from_str(res.email)?,
                 is_admin: res.is_admin,
             })),
         }
