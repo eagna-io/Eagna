@@ -1,3 +1,7 @@
+//! # Develop Design Note
+//! インフラ層は他の層（ドメイン層やアプリケーション層）への知識を
+//! 全く持たない。
+//! よってQueryの結果としてドメイン層のモデルを返すなどはしない。
 use super::{schema::prizes, Postgres};
 use chrono::{DateTime, Utc};
 use diesel::{pg::expression::dsl::any, prelude::*};
@@ -20,6 +24,7 @@ pub struct NewPrize<'a> {
     pub thumbnail_url: &'a str,
     pub price: u32,
     pub available: bool,
+    pub created: &'a DateTime<Utc>,
 }
 
 pub struct QueryPrize {
@@ -29,6 +34,7 @@ pub struct QueryPrize {
     pub thumbnail_url: String,
     pub price: u32,
     pub available: bool,
+    pub created: DateTime<Utc>,
 }
 
 impl PostgresPrizeInfra for Postgres {
@@ -92,7 +98,7 @@ pub struct QueryablePrize {
     thumbnail_url: String,
     price: i32,
     available: bool,
-    _created: DateTime<Utc>,
+    created: DateTime<Utc>,
 }
 
 impl Into<QueryPrize> for QueryablePrize {
@@ -104,6 +110,7 @@ impl Into<QueryPrize> for QueryablePrize {
             thumbnail_url: self.thumbnail_url,
             price: self.price as u32,
             available: self.available,
+            created: self.created,
         }
     }
 }

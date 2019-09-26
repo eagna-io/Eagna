@@ -29,5 +29,6 @@ sha2 = "~0.8"
 uuid = { version = "~0.7", features = ["v4", "serde"] }
 failure = "~0.1"
 derive_more = "~0.15"
+getset = "~0.0.8"
 log = "~0.4"
 env_logger = "~0.6"
