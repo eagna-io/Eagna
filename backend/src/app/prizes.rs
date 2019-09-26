@@ -9,6 +9,7 @@ use uuid::Uuid;
 
 /// GET や POST の結果として返される構造体
 #[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct ResPrize<'a> {
     id: &'a Uuid,
     name: &'a str,
@@ -26,7 +27,7 @@ impl<'a> From<&'a Prize> for ResPrize<'a> {
             name: prize.name().as_str(),
             description: prize.description().as_str(),
             thumbnail_url: prize.thumbnail_url().as_str(),
-            price: *prize.price(),
+            price: prize.price().as_u32(),
             available: *prize.available(),
             created: prize.created(),
         }

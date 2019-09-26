@@ -4,18 +4,18 @@ use crate::domain::{
     prize::{Prize, PrizeRepository},
     user::{UserId, UserRepository},
 };
-use crate::primitive::NonEmptyString;
+use crate::primitive::{NonEmptyString, NonZeroU32};
 use rouille::{input::json_input, Request, Response};
 
 pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
+    // Prizeを作成する権限があるかどうかチェック
+    let access_token = validate_bearer_header(infra, req)?;
+    authorize(infra, &access_token.user_id)?;
+
     let req_prize = json_input::<ReqPrize>(req).map_err(|e| {
         log::warn!("Invalid payload error : {:?}", e);
         FailureResponse::InvalidPayload
     })?;
-
-    // Prizeを作成する権限があるかどうかチェック
-    let access_token = validate_bearer_header(infra, req)?;
-    authorize(infra, &access_token.user_id)?;
 
     let new_prize = Prize::new(
         req_prize.name,
@@ -28,7 +28,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
     prize_repo.save_prize(&new_prize)?;
 
     let res_prize = ResPrize::from(&new_prize);
-    Ok(Response::json(&res_prize))
+    Ok(Response::json(&res_prize).with_status_code(201))
 }
 
 fn authorize(infra: &InfraManager, user_id: &UserId) -> Result<(), FailureResponse> {
@@ -50,10 +50,11 @@ fn authorize(infra: &InfraManager, user_id: &UserId) -> Result<(), FailureRespon
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct ReqPrize {
     name: NonEmptyString,
     description: String,
     thumbnail_url: String,
-    price: u32,
+    price: NonZeroU32,
     available: bool,
 }

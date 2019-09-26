@@ -9,6 +9,9 @@ def main():
     # /users/ リソースのテスト
     test_users_api()
 
+    # /prizes/ リソースのテスト
+    test_prizes_api()
+
     # /markets/ リソースのテスト
     test_markets_api()
 
@@ -61,6 +64,84 @@ def test_users_api():
     assert_eq(res.json()["point"], 0)
 
 
+def test_prizes_api():
+    # 初期状態ではPrizeが存在していないことをテストする
+    res = requests.get(url("/prizes/"))
+    assert_eq(res.status_code, 200)
+    assert_eq(len(res.json()), 0)
+
+    # 不正なアクセストークンでは賞品が作成できないことをテストする
+    # ペイロードが適切かどうかよりも、アクセストークンが適切かを
+    # 先にチェックすることをテストする
+    headers = bearer_token(empty_headers(), UserAccessToken)
+    res = requests.post(url("/prizes/"), headers=headers)
+    assert_eq(res.status_code, 401)
+
+    # アクセストークンが正しくても、
+    # 不正なペイロードでは賞品が作成できないことをテストする
+    headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
+    res = requests.post(url("/prizes/"), headers=headers)
+    assert_eq(res.status_code, 400)
+
+    # 不正なペイロードでは賞品が作成できないことをテストする
+    # nameが空文字列は許可しない
+    payload = {
+        "name": "",
+        "description": "",
+        "thumbnailUrl": "",
+        "price": 0,
+        "available": True,
+    }
+    res = requests.post(url("/prizes/"), json.dumps(payload), headers=headers)
+    assert_eq(res.status_code, 400)
+
+    # 不正なペイロードでは賞品が作成できないことをテストする
+    # priceが0は許可しない
+    payload = {
+        "name": "hoge",
+        "description": "",
+        "thumbnailUrl": "",
+        "price": 0,
+        "available": True,
+    }
+    res = requests.post(url("/prizes/"), json.dumps(payload), headers=headers)
+    assert_eq(res.status_code, 400)
+
+    # 不正なペイロードでは賞品が作成できないことをテストする
+    # priceが0以下は許可しない
+    payload = {
+        "name": "hoge",
+        "description": "",
+        "thumbnailUrl": "",
+        "price": -1,
+        "available": True,
+    }
+    res = requests.post(url("/prizes/"), json.dumps(payload), headers=headers)
+    assert_eq(res.status_code, 400)
+
+    # 正しいペイロードで賞品が作成できることをテストする
+    payload = {
+        "name": "Prize Hoge",
+        "description": "",
+        "thumbnailUrl": "",
+        "price": 1,
+        "available": True,
+    }
+    res = requests.post(url("/prizes/"), json.dumps(payload), headers=headers)
+    assert_eq(res.status_code, 201)
+
+    # ↑で作成した賞品が取得できるかテストする
+    res = requests.get(url("/prizes/"))
+    assert_eq(res.status_code, 200)
+    assert_eq(len(res.json()), 1)
+    assert_eq(res.json()[0]["name"], payload["name"])
+    assert_eq(res.json()[0]["description"], payload["description"])
+    assert_eq(res.json()[0]["thumbnailUrl"], payload["thumbnailUrl"])
+    assert_eq(res.json()[0]["price"], payload["price"])
+    assert_eq(res.json()[0]["available"], payload["available"])
+
+
+
 def test_markets_api():
     # 初期状態ではマーケットが存在しないことをテストする
     res = requests.get(url("/markets/"))
@@ -68,8 +149,7 @@ def test_markets_api():
     assert_eq(len(res.json()), 0)
 
     # 不正なアクセストークンではマーケットが作成できないことをテストする
-    invalid_token = "hoge"
-    headers = bearer_token(empty_headers(), invalid_token)
+    headers = bearer_token(empty_headers(), UserAccessToken)
     res = requests.post(url("/markets/"), headers=headers)
     assert_eq(res.status_code, 401)
 

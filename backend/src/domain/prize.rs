@@ -7,7 +7,7 @@
 pub mod repository;
 pub use repository::*;
 
-use crate::primitive::NonEmptyString;
+use crate::primitive::{NonEmptyString, NonZeroU32};
 use chrono::{DateTime, Utc};
 use getset::Getters;
 use uuid::Uuid;
@@ -22,11 +22,11 @@ pub struct Prize {
     name: NonEmptyString,
     description: String,
     thumbnail_url: String,
+    price: NonZeroU32,
     // getsetの新しいバージョンではCopyGettersが導入されるはず。
     // それが導入されれば、
     // #[get_copy = "pub"]
-    // と書くことでprize.price() が参照でなく値を返すようになる。
-    price: u32,
+    // と書くことでprize.available() が参照でなく値を返すようになる。
     available: bool,
     created: DateTime<Utc>,
 }
@@ -36,7 +36,7 @@ impl Prize {
         name: NonEmptyString,
         description: String,
         thumbnail_url: String,
-        price: u32,
+        price: NonZeroU32,
         available: bool,
     ) -> Prize {
         Prize {
