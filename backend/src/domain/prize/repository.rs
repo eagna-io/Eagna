@@ -1,6 +1,3 @@
-//! # Develop Design Note
-//! repositoryモジュールは、ドメイン層に関する知識と
-//! インフラ層に関する知識をどちらも持つ。
 use super::{Prize, PrizeId};
 use crate::infra::postgres::{prize::NewPrize, PostgresInfra};
 use crate::primitive::{NonEmptyString, NonZeroU32};

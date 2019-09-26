@@ -1,3 +1,8 @@
+//! # Develop Design Note
+//! APIサーバーのルーティングに対する知識をもつ。
+//! このモジュール以下に、各ルートのハンドラを記述する。
+//! 基本的に、各ルート1ファイルで記述する。
+//! 例えば、GET /users/ で1ファイル、POST /users/ で1ファイル。
 mod cronjob;
 mod markets;
 mod prizes;
