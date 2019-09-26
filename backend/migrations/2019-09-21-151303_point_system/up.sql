@@ -36,6 +36,7 @@ CREATE TABLE prizes (
   price         integer NOT NULL,
   -- prizeが交換可能かどうか。
   available     boolean NOT NULL DEFAULT true,
+  created       timestamptz NOT NULL DEFAULT now(),
 
   CONSTRAINT price_larger_than_zero CHECK ( price > 0 )
 );

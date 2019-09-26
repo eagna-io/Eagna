@@ -22,7 +22,7 @@ TMP_PG_URL:=postgres://postgres:postgres@localhost:5430/postgres
 
 print_schema:
 	docker run -d --rm --name postgres-tmp -p 5430:5432 postgres
-	sleep 2
+	sleep 5
 	diesel migration run --database-url "${TMP_PG_URL}" || true
 	diesel print-schema --database-url "${TMP_PG_URL}" || true
 	docker stop postgres-tmp

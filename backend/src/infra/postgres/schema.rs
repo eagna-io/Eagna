@@ -84,6 +84,7 @@ table! {
         thumbnail_url -> Text,
         price -> Int4,
         available -> Bool,
+        created -> Timestamptz,
     }
 }
 
