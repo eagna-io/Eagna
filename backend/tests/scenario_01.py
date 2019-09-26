@@ -6,25 +6,24 @@ AdminAccessToken = "test_admin_access_token"
 UserAccessToken = "test_user_access_token"
 
 def main():
-    get_user_test_1()
-    create_user_test()
-    get_user_test_2()
+    # /users/ リソースのテスト
+    test_users_api()
 
-    get_markets_test_1()
-    create_market_test()
+    # /markets/ リソースのテスト
+    test_markets_api()
 
     print("[ OK ]")
 
 
-# ユーザーがまだ作られていないことをテストする
-# Firebaseには登録済みで、AccessTokenは取得している
-def get_user_test_1():
+def test_users_api():
+    # ユーザーがまだ作られていないことをテストする
+    # Firebaseには登録済みで、AccessTokenは取得している
     headers = bearer_token({}, UserAccessToken)
     res = requests.get(url("/users/me/"), headers=headers)
     assert_eq(res.status_code, 401)
 
-def create_user_test():
-    # 不正なペイロード。名前が空文字列は許可しない
+    # 不正なペイロードではユーザーが作成できないことをテストする
+    # 名前が空文字列は許可しない
     payload = {
         "name": "",
         "email": "hoge@eagna.io",
@@ -33,7 +32,8 @@ def create_user_test():
     res = requests.post(url("/users/"), json.dumps(payload), headers=headers,)
     assert_eq(res.status_code, 400)
 
-    # 不正なペイロード。メアドが空文字列は許可しない
+    # 不正なペイロードではユーザーが作成できないことをテストする
+    # メアドが空文字列は許可しない
     payload = {
         "name": "Hoge Hogeo",
         "email": "",
@@ -42,7 +42,7 @@ def create_user_test():
     res = requests.post(url("/users/"), json.dumps(payload), headers=headers,)
     assert_eq(res.status_code, 400)
 
-    # valid payload
+    # 正しいペイロードでユーザーが作成できることをテストする
     payload = {
         "name": "Hoge Hogeo",
         "email": "hoge@eagna.io",
@@ -51,7 +51,7 @@ def create_user_test():
     res = requests.post(url("/users/"), json.dumps(payload), headers=headers,)
     assert_eq(res.status_code, 201)
 
-def get_user_test_2():
+    # ↑で作成したユーザーが取得できることをテストする
     headers = bearer_token({}, UserAccessToken)
     res = requests.get(url("/users/me/"), headers=headers)
     assert_eq(res.status_code, 200)
@@ -61,24 +61,26 @@ def get_user_test_2():
     assert_eq(res.json()["point"], 0)
 
 
-def get_markets_test_1():
+def test_markets_api():
+    # 初期状態ではマーケットが存在しないことをテストする
     res = requests.get(url("/markets/"))
     assert_eq(res.status_code, 200)
     assert_eq(len(res.json()), 0)
 
-def create_market_test():
-    # Test invalid access token
+    # 不正なアクセストークンではマーケットが作成できないことをテストする
     invalid_token = "hoge"
     headers = bearer_token(empty_headers(), invalid_token)
     res = requests.post(url("/markets/"), headers=headers)
     assert_eq(res.status_code, 401)
 
-    # Test valid access token but invalid payload
+    # アクセストークンが正しくても、
+    # 不正なペイロードではマーケットが作成できないことをテストする
     headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
     res = requests.post(url("/markets/"), headers=headers)
     assert_eq(res.status_code, 400)
 
-    # 不正なペイロード。タイトルが空文字列は許可しない
+    # 不正なペイロードではマーケットが作成できないことをテストする
+    # タイトルが空文字列は許可しない
     headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
     invalid_payload = {
         'title': "",
@@ -94,7 +96,8 @@ def create_market_test():
     res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
     assert_eq(res.status_code, 400)
 
-    # 不正なペイロード。トークンが空配列は許可しない
+    # 不正なペイロードではマーケットが作成できないことをテストする
+    # トークンが空配列は許可しない
     headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
     invalid_payload = {
         'title': "hoge",
@@ -110,7 +113,8 @@ def create_market_test():
     res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
     assert_eq(res.status_code, 400)
 
-    # 不正なペイロード。トークン名が空文字列は許可しない
+    # 不正なペイロードではマーケットが作成できないことをテストする
+    # トークン名が空文字列は許可しない
     headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
     invalid_payload = {
         'title': "hoge",
@@ -126,9 +130,9 @@ def create_market_test():
     res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
     assert_eq(res.status_code, 400)
 
-    # 適格なペイロード
+    # 正しいペイロードでマーケットが作成できることをテストする
     headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
-    invalid_payload = {
+    valid_payload = {
         'title': "hoge",
         'description': "",
         'organizerId': "ec2966c5-d661-4a9b-b377-9e00f21d7dd4",
@@ -139,8 +143,24 @@ def create_market_test():
         'tokens': [{"name": "hoge", "description": "", "thumbnailUrl": ""}],
         'prizes': [],
     }
-    res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
+    res = requests.post(url("/markets/"), json.dumps(valid_payload), headers=headers)
     assert_eq(res.status_code, 201)
+    market_id = res.json()
+
+    # ↑で作成したマーケットが取得できることをテストする
+    res = requests.get(url(f"/markets/{market_id}/"))
+    assert_eq(res.status_code, 200)
+    assert_eq(res.json()["id"], market_id)
+    assert_eq(res.json()["title"], valid_payload["title"])
+    assert_eq(res.json()["description"], valid_payload["description"])
+    assert_eq(res.json()["organizerId"], valid_payload["organizerId"])
+    assert_eq(res.json()["lmsrB"], valid_payload["lmsrB"])
+    assert_eq(res.json()["open"], valid_payload["open"])
+    assert_eq(res.json()["close"], valid_payload["close"])
+    assert_eq(res.json()["totalRewardPoint"], valid_payload["totalRewardPoint"])
+    assert_eq(res.json()["tokens"], valid_payload["tokens"])
+    assert_eq(res.json()["prizes"], valid_payload["prizes"])
+
 
 ## Utils
 def url(path):
