@@ -13,11 +13,16 @@ use getset::Getters;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Getters)]
+#[get = "pub"]
 pub struct Prize {
     id: Uuid,
     name: NonEmptyString,
     description: String,
     thumbnail_url: String,
+    // getsetの新しいバージョンではCopyGettersが導入されるはず。
+    // それが導入されれば、
+    // #[get_copy = "pub"]
+    // と書くことでprize.price() が参照でなく値を返すようになる。
     price: u32,
     available: bool,
     created: DateTime<Utc>,

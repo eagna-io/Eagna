@@ -3,6 +3,7 @@ mod cronjob;
 mod failure_response;
 mod infra_manager;
 mod markets;
+mod prizes;
 mod req;
 mod users;
 
@@ -94,6 +95,12 @@ pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
         },
         (POST) (/markets/{id: MarketId}/orders/) => {
             markets::orders::post(infra, req, id)
+        },
+        (GET) (/prizes/) => {
+            prizes::get_list(infra, req)
+        },
+        (POST) (/prizes/) => {
+            prizes::post(infra, req)
         },
         (GET) (/cronjob/check_markets/) => {
             cronjob::check_markets::get(infra, req)

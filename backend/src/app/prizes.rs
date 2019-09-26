@@ -1,0 +1,34 @@
+mod get;
+mod post;
+pub use get::get_list;
+pub use post::post;
+
+use crate::domain::prize::Prize;
+use chrono::{DateTime, Utc};
+use uuid::Uuid;
+
+/// GET や POST の結果として返される構造体
+#[derive(Debug, Serialize)]
+struct ResPrize<'a> {
+    id: &'a Uuid,
+    name: &'a str,
+    description: &'a str,
+    thumbnail_url: &'a str,
+    price: u32,
+    available: bool,
+    created: &'a DateTime<Utc>,
+}
+
+impl<'a> From<&'a Prize> for ResPrize<'a> {
+    fn from(prize: &'a Prize) -> ResPrize<'a> {
+        ResPrize {
+            id: prize.id(),
+            name: prize.name().as_str(),
+            description: prize.description().as_str(),
+            thumbnail_url: prize.thumbnail_url().as_str(),
+            price: *prize.price(),
+            available: *prize.available(),
+            created: prize.created(),
+        }
+    }
+}
