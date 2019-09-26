@@ -22,7 +22,7 @@ struct ResPrize<'a> {
 impl<'a> From<&'a Prize> for ResPrize<'a> {
     fn from(prize: &'a Prize) -> ResPrize<'a> {
         ResPrize {
-            id: prize.id(),
+            id: prize.id().as_uuid(),
             name: prize.name().as_str(),
             description: prize.description().as_str(),
             thumbnail_url: prize.thumbnail_url().as_str(),

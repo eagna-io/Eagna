@@ -1,7 +1,7 @@
 //! # Develop Design Note
 //! repositoryモジュールは、ドメイン層に関する知識と
 //! インフラ層に関する知識をどちらも持つ。
-use super::Prize;
+use super::{Prize, PrizeId};
 use crate::infra::postgres::{prize::NewPrize, PostgresInfra};
 use crate::primitive::NonEmptyString;
 
@@ -13,7 +13,7 @@ pub struct PrizeRepository<'a> {
 impl<'a> PrizeRepository<'a> {
     pub fn save_prize(&self, prize: &Prize) -> Result<(), failure::Error> {
         let new_prize = NewPrize {
-            id: &prize.id,
+            id: &prize.id.as_uuid(),
             name: prize.name.as_str(),
             description: prize.description.as_str(),
             thumbnail_url: prize.thumbnail_url.as_str(),
@@ -29,7 +29,7 @@ impl<'a> PrizeRepository<'a> {
         let mut prizes = Vec::with_capacity(query_prizes.len());
         for query_prize in query_prizes {
             prizes.push(Prize {
-                id: query_prize.id,
+                id: PrizeId::from(query_prize.id),
                 name: NonEmptyString::from_str(query_prize.name)?,
                 description: query_prize.description,
                 thumbnail_url: query_prize.thumbnail_url,

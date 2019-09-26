@@ -12,10 +12,13 @@ use chrono::{DateTime, Utc};
 use getset::Getters;
 use uuid::Uuid;
 
+/// # Develop Design Note
+/// 各モデルのidくらいはNewTypeパターンでもいい。
+/// 全てのfieldを独自モデルにするのは冗長
 #[derive(Debug, Clone, Getters)]
 #[get = "pub"]
 pub struct Prize {
-    id: Uuid,
+    id: PrizeId,
     name: NonEmptyString,
     description: String,
     thumbnail_url: String,
@@ -37,7 +40,7 @@ impl Prize {
         available: bool,
     ) -> Prize {
         Prize {
-            id: Uuid::new_v4(),
+            id: PrizeId::new(),
             name,
             description,
             thumbnail_url,
@@ -45,5 +48,18 @@ impl Prize {
             available,
             created: Utc::now(),
         }
+    }
+}
+
+#[derive(Debug, Clone, From)]
+pub struct PrizeId(Uuid);
+
+impl PrizeId {
+    pub fn new() -> PrizeId {
+        PrizeId(Uuid::new_v4())
+    }
+
+    pub fn as_uuid(&self) -> &Uuid {
+        &self.0
     }
 }
