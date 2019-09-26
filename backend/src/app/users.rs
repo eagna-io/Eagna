@@ -21,9 +21,9 @@ pub fn me(infra: &InfraManager, req: &Request) -> Result<Response, FailureRespon
 }
 
 pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
-    let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
-
     let access_token = validate_bearer_header(infra, req)?;
+
+    let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
 
     let new_user = User::new(access_token.user_id, req_data.name, req_data.email);
 
