@@ -67,7 +67,7 @@ fn authorize(postgres: &dyn PostgresInfra, user_id: &UserId) -> Result<(), Failu
 
     match user_repo.query_user(user_id)? {
         Some(user) => {
-            if user.is_admin() {
+            if *user.is_admin() {
                 Ok(())
             } else {
                 Err(FailureResponse::Unauthorized)

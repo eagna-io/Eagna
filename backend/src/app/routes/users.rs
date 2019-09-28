@@ -12,7 +12,7 @@ pub fn me(infra: &InfraManager, req: &Request) -> Result<Response, FailureRespon
             name: user.name(),
             email: user.email(),
             point: repo.query_user_point(&access_token.user_id)?,
-            is_admin: user.is_admin(),
+            is_admin: *user.is_admin(),
         };
         return Ok(Response::json(&res_data));
     } else {
@@ -36,7 +36,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
         name: new_user.name(),
         email: new_user.email(),
         point: 0,
-        is_admin: new_user.is_admin(),
+        is_admin: *new_user.is_admin(),
     };
 
     Ok(Response::json(&res_data).with_status_code(201))

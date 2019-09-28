@@ -3,8 +3,10 @@ pub use repository::*;
 
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use arrayvec::ArrayString;
+use getset::Getters;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
+#[get = "pub"]
 pub struct User {
     id: UserId,
     name: UserName,
@@ -21,22 +23,6 @@ impl User {
             email,
             is_admin: false,
         }
-    }
-
-    pub fn id(&self) -> &UserId {
-        &self.id
-    }
-
-    pub fn name(&self) -> &UserName {
-        &self.name
-    }
-
-    pub fn email(&self) -> &UserEmail {
-        &self.email
-    }
-
-    pub fn is_admin(&self) -> bool {
-        self.is_admin
     }
 }
 
