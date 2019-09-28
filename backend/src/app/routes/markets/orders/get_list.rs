@@ -1,17 +1,18 @@
-use super::ApiOrderModel;
+use super::ResOrder;
 use crate::app::{get_params, validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::market::*;
 use rouille::{Request, Response};
+use uuid::Uuid;
 
 pub fn get_list(
     infra: &InfraManager,
     req: &Request,
-    market_id: MarketId,
+    market_id: Uuid,
 ) -> Result<Response, FailureResponse> {
     let postgres = infra.get_postgres()?;
     let market_repo = MarketRepository::from(postgres);
 
-    let market = match market_repo.query_market(&market_id)? {
+    let market = match market_repo.query_market(&MarketId::from(market_id))? {
         Some(m) => m,
         None => return Err(FailureResponse::ResourceNotFound),
     };
@@ -21,14 +22,14 @@ pub fn get_list(
         let my_orders = market
             .orders()
             .iter_related_to_user(&access_token.user_id)
-            .map(|o| ApiOrderModel::from(o.clone()))
+            .map(|o| ResOrder::from(o))
             .collect();
         Ok(Response::json(&RespBody { orders: my_orders }))
     } else {
         let orders = market
             .orders()
             .filter_normal_orders()
-            .map(|o| ApiOrderModel::from(Order::from(o.clone()))) // TODO : stop clone
+            .map(|o| ResOrder::from(o))
             .collect();
 
         Ok(Response::json(&RespBody { orders: orders }))
@@ -36,6 +37,6 @@ pub fn get_list(
 }
 
 #[derive(Debug, Serialize)]
-struct RespBody {
-    orders: Vec<ApiOrderModel>,
+struct RespBody<'a> {
+    orders: Vec<ResOrder<'a>>,
 }

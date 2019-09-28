@@ -12,6 +12,14 @@ impl<T> NonEmptyVec<T> {
         self.0.as_slice()
     }
 
+    pub fn iter(&self) -> impl Iterator<Item = &T> {
+        self.0.iter()
+    }
+
+    pub fn into_iter(self) -> impl Iterator<Item = T> {
+        self.0.into_iter()
+    }
+
     pub fn from_vec(vec: Vec<T>) -> Result<Self, EmptyVecError> {
         if vec.is_empty() {
             Err(EmptyVecError())

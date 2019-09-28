@@ -1,7 +1,9 @@
 use crate::app::{FailureResponse, InfraManager};
 use crate::domain::market::*;
 use crate::infra::postgres::transaction;
+
 use rouille::{Request, Response};
+use uuid::Uuid;
 
 pub fn get(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     validate_request(req)?;
@@ -19,8 +21,8 @@ pub fn get(infra: &InfraManager, req: &Request) -> Result<Response, FailureRespo
 
 #[derive(Serialize)]
 struct RespData {
-    open_markets: Vec<MarketId>,
-    close_markets: Vec<MarketId>,
+    open_markets: Vec<Uuid>,
+    close_markets: Vec<Uuid>,
 }
 
 /// ## Reference
@@ -31,7 +33,7 @@ fn validate_request(req: &Request) -> Result<(), FailureResponse> {
         .map(|_| ())
 }
 
-fn check_open(infra: &InfraManager) -> Result<Vec<MarketId>, FailureResponse> {
+fn check_open(infra: &InfraManager) -> Result<Vec<Uuid>, FailureResponse> {
     // オープン可能なマーケットのid一覧を取得
     let openable_market_ids = {
         let repo = MarketRepository::from(infra.get_postgres()?);
@@ -52,7 +54,7 @@ fn check_open(infra: &InfraManager) -> Result<Vec<MarketId>, FailureResponse> {
             if let Market::Upcoming(m) = market_repo.query_market(&market_id)?.unwrap() {
                 let opened_market = m.try_open().unwrap();
                 market_repo.save_market(&Market::from(opened_market))?;
-                opened_market_ids.push(market_id);
+                opened_market_ids.push(*market_id.as_uuid());
             };
 
             Ok::<_, FailureResponse>(())
@@ -62,7 +64,7 @@ fn check_open(infra: &InfraManager) -> Result<Vec<MarketId>, FailureResponse> {
     Ok(opened_market_ids)
 }
 
-fn check_close(infra: &InfraManager) -> Result<Vec<MarketId>, FailureResponse> {
+fn check_close(infra: &InfraManager) -> Result<Vec<Uuid>, FailureResponse> {
     // クローズ可能なマーケットのid一覧を取得
     let closable_market_ids = {
         let repo = MarketRepository::from(infra.get_postgres()?);
@@ -82,7 +84,7 @@ fn check_close(infra: &InfraManager) -> Result<Vec<MarketId>, FailureResponse> {
             if let Market::Open(m) = market_repo.query_market(&market_id)?.unwrap() {
                 let closed_market = m.try_close().unwrap();
                 market_repo.save_market(&Market::from(closed_market))?;
-                closed_market_ids.push(market_id);
+                closed_market_ids.push(*market_id.as_uuid());
             }
 
             Ok::<_, FailureResponse>(())

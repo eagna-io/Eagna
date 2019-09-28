@@ -13,10 +13,10 @@ mod markets;
 mod prizes;
 mod users;
 
-use crate::domain::market::MarketId;
-
 use super::{FailureResponse, InfraManager};
+
 use rouille::{router, Request, Response};
+use uuid::Uuid;
 
 pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     router!(req,
@@ -32,16 +32,16 @@ pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
         (POST) (/markets/) => {
             markets::post(infra, req)
         },
-        (GET) (/markets/{id: MarketId}/) => {
+        (GET) (/markets/{id: Uuid}/) => {
             markets::get(infra, req, id)
         },
-        (PUT) (/markets/{id: MarketId}/) => {
+        (PUT) (/markets/{id: Uuid}/) => {
             markets::put(infra, req, id)
         },
-        (GET) (/markets/{id: MarketId}/orders/) => {
+        (GET) (/markets/{id: Uuid}/orders/) => {
             markets::orders::get_list(infra, req, id)
         },
-        (POST) (/markets/{id: MarketId}/orders/) => {
+        (POST) (/markets/{id: Uuid}/orders/) => {
             markets::orders::post(infra, req, id)
         },
         (GET) (/prizes/) => {
