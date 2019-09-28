@@ -1,9 +1,10 @@
 pub mod repository;
 pub use repository::*;
 
-use crate::primitive::{NonEmptyString, NonZeroU32};
+use crate::primitive::NonEmptyString;
 use chrono::{DateTime, Utc};
 use getset::Getters;
+use std::num::NonZeroU32;
 use uuid::Uuid;
 
 /// # Develop Design Note

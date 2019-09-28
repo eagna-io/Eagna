@@ -27,7 +27,7 @@ impl<'a> From<&'a Prize> for ResPrize<'a> {
             name: prize.name().as_str(),
             description: prize.description().as_str(),
             thumbnail_url: prize.thumbnail_url().as_str(),
-            price: prize.price().as_u32(),
+            price: prize.price().get(),
             available: *prize.available(),
             created: prize.created(),
         }

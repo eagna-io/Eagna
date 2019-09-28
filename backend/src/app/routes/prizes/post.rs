@@ -4,8 +4,9 @@ use crate::domain::{
     prize::{Prize, PrizeRepository},
     user::{UserId, UserRepository},
 };
-use crate::primitive::{NonEmptyString, NonZeroU32};
+use crate::primitive::NonEmptyString;
 use rouille::{input::json_input, Request, Response};
+use std::num::NonZeroU32;
 
 pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     // Prizeを作成する権限があるかどうかチェック
