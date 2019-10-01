@@ -1,17 +1,20 @@
+pub mod point_history;
 pub mod repository;
+pub use point_history::*;
 pub use repository::*;
 
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use arrayvec::ArrayString;
 use getset::Getters;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Getters)]
+#[derive(Debug, Clone, PartialEq, Eq, Getters)]
 #[get = "pub"]
 pub struct User {
     id: UserId,
     name: UserName,
     email: UserEmail,
     is_admin: bool,
+    point_history: PointHistory,
 }
 
 impl User {
@@ -22,7 +25,12 @@ impl User {
             name,
             email,
             is_admin: false,
+            point_history: PointHistory::new(),
         }
+    }
+
+    pub fn point(&self) -> u32 {
+        self.point_history().sum()
     }
 }
 

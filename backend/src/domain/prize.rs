@@ -46,7 +46,7 @@ impl Prize {
     }
 }
 
-#[derive(Debug, Clone, From)]
+#[derive(Debug, Clone, PartialEq, Eq, From)]
 pub struct PrizeId(Uuid);
 
 impl PrizeId {

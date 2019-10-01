@@ -29,7 +29,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
 
     let user_repo = UserRepository::from(infra.get_postgres()?);
 
-    user_repo.save_user(&new_user)?;
+    user_repo.save_new_user(&new_user)?;
 
     let res_data = ResData {
         id: new_user.id(),

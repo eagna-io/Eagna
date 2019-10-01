@@ -13,12 +13,18 @@ pub trait PostgresUserInfra {
 
     fn query_user(&self, user_id: &str) -> Result<Option<QueryUser>, failure::Error>;
 
+    fn save_user_point_history(
+        &self,
+        user_id: &str,
+        history: NewPointHistoryItem,
+    ) -> Result<(), failure::Error>;
+
     fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error>;
 
     fn query_user_point_history(
         &self,
         user_id: &str,
-    ) -> Result<Vec<PointHistoryItem>, failure::Error>;
+    ) -> Result<Vec<QueryPointHistoryItem>, failure::Error>;
 }
 
 pub struct NewUser<'a> {
@@ -34,18 +40,40 @@ pub struct QueryUser {
     pub is_admin: bool,
 }
 
-pub enum PointHistoryItem {
-    MarketReward {
-        amount: u32,
-        time: DateTime<Utc>,
-        market_id: Uuid,
-    },
-    PrizeTrade {
-        price: u32,
-        time: DateTime<Utc>,
-        prize_id: Uuid,
-        status: PrizeTradeStatus,
-    },
+pub enum NewPointHistoryItem {
+    MarketReward(NewMarketRewardHistoryItem),
+    PrizeTrade(NewPrizeTradeHistoryItem),
+}
+
+pub struct NewMarketRewardHistoryItem {
+    pub point: u32,
+    pub time: DateTime<Utc>,
+    pub market_id: Uuid,
+}
+
+pub struct NewPrizeTradeHistoryItem {
+    pub price: u32,
+    pub time: DateTime<Utc>,
+    pub prize_id: Uuid,
+    pub status: PrizeTradeStatus,
+}
+
+pub enum QueryPointHistoryItem {
+    MarketReward(QueryMarketRewardHistoryItem),
+    PrizeTrade(QueryPrizeTradeHistoryItem),
+}
+
+pub struct QueryMarketRewardHistoryItem {
+    pub point: u32,
+    pub time: DateTime<Utc>,
+    pub market_id: Uuid,
+}
+
+pub struct QueryPrizeTradeHistoryItem {
+    pub price: u32,
+    pub time: DateTime<Utc>,
+    pub prize_id: Uuid,
+    pub status: PrizeTradeStatus,
 }
 
 impl PostgresUserInfra for Postgres {
@@ -76,6 +104,37 @@ impl PostgresUserInfra for Postgres {
         }
     }
 
+    fn save_user_point_history(
+        &self,
+        user_id: &str,
+        item: NewPointHistoryItem,
+    ) -> Result<(), failure::Error> {
+        match item {
+            NewPointHistoryItem::MarketReward(item) => {
+                diesel::insert_into(user_reward_point_history::table)
+                    .values(InsertableMarketRewardHistoryItem {
+                        user_id,
+                        point: item.point as i32,
+                        time: item.time,
+                        market_id: item.market_id,
+                    })
+                    .execute(&self.conn)?;
+            }
+            NewPointHistoryItem::PrizeTrade(item) => {
+                diesel::insert_into(user_prize_trade_history::table)
+                    .values(InsertablePrizeTradeHistoryItem {
+                        user_id,
+                        price: item.price as i32,
+                        time: item.time,
+                        prize_id: item.prize_id,
+                        status: item.status,
+                    })
+                    .execute(&self.conn)?;
+            }
+        }
+        Ok(())
+    }
+
     /// Userの現在の保有コインを取得する。
     /// Userが存在しない場合は0を返す。
     fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error> {
@@ -96,7 +155,7 @@ impl PostgresUserInfra for Postgres {
     fn query_user_point_history(
         &self,
         user_id: &str,
-    ) -> Result<Vec<PointHistoryItem>, failure::Error> {
+    ) -> Result<Vec<QueryPointHistoryItem>, failure::Error> {
         let mut reward_history = user_reward_point_history::table
             .filter(user_reward_point_history::columns::user_id.eq(user_id))
             .select((
@@ -128,21 +187,25 @@ impl PostgresUserInfra for Postgres {
             };
             let item = match which {
                 Ordering::Less | Ordering::Equal => {
-                    let reward_item = reward_history.pop().unwrap();
-                    PointHistoryItem::MarketReward {
-                        amount: reward_item.point as u32,
-                        market_id: reward_item.market_id,
-                        time: reward_item.time,
-                    }
+                    // reward_history から取り出す
+                    let infra_reward_item = reward_history.pop().unwrap();
+                    let reward_item = QueryMarketRewardHistoryItem {
+                        point: infra_reward_item.point as u32,
+                        market_id: infra_reward_item.market_id,
+                        time: infra_reward_item.time,
+                    };
+                    QueryPointHistoryItem::MarketReward(reward_item)
                 }
                 Ordering::Greater => {
-                    let trade_item = trade_history.pop().unwrap();
-                    PointHistoryItem::PrizeTrade {
-                        price: trade_item.price as u32,
-                        prize_id: trade_item.prize_id,
-                        time: trade_item.time,
-                        status: trade_item.status,
-                    }
+                    // trade_history から取り出す
+                    let infra_trade_item = trade_history.pop().unwrap();
+                    let trade_item = QueryPrizeTradeHistoryItem {
+                        price: infra_trade_item.price as u32,
+                        time: infra_trade_item.time,
+                        prize_id: infra_trade_item.prize_id,
+                        status: infra_trade_item.status,
+                    };
+                    QueryPointHistoryItem::PrizeTrade(trade_item)
                 }
             };
             history.push(item);
@@ -168,11 +231,30 @@ struct QueryableUser {
     _created: DateTime<Utc>,
 }
 
+#[derive(Insertable)]
+#[table_name = "user_reward_point_history"]
+struct InsertableMarketRewardHistoryItem<'a> {
+    user_id: &'a str,
+    market_id: Uuid,
+    point: i32,
+    time: DateTime<Utc>,
+}
+
 #[derive(Queryable)]
 struct QueryableMarketRewardHistoryItem {
     market_id: Uuid,
     point: i32,
     time: DateTime<Utc>,
+}
+
+#[derive(Insertable)]
+#[table_name = "user_prize_trade_history"]
+struct InsertablePrizeTradeHistoryItem<'a> {
+    user_id: &'a str,
+    prize_id: Uuid,
+    price: i32,
+    time: DateTime<Utc>,
+    status: PrizeTradeStatus,
 }
 
 #[derive(Queryable)]
