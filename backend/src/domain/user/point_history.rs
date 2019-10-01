@@ -33,7 +33,7 @@ impl PointHistoryItem {
     pub fn amount_point(&self) -> i32 {
         match self {
             PointHistoryItem::MarketReward(ref reward) => reward.point as i32,
-            PointHistoryItem::PrizeTrade(ref trade) => -(trade.price as i32),
+            PointHistoryItem::PrizeTrade(ref trade) => -(trade.point as i32),
         }
     }
 }
@@ -49,7 +49,7 @@ pub struct MarketRewardHistoryItem {
 #[derive(Debug, Clone, PartialEq, Eq, Getters, From)]
 #[get = "pub"]
 pub struct PrizeTradeHistoryItem {
-    price: u32,
+    point: u32,
     time: DateTime<Utc>,
     prize_id: PrizeId,
     status: PrizeTradeStatus,

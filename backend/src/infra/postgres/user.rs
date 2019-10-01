@@ -50,7 +50,7 @@ pub struct NewMarketRewardHistoryItem {
 }
 
 pub struct NewPrizeTradeHistoryItem {
-    pub price: u32,
+    pub point: u32,
     pub time: DateTime<Utc>,
     pub prize_id: Uuid,
     pub status: PrizeTradeStatus,
@@ -68,7 +68,7 @@ pub struct QueryMarketRewardHistoryItem {
 }
 
 pub struct QueryPrizeTradeHistoryItem {
-    pub price: u32,
+    pub point: u32,
     pub time: DateTime<Utc>,
     pub prize_id: Uuid,
     pub status: PrizeTradeStatus,
@@ -122,7 +122,7 @@ impl PostgresUserInfra for Postgres {
                 diesel::insert_into(user_prize_trade_history::table)
                     .values(InsertablePrizeTradeHistoryItem {
                         user_id,
-                        price: item.price as i32,
+                        point: item.point as i32,
                         time: item.time,
                         prize_id: item.prize_id,
                         status: item.status,
@@ -150,7 +150,7 @@ impl PostgresUserInfra for Postgres {
             .filter(user_prize_trade_history::columns::user_id.eq(user_id))
             .select((
                 user_prize_trade_history::columns::prize_id,
-                user_prize_trade_history::columns::price,
+                user_prize_trade_history::columns::point,
                 user_prize_trade_history::columns::time,
                 user_prize_trade_history::columns::status,
             ))
@@ -181,7 +181,7 @@ impl PostgresUserInfra for Postgres {
                     // trade_history から取り出す
                     let infra_trade_item = trade_history.pop().unwrap();
                     let trade_item = QueryPrizeTradeHistoryItem {
-                        price: infra_trade_item.price as u32,
+                        point: infra_trade_item.point as u32,
                         time: infra_trade_item.time,
                         prize_id: infra_trade_item.prize_id,
                         status: infra_trade_item.status,
@@ -233,7 +233,7 @@ struct QueryableMarketRewardHistoryItem {
 struct InsertablePrizeTradeHistoryItem<'a> {
     user_id: &'a str,
     prize_id: Uuid,
-    price: i32,
+    point: i32,
     time: DateTime<Utc>,
     status: PrizeTradeStatus,
 }
@@ -241,7 +241,7 @@ struct InsertablePrizeTradeHistoryItem<'a> {
 #[derive(Queryable)]
 struct QueryablePrizeTradeHistoryItem {
     prize_id: Uuid,
-    price: i32,
+    point: i32,
     time: DateTime<Utc>,
     status: PrizeTradeStatus,
 }

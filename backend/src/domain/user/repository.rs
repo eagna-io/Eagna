@@ -71,7 +71,7 @@ fn convert_point_history_item_to_infra(item: &PointHistoryItem) -> NewPointHisto
         }
         PointHistoryItem::PrizeTrade(ref item) => {
             NewPointHistoryItem::PrizeTrade(NewPrizeTradeHistoryItem {
-                price: *item.price(),
+                point: *item.point(),
                 time: *item.time(),
                 prize_id: *item.prize_id().as_uuid(),
                 status: match item.status() {
@@ -90,7 +90,7 @@ fn convert_point_history_item_from_infra(item: QueryPointHistoryItem) -> PointHi
         ),
         QueryPointHistoryItem::PrizeTrade(item) => {
             PointHistoryItem::PrizeTrade(PrizeTradeHistoryItem::from((
-                item.price,
+                item.point,
                 item.time,
                 PrizeId::from(item.prize_id),
                 match item.status {

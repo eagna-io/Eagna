@@ -25,7 +25,7 @@ fn construct_response_data(user: &User) -> ResUser {
                 market_id: *reward_item.market_id().as_uuid(),
             },
             PointHistoryItem::PrizeTrade(trade_item) => ResPointHistoryItem::PrizeTrade {
-                point: *trade_item.price(),
+                point: *trade_item.point(),
                 time: *trade_item.time(),
                 prize_id: *trade_item.prize_id().as_uuid(),
                 trade_status: match trade_item.status() {

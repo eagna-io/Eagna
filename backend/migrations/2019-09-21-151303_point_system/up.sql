@@ -58,7 +58,7 @@ CREATE TABLE user_prize_trade_history (
   user_id       text NOT NULL,
   prize_id      uuid NOT NULL,
   -- 消費したポイント。0より大きい。
-  price         integer NOT NULL,
+  point         integer NOT NULL,
   time          timestamptz NOT NULL DEFAULT now(),
   status        prize_trade_status NOT NULL DEFAULT 'requested',
 
@@ -66,5 +66,5 @@ CREATE TABLE user_prize_trade_history (
     REFERENCES users(fb_uid) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT user_prize_trade_history_prize_fkey FOREIGN KEY(prize_id)
     REFERENCES prizes(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-  CONSTRAINT price_larger_than_zero CHECK ( price > 0 )
+  CONSTRAINT price_larger_than_zero CHECK ( point > 0 )
 );
