@@ -4,7 +4,7 @@ use super::{
     Postgres,
 };
 use chrono::{DateTime, Utc};
-use diesel::{dsl::sum, prelude::*, result::Error as PgError};
+use diesel::{prelude::*, result::Error as PgError};
 use std::cmp::Ordering;
 use uuid::Uuid;
 
@@ -18,8 +18,6 @@ pub trait PostgresUserInfra {
         user_id: &str,
         history: NewPointHistoryItem,
     ) -> Result<(), failure::Error>;
-
-    fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error>;
 
     fn query_user_point_history(
         &self,
@@ -133,23 +131,6 @@ impl PostgresUserInfra for Postgres {
             }
         }
         Ok(())
-    }
-
-    /// Userの現在の保有コインを取得する。
-    /// Userが存在しない場合は0を返す。
-    fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error> {
-        let earned = user_reward_point_history::table
-            .filter(user_reward_point_history::columns::user_id.eq(user_id))
-            .select(sum(user_reward_point_history::columns::point))
-            .first::<Option<i64>>(&self.conn)?
-            .unwrap_or(0);
-        let consumed = user_prize_trade_history::table
-            .filter(user_prize_trade_history::columns::user_id.eq(user_id))
-            .select(sum(user_prize_trade_history::columns::price))
-            .first::<Option<i64>>(&self.conn)?
-            .unwrap_or(0);
-        assert!(earned >= consumed);
-        return Ok((earned - consumed) as u32);
     }
 
     fn query_user_point_history(

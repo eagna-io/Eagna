@@ -1,24 +1,10 @@
+mod me;
+pub use me::get_me;
+
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::user::*;
 use rouille::{input::json::json_input, Request, Response};
 use serde::{Deserialize, Serialize};
-
-pub fn me(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
-    let access_token = validate_bearer_header(infra, req)?;
-    let repo = UserRepository::from(infra.get_postgres()?);
-    if let Some(user) = repo.query_user(&access_token.user_id)? {
-        let res_data = ResData {
-            id: user.id(),
-            name: user.name(),
-            email: user.email(),
-            point: repo.query_user_point(&access_token.user_id)?,
-            is_admin: *user.is_admin(),
-        };
-        return Ok(Response::json(&res_data));
-    } else {
-        return Err(FailureResponse::Unauthorized);
-    }
-}
 
 pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     let access_token = validate_bearer_header(infra, req)?;

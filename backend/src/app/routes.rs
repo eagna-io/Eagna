@@ -24,7 +24,7 @@ pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
             users::post(infra, req)
         },
         (GET) (/users/me/) => {
-            users::me(infra, req)
+            users::get_me(infra, req)
         },
         (GET) (/markets/) => {
             markets::get_list(infra, req)

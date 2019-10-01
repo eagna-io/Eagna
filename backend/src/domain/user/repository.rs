@@ -58,10 +58,6 @@ impl<'a> UserRepository<'a> {
             }
         }
     }
-
-    pub fn query_user_point(&self, user_id: &UserId) -> Result<u32, failure::Error> {
-        self.postgres.query_user_point(user_id.as_str())
-    }
 }
 
 fn convert_point_history_item_to_infra(item: &PointHistoryItem) -> NewPointHistoryItem {
