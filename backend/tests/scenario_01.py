@@ -61,7 +61,7 @@ def test_users_api():
     assert_eq(res.json()["name"], "Hoge Hogeo")
     assert_eq(res.json()["email"], "hoge@eagna.io")
     assert_eq(res.json()["isAdmin"], False)
-    assert_eq(res.json()["point"], 0)
+    assert_eq(len(res.json()["pointHistory"]), 0)
 
 
 def test_prizes_api():
@@ -210,6 +210,23 @@ def test_markets_api():
     res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
     assert_eq(res.status_code, 400)
 
+    # 不正なペイロードではマーケットが作成できないことをテストする
+    # Prizeが空配列は許可しない
+    headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
+    invalid_payload = {
+        'title': "hoge",
+        'description': "hoge",
+        'organizerId': "ec2966c5-d661-4a9b-b377-9e00f21d7dd4",
+        'lmsrB': 0,
+        'open': datetime.utcnow().isoformat() + 'Z',
+        'close': datetime.utcnow().isoformat() + 'Z',
+        'totalRewardPoint': 10000,
+        'tokens': [{"name": "hoge", "description": "", "thumbnailUrl": ""}],
+        'prizes': [],
+    }
+    res = requests.post(url("/markets/"), json.dumps(invalid_payload), headers=headers)
+    assert_eq(res.status_code, 400)
+
     # 正しいペイロードでマーケットが作成できることをテストする
     headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
     valid_payload = {
@@ -221,11 +238,12 @@ def test_markets_api():
         'close': datetime.utcnow().isoformat() + 'Z',
         'totalRewardPoint': 10000,
         'tokens': [{"name": "hoge", "description": "", "thumbnailUrl": ""}],
-        'prizes': [],
+        'prizes': [{"name": "hoge", "target": "everyone", "thumbnailUrl": ""}],
     }
     res = requests.post(url("/markets/"), json.dumps(valid_payload), headers=headers)
     assert_eq(res.status_code, 201)
-    market_id = res.json()
+    assert_eq(type(res.json()["id"]) is str, True)
+    market_id = res.json()["id"]
 
     # ↑で作成したマーケットが取得できることをテストする
     res = requests.get(url(f"/markets/{market_id}/"))
@@ -239,7 +257,10 @@ def test_markets_api():
     assert_eq(res.json()["close"], valid_payload["close"])
     assert_eq(res.json()["totalRewardPoint"], valid_payload["totalRewardPoint"])
     assert_eq(res.json()["tokens"], valid_payload["tokens"])
-    assert_eq(res.json()["prizes"], valid_payload["prizes"])
+    assert_eq(len(res.json()["prizes"]), 1)
+    assert_eq(res.json()["prizes"][0]["name"], valid_payload["prizes"][0]["name"])
+    assert_eq(res.json()["prizes"][0]["target"], valid_payload["prizes"][0]["target"])
+    assert_eq(res.json()["prizes"][0]["thumbnailUrl"], valid_payload["prizes"][0]["thumbnailUrl"])
 
 
 ## Utils
