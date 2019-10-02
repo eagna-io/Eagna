@@ -8,17 +8,15 @@ import Header from "app/components/header";
 import { withUser, LoginStatus } from "app/components/user";
 import NotFoundPage from "app/pages/not_found";
 
-import MarketDataProvider, {
-  useMarket
-} from "./market/components/data_provider";
-import MessageComponent from './market/components/message';
-import MarketHeader from "./market/components/header";
-import ParticipateComponent from "./market/components/participate";
-import TokenListComponent from "./market/components/tokens";
-import OrganizerComponent from "./market/components/organizer";
-import CoinsComponent from "./market/components/coins";
-import PrizeComponent from "./market/components/prize";
-import DescComponent from "./market/components/description";
+import MarketDataProvider, { useMarket } from "./components/data_provider";
+import MessageComponent from "./components/message";
+import MarketHeader from "./components/header";
+import ParticipateComponent from "./components/participate";
+import TokenListComponent from "./components/tokens";
+import OrganizerComponent from "./components/organizer";
+import CoinsComponent from "./components/coins";
+import PrizeComponent from "./components/prize";
+import DescComponent from "./components/description";
 
 interface MarketPageProps {
   user: LoginStatus;

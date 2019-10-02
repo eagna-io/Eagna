@@ -2,8 +2,8 @@ import React, { FC } from "react";
 
 import { Pc, Mobile, Tablet } from "app/components/responsive";
 
-import MobileComponent from "./tokens/mobile";
-import PcComponent from "./tokens/pc";
+import MobileComponent from "./mobile";
+import PcComponent from "./pc";
 
 const TokenListComponent: FC = () => {
   return (

@@ -10,9 +10,9 @@ import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
 import { withUser, LoginStatus } from "app/components/user";
 
-import ProfileComponent from "./account/components/profile";
-import MarketsComponent from "./account/components/markets";
-import NewsComponent from "./account/components/news";
+import ProfileComponent from "./components/profile";
+import MarketsComponent from "./components/markets";
+import NewsComponent from "./components/news";
 
 interface AccountPageProps {
   history: History;

@@ -6,10 +6,10 @@ import { pc } from "app/components/responsive";
 import SigninComponent from "app/components/signin";
 import TwitterFeed from "app/components/twitter";
 
-import Header from "./top/components/header";
-import ThreeStepsSection from "./top/components/three-steps";
-import FeaturedMarketComponent from "./top/components/featured_market";
-import Footer from "./top/components/footer";
+import Header from "./components/header";
+import ThreeStepsSection from "./components/three-steps";
+import FeaturedMarketComponent from "./components/featured_market";
+import Footer from "./components/footer";
 
 const TopPage: FC = () => {
   React.useEffect(() => {
