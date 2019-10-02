@@ -7,7 +7,7 @@ export class EagnaPrizeApi {
   static queryAll(): Promise<Prize[]> {
     return EagnaBackendApi.get({
       path: "/prizes/",
-      decoder: D.array(PrizeDecoder)
+      decoder: D.array(PRIZE_DECODER)
     });
   }
 }
@@ -22,7 +22,7 @@ export interface Prize {
   created: Moment;
 }
 
-const PrizeDecoder: D.Decoder<Prize> = D.object({
+const PRIZE_DECODER: D.Decoder<Prize> = D.object({
   id: D.string(),
   name: D.string(),
   description: D.string(),
