@@ -8,6 +8,7 @@ import thunk from "redux-thunk";
 import logger from "redux-logger";
 
 import { rootReducer } from "app/redux";
+import { startObservingUserLogin } from "app/redux/user";
 import App from "app/app";
 
 const firebaseApiKey = process.env.REACT_APP_FIREBASE_API_KEY;
@@ -27,5 +28,6 @@ ReactGA.initialize("UA-147662091-1", {
 });
 
 const store = createStore(rootReducer, applyMiddleware(thunk, logger));
+store.dispatch<any>(startObservingUserLogin());
 
 ReactDOM.render(<App store={store} />, document.getElementById("root"));
