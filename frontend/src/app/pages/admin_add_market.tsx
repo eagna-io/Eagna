@@ -1,14 +1,16 @@
 import React, { FC, useState } from "react";
 import styled from "styled-components";
 import moment from "moment";
+import { useSelector } from "react-redux";
 
 import { EagnaMarketApi } from "infra/eagna/market";
 import { User } from "models/user";
 import { Eagna } from "models/organizer";
-import { withUser, LoginStatus } from "app/components/user";
+import { RootState } from "app/redux";
 import NotFoundPage from "app/pages/not_found";
 
-const AddMarketOrNotFoundPage: FC<{ user: LoginStatus }> = ({ user }) => {
+const AddMarketOrNotFoundPage: FC = () => {
+  const user = useSelector((state: RootState) => state.user.user);
   if (user instanceof User && user.isAdmin) {
     return <AddMarketPage user={user} />;
   } else {
@@ -16,7 +18,7 @@ const AddMarketOrNotFoundPage: FC<{ user: LoginStatus }> = ({ user }) => {
   }
 };
 
-export default withUser(AddMarketOrNotFoundPage);
+export default AddMarketOrNotFoundPage;
 
 const AddMarketPage: FC<{ user: User }> = ({ user }) => {
   const [title, setTitle] = useState("");

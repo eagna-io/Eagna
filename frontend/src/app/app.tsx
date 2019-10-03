@@ -5,7 +5,6 @@ import { Provider as ReduxProvider } from "react-redux";
 
 import { Store } from "./redux";
 import { Responsive } from "./components/responsive";
-import { UserProvider } from "./components/user";
 import TopPage from "./pages/top";
 import LoginPage from "./pages/login";
 import AccountPage from "./pages/account";
@@ -21,11 +20,9 @@ const App: FC<{ store: Store }> = ({ store }) => {
     <>
       <GlobalStyle />
       <ReduxProvider store={store}>
-        <UserProvider>
-          <Responsive>
-            <AppRouter />
-          </Responsive>
-        </UserProvider>
+        <Responsive>
+          <AppRouter />
+        </Responsive>
       </ReduxProvider>
     </>
   );

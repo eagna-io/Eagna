@@ -2,7 +2,6 @@ import React, { FC } from "react";
 import styled from "styled-components";
 
 import { MarketToken } from "models/market";
-import { LoginStatus, withUser } from "app/components/user";
 
 import ChartComponent from "../chart";
 import AssetComponent from "../asset";
@@ -10,29 +9,25 @@ import OrderComponent from "../order";
 
 interface Props {
   token: MarketToken | null;
-  user: LoginStatus;
   onClose: () => void;
 }
 
-const TokenDetailPage: FC<Props> = React.memo(({ token, user, onClose }) => {
+export default React.memo(({ token, onClose }: Props) => {
   return (
     <Container show={token !== null}>
       {token ? (
-        <TokenDetailPageContent token={token} user={user} onClose={onClose} />
+        <TokenDetailPageContent token={token} onClose={onClose} />
       ) : null}
     </Container>
   );
 });
 
-export default withUser(TokenDetailPage);
-
 interface ContentProps {
   token: MarketToken;
-  user: LoginStatus;
   onClose: () => void;
 }
 
-const TokenDetailPageContent: FC<ContentProps> = ({ token, user, onClose }) => {
+const TokenDetailPageContent: FC<ContentProps> = ({ token, onClose }) => {
   return (
     <>
       <CloseButton onClick={onClose} />

@@ -1,14 +1,17 @@
 import React, { FC } from "react";
 import styled from "styled-components";
+import { useSelector } from 'react-redux';
 
 import { User } from "models/user";
 import { MarketStatus } from "models/market";
 import { Order, OrderRepository } from "models/order";
-import { withUser, UserProps } from "app/components/user";
+import { RootState } from 'app/redux';
 
 import { useMarket } from "./data_provider";
 
-const ParticipateComponent: FC<UserProps> = ({ user }) => {
+export default () => {
+  const user = useSelector((state: RootState) => state.user.user);
+
   const { market } = useMarket();
 
   if (market.status === MarketStatus.Open) {
@@ -18,8 +21,6 @@ const ParticipateComponent: FC<UserProps> = ({ user }) => {
   }
   return null;
 };
-
-export default withUser(ParticipateComponent);
 
 const RequestParticipateComponent: React.FC<{ user: User }> = ({ user }) => {
   const { market, updateMarket } = useMarket();

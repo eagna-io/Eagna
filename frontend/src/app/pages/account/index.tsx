@@ -3,12 +3,13 @@ import styled from "styled-components";
 import { withRouter } from "react-router-dom";
 import { History } from "history";
 import ReactGA from "react-ga";
+import { useSelector } from 'react-redux';
 
 import { Market, MarketStatus, MarketRepository } from "models/market";
 import { User } from "models/user";
+import { RootState } from 'app/redux';
 import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
-import { withUser, LoginStatus } from "app/components/user";
 
 import ProfileComponent from "./components/profile";
 import MarketsComponent from "./components/markets";
@@ -16,10 +17,11 @@ import NewsComponent from "./components/news";
 
 interface AccountPageProps {
   history: History;
-  user: LoginStatus;
 }
 
-const AccountPageWrapper: FC<AccountPageProps> = ({ history, user }) => {
+const AccountPageWrapper: FC<AccountPageProps> = ({ history}) => {
+  const user = useSelector((state: RootState) => state.user.user);
+
   useEffect(() => {
     ReactGA.pageview("/account");
   }, []);
@@ -30,14 +32,14 @@ const AccountPageWrapper: FC<AccountPageProps> = ({ history, user }) => {
     }
   });
 
-  if (user === null || user === "Checking") {
+  if (user === null || user === undefined) {
     return <h2>Loading...</h2>;
   } else {
     return <AccountPage user={user} />;
   }
 };
 
-export default withRouter(withUser(AccountPageWrapper));
+export default withRouter(AccountPageWrapper);
 
 const AccountPage: FC<{ user: User }> = ({ user }) => {
   const [participatedMarkets, setParticipatedMarkets] = useState<Market[]>([]);

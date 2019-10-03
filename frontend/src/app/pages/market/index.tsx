@@ -1,11 +1,12 @@
 import React, { FC } from "react";
 import styled from "styled-components";
 import ReactGA from "react-ga";
+import { useSelector } from "react-redux";
 
 import { User } from "models/user";
+import { RootState } from "app/redux";
 import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
-import { withUser, LoginStatus } from "app/components/user";
 import NotFoundPage from "app/pages/not_found";
 
 import MarketDataProvider, { useMarket } from "./components/data_provider";
@@ -19,11 +20,12 @@ import PrizeComponent from "./components/prize";
 import DescComponent from "./components/description";
 
 interface MarketPageProps {
-  user: LoginStatus;
   marketId: string;
 }
 
-const MarketPage: FC<MarketPageProps> = ({ user, marketId }) => {
+const MarketPage: FC<MarketPageProps> = ({ marketId }) => {
+  const user = useSelector((state: RootState) => state.user.user);
+
   React.useEffect(() => {
     ReactGA.pageview(`/market/${marketId}`);
   }, [marketId]);
@@ -40,7 +42,7 @@ const MarketPage: FC<MarketPageProps> = ({ user, marketId }) => {
   );
 };
 
-export default withUser(MarketPage);
+export default MarketPage;
 
 const MarketPageInner: FC = () => {
   const { myHistory } = useMarket();

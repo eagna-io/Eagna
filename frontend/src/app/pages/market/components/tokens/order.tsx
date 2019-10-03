@@ -1,20 +1,21 @@
 import React, { FC } from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 import { User } from "models/user";
 import { MarketStatus, MarketToken } from "models/market";
 import { Order, OrderRepository } from "models/order";
-import { LoginStatus, withUser } from "app/components/user";
+import { RootState } from "app/redux";
 import { pc } from "app/components/responsive";
 
 import { useMarket } from "../data_provider";
 
 interface OrderComponentProps {
   token: MarketToken;
-  user: LoginStatus;
 }
 
-const OrderComponent: FC<OrderComponentProps> = ({ token, user }) => {
+export default ({ token }: OrderComponentProps) => {
+  const user = useSelector((state: RootState) => state.user.user);
   const { market, distribution, lmsr, myHistory, updateMarket } = useMarket();
   const [requesting, setRequesting] = React.useState();
 
@@ -111,8 +112,6 @@ const OrderComponent: FC<OrderComponentProps> = ({ token, user }) => {
     }
   }
 };
-
-export default withUser(OrderComponent);
 
 interface BaseOrderComponentProps {
   token: MarketToken;
