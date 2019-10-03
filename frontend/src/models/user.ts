@@ -1,16 +1,31 @@
 import * as firebase from "firebase/app";
 import "firebase/auth";
-
-import { EagnaUserApi } from "infra/eagna/user";
+import {
+  EagnaUserApi,
+  MarketRewardItem as InfraMarketRewardItem,
+  PrizeTradeItem as InfraPrizeTradeItem
+} from "infra/eagna/user";
 
 // 現在ログインしているユーザー
 export class User {
+  readonly point: number;
+
   constructor(
     readonly uid: string,
     readonly name: string,
     readonly email: string,
-    readonly isAdmin: boolean
-  ) {}
+    readonly isAdmin: boolean,
+    readonly pointHistory: (MarketRewardItem | PrizeTradeItem)[]
+  ) {
+    this.point = pointHistory.reduce((sum, item) => {
+      if (item.type === "MarketReward") {
+        return sum + item.point;
+      } else {
+        // item.type === PrizeTrade のとき
+        return sum - item.point;
+      }
+    }, 0);
+  }
 
   getAccessToken(): Promise<string> {
     const fbuser = firebase.auth().currentUser;
@@ -24,6 +39,9 @@ export class User {
   }
 }
 
+export type MarketRewardItem = InfraMarketRewardItem;
+export type PrizeTradeItem = InfraPrizeTradeItem;
+
 export class UserRepository {
   static async queryMe(): Promise<User | null> {
     const fbuser = firebase.auth().currentUser;
@@ -32,7 +50,13 @@ export class UserRepository {
     } else {
       const accessToken = await fbuser.getIdToken();
       const user = await EagnaUserApi.queryMe(accessToken);
-      return new User(user.id, user.name, user.email, user.isAdmin);
+      return new User(
+        user.id,
+        user.name,
+        user.email,
+        user.isAdmin,
+        user.pointHistory
+      );
     }
   }
 
@@ -48,7 +72,13 @@ export class UserRepository {
       };
       const accessToken = await fbuser.getIdToken();
       const user = await EagnaUserApi.create(newUser, accessToken);
-      return new User(user.id, user.name, user.email, user.isAdmin);
+      return new User(
+        user.id,
+        user.name,
+        user.email,
+        user.isAdmin,
+        user.pointHistory
+      );
     }
   }
 }
