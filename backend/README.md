@@ -1,5 +1,8 @@
 ## Tests
 
+- Firebase infra はモックを使う
+- FIREBASE_API_KEY を USE_MOCK_FIREBASE に設定するとモックを使用するようになる
+
 ### 実行
 
 `make test`

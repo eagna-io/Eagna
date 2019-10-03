@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 TEST_SERVER_PID_FILE="tests/server.pid"
 
@@ -24,7 +23,8 @@ psql -f "tests/init_data.sql" "${PG_URL}"
 
 # サーバーの起動
 export BIND="0.0.0.0:8081"
-export RUN_MODE="test"
+export ACCESS_ALLOW_HOSTS="*"
+export FIREBASE_API_KEY="USE_MOCK_FIREBASE"
 if [ -z "${TEST_VERBOSE}" ]; then
   export RUST_LOG="warn"
 else
