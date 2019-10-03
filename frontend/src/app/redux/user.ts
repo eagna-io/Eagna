@@ -1,8 +1,9 @@
 import { ThunkAction } from "redux-thunk";
-import { Action as ReduxAction } from "redux";
 import * as firebase from "firebase/app";
 import "firebase/auth";
 import { User, UserRepository } from "models/user";
+import { Action as AppAction } from "./commons";
+import { RootAction } from './index';
 
 export interface State {
   // まだログイン状態かどうかわからないとき、undefined をとる
@@ -13,22 +14,34 @@ export const INITIAL_STATE = {
   user: undefined
 };
 
+enum ActionType {
+  SetUser = "USER_SET_USER",
+  ClearUser = "USER_CLEAR_USER",
+  ClearUserIfUndefined = "USER_CLEAR_USER_IF_UNDEFINED"
+}
+
 export type Action =
-  | SetUserAction
-  | ClearUserAction
-  | ClearUserIfUndefinedAction;
+  | AppAction<ActionType.SetUser, { user: User }>
+  | AppAction<ActionType.ClearUser>
+  | AppAction<ActionType.ClearUserIfUndefined>;
 
-class SetUserAction {
-  type = "USER_SET_USER";
-  constructor(readonly user: User) {}
+function setUser(user: User): Action {
+  return {
+    type: ActionType.SetUser,
+    user
+  };
 }
 
-class ClearUserAction {
-  type = "USER_CLEAR_USER";
+function clearUser(): Action {
+  return {
+    type: ActionType.ClearUser
+  };
 }
 
-class ClearUserIfUndefinedAction {
-  type = "USER_CLEAR_USER_IF_UNDEFINED";
+function clearUserIfUndefined(): Action {
+  return {
+    type: ActionType.ClearUserIfUndefined
+  };
 }
 
 const LOGIN_CHECK_TIMEOUT_MILLIS = 10 * 1000;
@@ -41,55 +54,53 @@ export function startObservingUserLogin(): ThunkAction<
 > {
   return async dispatch => {
     setTimeout(() => {
-      dispatch(new ClearUserIfUndefinedAction());
+      dispatch(clearUserIfUndefined());
     }, LOGIN_CHECK_TIMEOUT_MILLIS);
 
     firebase.auth().onAuthStateChanged(async fbuser => {
       if (!fbuser) {
-        dispatch(new ClearUserAction());
+        dispatch(clearUser());
       }
 
       try {
         const user = await UserRepository.queryMe();
         if (user) {
           // ログイン済み
-          dispatch(new SetUserAction(user));
+          dispatch(setUser(user));
         } else {
           // ここまでの処理の間に fbuser が null になった場合
-          dispatch(new ClearUserAction());
+          dispatch(clearUser());
         }
       } catch (e) {
         // 新規登録
         const user = await UserRepository.create();
-        dispatch(new SetUserAction(user));
+        dispatch(setUser(user));
       }
     });
   };
 }
 
-export function reducer<A extends ReduxAction>(
-  state: State = INITIAL_STATE,
-  action: A
-): State {
-  if (action instanceof SetUserAction) {
-    return {
-      user: action.user
-    };
-  } else if (action instanceof ClearUserAction) {
-    return {
-      user: null
-    };
-  } else if (action instanceof ClearUserIfUndefinedAction) {
-    if (state.user === undefined) {
+export function reducer(state: State = INITIAL_STATE, action: RootAction): State {
+  switch (action.type) {
+    case ActionType.SetUser:
+      return {
+        user: action.user
+      };
+    case ActionType.ClearUser:
       return {
         user: null
       };
-    } else {
-      return {
-        ...state
-      };
-    }
-  } else {
-    return state;
+    case ActionType.ClearUserIfUndefined:
+      if (state.user === undefined) {
+        return {
+          user: null
+        };
+      } else {
+        return {
+          ...state
+        };
+      }
+    default:
+      return state;
   }
 }

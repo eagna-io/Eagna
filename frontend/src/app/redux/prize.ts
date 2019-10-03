@@ -1,6 +1,7 @@
 import { ThunkAction } from "redux-thunk";
-import { Action as ReduxAction } from "redux";
 import { Prize, PrizeRepository } from "models/prize";
+import { Action as AppAction } from "./commons";
+import { RootAction } from "./index";
 
 export interface State {
   // まだ初回の取得を行なっていないとき、undefined をとる
@@ -11,11 +12,17 @@ export const INITIAL_STATE = {
   list: undefined
 };
 
-export type Action = SetListAction;
+enum ActionType {
+  SetList = "prize/SetList"
+}
 
-class SetListAction {
-  type = "PRIZE_SET_LIST";
-  constructor(readonly list: Prize[]) {}
+export type Action = AppAction<ActionType.SetList, { list: Prize[] }>;
+
+function setList(list: Prize[]): Action {
+  return {
+    type: ActionType.SetList,
+    list
+  };
 }
 
 // APIサーバーからPrizeのリストを取得し、Stateを更新するAction
@@ -27,19 +34,20 @@ export function queryPrizeList(): ThunkAction<
 > {
   return async dispatch => {
     const prizes = await PrizeRepository.queryAll();
-    dispatch(new SetListAction(prizes));
+    dispatch(setList(prizes));
   };
 }
 
-export function reducer<A extends ReduxAction>(
+export function reducer(
   state: State = INITIAL_STATE,
-  action: A
+  action: RootAction
 ): State {
-  if (action instanceof SetListAction) {
-    return {
-      list: action.list
-    };
-  } else {
-    return state;
+  switch (action.type) {
+    case ActionType.SetList:
+      return {
+        list: action.list
+      };
+    default:
+      return state;
   }
 }
