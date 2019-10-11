@@ -17,7 +17,7 @@ const Header: FC<{}> = React.memo(() => {
         <HeaderLink href="https://note.mu/rohan_market/n/nba87159eace9">
           Eagnaとは？
         </HeaderLink>
-        <HeaderLink href="https://note.mu/rohan_market/n/naed2a34bf6e6">
+        <HeaderLink href="https://note.mu/rohan_market/n/nacb0f6d2df6d">
           予測市場とは？
         </HeaderLink>
       </HeaderLinks>
