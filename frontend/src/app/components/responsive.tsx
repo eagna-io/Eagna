@@ -1,7 +1,10 @@
-import React, {FC, useState, useEffect, useContext} from 'react';
+import React from "react";
+import styled from "styled-components";
 
-export const MinTabletWidth = 768;
 export const MinPcWidth = 980;
+export const MaxTabletWidth = MinPcWidth - 1;
+export const MinTabletWidth = 768;
+export const MaxMobileWidth = MinTabletWidth - 1;
 
 export function pc(css: string): string {
   return `@media (min-width: ${MinPcWidth}px) {
@@ -15,67 +18,42 @@ export function tablet(css: string): string {
   }`;
 }
 
-enum Device {
-  Mobile = 'Mobile',
-  Tablet = 'Tablet',
-  Pc = 'Pc',
+export function mobile(css: string): string {
+  return `@media (max-width: ${MaxMobileWidth}px) {
+    ${css}
+  }`;
 }
 
-const DeviceContext = React.createContext<Device>(Device.Mobile);
+export const Container = styled.div`
+  width: 100%;
+  margin: 0 auto;
 
-function deviceFromWidth(width: number): Device {
-  if (width < 768) {
-    return Device.Mobile;
-  } else if (width < 980) {
-    return Device.Tablet;
-  } else {
-    return Device.Pc;
-  }
-}
+  ${tablet(`
+    width: ${MinTabletWidth}px;
+  `)}
 
-export const Responsive: FC<{}> = ({children}) => {
-  const [device, setDevice] = useState(
-    deviceFromWidth(window.parent.screen.width),
-  );
+  ${pc(`
+    width: ${MinPcWidth}px;
+  `)}
+`;
 
-  useEffect(() => {
-    const resize = () => {
-      const curDevice = deviceFromWidth(window.parent.screen.width);
-      if (curDevice !== device) {
-        setDevice(curDevice);
-      }
-    };
+export const Mobile = styled.div`
+  display: none;
+  ${mobile(`
+    display: block;
+  `)}
+`;
 
-    resize();
+export const Tablet = styled.div`
+  display: none;
+  ${tablet(`
+    display: block;
+  `)}
+`;
 
-    window.onresize = resize;
-
-    return () => {
-      window.onresize = null;
-    };
-  }, [device, setDevice]);
-
-  return (
-    <DeviceContext.Provider value={device}>{children}</DeviceContext.Provider>
-  );
-};
-
-interface ContentProps {
-  children: React.ReactNode;
-}
-
-const genDeviceContent: (device: Device) => FC<ContentProps> = device => ({
-  children,
-}) => {
-  const curDevice = useContext(DeviceContext);
-
-  return <>{curDevice === device ? children : null}</>;
-};
-
-export const Pc: FC<ContentProps> = React.memo(genDeviceContent(Device.Pc));
-export const Tablet: FC<ContentProps> = React.memo(
-  genDeviceContent(Device.Tablet),
-);
-export const Mobile: FC<ContentProps> = React.memo(
-  genDeviceContent(Device.Mobile),
-);
+export const Pc = styled.div`
+  display: none;
+  ${pc(`
+    display: block;
+  `)}
+`;

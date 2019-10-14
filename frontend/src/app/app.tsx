@@ -4,12 +4,12 @@ import { createGlobalStyle } from "styled-components";
 import { Provider as ReduxProvider } from "react-redux";
 
 import { Store } from "./redux";
-import { Responsive } from "./components/responsive";
 import TopPage from "./pages/top";
 import LoginPage from "./pages/login";
 import AccountPage from "./pages/account";
 import SpecialSignupPage from "./pages/special_signup";
 import MarketPage from "./pages/market";
+import PrizePage from "./pages/prize";
 import AdminAddMarketPage from "./pages/admin_add_market";
 import AdminResolveMarketPage from "./pages/admin_resolve_market";
 import PlainTextPage from "./pages/plain_text";
@@ -20,9 +20,7 @@ const App: FC<{ store: Store }> = ({ store }) => {
     <>
       <GlobalStyle />
       <ReduxProvider store={store}>
-        <Responsive>
-          <AppRouter />
-        </Responsive>
+        <AppRouter />
       </ReduxProvider>
     </>
   );
@@ -41,6 +39,7 @@ const AppRouter: FC = () => (
         exact
         render={({ match }) => <MarketPage marketId={match.params.id} />}
       />
+      <Route path="/prize" exact component={PrizePage} />
       <Route path="/admin/add_market" exact component={AdminAddMarketPage} />
       <Route
         path="/admin/resolve_market"
