@@ -2,6 +2,7 @@ import React, { FC } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import { Provider as ReduxProvider } from "react-redux";
+import { StylesProvider } from "@material-ui/core/styles";
 
 import { Store } from "./redux";
 import TopPage from "./pages/top";
@@ -19,9 +20,11 @@ const App: FC<{ store: Store }> = ({ store }) => {
   return (
     <>
       <GlobalStyle />
-      <ReduxProvider store={store}>
-        <AppRouter />
-      </ReduxProvider>
+      <StylesProvider injectFirst>
+        <ReduxProvider store={store}>
+          <AppRouter />
+        </ReduxProvider>
+      </StylesProvider>
     </>
   );
 };

@@ -2,71 +2,61 @@ import React from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { RootState } from "app/redux";
+import Card from "@material-ui/core/Card";
+import CardHeader from "@material-ui/core/CardHeader";
+import CardContent from "@material-ui/core/CardContent";
+import CardActionArea from "@material-ui/core/CardActionArea";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
 
 export default () => {
   const user = useSelector((state: RootState) => state.user.user);
   return (
-    <Container>
-      <MainContainer>
-        <Title>保有ポイント</Title>
-        <Icon src="/img/prize/trophy.svg" />
-        <Point>
-          {user ? user.point : "-"}
-          <PointUnit> ポイント</PointUnit>
-        </Point>
-      </MainContainer>
-      <BottomContainer>ポイント獲得・使用履歴を確認する</BottomContainer>
-    </Container>
+    <StyledCard>
+      <CardHeader
+        title="保有ポイント"
+        titleTypographyProps={{ variant: "subtitle1" }}
+      />
+      <CardContent>
+        <Grid container alignItems="center">
+          <Grid item xs={4}>
+            <Icon src="/img/prize/trophy.svg" />
+          </Grid>
+          <Grid item xs={8}>
+            <Point variant="h6" align="right">
+              {user ? user.point : "-"} ポイント
+            </Point>
+          </Grid>
+        </Grid>
+      </CardContent>
+      <CardFooter>
+        <Typography variant="caption">
+          ポイント獲得・使用履歴を確認する
+        </Typography>
+      </CardFooter>
+    </StyledCard>
   );
 };
 
-const Container = styled.div`
+const StyledCard = styled(Card)`
   position: relative;
   width: 100%;
-  max-width: 500px;
-  top: 30px;
-  border-radius: 4px;
-  border: solid 1px #d1d5da;
-  background-color: white;
-`;
-
-const MainContainer = styled.div`
-  width: 100%;
-  padding: 10px;
-`;
-
-const Title = styled.h3`
-  width: 100%;
-  margin: 0;
-  font-size: 14px;
-  font-weight: bold;
+  max-width: 400px;
+  top: 50px;
 `;
 
 const Icon = styled.img`
-  display: inline-block;
-  margin-top: 20px;
-  margin-left: 30px;
+  display: block;
+  margin: 0 auto;
   width: 40px;
   height: 40px;
 `;
 
-const Point = styled.div`
-  display: inline-block;
-  position: absolute;
-  right: 30px;
-  top: 60px;
-  font-size: 21px;
+const Point = styled(Typography)`
   font-weight: bold;
 `;
 
-const PointUnit = styled.span`
-  font-size: 18px;
-`;
-
-const BottomContainer = styled.div`
-  width: 100%;
+const CardFooter = styled(CardActionArea)`
   padding: 6px 11px;
   border-top: solid 1px #d1d5da;
-  font-size: 10px;
-  font-weight: thin;
 `;

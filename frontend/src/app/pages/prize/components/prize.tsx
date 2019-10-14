@@ -1,5 +1,12 @@
 import React from "react";
 import styled from "styled-components";
+import Grid from "@material-ui/core/Grid";
+import Card from "@material-ui/core/Card";
+import CardActionArea from "@material-ui/core/CardActionArea";
+import CardMedia from "@material-ui/core/CardMedia";
+import CardContent from "@material-ui/core/CardContent";
+import Typography from "@material-ui/core/Typography";
+
 import { Prize } from "models/prize";
 
 interface Props {
@@ -8,52 +15,29 @@ interface Props {
 
 export default ({ prize }: Props) => {
   return (
-    <Container>
-      <Thumbnail src={prize.thumbnailUrl} />
-      <Contents>
-        <Name>{prize.name}</Name>
-        <Point>{prize.price} ポイント</Point>
-      </Contents>
-    </Container>
+    <Grid item xs={6} sm={2}>
+      <Card>
+        <CardActionArea>
+          <CardThumbnail image={prize.thumbnailUrl} />
+          <CardContent>
+            <Typography gutterBottom variant="body2">
+              {prize.name}
+            </Typography>
+            <Point variant="body2" align="right">
+              {prize.price} ポイント
+            </Point>
+          </CardContent>
+        </CardActionArea>
+      </Card>
+    </Grid>
   );
 };
 
-const Container = styled.div`
-  display: inline-block;
-  width: 45vw;
-  margin-top: 40px;
-  border-radius: 4px;
-  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-
-  &:nth-of-type(even) {
-    margin-left: 13px;
-  }
-`;
-
-const Thumbnail = styled("div")<{ src: string }>`
-  width: 100%;
+const CardThumbnail = styled(CardMedia)`
   height: 170px;
-  background-image: url(${props => props.src});
-  background-size: cover;
-  background-position: center;
 `;
 
-const Contents = styled.div`
-  width: 100%;
-  padding: 6px;
-`;
-
-const Name = styled.h5`
-  margin: 0;
-  font-size: 12px;
-  font-weight: bold;
-`;
-
-const Point = styled.p`
-  margin-top: 15px;
-  font-size: 14px;
+const Point = styled(Typography)`
   font-weight: bold;
   color: #f9aa33;
-  text-align: right;
 `;
