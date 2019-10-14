@@ -148,6 +148,13 @@ const BaseOrderComponent: FC<BaseOrderComponentProps> = ({
             <OrderButtonTextUnit>coin</OrderButtonTextUnit>
           </BuyButton>
           <OrderButtonDesc>で購入する</OrderButtonDesc>
+          {buyable ? (
+            <AdviceMsg>
+              「{token.name}」が実現する可能性が
+              <Percentage>{buyPrice / 10} %</Percentage>
+              以上だと思うなら購入しましょう！
+            </AdviceMsg>
+          ) : null}
         </OrderButtonContainer>
         <OrderButtonContainer>
           <SellButton
@@ -158,6 +165,13 @@ const BaseOrderComponent: FC<BaseOrderComponentProps> = ({
             <OrderButtonTextUnit>coin</OrderButtonTextUnit>
           </SellButton>
           <OrderButtonDesc>で売却する</OrderButtonDesc>
+          {sellable && sellPrice ? (
+            <AdviceMsg>
+              「{token.name}」が実現する可能性が
+              <Percentage>{sellPrice / 10} %</Percentage>
+              以下だと思うなら売却しましょう！
+            </AdviceMsg>
+          ) : null}
         </OrderButtonContainer>
       </OrderButtonsContainer>
     </Container>
@@ -231,4 +245,17 @@ const OrderButtonDesc = styled.div`
   color: #979797;
   text-align: right;
   margin-top: 5px;
+`;
+
+const AdviceMsg = styled.p`
+  margin-top: 10px;
+  width: 100%;
+  font-size: 9px;
+  font-weight: normal;
+`;
+
+const Percentage = styled.span`
+  margin: 0 5px;
+  font-size: 10px;
+  font-weight: bold;
 `;
