@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 
 export const MinPcWidth = 980;
@@ -25,15 +24,18 @@ export function mobile(css: string): string {
 }
 
 export const Container = styled.div`
-  width: 100%;
-  margin: 0 auto;
+  width: 100vw;
+  padding-left: 20px;
+  padding-right: 20px;
 
   ${tablet(`
-    width: ${MinTabletWidth}px;
+    padding-left: calc((100vw - ${MinTabletWidth}px) / 2 + 20px);
+    padding-right: calc((100vw - ${MinTabletWidth}px) / 2 + 20px);
   `)}
 
   ${pc(`
-    width: ${MinPcWidth}px;
+    padding-left: calc((100vw - ${MinPcWidth}px) / 2 + 20px);
+    padding-right: calc((100vw - ${MinPcWidth}px) / 2 + 20px);
   `)}
 `;
 
