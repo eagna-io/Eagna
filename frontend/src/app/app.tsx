@@ -10,7 +10,7 @@ import LoginPage from "./pages/login";
 import AccountPage from "./pages/account";
 import SpecialSignupPage from "./pages/special_signup";
 import MarketPage from "./pages/market";
-import PrizePage from "./pages/prize";
+import PrizeListPage from "./pages/prize-list";
 import AdminAddMarketPage from "./pages/admin_add_market";
 import AdminResolveMarketPage from "./pages/admin_resolve_market";
 import PlainTextPage from "./pages/plain_text";
@@ -42,7 +42,7 @@ const AppRouter: FC = () => (
         exact
         render={({ match }) => <MarketPage marketId={match.params.id} />}
       />
-      <Route path="/prize" exact component={PrizePage} />
+      <Route path="/prize" exact component={PrizeListPage} />
       <Route path="/admin/add_market" exact component={AdminAddMarketPage} />
       <Route
         path="/admin/resolve_market"
