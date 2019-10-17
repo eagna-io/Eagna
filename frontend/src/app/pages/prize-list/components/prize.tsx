@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 import Grid from "@material-ui/core/Grid";
 import Card from "@material-ui/core/Card";
 import CardActionArea from "@material-ui/core/CardActionArea";
@@ -17,17 +18,19 @@ export default ({ prize }: Props) => {
   return (
     <Grid item xs={6} sm={2}>
       <Card>
-        <CardActionArea>
-          <CardThumbnail image={prize.thumbnailUrl} />
-          <CardContent>
-            <Typography gutterBottom variant="body2">
-              {prize.name}
-            </Typography>
-            <Point variant="body2" align="right">
-              {prize.price} ポイント
-            </Point>
-          </CardContent>
-        </CardActionArea>
+        <Link to={`/prize/${prize.id}`}>
+          <CardActionArea>
+            <CardThumbnail image={prize.thumbnailUrl} />
+            <CardContent>
+              <Typography gutterBottom variant="body2">
+                {prize.name}
+              </Typography>
+              <Point variant="body2" align="right">
+                {prize.price} ポイント
+              </Point>
+            </CardContent>
+          </CardActionArea>
+        </Link>
       </Card>
     </Grid>
   );
