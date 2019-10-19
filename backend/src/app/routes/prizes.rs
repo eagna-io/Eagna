@@ -15,7 +15,7 @@ struct ResPrize<'a> {
     name: &'a str,
     description: &'a str,
     thumbnail_url: &'a str,
-    price: u32,
+    point: u32,
     available: bool,
     created: &'a DateTime<Utc>,
 }
@@ -27,7 +27,7 @@ impl<'a> From<&'a Prize> for ResPrize<'a> {
             name: prize.name().as_str(),
             description: prize.description().as_str(),
             thumbnail_url: prize.thumbnail_url().as_str(),
-            price: prize.price().get(),
+            point: prize.point().get(),
             available: *prize.available(),
             created: prize.created(),
         }

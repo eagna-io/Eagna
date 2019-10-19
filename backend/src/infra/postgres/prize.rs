@@ -22,7 +22,7 @@ pub struct NewPrize<'a> {
     pub name: &'a str,
     pub description: &'a str,
     pub thumbnail_url: &'a str,
-    pub price: u32,
+    pub point: u32,
     pub available: bool,
     pub created: &'a DateTime<Utc>,
 }
@@ -32,7 +32,7 @@ pub struct QueryPrize {
     pub name: String,
     pub description: String,
     pub thumbnail_url: String,
-    pub price: u32,
+    pub point: u32,
     pub available: bool,
     pub created: DateTime<Utc>,
 }
@@ -45,7 +45,7 @@ impl PostgresPrizeInfra for Postgres {
                 name: new_prize.name,
                 description: new_prize.description,
                 thumbnail_url: new_prize.thumbnail_url,
-                price: new_prize.price as i32,
+                point: new_prize.point as i32,
                 available: new_prize.available,
             })
             .execute(&self.conn)?;
@@ -86,7 +86,7 @@ pub struct InsertablePrize<'a> {
     name: &'a str,
     description: &'a str,
     thumbnail_url: &'a str,
-    price: i32,
+    point: i32,
     available: bool,
 }
 
@@ -96,7 +96,7 @@ pub struct QueryablePrize {
     name: String,
     description: String,
     thumbnail_url: String,
-    price: i32,
+    point: i32,
     available: bool,
     created: DateTime<Utc>,
 }
@@ -108,7 +108,7 @@ impl Into<QueryPrize> for QueryablePrize {
             name: self.name,
             description: self.description,
             thumbnail_url: self.thumbnail_url,
-            price: self.price as u32,
+            point: self.point as u32,
             available: self.available,
             created: self.created,
         }

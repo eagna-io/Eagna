@@ -17,7 +17,7 @@ export interface Prize {
   name: string;
   description: string;
   thumbnailUrl: string;
-  price: number;
+  point: number;
   available: boolean;
   created: Moment;
 }
@@ -27,7 +27,7 @@ const PRIZE_DECODER: D.Decoder<Prize> = D.object({
   name: D.string(),
   description: D.string(),
   thumbnailUrl: D.string(),
-  price: D.number(),
+  point: D.number(),
   available: D.boolean(),
   created: D.string().map(s => moment(s))
 });

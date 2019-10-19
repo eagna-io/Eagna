@@ -28,7 +28,7 @@ export default ({ prize, closeModal }: Props) => {
       />
       <CardContent>
         <Typography variant="body2" paragraph>
-          <Bold>{prize.price}ポイント</Bold>と
+          <Bold>{prize.point}ポイント</Bold>と
           <br />
           <Bold>{prize.name}</Bold>
           <br />

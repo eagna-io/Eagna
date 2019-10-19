@@ -8,7 +8,7 @@ export class Prize {
     readonly name: string,
     readonly description: string,
     readonly thumbnailUrl: string,
-    readonly price: number,
+    readonly point: number,
     readonly available: boolean,
     readonly created: Moment
   ) {}
@@ -24,7 +24,7 @@ export class PrizeRepository {
           prize.name,
           prize.description,
           prize.thumbnailUrl,
-          prize.price,
+          prize.point,
           prize.available,
           prize.created
         )

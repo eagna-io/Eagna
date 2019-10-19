@@ -17,7 +17,7 @@ pub struct Prize {
     name: NonEmptyString,
     description: String,
     thumbnail_url: String,
-    price: NonZeroU32,
+    point: NonZeroU32,
     // getsetの新しいバージョンではCopyGettersが導入されるはず。
     // それが導入されれば、
     // #[get_copy = "pub"]
@@ -31,7 +31,7 @@ impl Prize {
         name: NonEmptyString,
         description: String,
         thumbnail_url: String,
-        price: NonZeroU32,
+        point: NonZeroU32,
         available: bool,
     ) -> Prize {
         Prize {
@@ -39,7 +39,7 @@ impl Prize {
             name,
             description,
             thumbnail_url,
-            price,
+            point,
             available,
             created: Utc::now(),
         }

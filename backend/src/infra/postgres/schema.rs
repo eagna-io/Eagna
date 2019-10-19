@@ -95,7 +95,7 @@ table! {
         name -> Text,
         description -> Text,
         thumbnail_url -> Text,
-        price -> Int4,
+        point -> Int4,
         available -> Bool,
         created -> Timestamptz,
     }

@@ -26,7 +26,7 @@ export default ({ prize }: Props) => {
                 {prize.name}
               </Typography>
               <Point variant="body2" align="right">
-                {prize.price} ポイント
+                {prize.point} ポイント
               </Point>
             </CardContent>
           </CardActionArea>

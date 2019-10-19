@@ -33,17 +33,17 @@ CREATE TABLE prizes (
   description   text NOT NULL,
   thumbnail_url text NOT NULL,
   -- prizeを交換するのに必要なポイント量。0より大きい。
-  price         integer NOT NULL,
+  point         integer NOT NULL,
   -- prizeが交換可能かどうか。
   available     boolean NOT NULL DEFAULT true,
   created       timestamptz NOT NULL DEFAULT now(),
 
-  CONSTRAINT price_larger_than_zero CHECK ( price > 0 )
+  CONSTRAINT price_larger_than_zero CHECK ( point > 0 )
 );
 
 COMMENT ON TABLE prizes IS
   'Userがpointと交換可能な景品';
-COMMENT ON COLUMN prizes.price IS
+COMMENT ON COLUMN prizes.point IS
   'prizeを交換するのに必要なポイント量。0より大きい';
 
 

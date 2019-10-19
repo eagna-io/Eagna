@@ -62,7 +62,7 @@ const PrizeContent: React.FC<{ prize: Prize }> = ({ prize }) => {
         <Grid item xs={12} sm={6}>
           <Name variant="h6">{prize.name}</Name>
           <Point variant="subtitle1" align="right">
-            {prize.price} ポイント
+            {prize.point} ポイント
           </Point>
           <Typography variant="body2" align="right" color="textSecondary">
             {user ? user.point : "-"} ポイント
@@ -73,7 +73,7 @@ const PrizeContent: React.FC<{ prize: Prize }> = ({ prize }) => {
             fullWidth
             size="large"
             onClick={() => setShowModal(true)}
-            disabled={!user || user.point < prize.price}
+            disabled={!user || user.point < prize.point}
           >
             交換をリクエストする
           </RequestButton>
@@ -81,7 +81,7 @@ const PrizeContent: React.FC<{ prize: Prize }> = ({ prize }) => {
             <Typography variant="caption" color="error">
               ポイントと賞品を交換するにはログインが必要です。
             </Typography>
-          ) : user.point < prize.price ? (
+          ) : user.point < prize.point ? (
             <Typography variant="caption" color="error">
               ポイントが不足しています
             </Typography>
