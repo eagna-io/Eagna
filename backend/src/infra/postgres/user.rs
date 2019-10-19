@@ -1,5 +1,5 @@
 use super::{
-    schema::{user_prize_trade_history, user_reward_point_history, users},
+    schema::{market_reward_records, user_prize_trade_history, users},
     types::PrizeTradeStatus,
     Postgres,
 };
@@ -109,8 +109,8 @@ impl PostgresUserInfra for Postgres {
     ) -> Result<(), failure::Error> {
         match item {
             NewPointHistoryItem::MarketReward(item) => {
-                diesel::insert_into(user_reward_point_history::table)
-                    .values(InsertableMarketRewardHistoryItem {
+                diesel::insert_into(market_reward_records::table)
+                    .values(InsertableMarketRewardRecord {
                         user_id,
                         point: item.point as i32,
                         time: item.time,
@@ -137,15 +137,15 @@ impl PostgresUserInfra for Postgres {
         &self,
         user_id: &str,
     ) -> Result<Vec<QueryPointHistoryItem>, failure::Error> {
-        let mut reward_history = user_reward_point_history::table
-            .filter(user_reward_point_history::columns::user_id.eq(user_id))
+        let mut reward_history = market_reward_records::table
+            .filter(market_reward_records::columns::user_id.eq(user_id))
             .select((
-                user_reward_point_history::columns::market_id,
-                user_reward_point_history::columns::point,
-                user_reward_point_history::columns::time,
+                market_reward_records::columns::market_id,
+                market_reward_records::columns::point,
+                market_reward_records::columns::time,
             ))
-            .order(user_reward_point_history::columns::time.asc())
-            .load::<QueryableMarketRewardHistoryItem>(&self.conn)?;
+            .order(market_reward_records::columns::time.asc())
+            .load::<QueryableMarketRewardRecord>(&self.conn)?;
         let mut trade_history = user_prize_trade_history::table
             .filter(user_prize_trade_history::columns::user_id.eq(user_id))
             .select((
@@ -213,8 +213,8 @@ struct QueryableUser {
 }
 
 #[derive(Insertable)]
-#[table_name = "user_reward_point_history"]
-struct InsertableMarketRewardHistoryItem<'a> {
+#[table_name = "market_reward_records"]
+struct InsertableMarketRewardRecord<'a> {
     user_id: &'a str,
     market_id: Uuid,
     point: i32,
@@ -222,7 +222,7 @@ struct InsertableMarketRewardHistoryItem<'a> {
 }
 
 #[derive(Queryable)]
-struct QueryableMarketRewardHistoryItem {
+struct QueryableMarketRewardRecord {
     market_id: Uuid,
     point: i32,
     time: DateTime<Utc>,
