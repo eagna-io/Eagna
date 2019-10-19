@@ -52,7 +52,7 @@ CREATE TYPE prize_trade_status as ENUM (
   'processed'
 );
 
-CREATE TABLE user_prize_trade_history (
+CREATE TABLE user_prize_trade_records (
   -- アプリ的に使用することはないが、dieselのために必要
   unused_id     serial PRIMARY KEY,
   user_id       text NOT NULL,

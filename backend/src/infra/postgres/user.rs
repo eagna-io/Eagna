@@ -1,5 +1,5 @@
 use super::{
-    schema::{market_reward_records, user_prize_trade_history, users},
+    schema::{market_reward_records, user_prize_trade_records, users},
     types::PrizeTradeStatus,
     Postgres,
 };
@@ -40,7 +40,7 @@ pub struct QueryUser {
 
 pub enum NewPointHistoryItem {
     MarketReward(NewMarketRewardHistoryItem),
-    PrizeTrade(NewPrizeTradeHistoryItem),
+    PrizeTrade(NewPrizeTradeRecord),
 }
 
 pub struct NewMarketRewardHistoryItem {
@@ -49,7 +49,7 @@ pub struct NewMarketRewardHistoryItem {
     pub market_id: Uuid,
 }
 
-pub struct NewPrizeTradeHistoryItem {
+pub struct NewPrizeTradeRecord {
     pub point: u32,
     pub time: DateTime<Utc>,
     pub prize_id: Uuid,
@@ -58,7 +58,7 @@ pub struct NewPrizeTradeHistoryItem {
 
 pub enum QueryPointHistoryItem {
     MarketReward(QueryMarketRewardHistoryItem),
-    PrizeTrade(QueryPrizeTradeHistoryItem),
+    PrizeTrade(QueryPrizeTradeRecord),
 }
 
 pub struct QueryMarketRewardHistoryItem {
@@ -67,7 +67,7 @@ pub struct QueryMarketRewardHistoryItem {
     pub market_id: Uuid,
 }
 
-pub struct QueryPrizeTradeHistoryItem {
+pub struct QueryPrizeTradeRecord {
     pub point: u32,
     pub time: DateTime<Utc>,
     pub prize_id: Uuid,
@@ -119,8 +119,8 @@ impl PostgresUserInfra for Postgres {
                     .execute(&self.conn)?;
             }
             NewPointHistoryItem::PrizeTrade(item) => {
-                diesel::insert_into(user_prize_trade_history::table)
-                    .values(InsertablePrizeTradeHistoryItem {
+                diesel::insert_into(user_prize_trade_records::table)
+                    .values(InsertablePrizeTradeRecord {
                         user_id,
                         point: item.point as i32,
                         time: item.time,
@@ -146,16 +146,16 @@ impl PostgresUserInfra for Postgres {
             ))
             .order(market_reward_records::columns::time.asc())
             .load::<QueryableMarketRewardRecord>(&self.conn)?;
-        let mut trade_history = user_prize_trade_history::table
-            .filter(user_prize_trade_history::columns::user_id.eq(user_id))
+        let mut trade_history = user_prize_trade_records::table
+            .filter(user_prize_trade_records::columns::user_id.eq(user_id))
             .select((
-                user_prize_trade_history::columns::prize_id,
-                user_prize_trade_history::columns::point,
-                user_prize_trade_history::columns::time,
-                user_prize_trade_history::columns::status,
+                user_prize_trade_records::columns::prize_id,
+                user_prize_trade_records::columns::point,
+                user_prize_trade_records::columns::time,
+                user_prize_trade_records::columns::status,
             ))
-            .order(user_prize_trade_history::columns::time.asc())
-            .load::<QueryablePrizeTradeHistoryItem>(&self.conn)?;
+            .order(user_prize_trade_records::columns::time.asc())
+            .load::<QueryablePrizeTradeRecord>(&self.conn)?;
 
         // time が小さいものから順に取り出していく
         let mut history = Vec::with_capacity(reward_history.len() + trade_history.len());
@@ -180,7 +180,7 @@ impl PostgresUserInfra for Postgres {
                 Ordering::Greater => {
                     // trade_history から取り出す
                     let infra_trade_item = trade_history.pop().unwrap();
-                    let trade_item = QueryPrizeTradeHistoryItem {
+                    let trade_item = QueryPrizeTradeRecord {
                         point: infra_trade_item.point as u32,
                         time: infra_trade_item.time,
                         prize_id: infra_trade_item.prize_id,
@@ -229,8 +229,8 @@ struct QueryableMarketRewardRecord {
 }
 
 #[derive(Insertable)]
-#[table_name = "user_prize_trade_history"]
-struct InsertablePrizeTradeHistoryItem<'a> {
+#[table_name = "user_prize_trade_records"]
+struct InsertablePrizeTradeRecord<'a> {
     user_id: &'a str,
     prize_id: Uuid,
     point: i32,
@@ -239,7 +239,7 @@ struct InsertablePrizeTradeHistoryItem<'a> {
 }
 
 #[derive(Queryable)]
-struct QueryablePrizeTradeHistoryItem {
+struct QueryablePrizeTradeRecord {
     prize_id: Uuid,
     point: i32,
     time: DateTime<Utc>,

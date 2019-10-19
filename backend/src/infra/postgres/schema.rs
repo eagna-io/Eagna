@@ -105,7 +105,7 @@ table! {
     use diesel::sql_types::*;
     use crate::infra::postgres::types::*;
 
-    user_prize_trade_history (unused_id) {
+    user_prize_trade_records (unused_id) {
         unused_id -> Int4,
         user_id -> Text,
         prize_id -> Uuid,
@@ -135,8 +135,8 @@ joinable!(market_tokens -> markets (market_id));
 joinable!(markets -> organizers (organizer_id));
 joinable!(orders -> markets (market_id));
 joinable!(orders -> users (user_id));
-joinable!(user_prize_trade_history -> prizes (prize_id));
-joinable!(user_prize_trade_history -> users (user_id));
+joinable!(user_prize_trade_records -> prizes (prize_id));
+joinable!(user_prize_trade_records -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     market_prizes,
@@ -146,6 +146,6 @@ allow_tables_to_appear_in_same_query!(
     orders,
     organizers,
     prizes,
-    user_prize_trade_history,
+    user_prize_trade_records,
     users,
 );

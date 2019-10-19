@@ -3,7 +3,7 @@ use crate::domain::{market::MarketId, prize::PrizeId};
 use crate::infra::postgres::{
     types::PrizeTradeStatus as InfraPrizeTradeStatus,
     user::{
-        NewMarketRewardHistoryItem, NewPointHistoryItem, NewPrizeTradeHistoryItem, NewUser,
+        NewMarketRewardHistoryItem, NewPointHistoryItem, NewPrizeTradeRecord, NewUser,
         QueryPointHistoryItem,
     },
     PostgresInfra,
@@ -70,7 +70,7 @@ fn convert_point_history_item_to_infra(item: &PointHistoryItem) -> NewPointHisto
             })
         }
         PointHistoryItem::PrizeTrade(ref item) => {
-            NewPointHistoryItem::PrizeTrade(NewPrizeTradeHistoryItem {
+            NewPointHistoryItem::PrizeTrade(NewPrizeTradeRecord {
                 point: *item.point(),
                 time: *item.time(),
                 prize_id: *item.prize_id().as_uuid(),
