@@ -22,7 +22,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
         req_prize.name,
         req_prize.description,
         req_prize.thumbnail_url,
-        req_prize.price,
+        req_prize.point,
         req_prize.available,
     );
     let prize_repo = PrizeRepository::from(infra.get_postgres()?);
@@ -56,6 +56,6 @@ struct ReqPrize {
     name: NonEmptyString,
     description: String,
     thumbnail_url: String,
-    price: NonZeroU32,
+    point: NonZeroU32,
     available: bool,
 }

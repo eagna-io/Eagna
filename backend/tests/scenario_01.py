@@ -65,10 +65,10 @@ def test_users_api():
 
 
 def test_prizes_api():
-    # 初期状態ではPrizeが存在していないことをテストする
+    # 初期状態ではPrizeが1つだけ存在していることをテストする
     res = requests.get(url("/prizes/"))
     assert_eq(res.status_code, 200)
-    assert_eq(len(res.json()), 0)
+    assert_eq(len(res.json()), 1)
 
     # 不正なアクセストークンでは賞品が作成できないことをテストする
     # ペイロードが適切かどうかよりも、アクセストークンが適切かを
@@ -89,31 +89,31 @@ def test_prizes_api():
         "name": "",
         "description": "",
         "thumbnailUrl": "",
-        "price": 0,
+        "point": 0,
         "available": True,
     }
     res = requests.post(url("/prizes/"), json.dumps(payload), headers=headers)
     assert_eq(res.status_code, 400)
 
     # 不正なペイロードでは賞品が作成できないことをテストする
-    # priceが0は許可しない
+    # pointが0は許可しない
     payload = {
         "name": "hoge",
         "description": "",
         "thumbnailUrl": "",
-        "price": 0,
+        "point": 0,
         "available": True,
     }
     res = requests.post(url("/prizes/"), json.dumps(payload), headers=headers)
     assert_eq(res.status_code, 400)
 
     # 不正なペイロードでは賞品が作成できないことをテストする
-    # priceが0以下は許可しない
+    # pointが0以下は許可しない
     payload = {
         "name": "hoge",
         "description": "",
         "thumbnailUrl": "",
-        "price": -1,
+        "point": -1,
         "available": True,
     }
     res = requests.post(url("/prizes/"), json.dumps(payload), headers=headers)
@@ -124,7 +124,7 @@ def test_prizes_api():
         "name": "Prize Hoge",
         "description": "",
         "thumbnailUrl": "",
-        "price": 1,
+        "point": 1,
         "available": True,
     }
     res = requests.post(url("/prizes/"), json.dumps(payload), headers=headers)
@@ -133,12 +133,13 @@ def test_prizes_api():
     # ↑で作成した賞品が取得できるかテストする
     res = requests.get(url("/prizes/"))
     assert_eq(res.status_code, 200)
-    assert_eq(len(res.json()), 1)
-    assert_eq(res.json()[0]["name"], payload["name"])
-    assert_eq(res.json()[0]["description"], payload["description"])
-    assert_eq(res.json()[0]["thumbnailUrl"], payload["thumbnailUrl"])
-    assert_eq(res.json()[0]["price"], payload["price"])
-    assert_eq(res.json()[0]["available"], payload["available"])
+    assert_eq(len(res.json()), 2)
+    prize = next(filter(lambda p: p["name"] == payload["name"], res.json()))
+    assert_eq(prize["name"], payload["name"])
+    assert_eq(prize["description"], payload["description"])
+    assert_eq(prize["thumbnailUrl"], payload["thumbnailUrl"])
+    assert_eq(prize["point"], payload["point"])
+    assert_eq(prize["available"], payload["available"])
 
 
 
