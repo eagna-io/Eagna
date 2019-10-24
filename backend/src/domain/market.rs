@@ -125,6 +125,13 @@ pub trait AbstractMarket {
     fn orders(&self) -> &MarketOrders;
     fn token_distribution(&self) -> &TokenDistribution;
     fn status(&self) -> MarketStatus;
+
+    fn num_users(&self) -> usize {
+        self.orders()
+            .iter()
+            .filter(|o| o.type_() == OrderType::CoinSupply)
+            .count()
+    }
 }
 
 macro_rules! impl_abstract_market {

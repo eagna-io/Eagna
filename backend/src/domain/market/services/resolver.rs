@@ -2,7 +2,7 @@ use crate::domain::{
     market::{
         num::{AmountCoin, AmountToken},
         order::{NormalOrder, Order},
-        ClosedMarket, ResolvedMarket, RewardRecords, INITIAL_SUPPLY_COIN,
+        AbstractMarket, ClosedMarket, ResolvedMarket, RewardRecords, INITIAL_SUPPLY_COIN,
     },
     point::Point,
     user::UserId,
@@ -71,7 +71,7 @@ pub fn resolve_market_uncheck(
 fn compute_point_coin_ratio(market: &ClosedMarket) -> Result<Ratio<u32>, NoUserError> {
     // マーケットで発行された総コイン量を計算する
     // 参加ユーザー数 * InitialSupplyCoin
-    let user_num = market.orders.num_users();
+    let user_num = market.num_users();
     if user_num == 0 {
         return Err(NoUserError());
     }

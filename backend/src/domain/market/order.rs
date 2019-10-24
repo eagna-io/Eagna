@@ -133,13 +133,6 @@ impl MarketOrders {
             Order::Reward(ref r) => Some(r),
         })
     }
-
-    /// マーケットに参加したユーザーの数を返す
-    pub fn num_users(&self) -> usize {
-        self.iter()
-            .filter(|o| o.type_() == OrderType::CoinSupply)
-            .count()
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, From)]
