@@ -105,6 +105,7 @@ fn save_resolved_market(
         &InfraMarketStatus::Resolved,
         market.resolved_token_name().as_str(),
     )?;
+
     // RewardOrder を記録する
     let mut reward_orders = market.orders().filter_reward_orders().map(|o| NewOrder {
         local_id: o.id().as_i32(),
@@ -115,7 +116,19 @@ fn save_resolved_market(
         type_: InfraOrderType::Reward,
         time: *o.time(),
     });
-    postgres.insert_orders(market.id().as_uuid(), &mut reward_orders)
+    postgres.insert_orders(market.id().as_uuid(), &mut reward_orders)?;
+
+    // RewardRecord を記録する
+    let now = chrono::Utc::now();
+    let mut reward_records = market
+        .reward_records
+        .iter()
+        .map(|(user_id, point)| NewRewardRecord {
+            user_id: user_id.as_str(),
+            point: point.as_u32() as i32,
+            time: now,
+        });
+    postgres.insert_reward_records(*market.id().as_uuid(), &mut reward_records)
 }
 
 fn convert_order_type_to_infra(s: OrderType) -> InfraOrderType {

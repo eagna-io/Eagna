@@ -401,6 +401,13 @@ impl_abstract_market!(ResolvedMarket, MarketStatus::Resolved);
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RewardRecords(HashMap<UserId, Point>);
 
+impl std::ops::Deref for RewardRecords {
+    type Target = HashMap<UserId, Point>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TokenDistribution(HashMap<NonEmptyString, AmountToken>);
 

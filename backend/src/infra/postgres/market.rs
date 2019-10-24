@@ -40,7 +40,7 @@ pub trait PostgresMarketInfra {
 
     fn insert_reward_records<'a>(
         &self,
-        market_id: &'a Uuid,
+        market_id: Uuid,
         records: &'a mut dyn Iterator<Item = NewRewardRecord<'a>>,
     ) -> Result<(), failure::Error>;
 
@@ -109,10 +109,9 @@ pub struct NewOrder<'a> {
 }
 
 pub struct NewRewardRecord<'a> {
-    pub market_id: &'a Uuid,
     pub user_id: &'a str,
     pub point: i32,
-    pub time: &'a DateTime<Utc>,
+    pub time: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone)]
@@ -280,15 +279,15 @@ impl PostgresMarketInfra for Postgres {
 
     fn insert_reward_records<'a>(
         &self,
-        market_id: &'a Uuid,
+        market_id: Uuid,
         records: &'a mut dyn Iterator<Item = NewRewardRecord<'a>>,
     ) -> Result<(), failure::Error> {
         let insert_records = records
             .map(|record| InsertableRewardRecord {
-                market_id: *record.market_id,
+                market_id,
                 user_id: record.user_id,
                 point: record.point,
-                time: *record.time,
+                time: record.time,
             })
             .collect::<Vec<_>>();
         diesel::insert_into(market_reward_records::table)
