@@ -70,8 +70,10 @@ impl Market {
             orders,
         })
     }
+}
 
-    pub fn id(&self) -> &MarketId {
+impl AbstractMarket for Market {
+    fn id(&self) -> &MarketId {
         match self {
             Market::Upcoming(ref inner) => inner.id(),
             Market::Open(ref inner) => inner.id(),
@@ -80,7 +82,7 @@ impl Market {
         }
     }
 
-    pub fn attrs(&self) -> &MarketAttrs {
+    fn attrs(&self) -> &MarketAttrs {
         match self {
             Market::Upcoming(ref inner) => inner.attrs(),
             Market::Open(ref inner) => inner.attrs(),
@@ -89,7 +91,7 @@ impl Market {
         }
     }
 
-    pub fn orders(&self) -> &MarketOrders {
+    fn orders(&self) -> &MarketOrders {
         match self {
             Market::Upcoming(ref inner) => inner.orders(),
             Market::Open(ref inner) => inner.orders(),
@@ -98,7 +100,7 @@ impl Market {
         }
     }
 
-    pub fn status(&self) -> MarketStatus {
+    fn status(&self) -> MarketStatus {
         match self {
             Market::Upcoming(_) => MarketStatus::Upcoming,
             Market::Open(_) => MarketStatus::Open,
@@ -107,7 +109,7 @@ impl Market {
         }
     }
 
-    pub fn token_distribution(&self) -> &TokenDistribution {
+    fn token_distribution(&self) -> &TokenDistribution {
         match self {
             Market::Upcoming(ref inner) => inner.token_distribution(),
             Market::Open(ref inner) => inner.token_distribution(),
@@ -117,15 +119,16 @@ impl Market {
     }
 }
 
-trait AbstractMarket {
+pub trait AbstractMarket {
     fn id(&self) -> &MarketId;
     fn attrs(&self) -> &MarketAttrs;
     fn orders(&self) -> &MarketOrders;
     fn token_distribution(&self) -> &TokenDistribution;
+    fn status(&self) -> MarketStatus;
 }
 
 macro_rules! impl_abstract_market {
-    ($ty: ident) => {
+    ($ty: ident, $status: expr) => {
         impl AbstractMarket for $ty {
             fn id(&self) -> &MarketId {
                 &self.id
@@ -138,6 +141,9 @@ macro_rules! impl_abstract_market {
             }
             fn token_distribution(&self) -> &TokenDistribution {
                 &self.token_distribution
+            }
+            fn status(&self) -> MarketStatus {
+                $status
             }
         }
     };
@@ -152,7 +158,7 @@ pub struct UpcomingMarket {
     token_distribution: TokenDistribution,
 }
 
-impl_abstract_market!(UpcomingMarket);
+impl_abstract_market!(UpcomingMarket, MarketStatus::Upcoming);
 
 impl UpcomingMarket {
     pub fn try_open(self) -> Result<OpenMarket, UpcomingMarket> {
@@ -182,7 +188,7 @@ pub struct OpenMarket {
     token_distribution: TokenDistribution,
 }
 
-impl_abstract_market!(OpenMarket);
+impl_abstract_market!(OpenMarket, MarketStatus::Open);
 
 #[derive(Debug, Clone, PartialEq, Eq, Fail)]
 pub enum TryOrderError {
@@ -321,7 +327,7 @@ pub struct ClosedMarket {
     token_distribution: TokenDistribution,
 }
 
-impl_abstract_market!(ClosedMarket);
+impl_abstract_market!(ClosedMarket, MarketStatus::Closed);
 
 #[derive(Debug, Clone, PartialEq, Eq, Getters)]
 #[get = "pub"]
@@ -334,7 +340,7 @@ pub struct ResolvedMarket {
     reward_records: RewardRecords,
 }
 
-impl_abstract_market!(ResolvedMarket);
+impl_abstract_market!(ResolvedMarket, MarketStatus::Resolved);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RewardRecords(HashMap<UserId, Point>);
