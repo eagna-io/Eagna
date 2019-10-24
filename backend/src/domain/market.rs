@@ -152,6 +152,7 @@ pub trait AbstractMarket {
     }
 }
 
+/// ポイントとコインの交換比率を表現する構造体
 pub struct PointCoinRate(Ratio<u32>);
 
 impl PointCoinRate {

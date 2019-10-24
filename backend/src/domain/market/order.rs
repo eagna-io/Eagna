@@ -3,7 +3,6 @@ use crate::domain::user::UserId;
 use crate::primitive::NonEmptyString;
 use chrono::{DateTime, Utc};
 use getset::Getters;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MarketOrders {
