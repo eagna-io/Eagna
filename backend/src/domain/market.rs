@@ -18,7 +18,10 @@ use crate::domain::{
 };
 use crate::primitive::{NonEmptyString, NonEmptyVec};
 use chrono::{DateTime, Utc};
+use failure::Fallible;
 use getset::Getters;
+use num_rational::Ratio;
+use rand::{Rng, RngCore};
 use std::{collections::HashMap, str::FromStr};
 use uuid::Uuid;
 
@@ -126,11 +129,56 @@ pub trait AbstractMarket {
     fn token_distribution(&self) -> &TokenDistribution;
     fn status(&self) -> MarketStatus;
 
+    /// 全Orderを走査するのでOrder数に比例してコストが高くなる
     fn num_users(&self) -> usize {
         self.orders()
             .iter()
             .filter(|o| o.type_() == OrderType::CoinSupply)
             .count()
+    }
+
+    fn point_coin_rate(&self) -> Fallible<PointCoinRate> {
+        let num_users = self.num_users();
+        if num_users == 0 {
+            return Err(failure::err_msg(
+                "Since there is no user, it is infinite rate",
+            ));
+        }
+        let total_issued_coin = INITIAL_SUPPLY_COIN * num_users as i32;
+        Ok(PointCoinRate(Ratio::new(
+            self.attrs().total_reward_point().as_u32(),
+            total_issued_coin.as_i32() as u32,
+        )))
+    }
+}
+
+pub struct PointCoinRate(Ratio<u32>);
+
+impl PointCoinRate {
+    pub fn as_f64(&self) -> f64 {
+        (*self.0.numer() as f64) / (*self.0.denom() as f64)
+    }
+}
+
+impl std::ops::Mul<AmountCoin> for PointCoinRate {
+    type Output = (Point, FractPoint);
+
+    fn mul(self, rhs: AmountCoin) -> (Point, FractPoint) {
+        assert!(rhs >= AmountCoin::zero());
+        let point = self.0 * rhs.as_i32() as u32;
+        (Point::from(point.to_integer()), FractPoint(point.fract()))
+    }
+}
+
+pub struct FractPoint(Ratio<u32>);
+
+impl FractPoint {
+    /// Returns 1 with a probability of this value.
+    pub fn to_integer_with_probability<Rng>(&self, rng: &mut Rng) -> Point
+    where
+        Rng: RngCore,
+    {
+        Point::from(rng.gen_ratio(*self.0.numer(), *self.0.denom()) as u32)
     }
 }
 

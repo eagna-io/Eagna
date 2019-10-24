@@ -2,15 +2,12 @@ use crate::domain::{
     market::{
         num::{AmountCoin, AmountToken},
         order::{NormalOrder, Order},
-        AbstractMarket, ClosedMarket, ResolvedMarket, RewardRecords, INITIAL_SUPPLY_COIN,
+        AbstractMarket, ClosedMarket, ResolvedMarket, RewardRecords,
     },
-    point::Point,
     user::UserId,
 };
 use crate::primitive::NonEmptyString;
-use num_rational::Ratio;
-use rand::Rng;
-use std::{collections::HashMap, iter::FromIterator};
+use std::collections::HashMap;
 
 const REWARD_COIN_PER_TOKEN: u32 = 1000;
 
@@ -21,8 +18,8 @@ pub fn resolve_market_uncheck(
 ) -> ResolvedMarket {
     assert!(market.attrs.is_valid_token(&resolved_token_name));
 
-    let point_coin_ratio = match compute_point_coin_ratio(&market) {
-        Ok(ratio) => ratio,
+    let point_coin_rate = match market.point_coin_rate() {
+        Ok(rate) => rate,
         Err(_) => {
             return ResolvedMarket {
                 id: market.id,
@@ -47,14 +44,16 @@ pub fn resolve_market_uncheck(
             );
         });
 
-    // 参加した全ユーザーの保有コイン量を計算
-    let users_reward_point_iter = compute_users_coin_amount(&market)
+    // ユーザーに報酬ポイントを配布
+    let mut rng = rand::thread_rng();
+    let users_reward_point = compute_users_coin_amount(&market)
         .into_iter()
-        .map(|(user, coin)| (user, determine_user_reward_point(point_coin_ratio, coin)));
-
-    // 各ユーザーの獲得ポイントを記録
-    let mut users_reward_point = HashMap::from_iter(users_reward_point_iter);
-
+        .map(|(user, coin)| {
+            let (int_point, fract_point) = point_coin_rate * coin;
+            let point = int_point + fract_point.to_integer_with_probability(&mut rng);
+            (user, point)
+        })
+        .collect::<HashMap<_, _>>();
     let reward_records = RewardRecords(users_reward_point);
 
     ResolvedMarket {
@@ -66,26 +65,6 @@ pub fn resolve_market_uncheck(
         reward_records,
     }
 }
-
-// 1コインあたりのポイント比率を計算する
-fn compute_point_coin_ratio(market: &ClosedMarket) -> Result<Ratio<u32>, NoUserError> {
-    // マーケットで発行された総コイン量を計算する
-    // 参加ユーザー数 * InitialSupplyCoin
-    let user_num = market.num_users();
-    if user_num == 0 {
-        return Err(NoUserError());
-    }
-    let total_issued_coin = INITIAL_SUPPLY_COIN * user_num as i32;
-
-    let reward_point = *market.attrs.total_reward_point();
-
-    Ok(Ratio::new(
-        reward_point.as_u32(),
-        total_issued_coin.as_i32() as u32,
-    ))
-}
-
-struct NoUserError();
 
 // 各ユーザーが持っている対象トークンの量を計算
 fn compute_users_token_amount(
@@ -131,16 +110,4 @@ fn compute_users_coin_amount(market: &ClosedMarket) -> HashMap<UserId, AmountCoi
     });
 
     user_coin_map
-}
-
-fn determine_user_reward_point(point_coin_ratio: Ratio<u32>, coin: AmountCoin) -> Point {
-    let reward_point = point_coin_ratio * coin.as_i32() as u32;
-    let int_reward_point = reward_point.to_integer();
-    let fract_reward_point = reward_point.fract();
-    let rng = rand::thread_rng();
-    if rng.gen_ratio(*fract_reward_point.numer(), *fract_reward_point.denom()) {
-        Point::from(int_reward_point + 1)
-    } else {
-        Point::from(int_reward_point)
-    }
 }
