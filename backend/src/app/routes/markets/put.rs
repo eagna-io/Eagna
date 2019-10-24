@@ -1,6 +1,6 @@
 use super::ApiMarketStatus;
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::{market::*, user::*};
+use crate::domain::{market::services::resolver::resolve_market_uncheck, market::*, user::*};
 use crate::infra::postgres::{transaction, PostgresInfra};
 use crate::primitive::NonEmptyString;
 
@@ -32,6 +32,7 @@ pub fn put(
             log::info!("resolved_token_name is not set");
             return Err(FailureResponse::InvalidPayload);
         }
+        let resolved_token_name = req_data.resolved_token_name.unwrap();
 
         let market_repo = MarketRepository::from(postgres);
         market_repo.lock_market(&MarketId::from(market_id))?;
@@ -39,19 +40,17 @@ pub fn put(
         let closed_market = match market_repo.query_market(&MarketId::from(market_id))? {
             Some(Market::Closed(m)) => m,
             Some(_) => {
-                log::info!("Would resolve market is not closed.");
+                log::warn!("specified market is not closed.");
                 return Err(FailureResponse::ResourceNotFound);
             }
             None => return Err(FailureResponse::ResourceNotFound),
         };
 
-        let resolved_market = match closed_market.resolve(req_data.resolved_token_name.unwrap()) {
-            Ok(m) => m,
-            Err(e) => {
-                log::info!("Failed to resolve market : {:?}", e);
-                return Err(FailureResponse::InvalidPayload);
-            }
-        };
+        if !closed_market.attrs().is_valid_token(&resolved_token_name) {
+            log::warn!("invalid resolved token : {:?}", resolved_token_name);
+            return Err(FailureResponse::InvalidPayload);
+        }
+        let resolved_market = resolve_market_uncheck(closed_market, resolved_token_name);
 
         market_repo.save_market(&Market::from(resolved_market))?;
 

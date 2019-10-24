@@ -118,26 +118,6 @@ impl MarketOrders {
         self.iter_related_to_user(user_id).next().is_some()
     }
 
-    pub fn compute_amount_token_of_each_user(
-        &self,
-        token_name: &NonEmptyString,
-    ) -> HashMap<UserId, AmountToken> {
-        let mut user_token_map = HashMap::new();
-
-        let iter = self.iter().filter(|o| {
-            o.token_name()
-                .filter(|tname| *tname == token_name)
-                .is_some()
-        });
-        for order in iter {
-            *user_token_map
-                .entry(*order.user_id())
-                .or_insert(AmountToken(0)) += order.amount_token();
-        }
-
-        return user_token_map;
-    }
-
     pub fn filter_normal_orders(&self) -> impl Iterator<Item = &NormalOrder> {
         self.iter().filter_map(|o| match o {
             Order::CoinSupply(_) => None,
@@ -152,6 +132,13 @@ impl MarketOrders {
             Order::Normal(_) => None,
             Order::Reward(ref r) => Some(r),
         })
+    }
+
+    /// マーケットに参加したユーザーの数を返す
+    pub fn num_users(&self) -> usize {
+        self.iter()
+            .filter(|o| o.type_() == OrderType::CoinSupply)
+            .count()
     }
 }
 

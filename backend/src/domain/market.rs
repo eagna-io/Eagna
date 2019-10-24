@@ -1,6 +1,7 @@
-mod num;
-mod order;
-mod repository;
+pub mod num;
+pub mod order;
+pub mod repository;
+pub mod services;
 pub use num::*;
 pub use order::*;
 pub use repository::*;
@@ -17,7 +18,7 @@ use crate::domain::{
 };
 use crate::primitive::{NonEmptyString, NonEmptyVec};
 use chrono::{DateTime, Utc};
-use getset::Getters;
+use getset::{Getters, MutGetters};
 use std::{collections::HashMap, str::FromStr};
 use uuid::Uuid;
 
@@ -281,51 +282,14 @@ impl OpenMarket {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
+#[derive(Debug, Clone, PartialEq, Eq, Getters, MutGetters)]
 #[get = "pub"]
 pub struct ClosedMarket {
     id: MarketId,
     attrs: MarketAttrs,
+    #[get_mut]
     orders: MarketOrders,
     token_distribution: TokenDistribution,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Fail)]
-pub enum ResolveMarketError {
-    #[fail(display = "Specified token does not exists on specified market")]
-    InvalidTokenId,
-}
-
-impl ClosedMarket {
-    pub fn resolve(
-        mut self,
-        resolved_token_name: NonEmptyString,
-    ) -> Result<ResolvedMarket, ResolveMarketError> {
-        if !self.attrs.is_valid_token(&resolved_token_name) {
-            return Err(ResolveMarketError::InvalidTokenId);
-        }
-
-        // Reward orderを発行
-        for (user_id, amount_token) in self
-            .orders
-            .compute_amount_token_of_each_user(&resolved_token_name)
-            .into_iter()
-        {
-            self.orders.add_reward_order(
-                user_id,
-                resolved_token_name.clone(),
-                REWARD_COIN_PER_TOKEN * amount_token.as_i32(),
-            );
-        }
-
-        Ok(ResolvedMarket {
-            id: self.id,
-            attrs: self.attrs,
-            orders: self.orders,
-            token_distribution: self.token_distribution,
-            resolved_token_name,
-        })
-    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Getters)]
@@ -336,7 +300,11 @@ pub struct ResolvedMarket {
     orders: MarketOrders,
     token_distribution: TokenDistribution,
     resolved_token_name: NonEmptyString,
+    reward_records: RewardRecords,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RewardRecords(HashMap<UserId, Point>);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TokenDistribution(HashMap<NonEmptyString, AmountToken>);
@@ -394,7 +362,7 @@ pub struct MarketAttrs {
 }
 
 impl MarketAttrs {
-    fn is_valid_token(&self, token_name: &NonEmptyString) -> bool {
+    pub fn is_valid_token(&self, token_name: &NonEmptyString) -> bool {
         self.tokens.iter().find(|t| &t.name == token_name).is_some()
     }
 }

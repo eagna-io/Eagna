@@ -20,6 +20,7 @@ diesel = { version = "~1.4", features = ["postgres", "chrono", "uuid", "uuidv07"
 diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
 serde = { version = "~1.0", features = ["derive", "rc"] }
 chrono = { version = "~0.4", features = ["serde"] }
+num-rational = "~0.2"
 arrayvec = { version = "~0.4", features = ["serde-1"] }
 lazycell = "~1.2"
 regex = "~1.3"
