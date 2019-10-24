@@ -130,6 +130,7 @@ pub struct QueryMarket {
     // tokenのidxカラム順にソートされている
     pub tokens: Vec<QueryToken>,
     pub prizes: Vec<QueryPrize>,
+    pub reward_records: Option<Vec<QueryRewardRecord>>,
 }
 
 #[derive(Debug, Clone)]
@@ -145,6 +146,12 @@ pub struct QueryPrize {
     pub name: String,
     pub thumbnail_url: String,
     pub target: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct QueryRewardRecord {
+    pub user_id: String,
+    pub point: u32,
 }
 
 #[derive(Debug, Clone)]
@@ -320,7 +327,23 @@ impl PostgresMarketInfra for Postgres {
             .filter(market_prizes::columns::market_id.eq(id))
             .load::<QueryablePrize>(&self.conn)?;
 
-        let market = QueryMarket::from_parts(raw_market, raw_market_tokens, raw_market_prizes);
+        // statusがresolvedのとき、QueryableRewardRecordsを取得
+        let reward_records = if raw_market.status == MarketStatus::Resolved {
+            Some(
+                market_reward_records::table
+                    .filter(market_reward_records::columns::market_id.eq(id))
+                    .load::<QueryableRewardRecords>(&self.conn)?,
+            )
+        } else {
+            None
+        };
+
+        let market = QueryMarket::from_parts(
+            raw_market,
+            raw_market_tokens,
+            raw_market_prizes,
+            reward_records,
+        );
 
         Ok(Some(market))
     }
@@ -392,6 +415,7 @@ impl QueryMarket {
         raw_market: QueryableMarket,
         raw_tokens: Vec<QueryableToken>,
         raw_prizes: Vec<QueryablePrize>,
+        raw_reward_records: Option<Vec<QueryableRewardRecords>>,
     ) -> QueryMarket {
         QueryMarket {
             id: raw_market.id,
@@ -421,6 +445,15 @@ impl QueryMarket {
                     target: prize.target,
                 })
                 .collect(),
+            reward_records: raw_reward_records.map(|records| {
+                records
+                    .into_iter()
+                    .map(|record| QueryRewardRecord {
+                        user_id: record.user_id,
+                        point: record.point as u32,
+                    })
+                    .collect()
+            }),
         }
     }
 }
@@ -512,6 +545,15 @@ struct QueryablePrize {
     thumbnail_url: String,
     target: String,
     market_id: Uuid,
+}
+
+#[derive(Clone, Queryable)]
+struct QueryableRewardRecords {
+    _unused_id: i32,
+    market_id: Uuid,
+    user_id: String,
+    point: i32,
+    time: DateTime<Utc>,
 }
 
 #[derive(Clone, Queryable)]

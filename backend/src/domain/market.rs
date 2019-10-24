@@ -153,6 +153,7 @@ pub trait AbstractMarket {
 }
 
 /// ポイントとコインの交換比率を表現する構造体
+#[derive(Debug, Clone, Copy)]
 pub struct PointCoinRate(Ratio<u32>);
 
 impl PointCoinRate {
@@ -171,6 +172,7 @@ impl std::ops::Mul<AmountCoin> for PointCoinRate {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct FractPoint(Ratio<u32>);
 
 impl FractPoint {

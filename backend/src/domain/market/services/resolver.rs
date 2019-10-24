@@ -13,7 +13,7 @@ const REWARD_COIN_PER_TOKEN: u32 = 1000;
 
 /// ClosedMarketのメソッドとして持たせるには機能が大きすぎるので分離。
 pub fn resolve_market_uncheck(
-    market: ClosedMarket,
+    mut market: ClosedMarket,
     resolved_token_name: NonEmptyString,
 ) -> ResolvedMarket {
     assert!(market.attrs.is_valid_token(&resolved_token_name));

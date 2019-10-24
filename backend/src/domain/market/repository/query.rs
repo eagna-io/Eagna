@@ -83,12 +83,23 @@ pub fn query_market_ids_ready_to_close(
 }
 
 /// `orders` はソート済みでなければならない
-fn build_market(market: QueryMarket, orders: Vec<QueryOrder>) -> Market {
+fn build_market(mut market: QueryMarket, orders: Vec<QueryOrder>) -> Market {
     let market_status = market.status.clone();
     let resolved_token_name = market
         .resolved_token_name
         .clone()
         .map(|n| NonEmptyString::from_str(n).unwrap());
+    let reward_records = market.reward_records.take().map(|records| {
+        records
+            .into_iter()
+            .map(|record| {
+                (
+                    UserId::from_str(record.user_id.as_str()),
+                    Point::from(record.point),
+                )
+            })
+            .collect::<HashMap<_, _>>()
+    });
     let id = MarketId::from(market.id.clone());
     let market_attrs = build_market_attrs(market);
 
@@ -123,6 +134,7 @@ fn build_market(market: QueryMarket, orders: Vec<QueryOrder>) -> Market {
             orders: market_orders,
             token_distribution,
             resolved_token_name: resolved_token_name.unwrap(),
+            reward_records: RewardRecords(reward_records.unwrap()),
         }),
     }
 }
