@@ -38,6 +38,12 @@ pub trait PostgresMarketInfra {
         orders: &'a mut dyn Iterator<Item = NewOrder<'a>>,
     ) -> Result<(), failure::Error>;
 
+    fn insert_reward_records<'a>(
+        &self,
+        market_id: &'a Uuid,
+        records: &'a mut dyn Iterator<Item = NewRewardRecord<'a>>,
+    ) -> Result<(), failure::Error>;
+
     fn query_market_by_id(&self, id: &Uuid) -> Result<Option<QueryMarket>, failure::Error>;
 
     /// 時系列順にソートされた `QueryOrder` を返す。
@@ -102,6 +108,13 @@ pub struct NewOrder<'a> {
     pub time: DateTime<Utc>,
 }
 
+pub struct NewRewardRecord<'a> {
+    pub market_id: &'a Uuid,
+    pub user_id: &'a str,
+    pub point: i32,
+    pub time: &'a DateTime<Utc>,
+}
+
 #[derive(Debug, Clone)]
 pub struct QueryMarket {
     pub id: Uuid,
@@ -152,6 +165,8 @@ pub struct QueryOrder {
  * Implementation
  * ==================
  */
+
+use super::schema::{market_prizes, market_reward_records, market_tokens, markets, orders};
 
 impl PostgresMarketInfra for Postgres {
     fn lock_market(&self, market_id: &Uuid) -> Result<(), failure::Error> {
@@ -259,6 +274,25 @@ impl PostgresMarketInfra for Postgres {
             .collect();
         diesel::insert_into(orders::table)
             .values(&insert_orders)
+            .execute(&self.conn)?;
+        Ok(())
+    }
+
+    fn insert_reward_records<'a>(
+        &self,
+        market_id: &'a Uuid,
+        records: &'a mut dyn Iterator<Item = NewRewardRecord<'a>>,
+    ) -> Result<(), failure::Error> {
+        let insert_records = records
+            .map(|record| InsertableRewardRecord {
+                market_id: *record.market_id,
+                user_id: record.user_id,
+                point: record.point,
+                time: *record.time,
+            })
+            .collect::<Vec<_>>();
+        diesel::insert_into(market_reward_records::table)
+            .values(&insert_records)
             .execute(&self.conn)?;
         Ok(())
     }
@@ -392,8 +426,6 @@ impl QueryMarket {
     }
 }
 
-use super::schema::{market_prizes, market_tokens, markets, orders};
-
 #[derive(Insertable)]
 #[table_name = "markets"]
 struct InsertableMarket<'a> {
@@ -437,6 +469,15 @@ struct InsertableOrder<'a> {
     amount_coin: i32,
     type_: OrderType,
     market_id: &'a Uuid,
+    time: DateTime<Utc>,
+}
+
+#[derive(Insertable)]
+#[table_name = "market_reward_records"]
+struct InsertableRewardRecord<'a> {
+    market_id: Uuid,
+    user_id: &'a str,
+    point: i32,
     time: DateTime<Utc>,
 }
 
