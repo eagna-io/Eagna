@@ -18,7 +18,7 @@ use crate::domain::{
 };
 use crate::primitive::{NonEmptyString, NonEmptyVec};
 use chrono::{DateTime, Utc};
-use getset::{Getters, MutGetters};
+use getset::Getters;
 use std::{collections::HashMap, str::FromStr};
 use uuid::Uuid;
 
@@ -117,6 +117,32 @@ impl Market {
     }
 }
 
+trait AbstractMarket {
+    fn id(&self) -> &MarketId;
+    fn attrs(&self) -> &MarketAttrs;
+    fn orders(&self) -> &MarketOrders;
+    fn token_distribution(&self) -> &TokenDistribution;
+}
+
+macro_rules! impl_abstract_market {
+    ($ty: ident) => {
+        impl AbstractMarket for $ty {
+            fn id(&self) -> &MarketId {
+                &self.id
+            }
+            fn attrs(&self) -> &MarketAttrs {
+                &self.attrs
+            }
+            fn orders(&self) -> &MarketOrders {
+                &self.orders
+            }
+            fn token_distribution(&self) -> &TokenDistribution {
+                &self.token_distribution
+            }
+        }
+    };
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Getters)]
 #[get = "pub"]
 pub struct UpcomingMarket {
@@ -125,6 +151,8 @@ pub struct UpcomingMarket {
     orders: MarketOrders,
     token_distribution: TokenDistribution,
 }
+
+impl_abstract_market!(UpcomingMarket);
 
 impl UpcomingMarket {
     pub fn try_open(self) -> Result<OpenMarket, UpcomingMarket> {
@@ -153,6 +181,8 @@ pub struct OpenMarket {
     orders: MarketOrders,
     token_distribution: TokenDistribution,
 }
+
+impl_abstract_market!(OpenMarket);
 
 #[derive(Debug, Clone, PartialEq, Eq, Fail)]
 pub enum TryOrderError {
@@ -282,15 +312,16 @@ impl OpenMarket {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Getters, MutGetters)]
+#[derive(Debug, Clone, PartialEq, Eq, Getters)]
 #[get = "pub"]
 pub struct ClosedMarket {
     id: MarketId,
     attrs: MarketAttrs,
-    #[get_mut]
     orders: MarketOrders,
     token_distribution: TokenDistribution,
 }
+
+impl_abstract_market!(ClosedMarket);
 
 #[derive(Debug, Clone, PartialEq, Eq, Getters)]
 #[get = "pub"]
@@ -302,6 +333,8 @@ pub struct ResolvedMarket {
     resolved_token_name: NonEmptyString,
     reward_records: RewardRecords,
 }
+
+impl_abstract_market!(ResolvedMarket);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RewardRecords(HashMap<UserId, Point>);

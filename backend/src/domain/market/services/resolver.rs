@@ -19,7 +19,7 @@ pub fn resolve_market_uncheck(
     market: ClosedMarket,
     resolved_token_name: NonEmptyString,
 ) -> ResolvedMarket {
-    assert!(market.attrs().is_valid_token(&resolved_token_name));
+    assert!(market.attrs.is_valid_token(&resolved_token_name));
 
     let point_coin_ratio = match compute_point_coin_ratio(&market) {
         Ok(ratio) => ratio,
@@ -40,7 +40,7 @@ pub fn resolve_market_uncheck(
         .into_iter()
         .for_each(|(user_id, amount_token)| {
             // 各ユーザーにReward Orderを発行
-            market.orders_mut().add_reward_order(
+            market.orders.add_reward_order(
                 user_id,
                 resolved_token_name.clone(),
                 AmountCoin(REWARD_COIN_PER_TOKEN as i32 * amount_token.as_i32()),
@@ -71,13 +71,13 @@ pub fn resolve_market_uncheck(
 fn compute_point_coin_ratio(market: &ClosedMarket) -> Result<Ratio<u32>, NoUserError> {
     // マーケットで発行された総コイン量を計算する
     // 参加ユーザー数 * InitialSupplyCoin
-    let user_num = market.orders().num_users();
+    let user_num = market.orders.num_users();
     if user_num == 0 {
         return Err(NoUserError());
     }
     let total_issued_coin = INITIAL_SUPPLY_COIN * user_num as i32;
 
-    let reward_point = *market.attrs().total_reward_point();
+    let reward_point = *market.attrs.total_reward_point();
 
     Ok(Ratio::new(
         reward_point.as_u32(),
@@ -123,7 +123,7 @@ fn filter_map_related_normal_order<'a>(
 fn compute_users_coin_amount(market: &ClosedMarket) -> HashMap<UserId, AmountCoin> {
     let mut user_coin_map = HashMap::new();
 
-    market.orders().iter().for_each(|order| {
+    market.orders.iter().for_each(|order| {
         let cur_amount = user_coin_map
             .entry(*order.user_id())
             .or_insert(AmountCoin(0));
