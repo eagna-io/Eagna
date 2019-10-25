@@ -3,6 +3,7 @@ pub mod repository;
 pub use point_history::*;
 pub use repository::*;
 
+use crate::domain::point::Point;
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use arrayvec::ArrayString;
 use getset::Getters;
@@ -14,7 +15,7 @@ pub struct User {
     name: UserName,
     email: UserEmail,
     is_admin: bool,
-    point_history: PointHistory,
+    point: Point,
 }
 
 impl User {
@@ -25,12 +26,8 @@ impl User {
             name,
             email,
             is_admin: false,
-            point_history: PointHistory::new(),
+            point: Point::zero(),
         }
-    }
-
-    pub fn point(&self) -> u32 {
-        self.point_history().sum()
     }
 }
 

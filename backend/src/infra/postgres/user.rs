@@ -4,8 +4,7 @@ use super::{
     Postgres,
 };
 use chrono::{DateTime, Utc};
-use diesel::{prelude::*, result::Error as PgError};
-use std::cmp::Ordering;
+use diesel::{dsl::sum, prelude::*, result::Error as PgError};
 use uuid::Uuid;
 
 pub trait PostgresUserInfra {
@@ -13,16 +12,18 @@ pub trait PostgresUserInfra {
 
     fn query_user(&self, user_id: &str) -> Result<Option<QueryUser>, failure::Error>;
 
-    fn save_user_point_history(
+    fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error>;
+
+    fn save_user_prize_trade_record(
         &self,
         user_id: &str,
-        history: NewPointHistoryItem,
+        record: NewPrizeTradeRecord,
     ) -> Result<(), failure::Error>;
 
-    fn query_user_point_history(
+    fn query_user_prize_trade_records(
         &self,
         user_id: &str,
-    ) -> Result<Vec<QueryPointHistoryItem>, failure::Error>;
+    ) -> Result<Vec<QueryPrizeTradeRecord>, failure::Error>;
 }
 
 pub struct NewUser<'a> {
@@ -38,33 +39,11 @@ pub struct QueryUser {
     pub is_admin: bool,
 }
 
-pub enum NewPointHistoryItem {
-    MarketReward(NewMarketRewardHistoryItem),
-    PrizeTrade(NewPrizeTradeRecord),
-}
-
-pub struct NewMarketRewardHistoryItem {
-    pub point: u32,
-    pub time: DateTime<Utc>,
-    pub market_id: Uuid,
-}
-
 pub struct NewPrizeTradeRecord {
-    pub point: u32,
-    pub time: DateTime<Utc>,
     pub prize_id: Uuid,
-    pub status: PrizeTradeStatus,
-}
-
-pub enum QueryPointHistoryItem {
-    MarketReward(QueryMarketRewardHistoryItem),
-    PrizeTrade(QueryPrizeTradeRecord),
-}
-
-pub struct QueryMarketRewardHistoryItem {
     pub point: u32,
     pub time: DateTime<Utc>,
-    pub market_id: Uuid,
+    pub status: PrizeTradeStatus,
 }
 
 pub struct QueryPrizeTradeRecord {
@@ -102,51 +81,44 @@ impl PostgresUserInfra for Postgres {
         }
     }
 
-    fn save_user_point_history(
+    fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error> {
+        let reward_points = market_reward_records::table
+            .filter(market_reward_records::user_id.eq(user_id))
+            .select(sum(market_reward_records::point))
+            .first::<Option<i64>>(&self.conn)?
+            .unwrap_or(0);
+        let used_points = user_prize_trade_records::table
+            .filter(user_prize_trade_records::user_id.eq(user_id))
+            .select(sum(user_prize_trade_records::point))
+            .first::<Option<i64>>(&self.conn)?
+            .unwrap_or(0);
+        let user_points = reward_points + used_points;
+        assert!(user_points >= 0);
+        Ok(user_points as u32)
+    }
+
+    fn save_user_prize_trade_record(
         &self,
         user_id: &str,
-        item: NewPointHistoryItem,
+        record: NewPrizeTradeRecord,
     ) -> Result<(), failure::Error> {
-        match item {
-            NewPointHistoryItem::MarketReward(item) => {
-                diesel::insert_into(market_reward_records::table)
-                    .values(InsertableMarketRewardRecord {
-                        user_id,
-                        point: item.point as i32,
-                        time: item.time,
-                        market_id: item.market_id,
-                    })
-                    .execute(&self.conn)?;
-            }
-            NewPointHistoryItem::PrizeTrade(item) => {
-                diesel::insert_into(user_prize_trade_records::table)
-                    .values(InsertablePrizeTradeRecord {
-                        user_id,
-                        point: item.point as i32,
-                        time: item.time,
-                        prize_id: item.prize_id,
-                        status: item.status,
-                    })
-                    .execute(&self.conn)?;
-            }
-        }
+        diesel::insert_into(user_prize_trade_records::table)
+            .values(InsertablePrizeTradeRecord {
+                user_id,
+                point: record.point as i32,
+                time: record.time,
+                prize_id: record.prize_id,
+                status: record.status,
+            })
+            .execute(&self.conn)?;
         Ok(())
     }
 
-    fn query_user_point_history(
+    fn query_user_prize_trade_records(
         &self,
         user_id: &str,
-    ) -> Result<Vec<QueryPointHistoryItem>, failure::Error> {
-        let mut reward_history = market_reward_records::table
-            .filter(market_reward_records::columns::user_id.eq(user_id))
-            .select((
-                market_reward_records::columns::market_id,
-                market_reward_records::columns::point,
-                market_reward_records::columns::time,
-            ))
-            .order(market_reward_records::columns::time.asc())
-            .load::<QueryableMarketRewardRecord>(&self.conn)?;
-        let mut trade_history = user_prize_trade_records::table
+    ) -> Result<Vec<QueryPrizeTradeRecord>, failure::Error> {
+        Ok(user_prize_trade_records::table
             .filter(user_prize_trade_records::columns::user_id.eq(user_id))
             .select((
                 user_prize_trade_records::columns::prize_id,
@@ -155,43 +127,15 @@ impl PostgresUserInfra for Postgres {
                 user_prize_trade_records::columns::status,
             ))
             .order(user_prize_trade_records::columns::time.asc())
-            .load::<QueryablePrizeTradeRecord>(&self.conn)?;
-
-        // time が小さいものから順に取り出していく
-        let mut history = Vec::with_capacity(reward_history.len() + trade_history.len());
-        loop {
-            let which = match (reward_history.first(), trade_history.first()) {
-                (Some(reward_item), Some(trade_item)) => reward_item.time.cmp(&trade_item.time),
-                (Some(_), None) => Ordering::Less,
-                (None, Some(_)) => Ordering::Greater,
-                (None, None) => break,
-            };
-            let item = match which {
-                Ordering::Less | Ordering::Equal => {
-                    // reward_history から取り出す
-                    let infra_reward_item = reward_history.pop().unwrap();
-                    let reward_item = QueryMarketRewardHistoryItem {
-                        point: infra_reward_item.point as u32,
-                        market_id: infra_reward_item.market_id,
-                        time: infra_reward_item.time,
-                    };
-                    QueryPointHistoryItem::MarketReward(reward_item)
-                }
-                Ordering::Greater => {
-                    // trade_history から取り出す
-                    let infra_trade_item = trade_history.pop().unwrap();
-                    let trade_item = QueryPrizeTradeRecord {
-                        point: infra_trade_item.point as u32,
-                        time: infra_trade_item.time,
-                        prize_id: infra_trade_item.prize_id,
-                        status: infra_trade_item.status,
-                    };
-                    QueryPointHistoryItem::PrizeTrade(trade_item)
-                }
-            };
-            history.push(item);
-        }
-        Ok(history)
+            .load::<QueryablePrizeTradeRecord>(&self.conn)?
+            .into_iter()
+            .map(|record| QueryPrizeTradeRecord {
+                point: record.point as u32,
+                time: record.time,
+                prize_id: record.prize_id,
+                status: record.status,
+            })
+            .collect())
     }
 }
 
@@ -210,22 +154,6 @@ struct QueryableUser {
     email: String,
     is_admin: bool,
     _created: DateTime<Utc>,
-}
-
-#[derive(Insertable)]
-#[table_name = "market_reward_records"]
-struct InsertableMarketRewardRecord<'a> {
-    user_id: &'a str,
-    market_id: Uuid,
-    point: i32,
-    time: DateTime<Utc>,
-}
-
-#[derive(Queryable)]
-struct QueryableMarketRewardRecord {
-    market_id: Uuid,
-    point: i32,
-    time: DateTime<Utc>,
 }
 
 #[derive(Insertable)]
