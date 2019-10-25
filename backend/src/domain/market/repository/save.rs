@@ -100,11 +100,7 @@ fn save_resolved_market(
     market: &ResolvedMarket,
 ) -> Result<(), failure::Error> {
     // status を resolved に変更し、resolved_token_name を設定する
-    postgres.update_market_status_and_resolved_token_name(
-        market.id().as_uuid(),
-        &InfraMarketStatus::Resolved,
-        market.resolved_token_name().as_str(),
-    )?;
+    postgres.resolve_market(market.id().as_uuid(), market.resolved_token_name().as_str())?;
 
     // RewardOrder を記録する
     let mut reward_orders = market.orders().filter_reward_orders().map(|o| NewOrder {

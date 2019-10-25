@@ -25,10 +25,12 @@ pub trait PostgresMarketInfra {
         market_status: &MarketStatus,
     ) -> Result<(), failure::Error>;
 
-    fn update_market_status_and_resolved_token_name(
+    /// - market_statusをResolvedに変更
+    /// - resolved_token_name を設定
+    /// - resolved_at を設定
+    fn resolve_market(
         &self,
         market_id: &Uuid,
-        market_status: &MarketStatus,
         resolved_token_name: &str,
     ) -> Result<(), failure::Error>;
 
@@ -246,15 +248,14 @@ impl PostgresMarketInfra for Postgres {
         Ok(())
     }
 
-    fn update_market_status_and_resolved_token_name(
+    fn resolve_market(
         &self,
         market_id: &Uuid,
-        market_status: &MarketStatus,
         resolved_token_name: &str,
     ) -> Result<(), failure::Error> {
         diesel::update(markets::table.filter(markets::id.eq(market_id)))
             .set((
-                markets::status.eq(market_status),
+                markets::status.eq(MarketStatus::Resolved),
                 markets::resolved_token_name.eq(resolved_token_name),
                 markets::resolved_at.eq(Utc::now()),
             ))
