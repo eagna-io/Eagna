@@ -111,7 +111,6 @@ pub struct NewOrder<'a> {
 pub struct NewRewardRecord<'a> {
     pub user_id: &'a str,
     pub point: i32,
-    pub time: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone)]
@@ -126,10 +125,11 @@ pub struct QueryMarket {
     pub open: DateTime<Utc>,
     pub close: DateTime<Utc>,
     pub status: MarketStatus,
-    pub resolved_token_name: Option<String>,
     // tokenのidxカラム順にソートされている
     pub tokens: Vec<QueryToken>,
     pub prizes: Vec<QueryPrize>,
+    pub resolved_token_name: Option<String>,
+    pub resolved_at: Option<DateTime<Utc>>,
     pub reward_records: Option<Vec<QueryRewardRecord>>,
 }
 
@@ -256,6 +256,7 @@ impl PostgresMarketInfra for Postgres {
             .set((
                 markets::status.eq(market_status),
                 markets::resolved_token_name.eq(resolved_token_name),
+                markets::resolved_at.eq(Utc::now()),
             ))
             .execute(&self.conn)?;
         Ok(())
@@ -294,7 +295,6 @@ impl PostgresMarketInfra for Postgres {
                 market_id,
                 user_id: record.user_id,
                 point: record.point,
-                time: record.time,
             })
             .collect::<Vec<_>>();
         diesel::insert_into(market_reward_records::table)
@@ -428,6 +428,7 @@ impl QueryMarket {
             close: raw_market.close,
             status: raw_market.status,
             resolved_token_name: raw_market.resolved_token_name,
+            resolved_at: raw_market.resolved_at,
             tokens: raw_tokens
                 .into_iter()
                 .map(|token| QueryToken {
@@ -510,7 +511,6 @@ struct InsertableRewardRecord<'a> {
     market_id: Uuid,
     user_id: &'a str,
     point: i32,
-    time: DateTime<Utc>,
 }
 
 #[derive(Queryable)]
@@ -525,6 +525,7 @@ struct QueryableMarket {
     status: MarketStatus,
     resolved_token_name: Option<String>,
     total_reward_point: i32,
+    resolved_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Clone, Queryable)]
@@ -553,7 +554,6 @@ struct QueryableRewardRecords {
     market_id: Uuid,
     user_id: String,
     point: i32,
-    time: DateTime<Utc>,
 }
 
 #[derive(Clone, Queryable)]

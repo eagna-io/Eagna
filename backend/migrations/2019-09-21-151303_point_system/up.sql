@@ -2,6 +2,8 @@
 ALTER TABLE markets ADD COLUMN total_reward_point INTEGER NOT NULL DEFAULT 0;
 -- DEFAULT値を削除
 ALTER TABLE markets ALTER COLUMN total_reward_point DROP DEFAULT;
+-- market が resolve した時刻を記録
+ALTER TABLE markets ADD COLUMN resolved_at timestamptz DEFAULT NULL;
 
 -- Market報酬として発行されたpoint報酬の履歴
 CREATE TABLE market_reward_records (
@@ -11,7 +13,6 @@ CREATE TABLE market_reward_records (
   user_id     text NOT NULL,
   -- 発行したポイント量。0より大きい。0の場合はレコードを追加しない。
   point       integer NOT NULL,
-  time        timestamptz NOT NULL DEFAULT now(),
 
   CONSTRAINT user_reward_point_history_market_fkey FOREIGN KEY(market_id)
     REFERENCES markets(id) ON UPDATE CASCADE ON DELETE RESTRICT,

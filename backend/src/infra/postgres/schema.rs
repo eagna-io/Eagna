@@ -21,7 +21,6 @@ table! {
         market_id -> Uuid,
         user_id -> Text,
         point -> Int4,
-        time -> Timestamptz,
     }
 }
 
@@ -40,6 +39,7 @@ table! {
         status -> Market_status,
         resolved_token_name -> Nullable<Text>,
         total_reward_point -> Int4,
+        resolved_at -> Nullable<Timestamptz>,
     }
 }
 
