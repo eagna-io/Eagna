@@ -1,8 +1,11 @@
 use super::*;
-use crate::domain::prize::PrizeId;
+use crate::domain::{market::MarketId, point::Point, prize::PrizeId};
 use crate::infra::postgres::{
-    types::PrizeTradeStatus as InfraPrizeTradeStatus, user::NewUser as InfraNewUser, PostgresInfra,
+    types::PrizeTradeStatus as InfraPrizeTradeStatus,
+    user::{NewPrizeTradeRecord, NewUser as InfraNewUser},
+    PostgresInfra,
 };
+use failure::Fallible;
 
 #[derive(From)]
 pub struct UserRepository<'a> {
@@ -33,6 +36,23 @@ impl<'a> UserRepository<'a> {
             is_admin: user.is_admin,
             pg: self.postgres,
         }))
+    }
+
+    pub fn save_user_prize_trade_request<U>(
+        &self,
+        user: &UserWithPrizeTradeRequest<U>,
+    ) -> Fallible<()>
+    where
+        U: User,
+    {
+        let new_prize_trade_record = NewPrizeTradeRecord {
+            id: user.requested_prize_trade_record().id,
+            prize_id: *user.requested_prize_trade_record().prize_id.as_uuid(),
+            point: user.requested_prize_trade_record().point.as_u32(),
+            time: user.requested_prize_trade_record().time,
+        };
+        self.postgres
+            .save_user_prize_trade_record(user.id().as_str(), new_prize_trade_record)
     }
 }
 
@@ -116,60 +136,11 @@ impl<'a> UserWithPg for QueryUser<'a> {
     }
 }
 
-macro_rules! impl_user {
-    ($ty: ident) => {
-        impl<U: User> User for $ty<U> {
-            fn id(&self) -> &UserId {
-                self.user.id()
-            }
-            fn name(&self) -> &UserName {
-                self.user.name()
-            }
-            fn email(&self) -> &UserEmail {
-                self.user.email()
-            }
-            fn is_admin(&self) -> bool {
-                self.user.is_admin()
-            }
-        }
-    };
-}
-
 macro_rules! impl_user_with_pg {
     ($ty: ident) => {
         impl<U: UserWithPg> UserWithPg for $ty<U> {
             fn pg(&self) -> &dyn PostgresInfra {
                 self.user.pg()
-            }
-        }
-    };
-}
-
-macro_rules! impl_user_with_point {
-    ($ty: ident) => {
-        impl<U: UserWithPoint> UserWithPoint for $ty<U> {
-            fn point(&self) -> Point {
-                self.user.point()
-            }
-        }
-    };
-}
-
-macro_rules! impl_user_with_prize_trade_history {
-    ($ty: ident) => {
-        impl<U: UserWithPrizeTradeHistory> UserWithPrizeTradeHistory for $ty<U> {
-            fn prize_trade_history(&self) -> &Vec<PrizeTradeRecord> {
-                self.user.prize_trade_history()
-            }
-        }
-    };
-}
-
-macro_rules! impl_user_with_market_reward_history {
-    ($ty: ident) => {
-        impl<U: UserWithMarketRewardHistory> UserWithMarketRewardHistory for $ty<U> {
-            fn market_reward_history(&self) -> &Vec<MarketRewardRecord> {
-                self.user.market_reward_history()
             }
         }
     };

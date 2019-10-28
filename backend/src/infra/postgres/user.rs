@@ -49,7 +49,6 @@ pub struct NewPrizeTradeRecord {
     pub prize_id: Uuid,
     pub point: u32,
     pub time: DateTime<Utc>,
-    pub status: PrizeTradeStatus,
 }
 
 pub struct QueryPrizeTradeRecord {
@@ -121,7 +120,7 @@ impl PostgresUserInfra for Postgres {
                 point: record.point as i32,
                 time: record.time,
                 prize_id: record.prize_id,
-                status: record.status,
+                status: PrizeTradeStatus::Requested,
             })
             .execute(&self.conn)?;
         Ok(())
