@@ -11,7 +11,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
 
     let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
 
-    let new_user = User::new(access_token.user_id, req_data.name, req_data.email);
+    let new_user = NewUser::new(access_token.user_id, req_data.name, req_data.email);
 
     let user_repo = UserRepository::from(infra.get_postgres()?);
 
@@ -21,8 +21,8 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
         id: new_user.id(),
         name: new_user.name(),
         email: new_user.email(),
-        point: 0,
-        is_admin: *new_user.is_admin(),
+        point: new_user.point().as_u32(),
+        is_admin: new_user.is_admin(),
     };
 
     Ok(Response::json(&res_data).with_status_code(201))

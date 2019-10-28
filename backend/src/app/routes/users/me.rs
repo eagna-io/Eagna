@@ -8,16 +8,18 @@ pub fn get_me(infra: &InfraManager, req: &Request) -> Result<Response, FailureRe
     let repo = UserRepository::from(infra.get_postgres()?);
     match repo.query_user(&access_token.user_id)? {
         None => Err(FailureResponse::Unauthorized),
-        Some(user) => Ok(Response::json(&construct_response_data(&user))),
+        Some(user) => Ok(Response::json(&construct_response_data(
+            &user.with_point()?,
+        ))),
     }
 }
 
-fn construct_response_data(user: &User) -> ResUser {
+fn construct_response_data<U: UserWithPoint>(user: &U) -> ResUser {
     ResUser {
         id: user.id().as_str(),
         name: user.name().as_str(),
         email: user.email().as_str(),
-        is_admin: *user.is_admin(),
+        is_admin: user.is_admin(),
         point: user.point().as_u32(),
     }
 }

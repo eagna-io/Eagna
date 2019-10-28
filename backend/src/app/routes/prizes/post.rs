@@ -2,7 +2,7 @@ use super::ResPrize;
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::{
     prize::{Prize, PrizeRepository},
-    user::{UserId, UserRepository},
+    user::{User, UserId, UserRepository},
 };
 use crate::primitive::NonEmptyString;
 use rouille::{input::json_input, Request, Response};
@@ -36,7 +36,7 @@ fn authorize(infra: &InfraManager, user_id: &UserId) -> Result<(), FailureRespon
     let user_repo = UserRepository::from(infra.get_postgres()?);
     match user_repo.query_user(user_id)? {
         Some(user) => {
-            if *user.is_admin() {
+            if user.is_admin() {
                 Ok(())
             } else {
                 log::warn!("Non admin user try to access admin resource");

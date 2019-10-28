@@ -1,33 +1,68 @@
 pub mod point_history;
 pub mod repository;
-pub use point_history::*;
 pub use repository::*;
 
 use crate::domain::point::Point;
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use arrayvec::ArrayString;
-use getset::Getters;
+use chrono::{DateTime, Utc};
+use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
-#[get = "pub"]
-pub struct User {
+pub trait User: Sized {
+    fn id(&self) -> &UserId;
+    fn name(&self) -> &UserName;
+    fn email(&self) -> &UserEmail;
+    fn is_admin(&self) -> bool;
+}
+
+pub trait UserWithPoint: User {
+    fn point(&self) -> Point;
+}
+
+pub trait UserWithPrizeTradeHistory: User {
+    fn prize_trade_history(&self) -> &Vec<PrizeTradeRecord>;
+}
+
+pub struct NewUser {
     id: UserId,
     name: UserName,
     email: UserEmail,
-    is_admin: bool,
-    point: Point,
 }
 
-impl User {
+impl NewUser {
     /// 新たにエンティティが作られる時の関数
-    pub fn new(id: UserId, name: UserName, email: UserEmail) -> User {
-        User {
-            id,
-            name,
-            email,
-            is_admin: false,
-            point: Point::zero(),
+    pub fn new(id: UserId, name: UserName, email: UserEmail) -> NewUser {
+        NewUser { id, name, email }
+    }
+}
+
+impl User for NewUser {
+    fn id(&self) -> &UserId {
+        &self.id
+    }
+    fn name(&self) -> &UserName {
+        &self.name
+    }
+    fn email(&self) -> &UserEmail {
+        &self.email
+    }
+    fn is_admin(&self) -> bool {
+        false
+    }
+}
+
+impl UserWithPoint for NewUser {
+    fn point(&self) -> Point {
+        Point::zero()
+    }
+}
+
+impl UserWithPrizeTradeHistory for NewUser {
+    fn prize_trade_history(&self) -> &Vec<PrizeTradeRecord> {
+        lazy_static::lazy_static! {
+            static ref EMPTY_VEC: Vec<PrizeTradeRecord> = Vec::new();
         }
+        &EMPTY_VEC
     }
 }
 
@@ -72,4 +107,18 @@ impl UserEmail {
     pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
         Ok(UserEmail(NonEmptyString::from_str(s)?))
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrizeTradeRecord {
+    prize_id: Uuid,
+    point: Point,
+    time: DateTime<Utc>,
+    status: PrizeTradeStatus,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum PrizeTradeStatus {
+    Requested,
+    Processed,
 }
