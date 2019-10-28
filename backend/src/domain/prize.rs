@@ -1,6 +1,7 @@
 pub mod repository;
 pub use repository::*;
 
+use crate::domain::point::Point;
 use crate::primitive::NonEmptyString;
 use chrono::{DateTime, Utc};
 use getset::Getters;
@@ -17,7 +18,7 @@ pub struct Prize {
     name: NonEmptyString,
     description: String,
     thumbnail_url: String,
-    point: NonZeroU32,
+    point: Point,
     // getsetの新しいバージョンではCopyGettersが導入されるはず。
     // それが導入されれば、
     // #[get_copy = "pub"]
@@ -39,14 +40,14 @@ impl Prize {
             name,
             description,
             thumbnail_url,
-            point,
+            point: Point::from(point.get()),
             available,
             created: Utc::now(),
         }
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, From)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, From)]
 pub struct PrizeId(Uuid);
 
 impl PrizeId {

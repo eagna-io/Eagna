@@ -1,7 +1,7 @@
 use super::{Prize, PrizeId};
+use crate::domain::point::Point;
 use crate::infra::postgres::{prize::NewPrize, PostgresInfra};
 use crate::primitive::NonEmptyString;
-use std::num::NonZeroU32;
 
 #[derive(From)]
 pub struct PrizeRepository<'a> {
@@ -15,7 +15,7 @@ impl<'a> PrizeRepository<'a> {
             name: prize.name.as_str(),
             description: prize.description.as_str(),
             thumbnail_url: prize.thumbnail_url.as_str(),
-            point: prize.point.get(),
+            point: prize.point.as_u32(),
             available: prize.available,
             created: &prize.created,
         };
@@ -31,7 +31,7 @@ impl<'a> PrizeRepository<'a> {
                 name: NonEmptyString::from_str(query_prize.name)?,
                 description: query_prize.description,
                 thumbnail_url: query_prize.thumbnail_url,
-                point: NonZeroU32::new(query_prize.point).unwrap(),
+                point: Point::from(query_prize.point),
                 available: query_prize.available,
                 created: query_prize.created,
             });

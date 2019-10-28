@@ -2,7 +2,11 @@ pub mod point_history;
 pub mod repository;
 pub use repository::*;
 
-use crate::domain::{market::MarketId, point::Point, prize::PrizeId};
+use crate::domain::{
+    market::MarketId,
+    point::Point,
+    prize::{Prize, PrizeId},
+};
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use arrayvec::ArrayString;
 use chrono::{DateTime, Utc};
@@ -131,6 +135,21 @@ pub struct PrizeTradeRecord {
     point: Point,
     time: DateTime<Utc>,
     status: PrizeTradeStatus,
+}
+
+impl PrizeTradeRecord {
+    /// PrizeTradeRecord モデルを新規作成する。
+    /// `Prize` を要求することで、その `Prize` が
+    /// 実際に存在していることを証明する。
+    pub fn new(prize: Prize) -> PrizeTradeRecord {
+        PrizeTradeRecord {
+            id: Uuid::new_v4(),
+            prize_id: *prize.id(),
+            point: *prize.point(),
+            time: Utc::now(),
+            status: PrizeTradeStatus::Requested,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
