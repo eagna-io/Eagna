@@ -4,7 +4,7 @@
 //! よってQueryの結果としてドメイン層のモデルを返すなどはしない。
 use super::{schema::prizes, Postgres};
 use chrono::{DateTime, Utc};
-use diesel::{pg::expression::dsl::any, prelude::*};
+use diesel::{pg::expression::dsl::any, prelude::*, result::Error as PgError};
 use uuid::Uuid;
 
 pub trait PostgresPrizeInfra {
@@ -15,6 +15,8 @@ pub trait PostgresPrizeInfra {
     fn query_available_prizes(&self) -> Result<Vec<QueryPrize>, failure::Error>;
 
     fn query_prizes(&self, prize_id_list: &[Uuid]) -> Result<Vec<QueryPrize>, failure::Error>;
+
+    fn query_prize(&self, prize_id: &Uuid) -> Result<Option<QueryPrize>, failure::Error>;
 }
 
 pub struct NewPrize<'a> {
@@ -62,7 +64,7 @@ impl PostgresPrizeInfra for Postgres {
 
     fn query_available_prizes(&self) -> Result<Vec<QueryPrize>, failure::Error> {
         Ok(prizes::table
-            .filter(prizes::columns::available.eq(true))
+            .filter(prizes::available.eq(true))
             .load::<QueryablePrize>(&self.conn)?
             .into_iter()
             .map(QueryablePrize::into)
@@ -71,11 +73,30 @@ impl PostgresPrizeInfra for Postgres {
 
     fn query_prizes(&self, prize_id_list: &[Uuid]) -> Result<Vec<QueryPrize>, failure::Error> {
         Ok(prizes::table
-            .filter(prizes::columns::id.eq(any(prize_id_list)))
+            .filter(prizes::id.eq(any(prize_id_list)))
             .load::<QueryablePrize>(&self.conn)?
             .into_iter()
             .map(QueryablePrize::into)
             .collect())
+    }
+
+    fn query_prize(&self, prize_id: &Uuid) -> Result<Option<QueryPrize>, failure::Error> {
+        match prizes::table
+            .filter(prizes::id.eq(prize_id))
+            .first::<QueryablePrize>(&self.conn)
+        {
+            Ok(raw_prize) => Ok(Some(QueryPrize {
+                id: raw_prize.id,
+                name: raw_prize.name,
+                description: raw_prize.description,
+                thumbnail_url: raw_prize.thumbnail_url,
+                point: raw_prize.point as u32,
+                available: raw_prize.available,
+                created: raw_prize.created,
+            })),
+            Err(PgError::NotFound) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
     }
 }
 
