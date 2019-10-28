@@ -1,5 +1,4 @@
-mod me;
-pub use me::get_me;
+pub mod me;
 
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::user::*;

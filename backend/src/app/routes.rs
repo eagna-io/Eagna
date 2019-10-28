@@ -24,7 +24,10 @@ pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
             users::post(infra, req)
         },
         (GET) (/users/me/) => {
-            users::get_me(infra, req)
+            users::me::get(infra, req)
+        },
+        (POST) (/users/me/prize_trade_history/) => {
+            users::me::prize_trade_history::post(infra, req)
         },
         (GET) (/markets/) => {
             markets::get_list(infra, req)
