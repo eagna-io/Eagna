@@ -1,6 +1,9 @@
 use super::{Prize, PrizeId};
 use crate::domain::point::Point;
-use crate::infra::postgres::{prize::NewPrize, PostgresInfra};
+use crate::infra::postgres::{
+    prize::{NewPrize, QueryPrize},
+    PostgresInfra,
+};
 use crate::primitive::NonEmptyString;
 
 #[derive(From)]
@@ -23,19 +26,30 @@ impl<'a> PrizeRepository<'a> {
     }
 
     pub fn query_all_prizes(&self) -> Result<Vec<Prize>, failure::Error> {
-        let query_prizes = self.postgres.query_all_prizes()?;
-        let mut prizes = Vec::with_capacity(query_prizes.len());
-        for query_prize in query_prizes {
-            prizes.push(Prize {
-                id: PrizeId::from(query_prize.id),
-                name: NonEmptyString::from_str(query_prize.name)?,
-                description: query_prize.description,
-                thumbnail_url: query_prize.thumbnail_url,
-                point: Point::from(query_prize.point),
-                available: query_prize.available,
-                created: query_prize.created,
-            });
-        }
-        Ok(prizes)
+        Ok(self
+            .postgres
+            .query_all_prizes()?
+            .into_iter()
+            .map(convert_infra_prize_into_model)
+            .collect())
+    }
+
+    pub fn query_prize(&self, prize_id: &PrizeId) -> Result<Option<Prize>, failure::Error> {
+        Ok(self
+            .postgres
+            .query_prize(prize_id.as_uuid())?
+            .map(convert_infra_prize_into_model))
+    }
+}
+
+fn convert_infra_prize_into_model(prize: QueryPrize) -> Prize {
+    Prize {
+        id: PrizeId::from(prize.id),
+        name: NonEmptyString::from_str(prize.name).expect("Prize name MUST NOT empty"),
+        description: prize.description,
+        thumbnail_url: prize.thumbnail_url,
+        point: Point::from(prize.point),
+        available: prize.available,
+        created: prize.created,
     }
 }
