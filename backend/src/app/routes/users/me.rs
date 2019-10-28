@@ -67,7 +67,7 @@ impl<'a> From<&'a PrizeTradeRecord> for ResUserPrizeTradeRecord {
     fn from(record: &'a PrizeTradeRecord) -> ResUserPrizeTradeRecord {
         ResUserPrizeTradeRecord {
             id: *record.id(),
-            prize_id: *record.prize_id(),
+            prize_id: *record.prize_id().as_uuid(),
             point: record.point().as_u32(),
             time: *record.time(),
             status: ResUserPrizeTradeStatus::from(*record.status()),

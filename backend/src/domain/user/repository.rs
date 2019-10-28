@@ -1,4 +1,5 @@
 use super::*;
+use crate::domain::prize::PrizeId;
 use crate::infra::postgres::{
     types::PrizeTradeStatus as InfraPrizeTradeStatus, user::NewUser as InfraNewUser, PostgresInfra,
 };
@@ -77,7 +78,7 @@ pub trait UserWithPg: User + Sized {
             .into_iter()
             .map(|record| PrizeTradeRecord {
                 id: record.id,
-                prize_id: record.prize_id,
+                prize_id: PrizeId::from(record.prize_id),
                 point: Point::from(record.point),
                 time: record.time,
                 status: match record.status {

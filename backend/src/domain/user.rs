@@ -2,7 +2,7 @@ pub mod point_history;
 pub mod repository;
 pub use repository::*;
 
-use crate::domain::point::Point;
+use crate::domain::{point::Point, prize::PrizeId};
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use arrayvec::ArrayString;
 use chrono::{DateTime, Utc};
@@ -110,11 +110,11 @@ impl UserEmail {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Getters)]
+#[derive(Debug, Clone, PartialEq, Eq, Getters)]
 #[get = "pub"]
 pub struct PrizeTradeRecord {
     id: Uuid,
-    prize_id: Uuid,
+    prize_id: PrizeId,
     point: Point,
     time: DateTime<Utc>,
     status: PrizeTradeStatus,
