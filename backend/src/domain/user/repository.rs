@@ -92,6 +92,22 @@ pub trait UserWithPg: User + Sized {
             prize_trade_history: history,
         })
     }
+
+    fn with_market_reward_history(self) -> Result<WithMarketRewardHistory<Self>, failure::Error> {
+        let history = self
+            .pg()
+            .query_user_market_reward_records(self.id().as_str())?
+            .into_iter()
+            .map(|record| MarketRewardRecord {
+                market_id: MarketId::from(record.market_id),
+                point: Point::from(record.point),
+            })
+            .collect();
+        Ok(WithMarketRewardHistory {
+            user: self,
+            market_reward_records: history,
+        })
+    }
 }
 
 impl<'a> UserWithPg for QueryUser<'a> {
@@ -100,24 +116,68 @@ impl<'a> UserWithPg for QueryUser<'a> {
     }
 }
 
+macro_rules! impl_user {
+    ($ty: ident) => {
+        impl<U: User> User for $ty<U> {
+            fn id(&self) -> &UserId {
+                self.user.id()
+            }
+            fn name(&self) -> &UserName {
+                self.user.name()
+            }
+            fn email(&self) -> &UserEmail {
+                self.user.email()
+            }
+            fn is_admin(&self) -> bool {
+                self.user.is_admin()
+            }
+        }
+    };
+}
+
+macro_rules! impl_user_with_pg {
+    ($ty: ident) => {
+        impl<U: UserWithPg> UserWithPg for $ty<U> {
+            fn pg(&self) -> &dyn PostgresInfra {
+                self.user.pg()
+            }
+        }
+    };
+}
+
+macro_rules! impl_user_with_point {
+    ($ty: ident) => {
+        impl<U: UserWithPoint> UserWithPoint for $ty<U> {
+            fn point(&self) -> Point {
+                self.user.point()
+            }
+        }
+    };
+}
+
+macro_rules! impl_user_with_prize_trade_history {
+    ($ty: ident) => {
+        impl<U: UserWithPrizeTradeHistory> UserWithPrizeTradeHistory for $ty<U> {
+            fn prize_trade_history(&self) -> &Vec<PrizeTradeRecord> {
+                self.user.prize_trade_history()
+            }
+        }
+    };
+}
+
+macro_rules! impl_user_with_market_reward_history {
+    ($ty: ident) => {
+        impl<U: UserWithMarketRewardHistory> UserWithMarketRewardHistory for $ty<U> {
+            fn market_reward_history(&self) -> &Vec<MarketRewardRecord> {
+                self.user.market_reward_history()
+            }
+        }
+    };
+}
+
 pub struct WithPoint<U> {
     user: U,
     point: Point,
-}
-
-impl<U: User> User for WithPoint<U> {
-    fn id(&self) -> &UserId {
-        self.user.id()
-    }
-    fn name(&self) -> &UserName {
-        self.user.name()
-    }
-    fn email(&self) -> &UserEmail {
-        self.user.email()
-    }
-    fn is_admin(&self) -> bool {
-        self.user.is_admin()
-    }
 }
 
 impl<U: User> UserWithPoint for WithPoint<U> {
@@ -126,37 +186,14 @@ impl<U: User> UserWithPoint for WithPoint<U> {
     }
 }
 
-impl<U: UserWithPg> UserWithPg for WithPoint<U> {
-    fn pg(&self) -> &dyn PostgresInfra {
-        self.user.pg()
-    }
-
-    fn with_point(self) -> Result<WithPoint<Self>, failure::Error> {
-        Ok(WithPoint {
-            point: self.point,
-            user: self,
-        })
-    }
-}
+impl_user!(WithPoint);
+impl_user_with_pg!(WithPoint);
+impl_user_with_prize_trade_history!(WithPoint);
+impl_user_with_market_reward_history!(WithPoint);
 
 pub struct WithPrizeTradeHistory<U> {
     user: U,
     prize_trade_history: Vec<PrizeTradeRecord>,
-}
-
-impl<U: User> User for WithPrizeTradeHistory<U> {
-    fn id(&self) -> &UserId {
-        self.user.id()
-    }
-    fn name(&self) -> &UserName {
-        self.user.name()
-    }
-    fn email(&self) -> &UserEmail {
-        self.user.email()
-    }
-    fn is_admin(&self) -> bool {
-        self.user.is_admin()
-    }
 }
 
 impl<U: User> UserWithPrizeTradeHistory for WithPrizeTradeHistory<U> {
@@ -165,21 +202,43 @@ impl<U: User> UserWithPrizeTradeHistory for WithPrizeTradeHistory<U> {
     }
 }
 
-impl<U: UserWithPoint> UserWithPoint for WithPrizeTradeHistory<U> {
-    fn point(&self) -> Point {
-        self.user.point()
+impl_user!(WithPrizeTradeHistory);
+impl_user_with_pg!(WithPrizeTradeHistory);
+impl_user_with_point!(WithPrizeTradeHistory);
+impl_user_with_market_reward_history!(WithPrizeTradeHistory);
+
+pub struct WithMarketRewardHistory<U> {
+    user: U,
+    market_reward_records: Vec<MarketRewardRecord>,
+}
+
+impl<U: User> UserWithMarketRewardHistory for WithMarketRewardHistory<U> {
+    fn market_reward_history(&self) -> &Vec<MarketRewardRecord> {
+        &self.market_reward_records
     }
 }
 
-impl<U: UserWithPg> UserWithPg for WithPrizeTradeHistory<U> {
-    fn pg(&self) -> &dyn PostgresInfra {
-        self.user.pg()
-    }
-
-    fn with_prize_trade_history(self) -> Result<WithPrizeTradeHistory<Self>, failure::Error> {
-        Ok(WithPrizeTradeHistory {
-            prize_trade_history: self.prize_trade_history.clone(),
+impl<U: UserWithPrizeTradeHistory> WithMarketRewardHistory<U> {
+    pub fn compute_point(self) -> WithPoint<Self> {
+        let traded_point = self
+            .user
+            .prize_trade_history()
+            .iter()
+            .map(|r| r.point)
+            .sum::<Point>();
+        let reward_point = self
+            .market_reward_history()
+            .iter()
+            .map(|r| r.point)
+            .sum::<Point>();
+        WithPoint {
             user: self,
-        })
+            point: reward_point - traded_point,
+        }
     }
 }
+
+impl_user!(WithMarketRewardHistory);
+impl_user_with_pg!(WithMarketRewardHistory);
+impl_user_with_point!(WithMarketRewardHistory);
+impl_user_with_prize_trade_history!(WithMarketRewardHistory);

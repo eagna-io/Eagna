@@ -24,6 +24,11 @@ pub trait PostgresUserInfra {
         &self,
         user_id: &str,
     ) -> Result<Vec<QueryPrizeTradeRecord>, failure::Error>;
+
+    fn query_user_market_reward_records(
+        &self,
+        user_id: &str,
+    ) -> Result<Vec<QueryMarketRewardRecord>, failure::Error>;
 }
 
 pub struct NewUser<'a> {
@@ -53,6 +58,11 @@ pub struct QueryPrizeTradeRecord {
     pub time: DateTime<Utc>,
     pub prize_id: Uuid,
     pub status: PrizeTradeStatus,
+}
+
+pub struct QueryMarketRewardRecord {
+    pub market_id: Uuid,
+    pub point: u32,
 }
 
 impl PostgresUserInfra for Postgres {
@@ -142,6 +152,25 @@ impl PostgresUserInfra for Postgres {
             })
             .collect())
     }
+
+    fn query_user_market_reward_records(
+        &self,
+        user_id: &str,
+    ) -> Result<Vec<QueryMarketRewardRecord>, failure::Error> {
+        Ok(market_reward_records::table
+            .filter(market_reward_records::user_id.eq(user_id))
+            .select((
+                market_reward_records::market_id,
+                market_reward_records::point,
+            ))
+            .load::<QueryableMarketRewardRecord>(&self.conn)?
+            .into_iter()
+            .map(|record| QueryMarketRewardRecord {
+                market_id: record.market_id,
+                point: record.point as u32,
+            })
+            .collect())
+    }
 }
 
 #[derive(Insertable)]
@@ -179,4 +208,10 @@ struct QueryablePrizeTradeRecord {
     point: i32,
     time: DateTime<Utc>,
     status: PrizeTradeStatus,
+}
+
+#[derive(Queryable)]
+struct QueryableMarketRewardRecord {
+    market_id: Uuid,
+    point: i32,
 }

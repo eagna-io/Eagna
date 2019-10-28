@@ -10,7 +10,10 @@ pub fn get_me(infra: &InfraManager, req: &Request) -> Result<Response, FailureRe
     let repo = UserRepository::from(infra.get_postgres()?);
     let user = match repo.query_user(&access_token.user_id)? {
         None => return Err(FailureResponse::Unauthorized),
-        Some(user) => user.with_point()?.with_prize_trade_history()?,
+        Some(user) => user
+            .with_prize_trade_history()?
+            .with_market_reward_history()?
+            .compute_point(),
     };
     Ok(Response::json(&ResUser::from(&user)))
 }
@@ -24,6 +27,7 @@ struct ResUser<'a> {
     is_admin: bool,
     point: u32,
     prize_trade_history: Vec<ResUserPrizeTradeRecord>,
+    market_reward_history: Vec<ResUserMarketRewardRecord>,
 }
 
 #[derive(Serialize)]
@@ -43,9 +47,16 @@ enum ResUserPrizeTradeStatus {
     Processed,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ResUserMarketRewardRecord {
+    market_id: Uuid,
+    point: u32,
+}
+
 impl<'a, U> From<&'a U> for ResUser<'a>
 where
-    U: UserWithPoint + UserWithPrizeTradeHistory,
+    U: UserWithPoint + UserWithPrizeTradeHistory + UserWithMarketRewardHistory,
 {
     fn from(user: &'a U) -> ResUser<'a> {
         ResUser {
@@ -58,6 +69,11 @@ where
                 .prize_trade_history()
                 .iter()
                 .map(ResUserPrizeTradeRecord::from)
+                .collect(),
+            market_reward_history: user
+                .market_reward_history()
+                .iter()
+                .map(ResUserMarketRewardRecord::from)
                 .collect(),
         }
     }
@@ -80,6 +96,15 @@ impl From<PrizeTradeStatus> for ResUserPrizeTradeStatus {
         match status {
             PrizeTradeStatus::Requested => ResUserPrizeTradeStatus::Requested,
             PrizeTradeStatus::Processed => ResUserPrizeTradeStatus::Processed,
+        }
+    }
+}
+
+impl<'a> From<&'a MarketRewardRecord> for ResUserMarketRewardRecord {
+    fn from(record: &'a MarketRewardRecord) -> ResUserMarketRewardRecord {
+        ResUserMarketRewardRecord {
+            market_id: *record.market_id().as_uuid(),
+            point: record.point().as_u32(),
         }
     }
 }

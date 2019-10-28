@@ -2,7 +2,7 @@ pub mod point_history;
 pub mod repository;
 pub use repository::*;
 
-use crate::domain::{point::Point, prize::PrizeId};
+use crate::domain::{market::MarketId, point::Point, prize::PrizeId};
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use arrayvec::ArrayString;
 use chrono::{DateTime, Utc};
@@ -22,6 +22,10 @@ pub trait UserWithPoint: User {
 
 pub trait UserWithPrizeTradeHistory: User {
     fn prize_trade_history(&self) -> &Vec<PrizeTradeRecord>;
+}
+
+pub trait UserWithMarketRewardHistory: User {
+    fn market_reward_history(&self) -> &Vec<MarketRewardRecord>;
 }
 
 pub struct NewUser {
@@ -62,6 +66,15 @@ impl UserWithPrizeTradeHistory for NewUser {
     fn prize_trade_history(&self) -> &Vec<PrizeTradeRecord> {
         lazy_static::lazy_static! {
             static ref EMPTY_VEC: Vec<PrizeTradeRecord> = Vec::new();
+        }
+        &EMPTY_VEC
+    }
+}
+
+impl UserWithMarketRewardHistory for NewUser {
+    fn market_reward_history(&self) -> &Vec<MarketRewardRecord> {
+        lazy_static::lazy_static! {
+            static ref EMPTY_VEC: Vec<MarketRewardRecord> = Vec::new();
         }
         &EMPTY_VEC
     }
@@ -124,4 +137,11 @@ pub struct PrizeTradeRecord {
 pub enum PrizeTradeStatus {
     Requested,
     Processed,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Getters)]
+#[get = "pub"]
+pub struct MarketRewardRecord {
+    market_id: MarketId,
+    point: Point,
 }
