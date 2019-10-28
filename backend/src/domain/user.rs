@@ -6,6 +6,7 @@ use crate::domain::point::Point;
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use arrayvec::ArrayString;
 use chrono::{DateTime, Utc};
+use getset::Getters;
 use uuid::Uuid;
 
 pub trait User: Sized {
@@ -109,7 +110,8 @@ impl UserEmail {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Getters)]
+#[get = "pub"]
 pub struct PrizeTradeRecord {
     id: Uuid,
     prize_id: Uuid,
@@ -118,7 +120,7 @@ pub struct PrizeTradeRecord {
     status: PrizeTradeStatus,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PrizeTradeStatus {
     Requested,
     Processed,
