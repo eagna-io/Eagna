@@ -105,8 +105,8 @@ table! {
     use diesel::sql_types::*;
     use crate::infra::postgres::types::*;
 
-    user_prize_trade_records (unused_id) {
-        unused_id -> Int4,
+    user_prize_trade_records (id) {
+        id -> Uuid,
         user_id -> Text,
         prize_id -> Uuid,
         point -> Int4,

@@ -76,6 +76,7 @@ pub trait UserWithPg: User + Sized {
             .query_user_prize_trade_records(self.id().as_str())?
             .into_iter()
             .map(|record| PrizeTradeRecord {
+                id: record.id,
                 prize_id: record.prize_id,
                 point: Point::from(record.point),
                 time: record.time,

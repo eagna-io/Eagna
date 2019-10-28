@@ -111,6 +111,7 @@ impl UserEmail {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrizeTradeRecord {
+    id: Uuid,
     prize_id: Uuid,
     point: Point,
     time: DateTime<Utc>,

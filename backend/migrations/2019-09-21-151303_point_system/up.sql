@@ -54,8 +54,7 @@ CREATE TYPE prize_trade_status as ENUM (
 );
 
 CREATE TABLE user_prize_trade_records (
-  -- アプリ的に使用することはないが、dieselのために必要
-  unused_id     serial PRIMARY KEY,
+  id            uuid PRIMARY KEY,
   user_id       text NOT NULL,
   prize_id      uuid NOT NULL,
   -- 消費したポイント。0より大きい。

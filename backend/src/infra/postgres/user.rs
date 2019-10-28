@@ -40,6 +40,7 @@ pub struct QueryUser {
 }
 
 pub struct NewPrizeTradeRecord {
+    pub id: Uuid,
     pub prize_id: Uuid,
     pub point: u32,
     pub time: DateTime<Utc>,
@@ -47,6 +48,7 @@ pub struct NewPrizeTradeRecord {
 }
 
 pub struct QueryPrizeTradeRecord {
+    pub id: Uuid,
     pub point: u32,
     pub time: DateTime<Utc>,
     pub prize_id: Uuid,
@@ -104,6 +106,7 @@ impl PostgresUserInfra for Postgres {
     ) -> Result<(), failure::Error> {
         diesel::insert_into(user_prize_trade_records::table)
             .values(InsertablePrizeTradeRecord {
+                id: record.id,
                 user_id,
                 point: record.point as i32,
                 time: record.time,
@@ -121,15 +124,17 @@ impl PostgresUserInfra for Postgres {
         Ok(user_prize_trade_records::table
             .filter(user_prize_trade_records::columns::user_id.eq(user_id))
             .select((
-                user_prize_trade_records::columns::prize_id,
-                user_prize_trade_records::columns::point,
-                user_prize_trade_records::columns::time,
-                user_prize_trade_records::columns::status,
+                user_prize_trade_records::id,
+                user_prize_trade_records::prize_id,
+                user_prize_trade_records::point,
+                user_prize_trade_records::time,
+                user_prize_trade_records::status,
             ))
             .order(user_prize_trade_records::columns::time.asc())
             .load::<QueryablePrizeTradeRecord>(&self.conn)?
             .into_iter()
             .map(|record| QueryPrizeTradeRecord {
+                id: record.id,
                 point: record.point as u32,
                 time: record.time,
                 prize_id: record.prize_id,
@@ -159,6 +164,7 @@ struct QueryableUser {
 #[derive(Insertable)]
 #[table_name = "user_prize_trade_records"]
 struct InsertablePrizeTradeRecord<'a> {
+    id: Uuid,
     user_id: &'a str,
     prize_id: Uuid,
     point: i32,
@@ -168,6 +174,7 @@ struct InsertablePrizeTradeRecord<'a> {
 
 #[derive(Queryable)]
 struct QueryablePrizeTradeRecord {
+    id: Uuid,
     prize_id: Uuid,
     point: i32,
     time: DateTime<Utc>,
