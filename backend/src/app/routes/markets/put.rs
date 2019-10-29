@@ -24,12 +24,12 @@ pub fn put(
         })?;
 
         if req_data.status != ApiMarketStatus::Resolved {
-            log::info!("Only resolving operation is supported");
+            log::warn!("Only resolving operation is supported");
             return Err(FailureResponse::InvalidPayload);
         }
 
         if req_data.resolved_token_name.is_none() {
-            log::info!("resolved_token_name is not set");
+            log::warn!("resolved_token_name is not set");
             return Err(FailureResponse::InvalidPayload);
         }
         let resolved_token_name = req_data.resolved_token_name.unwrap();

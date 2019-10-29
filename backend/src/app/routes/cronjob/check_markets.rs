@@ -20,6 +20,7 @@ pub fn get(infra: &InfraManager, req: &Request) -> Result<Response, FailureRespo
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct RespData {
     open_markets: Vec<Uuid>,
     close_markets: Vec<Uuid>,

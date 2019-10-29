@@ -33,6 +33,8 @@ struct ResOrder<'a> {
     type_: ApiOrderType,
 }
 
+/// "camelCase"なので、リクエスト/レスポンスは
+/// coinSupply, normal, rewardになる。
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 enum ApiOrderType {

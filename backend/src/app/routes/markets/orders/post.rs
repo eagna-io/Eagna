@@ -11,7 +11,10 @@ pub fn post(
     req: &Request,
     market_id: Uuid,
 ) -> Result<Response, FailureResponse> {
-    let req_data = json_input::<ReqOrder>(req).map_err(|_| FailureResponse::InvalidPayload)?;
+    let req_data = json_input::<ReqOrder>(req).map_err(|e| {
+        log::warn!("Receive invalid payload request : {:?}", e);
+        FailureResponse::InvalidPayload
+    })?;
 
     validate_req_order(&req_data)?;
 
@@ -25,7 +28,14 @@ pub fn post(
 
         let mut open_market = match market_repo.query_market(&MarketId::from(market_id))? {
             Some(Market::Open(m)) => m,
-            _ => return Err(FailureResponse::ResourceNotFound),
+            Some(_) => {
+                log::warn!("User requests order for not opened market : ${}", market_id);
+                return Err(FailureResponse::ResourceNotFound);
+            }
+            None => {
+                log::warn!("User requests order for not exist market : ${}", market_id);
+                return Err(FailureResponse::ResourceNotFound);
+            }
         };
 
         let added_order = add_order(&mut open_market, &user_id, &req_data)?;

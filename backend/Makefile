@@ -1,6 +1,6 @@
+.PHONY: start-db
 PG_URL:=postgres://postgres:postgres@localhost:5432/postgres
 REDIS_URL:=redis://localhost:6379
-
 start-db:
 	docker stop postgres redis || true
 	docker run -d --rm --name postgres -p 5432:5432 postgres
@@ -9,6 +9,7 @@ start-db:
 	diesel migration run --database-url "${PG_URL}"
 	psql -f "tests/init_data.sql" "${PG_URL}"
 
+.PHONY: run-dev
 run-dev:
 	RUST_LOG=warn,libeagna=debug,eagna=debug \
 	PG_URL="${PG_URL}" \
@@ -19,15 +20,17 @@ run-dev:
 	cargo run
 
 
+.PHONY: print_schema
 TMP_PG_URL:=postgres://postgres:postgres@localhost:5430/postgres
-
+SCHEMA_FILE:=src/infra/postgres/schema.rs
 print_schema:
 	docker run -d --rm --name postgres-tmp -p 5430:5432 postgres
 	sleep 5
 	diesel migration run --database-url "${TMP_PG_URL}" || true
-	diesel print-schema --database-url "${TMP_PG_URL}" || true
+	diesel print-schema --database-url "${TMP_PG_URL}" || true > ${SCHEMA_FILE}
 	docker stop postgres-tmp
 
 
+.PHONY: test
 test:
-	bash tests/run.sh
+	bash tests/run-all.sh
