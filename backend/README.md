@@ -3,14 +3,18 @@
 - Firebase infra はモックを使う
 - FIREBASE_API_KEY を USE_MOCK_FIREBASE に設定するとモックを使用するようになる
 
-### 実行
+### 全てのテストを実行
 
 `make test`
 
-#### Verbose モードで実行
+### 特定のテストを実行
+
+`tests/run.sh tests/scenarios/scenario_01.py`
+
+### Verbose モードで実行
 
 `TEST_VERBOSE=1 make test`
 
 ### テストの追加
 
-/tests/scenario_01.py に追加する
+/tests/scenarios/*.py ファイルを作成する
