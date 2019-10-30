@@ -57,6 +57,7 @@ pub struct QueryPrizeTradeRecord {
     pub time: DateTime<Utc>,
     pub prize_id: Uuid,
     pub status: PrizeTradeStatus,
+    pub processed_at: Option<DateTime<Utc>>,
 }
 
 pub struct QueryMarketRewardRecord {
@@ -138,6 +139,7 @@ impl PostgresUserInfra for Postgres {
                 user_prize_trade_records::point,
                 user_prize_trade_records::time,
                 user_prize_trade_records::status,
+                user_prize_trade_records::processed_at,
             ))
             .order(user_prize_trade_records::columns::time.asc())
             .load::<QueryablePrizeTradeRecord>(&self.conn)?
@@ -148,6 +150,7 @@ impl PostgresUserInfra for Postgres {
                 time: record.time,
                 prize_id: record.prize_id,
                 status: record.status,
+                processed_at: record.processed_at,
             })
             .collect())
     }
@@ -207,6 +210,7 @@ struct QueryablePrizeTradeRecord {
     point: i32,
     time: DateTime<Utc>,
     status: PrizeTradeStatus,
+    processed_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Queryable)]

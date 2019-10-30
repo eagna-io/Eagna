@@ -112,6 +112,7 @@ table! {
         point -> Int4,
         time -> Timestamptz,
         status -> Prize_trade_status,
+        processed_at -> Nullable<Timestamptz>,
     }
 }
 

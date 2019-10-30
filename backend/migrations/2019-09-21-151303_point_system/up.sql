@@ -61,6 +61,7 @@ CREATE TABLE user_prize_trade_records (
   point         integer NOT NULL,
   time          timestamptz NOT NULL DEFAULT now(),
   status        prize_trade_status NOT NULL DEFAULT 'requested',
+  processed_at  timestamptz DEFAULT NULL,
 
   CONSTRAINT user_prize_trade_history_user_fkey FOREIGN KEY(user_id)
     REFERENCES users(fb_uid) ON UPDATE CASCADE ON DELETE RESTRICT,
