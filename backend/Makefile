@@ -27,7 +27,7 @@ print_schema:
 	docker run -d --rm --name postgres-tmp -p 5430:5432 postgres
 	sleep 5
 	diesel migration run --database-url "${TMP_PG_URL}" || true
-	diesel print-schema --database-url "${TMP_PG_URL}" || true > ${SCHEMA_FILE}
+	diesel print-schema --database-url "${TMP_PG_URL}" > ${SCHEMA_FILE}
 	docker stop postgres-tmp
 
 
