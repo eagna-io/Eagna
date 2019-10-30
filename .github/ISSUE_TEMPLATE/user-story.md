@@ -52,4 +52,13 @@ e.g.
 - [ ] ユーザーはログインしている状態で、featured marketの一覧を見れる
 - [ ] ユーザーはログインしていない状態で、featured marketの一覧をみれる
 
+### 見込み作業時間
+
+わからなければ空欄で、わかりそうな人にメンションする。
+
+- backend : featured market一覧を返すAPIの実装
+  - 4.0h
+- frontend : featured market一覧を表示
+  - 2.0h
+
 ### 関連リンク
