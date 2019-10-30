@@ -74,7 +74,8 @@ def test_users_api():
     assert_eq(res.json()["name"], "Hoge Hogeo")
     assert_eq(res.json()["email"], "hoge@eagna.io")
     assert_eq(res.json()["isAdmin"], False)
-    assert_eq(len(res.json()["pointHistory"]), 0)
+    assert_eq(len(res.json()["prizeTradeHistory"]), 0)
+    assert_eq(len(res.json()["marketRewardHistory"]), 0)
 
 
 def test_prizes_api():
