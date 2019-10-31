@@ -32,33 +32,31 @@ export interface User {
   name: string;
   email: string;
   isAdmin: boolean;
-  pointHistory: (MarketRewardItem | PrizeTradeItem)[];
+  point: number;
+  prizeTradeHistory: PrizeTradeRecord[],
+  marketRewardHistory: MarketRewardRecord[],
 }
 
-export interface MarketRewardItem {
-  type: "MarketReward";
+export interface MarketRewardRecord {
   point: number;
   time: Moment;
   marketId: string;
 }
 
-export interface PrizeTradeItem {
-  type: "PrizeTrade";
+export interface PrizeTradeRecord {
   point: number;
   time: Moment;
   prizeId: string;
   tradeStatus: "Requested" | "Processed";
 }
 
-const marketRewardItemDecoder: D.Decoder<MarketRewardItem> = D.object({
-  type: D.constant<"MarketReward">("MarketReward"),
+const marketRewardItemDecoder: D.Decoder<MarketRewardRecord> = D.object({
   point: D.number(),
   time: D.string().map(s => moment(s)),
   marketId: D.string()
 });
 
-const prizeTraedeItemDecoder: D.Decoder<PrizeTradeItem> = D.object({
-  type: D.constant<"PrizeTrade">("PrizeTrade"),
+const prizeTraedeItemDecoder: D.Decoder<PrizeTradeRecord> = D.object({
   point: D.number(),
   time: D.string().map(s => moment(s)),
   prizeId: D.string(),
@@ -73,7 +71,7 @@ const userDecoder: D.Decoder<User> = D.object({
   name: D.string(),
   email: D.string(),
   isAdmin: D.boolean(),
-  pointHistory: D.array(
-    D.union(marketRewardItemDecoder, prizeTraedeItemDecoder)
-  )
+  point: D.number(),
+  prizeTradeHistory: D.array(prizeTraedeItemDecoder),
+  marketRewardHistory: D.array(marketRewardItemDecoder),
 });
