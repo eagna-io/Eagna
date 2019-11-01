@@ -15,7 +15,6 @@ run-dev:
 	PG_URL="${PG_URL}" \
 	REDIS_URL="${REDIS_URL}" \
 	BIND="0.0.0.0:8080" \
-	FIREBASE_API_KEY=$${FIREBASE_API_KEY} \
 	ACCESS_ALLOW_HOSTS="*" \
 	cargo run
 
