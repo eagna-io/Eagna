@@ -1,7 +1,8 @@
 use crate::{
     app::{FailureResponse, InfraManager},
-    domain::access_token::{AccessToken, AccessTokenId, AccessTokenRepository},
+    domain::user::{AccessToken, AccessTokenId, UserRepository},
 };
+use regex::Regex;
 use rouille::Request;
 
 pub fn validate_bearer_header(
@@ -13,21 +14,21 @@ pub fn validate_bearer_header(
         .ok_or(FailureResponse::Unauthorized)?;
     let token_id = extract_token(header_val)?;
 
-    let firebase = infra.get_firebase()?;
-    let redis = infra.get_redis()?;
+    let user_repo = UserRepository::from((infra.get_postgres()?, infra.get_redis()?));
 
-    let access_token_repository = AccessTokenRepository::from((firebase, redis));
-
-    match access_token_repository.query_access_token(&token_id)? {
+    match user_repo.query_access_token(&token_id)? {
         Some(token) => Ok(token),
         None => Err(FailureResponse::Unauthorized),
     }
 }
 
 fn extract_token(header_val: &str) -> Result<AccessTokenId, FailureResponse> {
-    let re = regex::Regex::new(r"^Bearer: (.+)$").unwrap();
-    re.captures(header_val)
+    lazy_static::lazy_static! {
+        static ref BEARER_TOKEN_REGEX: Regex = Regex::new(r"^Bearer: (.+)$").unwrap();
+    }
+    BEARER_TOKEN_REGEX
+        .captures(header_val)
         .and_then(|cap| cap.get(1))
         .ok_or(FailureResponse::Unauthorized)
-        .map(|mat| AccessTokenId::from_str(mat.as_str()))
+        .and_then(|mat| AccessTokenId::try_from_str(mat.as_str()).map_err(FailureResponse::from))
 }

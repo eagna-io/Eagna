@@ -1,7 +1,7 @@
 use super::ApiMarketStatus;
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::{market::services::resolver::resolve_market_uncheck, market::*, user::*};
-use crate::infra::postgres::{transaction, PostgresInfra};
+use crate::infra::postgres::transaction;
 use crate::primitive::NonEmptyString;
 
 use rouille::{input::json::json_input, Request, Response};
@@ -16,7 +16,8 @@ pub fn put(
 
     let postgres = infra.get_postgres()?;
     transaction(postgres, || {
-        authorize(postgres, &access_token.user_id)?;
+        let user_repo = UserRepository::from((postgres, infra.get_redis()?));
+        authorize(user_repo, &access_token.user_id)?;
 
         let req_data = json_input::<ReqPutMarket>(req).map_err(|e| {
             log::warn!("Invalid payload : {:?}", e);
@@ -61,9 +62,7 @@ pub fn put(
 }
 
 // マーケットを作成する権限があるかチェック
-fn authorize(postgres: &dyn PostgresInfra, user_id: &UserId) -> Result<(), FailureResponse> {
-    let user_repo = UserRepository::from(postgres);
-
+fn authorize(user_repo: UserRepository, user_id: &UserId) -> Result<(), FailureResponse> {
     match user_repo.query_user(user_id)? {
         Some(user) => {
             if user.is_admin() {

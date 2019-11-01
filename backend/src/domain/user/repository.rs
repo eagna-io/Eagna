@@ -5,11 +5,13 @@ use crate::infra::postgres::{
     user::{NewPrizeTradeRecord, NewUser as InfraNewUser},
     PostgresInfra,
 };
+use crate::infra::redis::RedisInfra;
 use failure::Fallible;
 
 #[derive(From)]
 pub struct UserRepository<'a> {
     postgres: &'a dyn PostgresInfra,
+    redis: &'a dyn RedisInfra,
 }
 
 impl<'a> UserRepository<'a> {
@@ -36,6 +38,24 @@ impl<'a> UserRepository<'a> {
             is_admin: user.is_admin,
             pg: self.postgres,
         }))
+    }
+
+    pub fn save_access_token(&self, access_token: &AccessToken) -> Fallible<()> {
+        self.redis.save_access_token(
+            access_token.id.as_str(),
+            access_token.user_id.as_str(),
+            ACCESS_TOKEN_EXPIRE_SEC,
+        )
+    }
+
+    pub fn query_access_token(
+        &self,
+        access_token_id: &AccessTokenId,
+    ) -> Fallible<Option<AccessToken>> {
+        Ok(self
+            .redis
+            .query_user_id_by_access_token(access_token_id.as_str())?
+            .map(|user_id| AccessToken::from((*access_token_id, UserId::from_str(&user_id)))))
     }
 
     pub fn save_user_prize_trade_request<U>(

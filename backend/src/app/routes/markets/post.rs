@@ -12,7 +12,8 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
 
     let postgres = infra.get_postgres()?;
     let new_market = transaction(postgres, || {
-        authorize(postgres, &access_token.user_id)?;
+        let user_repo = UserRepository::from((postgres, infra.get_redis()?));
+        authorize(user_repo, &access_token.user_id)?;
 
         let req_market = json_input::<ReqPostMarket>(req).map_err(|e| {
             log::info!("Invalid payload error : {:?}", e);
@@ -35,9 +36,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
 }
 
 // マーケットを作成する権限があるかチェック
-fn authorize(postgres: &dyn PostgresInfra, user_id: &UserId) -> Result<(), FailureResponse> {
-    let user_repo = UserRepository::from(postgres);
-
+fn authorize(user_repo: UserRepository, user_id: &UserId) -> Result<(), FailureResponse> {
     match user_repo.query_user(user_id)? {
         Some(user) => {
             if user.is_admin() {

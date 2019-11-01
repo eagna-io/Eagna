@@ -33,7 +33,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
 }
 
 fn authorize(infra: &InfraManager, user_id: &UserId) -> Result<(), FailureResponse> {
-    let user_repo = UserRepository::from(infra.get_postgres()?);
+    let user_repo = UserRepository::from((infra.get_postgres()?, infra.get_redis()?));
     match user_repo.query_user(user_id)? {
         Some(user) => {
             if user.is_admin() {

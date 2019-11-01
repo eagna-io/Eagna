@@ -1,3 +1,6 @@
+pub mod access_token;
+pub use access_token::*;
+
 use crate::domain::{
     market::MarketId,
     point::Point,
@@ -15,6 +18,10 @@ pub trait User: Sized {
     fn name(&self) -> &UserName;
     fn email(&self) -> &UserEmail;
     fn is_admin(&self) -> bool;
+
+    fn new_access_token(&self) -> AccessToken {
+        AccessToken::new(self.id())
+    }
 }
 
 macro_rules! impl_user {
