@@ -12,7 +12,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
 
     let postgres = infra.get_postgres()?;
     let new_market = transaction(postgres, || {
-        let user_repo = UserRepository::from((postgres, infra.get_redis()?));
+        let user_repo = UserRepository::from(postgres);
         authorize(user_repo, &access_token.user_id)?;
 
         let req_market = json_input::<ReqPostMarket>(req).map_err(|e| {

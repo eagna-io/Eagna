@@ -12,7 +12,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
 
     let new_user = NewUser::new(access_token.user_id, req_data.name, req_data.email);
 
-    let user_repo = UserRepository::from((infra.get_postgres()?, infra.get_redis()?));
+    let user_repo = UserRepository::from(infra.get_postgres()?);
 
     user_repo.save_new_user(&new_user)?;
 

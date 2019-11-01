@@ -16,7 +16,7 @@ pub fn put(
 
     let postgres = infra.get_postgres()?;
     transaction(postgres, || {
-        let user_repo = UserRepository::from((postgres, infra.get_redis()?));
+        let user_repo = UserRepository::from(postgres);
         authorize(user_repo, &access_token.user_id)?;
 
         let req_data = json_input::<ReqPutMarket>(req).map_err(|e| {

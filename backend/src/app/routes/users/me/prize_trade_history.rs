@@ -12,7 +12,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
     let access_token = validate_bearer_header(infra, req)?;
     let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
 
-    let user_repo = UserRepository::from((infra.get_postgres()?, infra.get_redis()?));
+    let user_repo = UserRepository::from(infra.get_postgres()?);
     let user = match user_repo.query_user(&access_token.user_id)? {
         None => {
             return Err(FailureResponse::Unauthorized);

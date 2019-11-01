@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 pub fn get(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     let access_token = validate_bearer_header(infra, req)?;
-    let repo = UserRepository::from((infra.get_postgres()?, infra.get_redis()?));
+    let repo = UserRepository::from(infra.get_postgres()?);
     let user = match repo.query_user(&access_token.user_id)? {
         None => return Err(FailureResponse::Unauthorized),
         Some(user) => user

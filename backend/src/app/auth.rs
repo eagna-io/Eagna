@@ -1,6 +1,6 @@
 use crate::{
     app::{FailureResponse, InfraManager},
-    domain::user::{AccessToken, AccessTokenId, UserRepository},
+    domain::user::{AccessToken, AccessTokenId, AccessTokenRepository},
 };
 use regex::Regex;
 use rouille::Request;
@@ -14,9 +14,9 @@ pub fn validate_bearer_header(
         .ok_or(FailureResponse::Unauthorized)?;
     let token_id = extract_token(header_val)?;
 
-    let user_repo = UserRepository::from((infra.get_postgres()?, infra.get_redis()?));
+    let repo = AccessTokenRepository::from(infra.get_redis()?);
 
-    match user_repo.query_access_token(&token_id)? {
+    match repo.query(&token_id)? {
         Some(token) => Ok(token),
         None => Err(FailureResponse::Unauthorized),
     }
