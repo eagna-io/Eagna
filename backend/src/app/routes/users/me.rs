@@ -42,7 +42,7 @@ struct ResUserMarketRewardRecord {
 
 impl<'a, U> From<&'a U> for ResUser<'a>
 where
-    U: UserWithPoint + UserWithPrizeTradeHistory + UserWithMarketRewardHistory,
+    U: UserWithAttrs + UserWithPoint + UserWithPrizeTradeHistory + UserWithMarketRewardHistory,
 {
     fn from(user: &'a U) -> ResUser<'a> {
         ResUser {

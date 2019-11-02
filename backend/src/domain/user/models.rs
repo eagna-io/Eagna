@@ -13,11 +13,12 @@ use failure::Fallible;
 use getset::Getters;
 use uuid::Uuid;
 
+/// Userモデルを表現するインターフェイス
+/// このトレイトは最低限の要求しかしない。
+/// より詳細な情報が必要であれば `UserWithAttrs` や `UserWithPoint`
+/// などを要求する。
 pub trait User: Sized {
     fn id(&self) -> &UserId;
-    fn name(&self) -> &UserName;
-    fn email(&self) -> &UserEmail;
-    fn is_admin(&self) -> bool;
 
     fn new_access_token(&self) -> AccessToken {
         AccessToken::new(self.id())
@@ -30,6 +31,20 @@ macro_rules! impl_user {
             fn id(&self) -> &UserId {
                 self.user.id()
             }
+        }
+    };
+}
+
+/// 基本的な属性を保持するUserモデルを表現するインターフェイス
+pub trait UserWithAttrs: User {
+    fn name(&self) -> &UserName;
+    fn email(&self) -> &UserEmail;
+    fn is_admin(&self) -> bool;
+}
+
+macro_rules! impl_user_with_attrs {
+    ($ty: ident) => {
+        impl<U: UserWithAttrs> UserWithAttrs for $ty<U> {
             fn name(&self) -> &UserName {
                 self.user.name()
             }
@@ -112,6 +127,7 @@ impl<U: UserWithPoint> UserWithPoint for UserWithPrizeTradeRequest<U> {
 }
 
 impl_user!(UserWithPrizeTradeRequest);
+impl_user_with_attrs!(UserWithPrizeTradeRequest);
 impl_user_with_market_reward_history!(UserWithPrizeTradeRequest);
 
 #[derive(Debug, Clone, PartialEq, Eq, Getters)]
@@ -133,6 +149,9 @@ impl User for NewUser {
     fn id(&self) -> &UserId {
         &self.id
     }
+}
+
+impl UserWithAttrs for NewUser {
     fn name(&self) -> &UserName {
         &self.name
     }

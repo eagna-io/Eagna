@@ -58,6 +58,9 @@ impl<'a> User for QueryUser<'a> {
     fn id(&self) -> &UserId {
         &self.id
     }
+}
+
+impl<'a> UserWithAttrs for QueryUser<'a> {
     fn name(&self) -> &UserName {
         &self.name
     }
@@ -147,6 +150,7 @@ impl<U: User> UserWithPoint for WithPoint<U> {
 }
 
 impl_user!(WithPoint);
+impl_user_with_attrs!(WithPoint);
 impl_user_with_pg!(WithPoint);
 impl_user_with_prize_trade_history!(WithPoint);
 impl_user_with_market_reward_history!(WithPoint);
@@ -163,6 +167,7 @@ impl<U: User> UserWithPrizeTradeHistory for WithPrizeTradeHistory<U> {
 }
 
 impl_user!(WithPrizeTradeHistory);
+impl_user_with_attrs!(WithPrizeTradeHistory);
 impl_user_with_pg!(WithPrizeTradeHistory);
 impl_user_with_point!(WithPrizeTradeHistory);
 impl_user_with_market_reward_history!(WithPrizeTradeHistory);
@@ -199,6 +204,7 @@ impl<U: UserWithPrizeTradeHistory> WithMarketRewardHistory<U> {
 }
 
 impl_user!(WithMarketRewardHistory);
+impl_user_with_attrs!(WithMarketRewardHistory);
 impl_user_with_pg!(WithMarketRewardHistory);
 impl_user_with_point!(WithMarketRewardHistory);
 impl_user_with_prize_trade_history!(WithMarketRewardHistory);

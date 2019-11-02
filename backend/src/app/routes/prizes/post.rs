@@ -2,7 +2,7 @@ use super::ResPrize;
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::{
     prize::{Prize, PrizeRepository},
-    user::{User, UserId, UserRepository},
+    user::{UserId, UserRepository, UserWithAttrs},
 };
 use crate::primitive::NonEmptyString;
 use rouille::{input::json_input, Request, Response};
