@@ -1,7 +1,4 @@
-use crate::domain::user::{
-    models::UserId,
-    repository::{QueryUser, UserRepository},
-};
+use crate::domain::user::models::{User, UserId};
 use crate::infra::postgres::{user::QueryUserCredentials, PostgresInfra};
 use failure::{err_msg, Fallible};
 use rand::{thread_rng, Rng};
@@ -18,7 +15,7 @@ pub struct UserAuthService<'a> {
 }
 
 impl<'a> UserAuthService<'a> {
-    pub fn authenticate(&self, email: &str, attempted_pass: &str) -> Fallible<QueryUser<'a>> {
+    pub fn authenticate(&self, email: &str, attempted_pass: &str) -> Fallible<AuthorizedUser> {
         let QueryUserCredentials { id, cred, salt } = self
             .db
             .query_user_credentials(email)?
@@ -26,8 +23,9 @@ impl<'a> UserAuthService<'a> {
 
         pbkdf2_verify(cred.as_str(), salt.as_str(), attempted_pass)?;
 
-        let repo = UserRepository::from(self.db);
-        Ok(repo.query_user(&UserId::from_str(id.as_str()))?.unwrap())
+        Ok(AuthorizedUser {
+            id: UserId::from_str(id.as_str()),
+        })
     }
 }
 
@@ -46,4 +44,14 @@ fn gen_salt() -> [u8; CRED_LEN] {
     let mut salt = [0u8; CRED_LEN];
     thread_rng().fill(&mut salt);
     salt
+}
+
+pub struct AuthorizedUser {
+    id: UserId,
+}
+
+impl User for AuthorizedUser {
+    fn id(&self) -> &UserId {
+        &self.id
+    }
 }
