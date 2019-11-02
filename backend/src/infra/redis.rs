@@ -1,4 +1,4 @@
-use redis::{Commands, Connection as RedisConn, Client as RedisClient};
+use redis::{Client as RedisClient, Commands, Connection as RedisConn};
 use std::sync::Arc;
 
 use super::InfraFactory;
@@ -15,6 +15,8 @@ pub trait RedisInfra: Send + 'static {
         &self,
         access_token_id: &str,
     ) -> Result<Option<String>, failure::Error>;
+
+    fn delete_access_token(&self, access_token_id: &str) -> Result<(), failure::Error>;
 }
 
 pub struct Redis {
@@ -36,6 +38,11 @@ impl RedisInfra for Redis {
         access_token_id: &str,
     ) -> Result<Option<String>, failure::Error> {
         Ok(self.conn.get::<_, Option<String>>(access_token_id)?)
+    }
+
+    fn delete_access_token(&self, access_token_id: &str) -> Result<(), failure::Error> {
+        self.conn.del(access_token_id)?;
+        Ok(())
     }
 }
 
