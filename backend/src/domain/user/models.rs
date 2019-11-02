@@ -1,6 +1,6 @@
 pub mod access_token;
-pub use access_token::*;
 
+use self::access_token::AccessToken;
 use crate::domain::{
     market::MarketId,
     point::Point,
