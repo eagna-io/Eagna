@@ -1,9 +1,7 @@
 use crate::domain::user::*;
 use crate::domain::{market::MarketId, point::Point, prize::PrizeId};
 use crate::infra::postgres::{
-    types::PrizeTradeStatus as InfraPrizeTradeStatus,
-    user::{NewPrizeTradeRecord, NewUser as InfraNewUser},
-    PostgresInfra,
+    types::PrizeTradeStatus as InfraPrizeTradeStatus, user::NewPrizeTradeRecord, PostgresInfra,
 };
 use failure::Fallible;
 
@@ -13,17 +11,6 @@ pub struct UserRepository<'a> {
 }
 
 impl<'a> UserRepository<'a> {
-    /// ユーザーを新規作成したとき、それを infra に記録する。
-    /// PointHistory は記録しない。
-    pub fn save_new_user(&self, user: &NewUser) -> Result<(), failure::Error> {
-        let new_user = InfraNewUser {
-            id: user.id.as_str(),
-            name: user.name.as_str(),
-            email: user.email.as_str(),
-        };
-        self.postgres.save_user(new_user)
-    }
-
     pub fn query_user(&self, user_id: &UserId) -> Result<Option<QueryUser<'a>>, failure::Error> {
         let user = match self.postgres.query_user(user_id.as_str())? {
             None => return Ok(None),

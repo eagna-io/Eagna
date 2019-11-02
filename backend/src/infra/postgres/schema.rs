@@ -126,6 +126,8 @@ table! {
         email -> Text,
         is_admin -> Bool,
         created -> Timestamptz,
+        credential -> Varchar,
+        salt -> Varchar,
     }
 }
 

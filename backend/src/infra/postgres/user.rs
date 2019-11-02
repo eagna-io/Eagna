@@ -5,12 +5,15 @@ use super::{
 };
 use chrono::{DateTime, Utc};
 use diesel::{dsl::sum, prelude::*, result::Error as PgError};
+use failure::Fallible;
 use uuid::Uuid;
 
 pub trait PostgresUserInfra {
     fn save_user<'a>(&self, new_user: NewUser<'a>) -> Result<(), failure::Error>;
 
     fn query_user(&self, user_id: &str) -> Result<Option<QueryUser>, failure::Error>;
+
+    fn query_user_credentials(&self, email: &str) -> Fallible<Option<QueryUserCredentials>>;
 
     fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error>;
 
@@ -42,6 +45,12 @@ pub struct QueryUser {
     pub name: String,
     pub email: String,
     pub is_admin: bool,
+}
+
+pub struct QueryUserCredentials {
+    pub id: String,
+    pub cred: String,
+    pub salt: String,
 }
 
 pub struct NewPrizeTradeRecord {
@@ -80,6 +89,7 @@ impl PostgresUserInfra for Postgres {
     fn query_user(&self, user_id: &str) -> Result<Option<QueryUser>, failure::Error> {
         match users::table
             .filter(users::fb_uid.eq(user_id))
+            .select((users::fb_uid, users::name, users::email, users::is_admin))
             .first::<QueryableUser>(&self.conn)
         {
             Ok(query_res) => Ok(Some(QueryUser {
@@ -88,6 +98,18 @@ impl PostgresUserInfra for Postgres {
                 email: query_res.email,
                 is_admin: query_res.is_admin,
             })),
+            Err(PgError::NotFound) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    fn query_user_credentials(&self, email: &str) -> Fallible<Option<QueryUserCredentials>> {
+        match users::table
+            .filter(users::email.eq(email))
+            .select((users::fb_uid, users::credential, users::salt))
+            .first::<(String, String, String)>(&self.conn)
+        {
+            Ok((id, cred, salt)) => Ok(Some(QueryUserCredentials { id, cred, salt })),
             Err(PgError::NotFound) => Ok(None),
             Err(e) => Err(e.into()),
         }
@@ -189,7 +211,6 @@ struct QueryableUser {
     name: String,
     email: String,
     is_admin: bool,
-    _created: DateTime<Utc>,
 }
 
 #[derive(Insertable)]

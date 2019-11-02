@@ -5,6 +5,11 @@ ALTER TABLE markets ALTER COLUMN total_reward_point DROP DEFAULT;
 -- market が resolve した時刻を記録
 ALTER TABLE markets ADD COLUMN resolved_at timestamptz DEFAULT NULL;
 
+ALTER TABLE users ADD COLUMN credential VARCHAR(32) NOT NULL DEFAULT '';
+ALTER TABLE users ALTER COLUMN credential DROP DEFAULT;
+ALTER TABLE users ADD COLUMN salt VARCHAR(32) NOT NULL DEFAULT '';
+ALTER TABLE users ALTER COLUMN salt DROP DEFAULT;
+
 -- Market報酬として発行されたpoint報酬の履歴
 CREATE TABLE market_reward_records (
   -- アプリ的に使用することはないが、dieselのために必要
