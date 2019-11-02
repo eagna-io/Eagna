@@ -1,6 +1,7 @@
-use crate::{
-    app::{FailureResponse, InfraManager},
-    domain::user::{AccessToken, AccessTokenId, AccessTokenRepository},
+use crate::app::{FailureResponse, InfraManager};
+use crate::domain::user::{
+    models::access_token::{AccessToken, AccessTokenId},
+    repository::access_token::AccessTokenRepository,
 };
 use regex::Regex;
 use rouille::Request;

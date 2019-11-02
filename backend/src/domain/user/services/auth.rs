@@ -1,6 +1,6 @@
 use crate::domain::user::{
     models::UserId,
-    repository::user::{QueryUser, UserRepository},
+    repository::{QueryUser, UserRepository},
 };
 use crate::infra::postgres::{user::QueryUserCredentials, PostgresInfra};
 use failure::{err_msg, Fallible};
