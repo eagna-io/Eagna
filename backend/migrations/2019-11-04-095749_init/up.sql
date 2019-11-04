@@ -4,8 +4,8 @@ CREATE TABLE users (
   email         TEXT UNIQUE NOT NULL,
   is_admin      BOOLEAN NOT NULL DEFAULT False,
   created       TIMESTAMPTZ NOT NULL DEFAULT now(),
-  credential    VARCHAR(128) NOT NULL,
-  salt          VARCHAR(128) NOT NULL
+  credential    BYTEA NOT NULL, -- 64byte
+  salt          BYTEA NOT NULL -- 64byte
 );
 
 CREATE TYPE market_status AS ENUM (

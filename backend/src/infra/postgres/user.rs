@@ -48,8 +48,8 @@ pub struct QueryUser {
 
 pub struct QueryUserCredentials {
     pub id: Uuid,
-    pub cred: String,
-    pub salt: String,
+    pub cred: Vec<u8>,
+    pub salt: Vec<u8>,
 }
 
 pub struct NewPrizeTradeRecord {
@@ -105,7 +105,7 @@ impl PostgresUserInfra for Postgres {
         match users::table
             .filter(users::email.eq(email))
             .select((users::id, users::credential, users::salt))
-            .first::<(Uuid, String, String)>(&self.conn)
+            .first::<(Uuid, Vec<u8>, Vec<u8>)>(&self.conn)
         {
             Ok((id, cred, salt)) => Ok(Some(QueryUserCredentials { id, cred, salt })),
             Err(PgError::NotFound) => Ok(None),

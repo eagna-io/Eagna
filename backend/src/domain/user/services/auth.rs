@@ -28,18 +28,16 @@ impl<'a> UserAuthService<'a> {
             .query_user_credentials(email)?
             .ok_or(err_msg("Authentication failed"))?;
 
-        pbkdf2::verify(
-            ALGO,
-            N_ITER,
-            salt.as_bytes(),
-            attempted_pass.as_bytes(),
-            cred.as_bytes(),
-        )
-        .map_err(|_| err_msg("Authentication failed"))?;
+        Self::verify_credentials(salt.as_slice(), cred.as_slice(), attempted_pass)?;
 
         Ok(AuthorizedUser {
             id: UserId::from(id),
         })
+    }
+
+    fn verify_credentials(salt: &[u8], cred: &[u8], attempted_pass: &str) -> Fallible<()> {
+        pbkdf2::verify(ALGO, N_ITER, salt, attempted_pass.as_bytes(), cred)
+            .map_err(|_| err_msg("Authentication failed"))
     }
 
     pub fn derive_credentials(raw_pass: &str) -> Credentials {
@@ -48,15 +46,9 @@ impl<'a> UserAuthService<'a> {
         let mut cred = [0u8; CRED_LEN];
         pbkdf2::derive(ALGO, N_ITER, &salt, raw_pass.as_bytes(), &mut cred);
 
-        let mut encoded_salt = [0u8; ENCODED_CRED_LEN];
-        HEXUPPER.encode_mut(&salt[..], &mut encoded_salt[..]);
-
-        let mut encoded_cred = [0u8; ENCODED_CRED_LEN];
-        HEXUPPER.encode_mut(&cred[..], &mut encoded_cred[..]);
-
         Credentials {
-            salt: ArrayString::from_byte_string(&encoded_salt).unwrap(),
-            credential: ArrayString::from_byte_string(&encoded_cred).unwrap(),
+            salt: salt,
+            cred: cred,
         }
     }
 }
@@ -71,14 +63,43 @@ impl User for AuthorizedUser {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub struct Credentials {
-    pub salt: ArrayString<[u8; ENCODED_CRED_LEN]>,
-    pub credential: ArrayString<[u8; ENCODED_CRED_LEN]>,
+    salt: [u8; CRED_LEN],
+    cred: [u8; CRED_LEN],
+}
+
+impl Credentials {
+    pub fn salt_hex(&self) -> ArrayString<[u8; ENCODED_CRED_LEN]> {
+        encode(self.salt)
+    }
+
+    pub fn cred_hex(&self) -> ArrayString<[u8; ENCODED_CRED_LEN]> {
+        encode(self.cred)
+    }
 }
 
 fn gen_salt() -> [u8; CRED_LEN] {
     let mut salt = [0u8; CRED_LEN];
     thread_rng().fill(&mut salt);
     salt
+}
+
+fn encode(bytes: [u8; CRED_LEN]) -> ArrayString<[u8; ENCODED_CRED_LEN]> {
+    let mut encoded = [0u8; ENCODED_CRED_LEN];
+    HEXUPPER.encode_mut(&bytes[..], &mut encoded[..]);
+    ArrayString::from_byte_string(&encoded).unwrap()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn derive_and_verify() {
+        let pass = "hogehoge";
+
+        let Credentials { salt, cred } = UserAuthService::derive_credentials(pass);
+        UserAuthService::verify_credentials(&salt[..], &cred[..], pass).unwrap();
+    }
 }
