@@ -1,10 +1,9 @@
 CREATE TABLE users (
-  /* Firebase uid */
-  fb_uid        text PRIMARY KEY,
-  name          text NOT NULL,
-  email         text UNIQUE NOT NULL,
-  is_admin      boolean NOT NULL DEFAULT False,
-  created       timestamptz NOT NULL DEFAULT now(),
+  fb_uid        TEXT PRIMARY KEY,
+  name          TEXT NOT NULL,
+  email         TEXT UNIQUE NOT NULL,
+  is_admin      BOOLEAN NOT NULL DEFAULT False,
+  created       TIMESTAMPTZ NOT NULL DEFAULT now(),
   credential    VARCHAR(32) NOT NULL,
   salt          VARCHAR(32) NOT NULL
 );
@@ -17,24 +16,24 @@ CREATE TYPE market_status AS ENUM (
 );
 
 CREATE TABLE organizers (
-  id            uuid PRIMARY KEY,
-  name          text NOT NULL,
-  thumbnail_url  text NOT NULL
+  id            UUID PRIMARY KEY,
+  name          TEXT NOT NULL,
+  thumbnail_url TEXT NOT NULL
 );
 
 CREATE TABLE markets (
-  id                  uuid PRIMARY KEY,
-  title               text NOT NULL,
-  organizer_id        uuid NOT NULL,
-  description         text NOT NULL,
-  lmsr_b              integer NOT NULL,
-  open                timestamptz NOT NULL,
-  close               timestamptz NOT NULL,
+  id                  UUID PRIMARY KEY,
+  title               TEXT NOT NULL,
+  organizer_id        UUID NOT NULL,
+  description         TEXT NOT NULL,
+  lmsr_b              INTEGER NOT NULL,
+  open                TIMESTAMPTZ NOT NULL,
+  close               TIMESTAMPTZ NOT NULL,
   status              market_status NOT NULL DEFAULT 'upcoming',
   /* MUST NULL if "status" is NOT 'resolved' */
-  resolved_token_name text DEFAULT NULL,
-  total_reward_point  integer NOT NULL,
-  resolved_at         timestamptz DEFAULT NULL,
+  resolved_token_name TEXT DEFAULT NULL,
+  total_reward_point  INTEGER NOT NULL,
+  resolved_at         TIMESTAMPTZ DEFAULT NULL,
 
   CONSTRAINT market_organizer_fkey FOREIGN KEY(organizer_id)
     REFERENCES organizers(id) ON UPDATE RESTRICT ON DELETE RESTRICT
@@ -42,13 +41,13 @@ CREATE TABLE markets (
 
 CREATE TABLE market_tokens (
   /* Required by diesel. But not used by program */
-  unused_id     serial PRIMARY KEY,
+  unused_id     SERIAL PRIMARY KEY,
   /* MUST be locally unique in market */
-  name          text NOT NULL,
-  description   text NOT NULL,
-  thumbnail_url  text NOT NULL,
-  market_id     uuid NOT NULL,
-  idx           integer NOT NULL DEFAULT 0,
+  name          TEXT NOT NULL,
+  description   TEXT NOT NULL,
+  thumbnail_url TEXT NOT NULL,
+  market_id     UUID NOT NULL,
+  idx           INTEGER NOT NULL DEFAULT 0,
 
   UNIQUE (market_id, name),
   CONSTRAINT market_tokens_fkey FOREIGN KEY(market_id)
@@ -59,13 +58,13 @@ CREATE INDEX ON market_tokens (market_id);
 
 CREATE TABLE market_prizes (
   /* Required by diesel. But not used by program */
-  unused_id       serial PRIMARY KEY,
+  unused_id       SERIAL PRIMARY KEY,
   /* A locally unique number in each market */
-  market_local_id integer NOT NULL,
-  name            text NOT NULL,
-  thumbnail_url    text NOT NULL,
-  target          text NOT NULL,
-  market_id       uuid NOT NULL,
+  market_local_id INTEGER NOT NULL,
+  name            TEXT NOT NULL,
+  thumbnail_url   TEXT NOT NULL,
+  target          TEXT NOT NULL,
+  market_id       UUID NOT NULL,
 
   UNIQUE (market_id, market_local_id),
   CONSTRAINT market_prizes_fkey FOREIGN KEY(market_id)
@@ -80,17 +79,17 @@ CREATE TYPE order_type AS ENUM (
 
 CREATE TABLE orders (
   /* Required by diesel. But not used by program */
-  unused            serial PRIMARY KEY,
+  unused            SERIAL PRIMARY KEY,
   /* A locally unique number in each market */
-  market_local_id   integer NOT NULL,
-  user_id           text NOT NULL,
+  market_local_id   INTEGER NOT NULL,
+  user_id           TEXT NOT NULL,
   /* MUST NULL if "type" is 'initial_supply' */
-  token_name        text,
-  amount_token      integer NOT NULL,
-  amount_coin       integer NOT NULL,
+  token_name        TEXT,
+  amount_token      INTEGER NOT NULL,
+  amount_coin       INTEGER NOT NULL,
   type              order_type NOT NULL DEFAULT 'normal',
-  time              timestamptz NOT NULL DEFAULT now(),
-  market_id         uuid NOT NULL,
+  time              TIMESTAMPTZ NOT NULL DEFAULT now(),
+  market_id         UUID NOT NULL,
 
   UNIQUE (market_id, market_local_id),
   CONSTRAINT order_user_fkey FOREIGN KEY(user_id)
@@ -104,11 +103,11 @@ CREATE INDEX ON orders (market_id);
 -- Market報酬として発行されたpoint報酬の履歴
 CREATE TABLE market_reward_records (
   -- アプリ的に使用することはないが、dieselのために必要
-  unused_id   serial PRIMARY KEY,
-  market_id   uuid NOT NULL,
-  user_id     text NOT NULL,
+  unused_id   SERIAL PRIMARY KEY,
+  market_id   UUID NOT NULL,
+  user_id     TEXT NOT NULL,
   -- 発行したポイント量。0より大きい。0の場合はレコードを追加しない。
-  point       integer NOT NULL,
+  point       INTEGER NOT NULL,
 
   CONSTRAINT user_reward_point_history_market_fkey FOREIGN KEY(market_id)
     REFERENCES markets(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
@@ -119,15 +118,15 @@ CREATE TABLE market_reward_records (
 
 -- Userがpointと交換可能な景品
 CREATE TABLE prizes (
-  id            uuid NOT NULL PRIMARY KEY,
-  name          text NOT NULL,
-  description   text NOT NULL,
-  thumbnail_url text NOT NULL,
+  id            UUID NOT NULL PRIMARY KEY,
+  name          TEXT NOT NULL,
+  description   TEXT NOT NULL,
+  thumbnail_url TEXT NOT NULL,
   -- prizeを交換するのに必要なポイント量。0より大きい。
-  point         integer NOT NULL,
+  point         INTEGER NOT NULL,
   -- prizeが交換可能かどうか。
-  available     boolean NOT NULL DEFAULT true,
-  created       timestamptz NOT NULL DEFAULT now(),
+  available     BOOLEAN NOT NULL DEFAULT true,
+  created       TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   CONSTRAINT point_larger_than_zero CHECK ( point > 0 )
 );
@@ -138,14 +137,14 @@ CREATE TYPE prize_trade_status as ENUM (
 );
 
 CREATE TABLE user_prize_trade_records (
-  id            uuid PRIMARY KEY,
-  user_id       text NOT NULL,
-  prize_id      uuid NOT NULL,
+  id            UUID PRIMARY KEY,
+  user_id       TEXT NOT NULL,
+  prize_id      UUID NOT NULL,
   -- 消費したポイント。0より大きい。
-  point         integer NOT NULL,
-  time          timestamptz NOT NULL DEFAULT now(),
+  point         INTEGER NOT NULL,
+  time          TIMESTAMPTZ NOT NULL DEFAULT now(),
   status        prize_trade_status NOT NULL DEFAULT 'requested',
-  processed_at  timestamptz DEFAULT NULL,
+  processed_at  TIMESTAMPTZ DEFAULT NULL,
 
   CONSTRAINT user_prize_trade_history_user_fkey FOREIGN KEY(user_id)
     REFERENCES users(fb_uid) ON UPDATE RESTRICT ON DELETE RESTRICT,
