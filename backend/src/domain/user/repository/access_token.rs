@@ -25,4 +25,8 @@ impl<'a> AccessTokenRepository<'a> {
             .query_user_id_by_access_token(access_token_id.as_str())?
             .map(|user_id| AccessToken::from((*access_token_id, UserId::from_str(&user_id)))))
     }
+
+    pub fn delete(&self, access_token: &AccessToken) -> Fallible<()> {
+        self.redis.delete_access_token(access_token.id.as_str())
+    }
 }
