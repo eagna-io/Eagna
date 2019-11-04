@@ -24,7 +24,7 @@ impl<'a> UserAuthService<'a> {
         pbkdf2_verify(cred.as_str(), salt.as_str(), attempted_pass)?;
 
         Ok(AuthorizedUser {
-            id: UserId::from_str(id.as_str()),
+            id: UserId::from(id),
         })
     }
 }

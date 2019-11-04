@@ -19,7 +19,7 @@ table! {
     market_reward_records (unused_id) {
         unused_id -> Int4,
         market_id -> Uuid,
-        user_id -> Text,
+        user_id -> Uuid,
         point -> Int4,
     }
 }
@@ -64,7 +64,7 @@ table! {
     orders (unused) {
         unused -> Int4,
         market_local_id -> Int4,
-        user_id -> Text,
+        user_id -> Uuid,
         token_name -> Nullable<Text>,
         amount_token -> Int4,
         amount_coin -> Int4,
@@ -107,7 +107,7 @@ table! {
 
     user_prize_trade_records (id) {
         id -> Uuid,
-        user_id -> Text,
+        user_id -> Uuid,
         prize_id -> Uuid,
         point -> Int4,
         time -> Timestamptz,
@@ -120,8 +120,8 @@ table! {
     use diesel::sql_types::*;
     use crate::infra::postgres::types::*;
 
-    users (fb_uid) {
-        fb_uid -> Text,
+    users (id) {
+        id -> Uuid,
         name -> Text,
         email -> Text,
         is_admin -> Bool,

@@ -1,5 +1,5 @@
 CREATE TABLE users (
-  fb_uid        TEXT PRIMARY KEY,
+  id            UUID PRIMARY KEY,
   name          TEXT NOT NULL,
   email         TEXT UNIQUE NOT NULL,
   is_admin      BOOLEAN NOT NULL DEFAULT False,
@@ -82,7 +82,7 @@ CREATE TABLE orders (
   unused            SERIAL PRIMARY KEY,
   /* A locally unique number in each market */
   market_local_id   INTEGER NOT NULL,
-  user_id           TEXT NOT NULL,
+  user_id           UUID NOT NULL,
   /* MUST NULL if "type" is 'initial_supply' */
   token_name        TEXT,
   amount_token      INTEGER NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE orders (
 
   UNIQUE (market_id, market_local_id),
   CONSTRAINT order_user_fkey FOREIGN KEY(user_id)
-    REFERENCES users(fb_uid) ON UPDATE RESTRICT ON DELETE RESTRICT,
+    REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT order_market_fkey FOREIGN KEY(market_id)
     REFERENCES markets(id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
@@ -105,14 +105,14 @@ CREATE TABLE market_reward_records (
   -- アプリ的に使用することはないが、dieselのために必要
   unused_id   SERIAL PRIMARY KEY,
   market_id   UUID NOT NULL,
-  user_id     TEXT NOT NULL,
+  user_id     UUID NOT NULL,
   -- 発行したポイント量。0より大きい。0の場合はレコードを追加しない。
   point       INTEGER NOT NULL,
 
   CONSTRAINT user_reward_point_history_market_fkey FOREIGN KEY(market_id)
     REFERENCES markets(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT user_reward_point_history_user_fkey FOREIGN KEY(user_id)
-    REFERENCES users(fb_uid) ON UPDATE RESTRICT ON DELETE RESTRICT,
+    REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT point_larger_than_zero CHECK ( point > 0 )
 );
 
@@ -138,7 +138,7 @@ CREATE TYPE prize_trade_status as ENUM (
 
 CREATE TABLE user_prize_trade_records (
   id            UUID PRIMARY KEY,
-  user_id       TEXT NOT NULL,
+  user_id       UUID NOT NULL,
   prize_id      UUID NOT NULL,
   -- 消費したポイント。0より大きい。
   point         INTEGER NOT NULL,
@@ -147,7 +147,7 @@ CREATE TABLE user_prize_trade_records (
   processed_at  TIMESTAMPTZ DEFAULT NULL,
 
   CONSTRAINT user_prize_trade_history_user_fkey FOREIGN KEY(user_id)
-    REFERENCES users(fb_uid) ON UPDATE RESTRICT ON DELETE RESTRICT,
+    REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT user_prize_trade_history_prize_fkey FOREIGN KEY(prize_id)
     REFERENCES prizes(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT price_larger_than_zero CHECK ( point > 0 )

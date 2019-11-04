@@ -14,7 +14,7 @@ impl<'a> AccessTokenRepository<'a> {
     pub fn save(&self, access_token: &AccessToken) -> Fallible<()> {
         self.redis.save_access_token(
             access_token.id.as_str(),
-            access_token.user_id.as_str(),
+            access_token.user_id.as_uuid(),
             ACCESS_TOKEN_EXPIRE_SEC,
         )
     }
@@ -23,7 +23,7 @@ impl<'a> AccessTokenRepository<'a> {
         Ok(self
             .redis
             .query_user_id_by_access_token(access_token_id.as_str())?
-            .map(|user_id| AccessToken::from((*access_token_id, UserId::from_str(&user_id)))))
+            .map(|user_id| AccessToken::from((*access_token_id, UserId::from(user_id)))))
     }
 
     pub fn delete(&self, access_token: &AccessToken) -> Fallible<()> {

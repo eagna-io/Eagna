@@ -24,7 +24,7 @@ pub fn get(infra: &InfraManager, req: &Request) -> Result<Response, FailureRespo
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ResUser<'a> {
-    id: &'a str,
+    id: Uuid,
     name: &'a str,
     email: &'a str,
     is_admin: bool,
@@ -46,7 +46,7 @@ where
 {
     fn from(user: &'a U) -> ResUser<'a> {
         ResUser {
-            id: user.id().as_str(),
+            id: *user.id().as_uuid(),
             name: user.name().as_str(),
             email: user.email().as_str(),
             is_admin: user.is_admin(),

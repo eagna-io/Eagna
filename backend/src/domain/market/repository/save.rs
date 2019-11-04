@@ -76,7 +76,7 @@ fn save_open_market(
             // 最も新しい order だけ記録する
             let new_order = NewOrder {
                 local_id: order.id().as_i32(),
-                user_id: order.user_id().as_str(),
+                user_id: *order.user_id().as_uuid(),
                 token_name: order.token_name().map(|tn| tn.as_str()),
                 amount_token: order.amount_token().as_i32(),
                 amount_coin: order.amount_coin().as_i32(),
@@ -105,7 +105,7 @@ fn save_resolved_market(
     // RewardOrder を記録する
     let mut reward_orders = market.orders().filter_reward_orders().map(|o| NewOrder {
         local_id: o.id().as_i32(),
-        user_id: o.user_id().as_str(),
+        user_id: *o.user_id().as_uuid(),
         token_name: Some(o.token_name().as_str()),
         amount_token: 0,
         amount_coin: o.amount_coin().as_i32(),
@@ -119,7 +119,7 @@ fn save_resolved_market(
         .reward_records
         .iter()
         .map(|(user_id, point)| NewRewardRecord {
-            user_id: user_id.as_str(),
+            user_id: *user_id.as_uuid(),
             point: point.as_u32() as i32,
         });
     postgres.insert_reward_records(*market.id().as_uuid(), &mut reward_records)

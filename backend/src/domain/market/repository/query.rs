@@ -56,7 +56,7 @@ pub fn query_market_ids_participated_by_user(
     user_id: &UserId,
 ) -> Result<Vec<MarketId>, failure::Error> {
     Ok(postgres
-        .query_market_ids_participated_by_user(user_id.as_str())?
+        .query_market_ids_participated_by_user(user_id.as_uuid())?
         .into_iter()
         .map(MarketId::from)
         .collect())
@@ -92,12 +92,7 @@ fn build_market(mut market: QueryMarket, orders: Vec<QueryOrder>) -> Market {
     let reward_records = market.reward_records.take().map(|records| {
         records
             .into_iter()
-            .map(|record| {
-                (
-                    UserId::from_str(record.user_id.as_str()),
-                    Point::from(record.point),
-                )
-            })
+            .map(|record| (UserId::from(record.user_id), Point::from(record.point)))
             .collect::<HashMap<_, _>>()
     });
     let id = MarketId::from(market.id.clone());
@@ -197,13 +192,13 @@ fn build_order(order: QueryOrder) -> Order {
     match order.type_ {
         InfraOrderType::CoinSupply => Order::from(CoinSupplyOrder::from((
             OrderId::from(order.local_id),
-            UserId::from_str(order.user_id.as_str()),
+            UserId::from(order.user_id),
             AmountCoin::from(order.amount_coin),
             order.time,
         ))),
         InfraOrderType::Normal => Order::from(NormalOrder::from((
             OrderId::from(order.local_id),
-            UserId::from_str(order.user_id.as_str()),
+            UserId::from(order.user_id),
             NonEmptyString::from_str(order.token_name.unwrap()).unwrap(),
             AmountToken::from(order.amount_token),
             AmountCoin::from(order.amount_coin),
@@ -211,7 +206,7 @@ fn build_order(order: QueryOrder) -> Order {
         ))),
         InfraOrderType::Reward => Order::from(RewardOrder::from((
             OrderId::from(order.local_id),
-            UserId::from_str(order.user_id.as_str()),
+            UserId::from(order.user_id),
             NonEmptyString::from_str(order.token_name.unwrap()).unwrap(),
             AmountCoin::from(order.amount_coin),
             order.time,

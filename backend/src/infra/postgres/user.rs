@@ -11,44 +11,43 @@ use uuid::Uuid;
 pub trait PostgresUserInfra {
     fn save_user<'a>(&self, new_user: NewUser<'a>) -> Result<(), failure::Error>;
 
-    fn query_user(&self, user_id: &str) -> Result<Option<QueryUser>, failure::Error>;
+    fn query_user(&self, user_id: &Uuid) -> Result<Option<QueryUser>, failure::Error>;
 
     fn query_user_credentials(&self, email: &str) -> Fallible<Option<QueryUserCredentials>>;
 
-    fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error>;
+    fn query_user_point(&self, user_id: &Uuid) -> Result<u32, failure::Error>;
 
     fn save_user_prize_trade_record(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
         record: NewPrizeTradeRecord,
     ) -> Result<(), failure::Error>;
 
     fn query_user_prize_trade_records(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
     ) -> Result<Vec<QueryPrizeTradeRecord>, failure::Error>;
 
     fn query_user_market_reward_records(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
     ) -> Result<Vec<QueryMarketRewardRecord>, failure::Error>;
 }
 
 pub struct NewUser<'a> {
-    pub id: &'a str,
+    pub id: Uuid,
     pub name: &'a str,
     pub email: &'a str,
 }
 
 pub struct QueryUser {
-    pub id: String,
     pub name: String,
     pub email: String,
     pub is_admin: bool,
 }
 
 pub struct QueryUserCredentials {
-    pub id: String,
+    pub id: Uuid,
     pub cred: String,
     pub salt: String,
 }
@@ -78,7 +77,7 @@ impl PostgresUserInfra for Postgres {
     fn save_user<'a>(&self, new_user: NewUser<'a>) -> Result<(), failure::Error> {
         diesel::insert_into(users::table)
             .values(InsertableUser {
-                fb_uid: new_user.id,
+                id: new_user.id,
                 name: new_user.name,
                 email: new_user.email,
             })
@@ -86,14 +85,13 @@ impl PostgresUserInfra for Postgres {
         Ok(())
     }
 
-    fn query_user(&self, user_id: &str) -> Result<Option<QueryUser>, failure::Error> {
+    fn query_user(&self, user_id: &Uuid) -> Result<Option<QueryUser>, failure::Error> {
         match users::table
-            .filter(users::fb_uid.eq(user_id))
-            .select((users::fb_uid, users::name, users::email, users::is_admin))
+            .filter(users::id.eq(user_id))
+            .select((users::name, users::email, users::is_admin))
             .first::<QueryableUser>(&self.conn)
         {
             Ok(query_res) => Ok(Some(QueryUser {
-                id: query_res.fb_uid,
                 name: query_res.name,
                 email: query_res.email,
                 is_admin: query_res.is_admin,
@@ -106,8 +104,8 @@ impl PostgresUserInfra for Postgres {
     fn query_user_credentials(&self, email: &str) -> Fallible<Option<QueryUserCredentials>> {
         match users::table
             .filter(users::email.eq(email))
-            .select((users::fb_uid, users::credential, users::salt))
-            .first::<(String, String, String)>(&self.conn)
+            .select((users::id, users::credential, users::salt))
+            .first::<(Uuid, String, String)>(&self.conn)
         {
             Ok((id, cred, salt)) => Ok(Some(QueryUserCredentials { id, cred, salt })),
             Err(PgError::NotFound) => Ok(None),
@@ -115,7 +113,7 @@ impl PostgresUserInfra for Postgres {
         }
     }
 
-    fn query_user_point(&self, user_id: &str) -> Result<u32, failure::Error> {
+    fn query_user_point(&self, user_id: &Uuid) -> Result<u32, failure::Error> {
         let reward_points = market_reward_records::table
             .filter(market_reward_records::user_id.eq(user_id))
             .select(sum(market_reward_records::point))
@@ -133,13 +131,13 @@ impl PostgresUserInfra for Postgres {
 
     fn save_user_prize_trade_record(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
         record: NewPrizeTradeRecord,
     ) -> Result<(), failure::Error> {
         diesel::insert_into(user_prize_trade_records::table)
             .values(InsertablePrizeTradeRecord {
                 id: record.id,
-                user_id,
+                user_id: *user_id,
                 point: record.point as i32,
                 time: record.time,
                 prize_id: record.prize_id,
@@ -151,7 +149,7 @@ impl PostgresUserInfra for Postgres {
 
     fn query_user_prize_trade_records(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
     ) -> Result<Vec<QueryPrizeTradeRecord>, failure::Error> {
         Ok(user_prize_trade_records::table
             .filter(user_prize_trade_records::columns::user_id.eq(user_id))
@@ -179,7 +177,7 @@ impl PostgresUserInfra for Postgres {
 
     fn query_user_market_reward_records(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
     ) -> Result<Vec<QueryMarketRewardRecord>, failure::Error> {
         Ok(market_reward_records::table
             .filter(market_reward_records::user_id.eq(user_id))
@@ -200,14 +198,13 @@ impl PostgresUserInfra for Postgres {
 #[derive(Insertable)]
 #[table_name = "users"]
 struct InsertableUser<'a> {
-    fb_uid: &'a str,
+    id: Uuid,
     name: &'a str,
     email: &'a str,
 }
 
 #[derive(Queryable)]
 struct QueryableUser {
-    fb_uid: String,
     name: String,
     email: String,
     is_admin: bool,
@@ -215,9 +212,9 @@ struct QueryableUser {
 
 #[derive(Insertable)]
 #[table_name = "user_prize_trade_records"]
-struct InsertablePrizeTradeRecord<'a> {
+struct InsertablePrizeTradeRecord {
     id: Uuid,
-    user_id: &'a str,
+    user_id: Uuid,
     prize_id: Uuid,
     point: i32,
     time: DateTime<Utc>,

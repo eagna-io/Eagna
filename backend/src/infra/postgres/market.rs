@@ -43,7 +43,7 @@ pub trait PostgresMarketInfra {
     fn insert_reward_records<'a>(
         &self,
         market_id: Uuid,
-        records: &'a mut dyn Iterator<Item = NewRewardRecord<'a>>,
+        records: &'a mut dyn Iterator<Item = NewRewardRecord>,
     ) -> Result<(), failure::Error>;
 
     fn query_market_by_id(&self, id: &Uuid) -> Result<Option<QueryMarket>, failure::Error>;
@@ -62,7 +62,7 @@ pub trait PostgresMarketInfra {
 
     fn query_market_ids_participated_by_user(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
     ) -> Result<Vec<Uuid>, failure::Error>;
 
     fn query_market_ids_ready_to_open(&self) -> Result<Vec<Uuid>, failure::Error>;
@@ -102,7 +102,7 @@ pub struct NewPrize<'a> {
 
 pub struct NewOrder<'a> {
     pub local_id: i32,
-    pub user_id: &'a str,
+    pub user_id: Uuid,
     pub token_name: Option<&'a str>,
     pub amount_token: i32,
     pub amount_coin: i32,
@@ -110,8 +110,8 @@ pub struct NewOrder<'a> {
     pub time: DateTime<Utc>,
 }
 
-pub struct NewRewardRecord<'a> {
-    pub user_id: &'a str,
+pub struct NewRewardRecord {
+    pub user_id: Uuid,
     pub point: i32,
 }
 
@@ -152,14 +152,14 @@ pub struct QueryPrize {
 
 #[derive(Debug, Clone)]
 pub struct QueryRewardRecord {
-    pub user_id: String,
+    pub user_id: Uuid,
     pub point: u32,
 }
 
 #[derive(Debug, Clone)]
 pub struct QueryOrder {
     pub local_id: i32,
-    pub user_id: String,
+    pub user_id: Uuid,
     pub market_id: Uuid,
     pub token_name: Option<String>,
     pub amount_token: i32,
@@ -277,7 +277,7 @@ impl PostgresMarketInfra for Postgres {
                 amount_coin: order.amount_coin,
                 time: order.time,
                 type_: order.type_,
-                market_id: market_id,
+                market_id: *market_id,
             })
             .collect();
         diesel::insert_into(orders::table)
@@ -289,7 +289,7 @@ impl PostgresMarketInfra for Postgres {
     fn insert_reward_records<'a>(
         &self,
         market_id: Uuid,
-        records: &'a mut dyn Iterator<Item = NewRewardRecord<'a>>,
+        records: &'a mut dyn Iterator<Item = NewRewardRecord>,
     ) -> Result<(), failure::Error> {
         let insert_records = records
             .map(|record| InsertableRewardRecord {
@@ -385,7 +385,7 @@ impl PostgresMarketInfra for Postgres {
 
     fn query_market_ids_participated_by_user(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
     ) -> Result<Vec<Uuid>, failure::Error> {
         Ok(orders::table
             .filter(orders::columns::user_id.eq(user_id))
@@ -497,20 +497,20 @@ struct InsertablePrize<'a> {
 #[table_name = "orders"]
 struct InsertableOrder<'a> {
     market_local_id: i32,
-    user_id: &'a str,
+    user_id: Uuid,
     token_name: Option<&'a str>,
     amount_token: i32,
     amount_coin: i32,
     type_: OrderType,
-    market_id: &'a Uuid,
+    market_id: Uuid,
     time: DateTime<Utc>,
 }
 
 #[derive(Insertable)]
 #[table_name = "market_reward_records"]
-struct InsertableRewardRecord<'a> {
+struct InsertableRewardRecord {
     market_id: Uuid,
-    user_id: &'a str,
+    user_id: Uuid,
     point: i32,
 }
 
@@ -553,7 +553,7 @@ struct QueryablePrize {
 struct QueryableRewardRecords {
     _unused_id: i32,
     market_id: Uuid,
-    user_id: String,
+    user_id: Uuid,
     point: i32,
 }
 
@@ -561,7 +561,7 @@ struct QueryableRewardRecords {
 struct QueryableOrder {
     _unused_id: i32,
     market_local_id: i32,
-    user_id: String,
+    user_id: Uuid,
     token_name: Option<String>,
     amount_token: i32,
     amount_coin: i32,

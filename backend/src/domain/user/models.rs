@@ -7,7 +7,6 @@ use crate::domain::{
     prize::{Prize, PrizeId},
 };
 use crate::primitive::{EmptyStringError, NonEmptyString};
-use arrayvec::ArrayString;
 use chrono::{DateTime, Utc};
 use failure::Fallible;
 use getset::Getters;
@@ -187,20 +186,12 @@ impl UserWithMarketRewardHistory for NewUser {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-/// Firebase が発行するuidは現在28文字。
-/// しかし将来的に増える可能性がある（Firebaseはuidの長さについて言及していない）ので、
-/// 48文字まで対応できるようにしている。
-/// もしFirebaseのuidが36文字以上になってきたら、48以上にすることを検討すべき
-pub struct UserId(ArrayString<[u8; 48]>);
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, From)]
+pub struct UserId(Uuid);
 
 impl UserId {
-    pub fn from_str(s: &str) -> UserId {
-        UserId(ArrayString::from(s).unwrap())
-    }
-
-    pub fn as_str(&self) -> &str {
-        self.0.as_str()
+    pub fn as_uuid(&self) -> &Uuid {
+        &self.0
     }
 }
 

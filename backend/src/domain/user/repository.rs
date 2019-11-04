@@ -14,7 +14,7 @@ pub struct UserRepository<'a> {
 
 impl<'a> UserRepository<'a> {
     pub fn query_user(&self, user_id: &UserId) -> Result<Option<QueryUser<'a>>, failure::Error> {
-        let user = match self.postgres.query_user(user_id.as_str())? {
+        let user = match self.postgres.query_user(user_id.as_uuid())? {
             None => return Ok(None),
             Some(res) => res,
         };
@@ -41,7 +41,7 @@ impl<'a> UserRepository<'a> {
             time: user.requested_prize_trade_record().time,
         };
         self.postgres
-            .save_user_prize_trade_record(user.id().as_str(), new_prize_trade_record)
+            .save_user_prize_trade_record(user.id().as_uuid(), new_prize_trade_record)
     }
 }
 
@@ -76,7 +76,7 @@ pub trait UserWithPg: User + Sized {
     fn pg(&self) -> &dyn PostgresInfra;
 
     fn with_point(self) -> Result<WithPoint<Self>, failure::Error> {
-        let point = self.pg().query_user_point(self.id().as_str())?;
+        let point = self.pg().query_user_point(self.id().as_uuid())?;
         Ok(WithPoint {
             user: self,
             point: Point::from(point),
@@ -86,7 +86,7 @@ pub trait UserWithPg: User + Sized {
     fn with_prize_trade_history(self) -> Result<WithPrizeTradeHistory<Self>, failure::Error> {
         let history = self
             .pg()
-            .query_user_prize_trade_records(self.id().as_str())?
+            .query_user_prize_trade_records(self.id().as_uuid())?
             .into_iter()
             .map(|record| PrizeTradeRecord {
                 id: record.id,
@@ -108,7 +108,7 @@ pub trait UserWithPg: User + Sized {
     fn with_market_reward_history(self) -> Result<WithMarketRewardHistory<Self>, failure::Error> {
         let history = self
             .pg()
-            .query_user_market_reward_records(self.id().as_str())?
+            .query_user_market_reward_records(self.id().as_uuid())?
             .into_iter()
             .map(|record| MarketRewardRecord {
                 market_id: MarketId::from(record.market_id),
