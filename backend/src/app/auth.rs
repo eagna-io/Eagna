@@ -13,6 +13,7 @@ pub fn validate_bearer_header(
     let header_val = req
         .header("Authorization")
         .ok_or(FailureResponse::Unauthorized)?;
+
     let token_id = extract_token(header_val)?;
 
     let repo = AccessTokenRepository::from(infra.get_redis()?);

@@ -2,9 +2,7 @@ import requests
 from datetime import datetime
 import json
 
-AdminAccessToken = "test_admin_access_token"
-UserAccessToken = "test_user_access_token"
-
+AdminAccessToken = ""
 
 def main():
     # /users/ リソースのテスト
@@ -20,62 +18,16 @@ def main():
 
 
 def test_users_api():
-    # ユーザーがまだ作られていないことをテストする
-    # Firebaseには登録済みで、AccessTokenは取得している
-    headers = bearer_token({}, UserAccessToken)
-    res = requests.get(url("/users/me/"), headers=headers)
-    assert_eq(res.status_code, 401)
-
-    # 不正なペイロードではユーザーが作成できないことをテストする
-    # 名前が空文字列は許可しない
-    payload = {
-        "name": "",
-        "email": "hoge@eagna.io",
-    }
-    headers = content_type_json(bearer_token({}, UserAccessToken))
-    res = requests.post(
-        url("/users/"),
-        json.dumps(payload),
-        headers=headers,
-    )
-    assert_eq(res.status_code, 400)
-
-    # 不正なペイロードではユーザーが作成できないことをテストする
-    # メアドが空文字列は許可しない
-    payload = {
-        "name": "Hoge Hogeo",
-        "email": "",
-    }
-    headers = content_type_json(bearer_token({}, UserAccessToken))
-    res = requests.post(
-        url("/users/"),
-        json.dumps(payload),
-        headers=headers,
-    )
-    assert_eq(res.status_code, 400)
-
-    # 正しいペイロードでユーザーが作成できることをテストする
-    payload = {
-        "name": "Hoge Hogeo",
-        "email": "hoge@eagna.io",
-    }
-    headers = content_type_json(bearer_token({}, UserAccessToken))
-    res = requests.post(
-        url("/users/"),
-        json.dumps(payload),
-        headers=headers,
-    )
+    # signinができることをテストする
+    headers = content_type_json(empty_headers())
+    payload = {"email": "test-admin@eagna.io", "password": "hogehoge"}
+    res = requests.post(url("/users/me/access_token/"),
+                        json.dumps(payload),
+                        headers=headers)
     assert_eq(res.status_code, 201)
-
-    # ↑で作成したユーザーが取得できることをテストする
-    headers = bearer_token({}, UserAccessToken)
-    res = requests.get(url("/users/me/"), headers=headers)
-    assert_eq(res.status_code, 200)
-    assert_eq(res.json()["name"], "Hoge Hogeo")
-    assert_eq(res.json()["email"], "hoge@eagna.io")
-    assert_eq(res.json()["isAdmin"], False)
-    assert_eq(len(res.json()["prizeTradeHistory"]), 0)
-    assert_eq(len(res.json()["marketRewardHistory"]), 0)
+    assert_eq(len(res.json()["token"]), 64)
+    global AdminAccessToken
+    AdminAccessToken = res.json()["token"]
 
 
 def test_prizes_api():
@@ -83,13 +35,6 @@ def test_prizes_api():
     res = requests.get(url("/prizes/"))
     assert_eq(res.status_code, 200)
     assert_eq(len(res.json()), 1)
-
-    # 不正なアクセストークンでは賞品が作成できないことをテストする
-    # ペイロードが適切かどうかよりも、アクセストークンが適切かを
-    # 先にチェックすることをテストする
-    headers = bearer_token(empty_headers(), UserAccessToken)
-    res = requests.post(url("/prizes/"), headers=headers)
-    assert_eq(res.status_code, 401)
 
     # アクセストークンが正しくても、
     # 不正なペイロードでは賞品が作成できないことをテストする
@@ -164,7 +109,7 @@ def test_markets_api():
     assert_eq(len(res.json()), 0)
 
     # 不正なアクセストークンではマーケットが作成できないことをテストする
-    headers = bearer_token(empty_headers(), UserAccessToken)
+    headers = bearer_token(empty_headers(), "invalid_token")
     res = requests.post(url("/markets/"), headers=headers)
     assert_eq(res.status_code, 401)
 

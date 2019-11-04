@@ -11,7 +11,8 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
     })?;
 
     let user = UserAuthService::from(infra.get_postgres()?)
-        .authenticate(email.as_str(), password.as_str())?;
+        .authenticate(email.as_str(), password.as_str())
+        .map_err(|_| FailureResponse::Unauthorized)?;
     let access_token = user.new_access_token();
 
     AccessTokenRepository::from(infra.get_redis()?).save(&access_token)?;

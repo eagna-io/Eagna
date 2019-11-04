@@ -3,12 +3,11 @@ from datetime import datetime, timedelta
 import json
 import time
 
-AdminAccessToken = "test_admin_access_token"
-UserAccessToken = "test_user_access_token"
+AdminAccessToken = ""
 
 
 def main():
-    create_user()
+    signin()
 
     prize = create_prize()
 
@@ -39,14 +38,16 @@ def main():
     print("[ OK ]")
 
 
-def create_user():
-    headers = content_type_json(bearer_token({}, UserAccessToken))
+def signin():
+    headers = content_type_json({})
     payload = {
-        "name": "Hoge Hogeo",
-        "email": "hoge@eagna.io",
+        "email": "test-admin@eagna.io",
+        "password": "hogehoge"
     }
-    res = requests.post(url("/users/"), json.dumps(payload), headers=headers)
+    res = requests.post(url("/users/me/access_token/"), json.dumps(payload), headers=headers)
     assert_eq(res.status_code, 201)
+    global AdminAccessToken
+    AdminAccessToken = res.json()["token"]
 
 
 # 報酬を作成する
@@ -101,7 +102,7 @@ def check_markets():
 
 
 def join_market(market_id):
-    headers = content_type_json(bearer_token(empty_headers(), UserAccessToken))
+    headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
     payload = {
         "amountToken": 0,
         "amountCoin": 0,
@@ -128,14 +129,14 @@ def resolve_market(market_id):
 
 
 def get_my_info():
-    headers = content_type_json(bearer_token(empty_headers(), UserAccessToken))
+    headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
     res = requests.get(url("/users/me/"), headers=headers)
     assert_eq(res.status_code, 200)
     return res.json()
 
 
 def request_prize_trade(prize_id):
-    headers = content_type_json(bearer_token(empty_headers(), UserAccessToken))
+    headers = content_type_json(bearer_token(empty_headers(), AdminAccessToken))
     payload = {
         "prizeId": prize_id,
     }
