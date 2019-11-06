@@ -53,7 +53,8 @@ sleep 2
 echo "running test scenario..."
 
 # シナリオテスト
-python3 $TEST_SCENARIO
+python3 $TEST_SCENARIO &&
+echo "=====  [ ok ]  ====="
 
 kill -9 ${server_pid}
 rm -f ${TEST_SERVER_PID_FILE}
