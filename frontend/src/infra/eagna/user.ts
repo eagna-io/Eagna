@@ -11,6 +11,22 @@ export class EagnaUserApi {
     });
   }
 
+  static fetchAccessToken(args: {
+    email: string;
+    password: string;
+  }): Promise<string | null> {
+    return EagnaBackendApi.post({
+      path: "/users/me/access_token",
+      decoder: D.object({ token: D.string() }),
+      body: args
+    })
+      .then(({ token }) => token)
+      .catch(e => {
+        console.log(e);
+        return null;
+      });
+  }
+
   static create(
     user: {
       name: string;
@@ -33,8 +49,8 @@ export interface User {
   email: string;
   isAdmin: boolean;
   point: number;
-  prizeTradeHistory: PrizeTradeRecord[],
-  marketRewardHistory: MarketRewardRecord[],
+  prizeTradeHistory: PrizeTradeRecord[];
+  marketRewardHistory: MarketRewardRecord[];
 }
 
 export interface MarketRewardRecord {
@@ -73,5 +89,5 @@ const userDecoder: D.Decoder<User> = D.object({
   isAdmin: D.boolean(),
   point: D.number(),
   prizeTradeHistory: D.array(prizeTraedeItemDecoder),
-  marketRewardHistory: D.array(marketRewardItemDecoder),
+  marketRewardHistory: D.array(marketRewardItemDecoder)
 });
