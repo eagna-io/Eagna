@@ -8,7 +8,6 @@ import { Store } from "./redux";
 import TopPage from "./pages/top";
 import LoginPage from "./pages/login";
 import AccountPage from "./pages/account";
-import SpecialSignupPage from "./pages/special_signup";
 import MarketPage from "./pages/market";
 import PrizeListPage from "./pages/prize-list";
 import PrizePage from "./pages/prize";
@@ -65,7 +64,6 @@ const AppRouter: FC = () => (
         exact
         render={() => <PlainTextPage textUrl="/txt/terms.txt" />}
       />
-      <Route path="/special/signup" exact component={SpecialSignupPage} />
       <Route render={() => <NotFoundPage />} />
     </Switch>
   </Router>

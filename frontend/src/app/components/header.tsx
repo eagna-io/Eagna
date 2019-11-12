@@ -6,8 +6,6 @@ import { useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserCircle, faCaretDown } from "@fortawesome/free-solid-svg-icons";
 import { History } from "history";
-import * as firebase from "firebase/app";
-import "firebase/auth";
 
 import { User } from "models/user";
 import { pc } from "app/components/responsive";
@@ -66,15 +64,6 @@ const ProfileDropdown: FC<ProfileDropdownProps> = ({ history, user }) => {
     setShowMenu(!showMenu);
   };
 
-  const signOut = () => {
-    firebase
-      .auth()
-      .signOut()
-      .then(function() {
-        history.push("/");
-      });
-  };
-
   const signIn = () => {
     history.push("/login");
   };
@@ -99,7 +88,7 @@ const ProfileDropdown: FC<ProfileDropdownProps> = ({ history, user }) => {
             </MenuItem>
             <Line />
             <MenuItem>
-              <Signout onClick={signOut}>Sign out</Signout>
+              <Signout onClick={() => {/*TODO*/}}>Sign out</Signout>
             </MenuItem>
           </>
         ) : (

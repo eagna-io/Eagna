@@ -3,7 +3,6 @@ import styled from "styled-components";
 import ReactGA from "react-ga";
 
 import { pc } from "app/components/responsive";
-import SigninComponent from "app/components/signin";
 import TwitterFeed from "app/components/twitter";
 
 import Header from "./components/header";
@@ -23,7 +22,6 @@ const TopPage: FC = () => {
           <MainMsg>未来は僕等の手の中</MainMsg>
           <SubMsg>今すぐ予測市場を体験しましょう</SubMsg>
           <SubMsg2>どなたでも無料でご利用できます</SubMsg2>
-          <SigninComponent redirectUrl="/account" />
           <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n7f8a517c50f6">
             &beta; 版をリリースしました！
           </AnnounceBetaRelease>

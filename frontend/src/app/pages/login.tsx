@@ -4,8 +4,6 @@ import { withRouter } from "react-router-dom";
 import { History } from "history";
 import ReactGA from "react-ga";
 
-import SigninComponent from "app/components/signin";
-
 interface LoginPageProps {
   history: History;
 }
@@ -19,7 +17,6 @@ const LoginPage: FC<LoginPageProps> = ({ history }) => {
   return (
     <Container>
       <Logo src="/img/logo-big.png" />
-      <SigninComponent redirectUrl={redirectUrl} autoRedirect />
     </Container>
   );
 };
