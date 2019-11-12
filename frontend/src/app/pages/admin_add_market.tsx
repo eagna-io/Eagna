@@ -4,6 +4,7 @@ import moment from "moment";
 import { useSelector } from "react-redux";
 
 import { EagnaMarketApi } from "infra/eagna/market";
+import { Storage } from "infra/storage";
 import { User } from "models/user";
 import { Eagna } from "models/organizer";
 import { RootState } from "app/redux";
@@ -71,27 +72,26 @@ const AddMarketPage: FC<{ user: User }> = ({ user }) => {
   };
 
   const sendRequest = () => {
-    user.getAccessToken().then(accessToken => {
-      if (accessToken === null) {
-        alert("ログインセッションが切れました");
-      } else {
-        EagnaMarketApi.create(
-          {
-            title: title,
-            organizerId: Eagna.id,
-            description: description,
-            lmsrB: lmsrB,
-            open: moment(openTime),
-            close: moment(closeTime),
-            tokens: tokens,
-            prizes: prizes.map((p, idx) => ({ id: idx, ...p }))
-          },
-          accessToken
-        ).then(marketId => {
-          alert(`New market ${marketId} is created`);
-        });
-      }
-    });
+    const accessToken = Storage.getToken();
+    if (!accessToken) {
+      alert("ログインセッションが切れました");
+    } else {
+      EagnaMarketApi.create(
+        {
+          title: title,
+          organizerId: Eagna.id,
+          description: description,
+          lmsrB: lmsrB,
+          open: moment(openTime),
+          close: moment(closeTime),
+          tokens: tokens,
+          prizes: prizes.map((p, idx) => ({ id: idx, ...p }))
+        },
+        accessToken
+      ).then(marketId => {
+        alert(`New market ${marketId} is created`);
+      });
+    }
   };
 
   return (

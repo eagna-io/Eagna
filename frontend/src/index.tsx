@@ -8,7 +8,7 @@ import thunk from "redux-thunk";
 import logger from "redux-logger";
 
 import { rootReducer } from "app/redux";
-import { startObservingUserLogin } from "app/redux/user";
+import { checkLogin } from "app/redux/user";
 import App from "app/app";
 
 const firebaseApiKey = process.env.REACT_APP_FIREBASE_API_KEY;
