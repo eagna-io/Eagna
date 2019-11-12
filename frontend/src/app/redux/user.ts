@@ -21,20 +21,18 @@ export type Action =
   | AppAction<ActionType.SetUser, { user: User }>
   | AppAction<ActionType.ClearUser>;
 
-function setUser(user: User): Action {
+export function setUser(user: User): Action {
   return {
     type: ActionType.SetUser,
     user
   };
 }
 
-function clearUser(): Action {
+export function clearUser(): Action {
   return {
     type: ActionType.ClearUser
   };
 }
-
-const LOGIN_CHECK_TIMEOUT_SEC = 10;
 
 export function checkLogin(): ThunkAction<Promise<void>, State, null, Action> {
   return async dispatch => {

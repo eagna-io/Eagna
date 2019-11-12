@@ -1,5 +1,6 @@
 import {
   EagnaUserApi,
+  User as InfraUser,
   MarketRewardRecord as InfraMarketRewardRecord,
   PrizeTradeRecord as InfraPrizeTradeRecord
 } from "infra/eagna/user";
@@ -24,6 +25,19 @@ export class User {
   async getAccessToken(): Promise<string> {
     return this.accessToken;
   }
+
+  static fromInfra(user: InfraUser, token: string): User {
+    return new User(
+      user.id,
+      user.name,
+      user.email,
+      user.isAdmin,
+      user.point,
+      user.prizeTradeHistory,
+      user.marketRewardHistory,
+      token
+    );
+  }
 }
 
 export type PrizeTradeRecord = InfraPrizeTradeRecord;
@@ -37,21 +51,26 @@ export class UserRepository {
     } else {
       try {
         const user = await EagnaUserApi.queryMe(token);
-        return new User(
-          user.id,
-          user.name,
-          user.email,
-          user.isAdmin,
-          user.point,
-          user.prizeTradeHistory,
-          user.marketRewardHistory,
-          token
-        );
+        return User.fromInfra(user, token);
       } catch (e) {
         // Tokenが期限切れの時とか
         console.log(e);
         return null;
       }
     }
+  }
+
+  static async signin(email: string, password: string): Promise<User | null> {
+    const token = await EagnaUserApi.fetchAccessToken({
+      email,
+      password
+    });
+    if (!token) {
+      // 認証失敗
+      return null;
+    }
+
+    const user = await EagnaUserApi.queryMe(token);
+    return User.fromInfra(user, token);
   }
 }

@@ -4,6 +4,7 @@ import ReactGA from "react-ga";
 
 import { pc } from "app/components/responsive";
 import TwitterFeed from "app/components/twitter";
+import SigninForm from "app/components/signin";
 
 import Header from "./components/header";
 import ThreeStepsSection from "./components/three-steps";
@@ -25,6 +26,9 @@ const TopPage: FC = () => {
           <AnnounceBetaRelease href="https://note.mu/rohan_market/n/n7f8a517c50f6">
             &beta; 版をリリースしました！
           </AnnounceBetaRelease>
+          <SigninContainer>
+            <SigninForm />
+          </SigninContainer>
         </MainSectionBgFilter>
       </MainSection>
       <ThreeStepsSection />
@@ -125,4 +129,8 @@ const AnnounceBetaRelease = styled.a`
     margin-top: 50px;
     font-size: 18px;
   `)}
+`;
+
+const SigninContainer = styled.div`
+  padding-top: 50px;
 `;
