@@ -61,7 +61,7 @@ export class UserRepository {
   }
 
   static async signin(email: string, password: string): Promise<User | null> {
-    const token = await EagnaUserApi.fetchAccessToken({
+    const token = await EagnaUserApi.createAccessToken({
       email,
       password
     });

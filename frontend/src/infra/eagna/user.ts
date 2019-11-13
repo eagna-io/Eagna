@@ -11,7 +11,7 @@ export class EagnaUserApi {
     });
   }
 
-  static fetchAccessToken(args: {
+  static createAccessToken(args: {
     email: string;
     password: string;
   }): Promise<string | null> {
@@ -21,10 +21,7 @@ export class EagnaUserApi {
       body: args
     })
       .then(({ token }) => token)
-      .catch(e => {
-        console.log(e);
-        return null;
-      });
+      .catch(e => null);
   }
 
   static create(
