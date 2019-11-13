@@ -1,4 +1,5 @@
 import React from "react";
+import { useDispatch } from "react-redux";
 import styled from "styled-components";
 import Grid from "@material-ui/core/Grid";
 import Paper from "@material-ui/core/Paper";
@@ -19,6 +20,8 @@ const SigninForm: React.FC<Props> = ({ history }) => {
   const [email, setEmail] = React.useState();
   const [password, setPassword] = React.useState();
 
+  const dispatch = useDispatch();
+
   const onClick = () => {
     if (!email || !password) {
       return;
@@ -28,7 +31,7 @@ const SigninForm: React.FC<Props> = ({ history }) => {
       if (!user) {
         alert("メールアドレスまたはパスワードが違います");
       } else {
-        setUser(user);
+        dispatch(setUser(user));
         history.push("/account");
       }
     })();

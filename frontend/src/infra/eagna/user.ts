@@ -16,7 +16,7 @@ export class EagnaUserApi {
     password: string;
   }): Promise<string | null> {
     return EagnaBackendApi.post({
-      path: "/users/me/access_token",
+      path: "/users/me/access_token/",
       decoder: D.object({ token: D.string() }),
       body: args
     })

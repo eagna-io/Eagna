@@ -3,11 +3,11 @@ import styled from "styled-components";
 import { withRouter } from "react-router-dom";
 import { History } from "history";
 import ReactGA from "react-ga";
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 
 import { Market, MarketStatus, MarketRepository } from "models/market";
 import { User } from "models/user";
-import { RootState } from 'app/redux';
+import { RootState } from "app/redux";
 import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
 
@@ -19,7 +19,7 @@ interface AccountPageProps {
   history: History;
 }
 
-const AccountPageWrapper: FC<AccountPageProps> = ({ history}) => {
+const AccountPageWrapper: FC<AccountPageProps> = ({ history }) => {
   const user = useSelector((state: RootState) => state.user.user);
 
   useEffect(() => {
