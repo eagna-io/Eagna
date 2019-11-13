@@ -70,7 +70,12 @@ export class UserRepository {
       return null;
     }
 
+    // Userをfetch
     const user = await EagnaUserApi.queryMe(token);
+
+    // Tokenを保存
+    Storage.setToken(token);
+
     return User.fromInfra(user, token);
   }
 }
