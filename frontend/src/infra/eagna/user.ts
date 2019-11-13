@@ -3,12 +3,12 @@ import moment, { Moment } from "moment";
 import { EagnaBackendApi } from "infra/eagna";
 
 export class EagnaUserApi {
-  static queryMe(accessToken: string): Promise<User> {
+  static queryMe(accessToken: string): Promise<User | null> {
     return EagnaBackendApi.get({
       path: "/users/me/",
       accessToken: accessToken,
       decoder: userDecoder
-    });
+    }).catch(e => null);
   }
 
   static createAccessToken(args: {

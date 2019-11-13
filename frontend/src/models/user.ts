@@ -49,13 +49,11 @@ export class UserRepository {
     if (!token) {
       return null;
     } else {
-      try {
-        const user = await EagnaUserApi.queryMe(token);
-        return User.fromInfra(user, token);
-      } catch (e) {
-        // Tokenが期限切れの時とか
-        console.log(e);
+      const user = await EagnaUserApi.queryMe(token);
+      if (user === null) {
         return null;
+      } else {
+        return User.fromInfra(user, token);
       }
     }
   }
@@ -72,6 +70,11 @@ export class UserRepository {
 
     // Userをfetch
     const user = await EagnaUserApi.queryMe(token);
+    if (!user) {
+      // この場合、おそらくサーバーに何らかのバグがある
+      console.error("Success to create access token but it seems to invalid");
+      return null;
+    }
 
     // Tokenを保存
     Storage.setToken(token);
