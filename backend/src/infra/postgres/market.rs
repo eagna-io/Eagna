@@ -25,10 +25,12 @@ pub trait PostgresMarketInfra {
         market_status: &MarketStatus,
     ) -> Result<(), failure::Error>;
 
-    fn update_market_status_and_resolved_token_name(
+    /// - market_statusをResolvedに変更
+    /// - resolved_token_name を設定
+    /// - resolved_at を設定
+    fn resolve_market(
         &self,
         market_id: &Uuid,
-        market_status: &MarketStatus,
         resolved_token_name: &str,
     ) -> Result<(), failure::Error>;
 
@@ -36,6 +38,12 @@ pub trait PostgresMarketInfra {
         &self,
         market_id: &'a Uuid,
         orders: &'a mut dyn Iterator<Item = NewOrder<'a>>,
+    ) -> Result<(), failure::Error>;
+
+    fn insert_reward_records<'a>(
+        &self,
+        market_id: Uuid,
+        records: &'a mut dyn Iterator<Item = NewRewardRecord>,
     ) -> Result<(), failure::Error>;
 
     fn query_market_by_id(&self, id: &Uuid) -> Result<Option<QueryMarket>, failure::Error>;
@@ -54,7 +62,7 @@ pub trait PostgresMarketInfra {
 
     fn query_market_ids_participated_by_user(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
     ) -> Result<Vec<Uuid>, failure::Error>;
 
     fn query_market_ids_ready_to_open(&self) -> Result<Vec<Uuid>, failure::Error>;
@@ -68,6 +76,8 @@ pub struct NewMarket<'a> {
     pub organizer_id: &'a Uuid,
     pub description: &'a str,
     pub lmsr_b: i32,
+    // total_reward_point がnegativeにならないことはDB制約で担保している
+    pub total_reward_point: u32,
     pub open: &'a DateTime<Utc>,
     pub close: &'a DateTime<Utc>,
     // tokenのidxカラムは、この順序で設定される。
@@ -92,12 +102,17 @@ pub struct NewPrize<'a> {
 
 pub struct NewOrder<'a> {
     pub local_id: i32,
-    pub user_id: &'a str,
+    pub user_id: Uuid,
     pub token_name: Option<&'a str>,
     pub amount_token: i32,
     pub amount_coin: i32,
     pub type_: OrderType,
     pub time: DateTime<Utc>,
+}
+
+pub struct NewRewardRecord {
+    pub user_id: Uuid,
+    pub point: i32,
 }
 
 #[derive(Debug, Clone)]
@@ -107,13 +122,17 @@ pub struct QueryMarket {
     pub organizer_id: Uuid,
     pub description: String,
     pub lmsr_b: i32,
+    // total_reward_point がnegativeにならないことはDB制約で担保している
+    pub total_reward_point: u32,
     pub open: DateTime<Utc>,
     pub close: DateTime<Utc>,
     pub status: MarketStatus,
-    pub resolved_token_name: Option<String>,
     // tokenのidxカラム順にソートされている
     pub tokens: Vec<QueryToken>,
     pub prizes: Vec<QueryPrize>,
+    pub resolved_token_name: Option<String>,
+    pub resolved_at: Option<DateTime<Utc>>,
+    pub reward_records: Option<Vec<QueryRewardRecord>>,
 }
 
 #[derive(Debug, Clone)]
@@ -132,9 +151,15 @@ pub struct QueryPrize {
 }
 
 #[derive(Debug, Clone)]
+pub struct QueryRewardRecord {
+    pub user_id: Uuid,
+    pub point: u32,
+}
+
+#[derive(Debug, Clone)]
 pub struct QueryOrder {
     pub local_id: i32,
-    pub user_id: String,
+    pub user_id: Uuid,
     pub market_id: Uuid,
     pub token_name: Option<String>,
     pub amount_token: i32,
@@ -148,6 +173,8 @@ pub struct QueryOrder {
  * Implementation
  * ==================
  */
+
+use super::schema::{market_prizes, market_reward_records, market_tokens, markets, orders};
 
 impl PostgresMarketInfra for Postgres {
     fn lock_market(&self, market_id: &Uuid) -> Result<(), failure::Error> {
@@ -167,6 +194,7 @@ impl PostgresMarketInfra for Postgres {
             organizer_id: market.organizer_id,
             description: market.description,
             lmsr_b: market.lmsr_b,
+            total_reward_point: market.total_reward_point as i32,
             open: market.open,
             close: market.close,
         };
@@ -220,16 +248,16 @@ impl PostgresMarketInfra for Postgres {
         Ok(())
     }
 
-    fn update_market_status_and_resolved_token_name(
+    fn resolve_market(
         &self,
         market_id: &Uuid,
-        market_status: &MarketStatus,
         resolved_token_name: &str,
     ) -> Result<(), failure::Error> {
         diesel::update(markets::table.filter(markets::id.eq(market_id)))
             .set((
-                markets::status.eq(market_status),
+                markets::status.eq(MarketStatus::Resolved),
                 markets::resolved_token_name.eq(resolved_token_name),
+                markets::resolved_at.eq(Utc::now()),
             ))
             .execute(&self.conn)?;
         Ok(())
@@ -249,11 +277,29 @@ impl PostgresMarketInfra for Postgres {
                 amount_coin: order.amount_coin,
                 time: order.time,
                 type_: order.type_,
-                market_id: market_id,
+                market_id: *market_id,
             })
             .collect();
         diesel::insert_into(orders::table)
             .values(&insert_orders)
+            .execute(&self.conn)?;
+        Ok(())
+    }
+
+    fn insert_reward_records<'a>(
+        &self,
+        market_id: Uuid,
+        records: &'a mut dyn Iterator<Item = NewRewardRecord>,
+    ) -> Result<(), failure::Error> {
+        let insert_records = records
+            .map(|record| InsertableRewardRecord {
+                market_id,
+                user_id: record.user_id,
+                point: record.point,
+            })
+            .collect::<Vec<_>>();
+        diesel::insert_into(market_reward_records::table)
+            .values(&insert_records)
             .execute(&self.conn)?;
         Ok(())
     }
@@ -282,7 +328,23 @@ impl PostgresMarketInfra for Postgres {
             .filter(market_prizes::columns::market_id.eq(id))
             .load::<QueryablePrize>(&self.conn)?;
 
-        let market = QueryMarket::from_parts(raw_market, raw_market_tokens, raw_market_prizes);
+        // statusがresolvedのとき、QueryableRewardRecordsを取得
+        let reward_records = if raw_market.status == MarketStatus::Resolved {
+            Some(
+                market_reward_records::table
+                    .filter(market_reward_records::columns::market_id.eq(id))
+                    .load::<QueryableRewardRecords>(&self.conn)?,
+            )
+        } else {
+            None
+        };
+
+        let market = QueryMarket::from_parts(
+            raw_market,
+            raw_market_tokens,
+            raw_market_prizes,
+            reward_records,
+        );
 
         Ok(Some(market))
     }
@@ -323,7 +385,7 @@ impl PostgresMarketInfra for Postgres {
 
     fn query_market_ids_participated_by_user(
         &self,
-        user_id: &str,
+        user_id: &Uuid,
     ) -> Result<Vec<Uuid>, failure::Error> {
         Ok(orders::table
             .filter(orders::columns::user_id.eq(user_id))
@@ -354,6 +416,7 @@ impl QueryMarket {
         raw_market: QueryableMarket,
         raw_tokens: Vec<QueryableToken>,
         raw_prizes: Vec<QueryablePrize>,
+        raw_reward_records: Option<Vec<QueryableRewardRecords>>,
     ) -> QueryMarket {
         QueryMarket {
             id: raw_market.id,
@@ -361,10 +424,12 @@ impl QueryMarket {
             organizer_id: raw_market.organizer_id,
             description: raw_market.description,
             lmsr_b: raw_market.lmsr_b,
+            total_reward_point: raw_market.total_reward_point as u32,
             open: raw_market.open,
             close: raw_market.close,
             status: raw_market.status,
             resolved_token_name: raw_market.resolved_token_name,
+            resolved_at: raw_market.resolved_at,
             tokens: raw_tokens
                 .into_iter()
                 .map(|token| QueryToken {
@@ -382,11 +447,18 @@ impl QueryMarket {
                     target: prize.target,
                 })
                 .collect(),
+            reward_records: raw_reward_records.map(|records| {
+                records
+                    .into_iter()
+                    .map(|record| QueryRewardRecord {
+                        user_id: record.user_id,
+                        point: record.point as u32,
+                    })
+                    .collect()
+            }),
         }
     }
 }
-
-use super::schema::{market_prizes, market_tokens, markets, orders};
 
 #[derive(Insertable)]
 #[table_name = "markets"]
@@ -396,6 +468,7 @@ struct InsertableMarket<'a> {
     organizer_id: &'a Uuid,
     description: &'a str,
     lmsr_b: i32,
+    total_reward_point: i32,
     open: &'a DateTime<Utc>,
     close: &'a DateTime<Utc>,
 }
@@ -424,13 +497,21 @@ struct InsertablePrize<'a> {
 #[table_name = "orders"]
 struct InsertableOrder<'a> {
     market_local_id: i32,
-    user_id: &'a str,
+    user_id: Uuid,
     token_name: Option<&'a str>,
     amount_token: i32,
     amount_coin: i32,
     type_: OrderType,
-    market_id: &'a Uuid,
+    market_id: Uuid,
     time: DateTime<Utc>,
+}
+
+#[derive(Insertable)]
+#[table_name = "market_reward_records"]
+struct InsertableRewardRecord {
+    market_id: Uuid,
+    user_id: Uuid,
+    point: i32,
 }
 
 #[derive(Queryable)]
@@ -444,6 +525,8 @@ struct QueryableMarket {
     close: DateTime<Utc>,
     status: MarketStatus,
     resolved_token_name: Option<String>,
+    total_reward_point: i32,
+    resolved_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Clone, Queryable)]
@@ -467,10 +550,18 @@ struct QueryablePrize {
 }
 
 #[derive(Clone, Queryable)]
+struct QueryableRewardRecords {
+    _unused_id: i32,
+    market_id: Uuid,
+    user_id: Uuid,
+    point: i32,
+}
+
+#[derive(Clone, Queryable)]
 struct QueryableOrder {
     _unused_id: i32,
     market_local_id: i32,
-    user_id: String,
+    user_id: Uuid,
     token_name: Option<String>,
     amount_token: i32,
     amount_coin: i32,

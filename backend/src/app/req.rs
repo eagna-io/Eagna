@@ -35,11 +35,11 @@ mod tests {
     fn test_get_params() {
         let req = rouille::Request::fake_http("GET", "/?foo=bar&hoge=fuga%2Cfuga2", vec![], vec![]);
 
-        let mut param_foo = get_params(&req, "foo").unwrap();
+        let mut param_foo = get_params(&req, "foo");
         assert_eq!(param_foo.next(), Some("bar"));
         assert_eq!(param_foo.next(), None);
 
-        let mut param_hoge = get_params(&req, "hoge").unwrap();
+        let mut param_hoge = get_params(&req, "hoge");
         assert_eq!(param_hoge.next(), Some("fuga"));
         assert_eq!(param_hoge.next(), Some("fuga2"));
         assert_eq!(param_hoge.next(), None);

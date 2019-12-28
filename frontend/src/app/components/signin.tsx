@@ -1,61 +1,90 @@
-import React from 'react';
-import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
-import {RouteComponentProps, withRouter} from 'react-router-dom';
+import React from "react";
+import { useDispatch } from "react-redux";
+import styled from "styled-components";
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
+import Typography from "@material-ui/core/Typography";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import { withRouter } from "react-router-dom";
+import { History } from "history";
 
-import {User} from 'models/user';
-import {UserProps, withUser} from 'app/components/user';
+import { UserRepository } from "models/user";
+import { setUser } from "app/redux/user";
 
 interface Props {
-  redirectUrl: string;
-  autoRedirect?: boolean;
+  history: History;
 }
 
-const SigninComponent: React.FC<Props & UserProps & RouteComponentProps> = ({
-  redirectUrl,
-  autoRedirect,
-  user,
-  history,
-}) => {
-  React.useEffect(() => {
-    if (autoRedirect) {
-      if (user instanceof User) {
-        history.push(redirectUrl);
-      }
+const SigninForm: React.FC<Props> = ({ history }) => {
+  const [email, setEmail] = React.useState();
+  const [password, setPassword] = React.useState();
+
+  const dispatch = useDispatch();
+
+  const onClick = () => {
+    if (!email || !password) {
+      return;
     }
-  }, [user, redirectUrl, autoRedirect, history]);
+    (async () => {
+      const user = await UserRepository.signin(email, password);
+      if (!user) {
+        alert("メールアドレスまたはパスワードが違います");
+      } else {
+        dispatch(setUser(user));
+        history.push("/account");
+      }
+    })();
+  };
 
   return (
-    <StyledFirebaseAuth
-      uiConfig={config(redirectUrl)}
-      firebaseAuth={firebase.auth()}
-    />
+    <Grid container justify="center">
+      <Grid item xs={4} sm={3}>
+        <Container>
+          <Typography variant="h6" gutterBottom align="center">
+            ログイン
+          </Typography>
+          <TextField
+            label="メールアドレス"
+            variant="outlined"
+            placeholder="info@crop-pm.com"
+            fullWidth
+            margin="dense"
+            error={email === ""}
+            helperText={
+              email === "" ? "メールアドレスを入力してください" : undefined
+            }
+            onChange={e => setEmail(e.target.value)}
+          />
+          <TextField
+            label="パスワード"
+            variant="outlined"
+            type="password"
+            fullWidth
+            margin="dense"
+            error={password === ""}
+            helperText={
+              password === "" ? "パスワードを入力してください" : undefined
+            }
+            onChange={e => setPassword(e.target.value)}
+          />
+          <LoginButton variant="contained" color="primary" onClick={onClick}>
+            ログイン
+          </LoginButton>
+        </Container>
+      </Grid>
+    </Grid>
   );
 };
 
-export default withRouter(withUser(SigninComponent));
+export default withRouter(SigninForm);
 
-function config(redirect: string): any {
-  return {
-    signInSuccessUrl: redirect,
-    signInFlow: 'popup',
-    signInOptions: [
-      {
-        provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        scopes: ['https://www.googleapis.com/auth/userinfo.email'],
-        customParameters: {
-          prompt: 'select_account',
-        },
-      },
-      {
-        provider: firebase.auth.FacebookAuthProvider.PROVIDER_ID,
-        scopes: ['email'],
-      },
-      {
-        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        requireDisplayName: true,
-      },
-    ],
-  };
-}
+const Container = styled(Paper)`
+  padding: 30px 50px;
+  background-color: white;
+`;
+
+const LoginButton = styled(Button)`
+  display: block;
+  margin: 15px auto 0 auto;
+`;

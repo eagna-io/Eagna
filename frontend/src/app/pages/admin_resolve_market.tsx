@@ -1,12 +1,14 @@
 import React, { FC, useState, useEffect } from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 import { User } from "models/user";
 import { Market, MarketStatus, MarketRepository } from "models/market";
-import { withUser, LoginStatus } from "app/components/user";
+import { RootState } from "app/redux";
 import NotFoundPage from "app/pages/not_found";
 
-const AdminResolveMarketOrNotFound: FC<{ user: LoginStatus }> = ({ user }) => {
+const AdminResolveMarketOrNotFound: FC = () => {
+  const user = useSelector((state: RootState) => state.user.user);
   if (user instanceof User && user.isAdmin) {
     return <ResolveMarketPage user={user} />;
   } else {
@@ -14,7 +16,7 @@ const AdminResolveMarketOrNotFound: FC<{ user: LoginStatus }> = ({ user }) => {
   }
 };
 
-export default withUser(AdminResolveMarketOrNotFound);
+export default AdminResolveMarketOrNotFound;
 
 const ResolveMarketPage: FC<{ user: User }> = ({ user }) => {
   const [closedMarkets, setClosedMarkets] = useState<Market[]>([]);

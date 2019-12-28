@@ -31,3 +31,5 @@ export const UpcomingMarketColor = Color.fromHex("#D8D212");
 export const OpenMarketColor = Color.fromHex("#23AC0E");
 export const ClosedMarketColor = Color.fromHex("#3261AB");
 export const ResolvedMarketColor = Color.fromHex("#A52175");
+
+export const EagnaColor = Color.fromHex("#5BB192");

@@ -1,5 +1,5 @@
 use super::MAX_SLIP_RATE;
-use std::iter::Sum;
+use std::{iter::Sum, ops::Mul};
 
 #[derive(
     Debug,
@@ -12,7 +12,6 @@ use std::iter::Sum;
     Add,
     Sub,
     Neg,
-    Mul,
     AddAssign,
     From,
     Serialize,
@@ -65,7 +64,6 @@ impl_sum!(AmountToken);
     Add,
     Sub,
     Neg,
-    Mul,
     AddAssign,
     From,
     Serialize,
@@ -106,3 +104,14 @@ impl AmountCoin {
 }
 
 impl_sum!(AmountCoin);
+
+impl<T> Mul<T> for AmountCoin
+where
+    i32: Mul<T, Output = i32>,
+{
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self {
+        AmountCoin(self.0 * rhs)
+    }
+}

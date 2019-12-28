@@ -1,23 +1,22 @@
-import React, {FC, useState} from 'react';
-import styled from 'styled-components';
-import OutsideClickHandler from 'react-outside-click-handler';
-import {Link, withRouter} from 'react-router-dom';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faUserCircle, faCaretDown} from '@fortawesome/free-solid-svg-icons';
-import {History} from 'history';
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
+import React, { FC, useState } from "react";
+import styled from "styled-components";
+import OutsideClickHandler from "react-outside-click-handler";
+import { Link, withRouter } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserCircle, faCaretDown } from "@fortawesome/free-solid-svg-icons";
+import { History } from "history";
 
-import {User} from 'models/user';
-import {pc} from 'app/components/responsive';
-import {withUser, LoginStatus} from 'app/components/user';
+import { User } from "models/user";
+import { pc } from "app/components/responsive";
+import { RootState } from "app/redux";
 
 interface HeaderProps {
   history: History;
-  user: LoginStatus;
 }
 
-const Header: FC<HeaderProps> = ({history, user}) => {
+const Header: FC<HeaderProps> = ({ history }) => {
+  const user = useSelector((state: RootState) => state.user.user);
   return (
     <Container>
       <Link to="/">
@@ -30,7 +29,7 @@ const Header: FC<HeaderProps> = ({history, user}) => {
   );
 };
 
-export default withRouter(withUser(Header));
+export default withRouter(Header);
 
 const Container = styled.div`
   width: 100vw;
@@ -55,34 +54,26 @@ const ProfileDropdownContainer = styled.div`
 
 interface ProfileDropdownProps {
   history: History;
-  user: LoginStatus;
+  user: User | null | undefined;
 }
 
-const ProfileDropdown: FC<ProfileDropdownProps> = ({history, user}) => {
+const ProfileDropdown: FC<ProfileDropdownProps> = ({ history, user }) => {
   const [showMenu, setShowMenu] = useState(false);
 
   const toggleDropdown = () => {
     setShowMenu(!showMenu);
   };
 
-  const signOut = () => {
-    firebase
-      .auth()
-      .signOut()
-      .then(function() {
-        history.push('/');
-      });
-  };
-
   const signIn = () => {
-    history.push('/login');
+    history.push("/login");
   };
 
   return (
     <OutsideClickHandler
       onOutsideClick={() => {
         setShowMenu(false);
-      }}>
+      }}
+    >
       <ProfileButton onClick={toggleDropdown}>
         <FontAwesomeIcon icon={faUserCircle} size="3x" />
         <DropdownCaret>
@@ -97,7 +88,7 @@ const ProfileDropdown: FC<ProfileDropdownProps> = ({history, user}) => {
             </MenuItem>
             <Line />
             <MenuItem>
-              <Signout onClick={signOut}>Sign out</Signout>
+              <Signout onClick={() => {/*TODO*/}}>Sign out</Signout>
             </MenuItem>
           </>
         ) : (
@@ -127,9 +118,9 @@ const DropdownCaret = styled.span`
   vertical-align: top;
 `;
 
-const ProfileMenu = styled('div')<{show: boolean}>`
+const ProfileMenu = styled("div")<{ show: boolean }>`
   position: absolute;
-  display: ${props => (props.show ? 'block' : 'none')};
+  display: ${props => (props.show ? "block" : "none")};
   width: 100px;
   top: 50px;
   right: 10px;

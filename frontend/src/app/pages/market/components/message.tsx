@@ -1,9 +1,10 @@
-import React, { FC } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { useSelector } from 'react-redux';
 
 import { MarketStatus } from "models/market";
-import { withUser, UserProps } from "app/components/user";
+import { RootState } from 'app/redux';
 import { pc } from "app/components/responsive";
 import {
   Color,
@@ -15,7 +16,8 @@ import {
 
 import { useMarket } from "./data_provider";
 
-const MessageComponent: FC<UserProps> = ({ user }) => {
+export default () => {
+  const user = useSelector((state: RootState) => state.user.user);
   const { market, myHistory } = useMarket();
 
   switch (market.status) {
@@ -33,7 +35,7 @@ const MessageComponent: FC<UserProps> = ({ user }) => {
             する必要があります。
           </Container>
         );
-      } else if (user === "Checking") {
+      } else if (user === undefined) {
         return null;
       } else if (!myHistory) {
         return (
@@ -58,8 +60,6 @@ const MessageComponent: FC<UserProps> = ({ user }) => {
       );
   }
 };
-
-export default withUser(MessageComponent);
 
 const Container = styled("div")<{ bgcolor: Color }>`
   width: 100%;

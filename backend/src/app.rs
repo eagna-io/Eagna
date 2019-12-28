@@ -1,18 +1,15 @@
 mod auth;
-mod cronjob;
 mod failure_response;
 mod infra_manager;
-mod markets;
 mod req;
-mod users;
+mod routes;
 
 pub use self::auth::validate_bearer_header;
 pub use self::failure_response::FailureResponse;
 pub use self::infra_manager::{InfraManager, InfraManagerFactory};
 pub use self::req::{get_param, get_params};
-use crate::domain::market::MarketId;
 
-use rouille::{router, Request, Response};
+use rouille::{Request, Response};
 use std::time::Duration;
 
 #[derive(Constructor)]
@@ -58,7 +55,7 @@ impl ApiServer {
 
     pub fn process_request(&self, req: &Request) -> Response {
         let infra = self.infra_factory.create();
-        routing(&infra, req).unwrap_or_else(<FailureResponse as Into<Response>>::into)
+        routes::routing(&infra, req).unwrap_or_else(<FailureResponse as Into<Response>>::into)
     }
 
     pub fn append_cors_header(&self, resp: Response) -> Response {
@@ -67,39 +64,6 @@ impl ApiServer {
             self.access_allow_hosts.clone(),
         )
     }
-}
-
-pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
-    router!(req,
-        (POST) (/users/) => {
-            users::post(infra, req)
-        },
-        (GET) (/users/me/) => {
-            users::me(infra, req)
-        },
-        (GET) (/markets/) => {
-            markets::get_list(infra, req)
-        },
-        (POST) (/markets/) => {
-            markets::post(infra, req)
-        },
-        (GET) (/markets/{id: MarketId}/) => {
-            markets::get(infra, req, id)
-        },
-        (PUT) (/markets/{id: MarketId}/) => {
-            markets::put(infra, req, id)
-        },
-        (GET) (/markets/{id: MarketId}/orders/) => {
-            markets::orders::get_list(infra, req, id)
-        },
-        (POST) (/markets/{id: MarketId}/orders/) => {
-            markets::orders::post(infra, req, id)
-        },
-        (GET) (/cronjob/check_markets/) => {
-            cronjob::check_markets::get(infra, req)
-        },
-        _ => Err(FailureResponse::ResourceNotFound)
-    )
 }
 
 fn log_ok(req: &Request, resp: &Response, elap: Duration) {

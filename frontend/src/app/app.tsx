@@ -1,31 +1,35 @@
-import React, {FC} from 'react';
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
-import {createGlobalStyle} from 'styled-components';
+import React, { FC } from "react";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { createGlobalStyle } from "styled-components";
+import { Provider as ReduxProvider } from "react-redux";
+import { StylesProvider } from "@material-ui/core/styles";
 
-import {Responsive} from './components/responsive';
-import {UserProvider} from './components/user';
-import TopPage from './pages/top';
-import LoginPage from './pages/login';
-import AccountPage from './pages/account';
-import SpecialSignupPage from './pages/special_signup';
-import MarketPage from './pages/market';
-import AdminAddMarketPage from './pages/admin_add_market';
-import AdminResolveMarketPage from './pages/admin_resolve_market';
-import PlainTextPage from './pages/plain_text';
-import NotFoundPage from './pages/not_found';
+import { Store } from "./redux";
+import TopPage from "./pages/top";
+import LoginPage from "./pages/login";
+import AccountPage from "./pages/account";
+import MarketPage from "./pages/market";
+import PrizeListPage from "./pages/prize-list";
+import PrizePage from "./pages/prize";
+import AdminAddMarketPage from "./pages/admin_add_market";
+import AdminResolveMarketPage from "./pages/admin_resolve_market";
+import PlainTextPage from "./pages/plain_text";
+import NotFoundPage from "./pages/not_found";
 
-const App: FC<{}> = () => {
+const App: FC<{ store: Store }> = ({ store }) => {
   return (
     <>
       <GlobalStyle />
-      <UserProvider>
-        <Responsive>
+      <StylesProvider injectFirst>
+        <ReduxProvider store={store}>
           <AppRouter />
-        </Responsive>
-      </UserProvider>
+        </ReduxProvider>
+      </StylesProvider>
     </>
   );
 };
+
+export default App;
 
 const AppRouter: FC = () => (
   <Router>
@@ -36,7 +40,13 @@ const AppRouter: FC = () => (
       <Route
         path="/market/:id"
         exact
-        render={({match}) => <MarketPage marketId={match.params.id} />}
+        render={({ match }) => <MarketPage marketId={match.params.id} />}
+      />
+      <Route path="/prize" exact component={PrizeListPage} />
+      <Route
+        path="/prize/:id"
+        exact
+        render={({ match }) => <PrizePage prizeId={match.params.id} />}
       />
       <Route path="/admin/add_market" exact component={AdminAddMarketPage} />
       <Route
@@ -54,13 +64,10 @@ const AppRouter: FC = () => (
         exact
         render={() => <PlainTextPage textUrl="/txt/terms.txt" />}
       />
-      <Route path="/special/signup" exact component={SpecialSignupPage} />
       <Route render={() => <NotFoundPage />} />
     </Switch>
   </Router>
 );
-
-export default App;
 
 const GlobalStyle = createGlobalStyle`
   body {
