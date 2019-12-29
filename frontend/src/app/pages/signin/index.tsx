@@ -8,6 +8,7 @@ import TextField from "@material-ui/core/TextField";
 
 import { Market, MarketStatus, MarketRepository } from "models/market";
 import { User } from "models/user";
+import { EagnaUserApi } from "infra/eagna/user";
 import { RootState } from "app/redux";
 import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
@@ -35,6 +36,17 @@ const SigninPageWrapper: FC<Props> = ({ history }) => {
 export default withRouter(SigninPageWrapper);
 
 const SigninPage: FC = () => {
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
+
+  const onClick = async () => {
+    const token = await EagnaUserApi.createAccessToken({
+      email,
+      password: pass
+    });
+    alert(token);
+  };
+
   return (
     <>
       <HeaderLogo src="/img/logo.png" />
@@ -43,14 +55,16 @@ const SigninPage: FC = () => {
           variant="outlined"
           margin="dense"
           label="メールアドレス"
+          onChange={e => setEmail(e.target.value)}
         />
         <StyledTextField
           variant="outlined"
           margin="dense"
           label="パスワード"
           type="password"
+          onChange={e => setPass(e.target.value)}
         />
-        <SubmitButton>ログイン</SubmitButton>
+        <SubmitButton onClick={onClick}>ログイン</SubmitButton>
       </InputForm>
     </>
   );
