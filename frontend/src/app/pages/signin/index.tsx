@@ -11,6 +11,7 @@ import { EagnaUserApi } from "infra/eagna/user";
 import { Storage } from "infra/storage";
 import { RootState } from "app/redux";
 import { setUser } from "app/redux/user";
+import { pc } from "app/components/responsive";
 
 interface Props {
   history: History;
@@ -87,15 +88,19 @@ const SigninPageWrapper: FC<Props> = ({ history }) => {
 export default withRouter(SigninPageWrapper);
 
 const HeaderLogo = styled.img`
-  width: 114px;
-  height: 40px;
+  width: 228px;
+  height: 80px;
   margin: 0 auto auto 0;
 `;
 
 const InputForm = styled.div`
   width: 90%;
-  margin: 133px auto 0 auto;
-  padding: 50px 0;
+  max-width: 622px;
+  margin: 150px auto 0 auto;
+
+  ${pc(`
+    margin-top: 291px;
+  `)}
 `;
 
 const StyledTextField = styled(TextField)`
