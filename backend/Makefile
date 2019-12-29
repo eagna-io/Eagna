@@ -1,3 +1,7 @@
+.PHONY: build-docker
+build-docker:
+	docker build -t crop-backend -f appengine/Dockerfile --build-arg BUILD_MODE=debug --rm=false .
+
 .PHONY: start-db
 PG_URL:=postgres://postgres:postgres@localhost:5432/postgres
 REDIS_URL:=redis://localhost:6379
@@ -11,12 +15,14 @@ start-db:
 
 .PHONY: run-dev
 run-dev:
-	RUST_LOG=warn,libeagna=debug,eagna=debug \
-	PG_URL="${PG_URL}" \
-	REDIS_URL="${REDIS_URL}" \
-	BIND="0.0.0.0:8080" \
-	ACCESS_ALLOW_HOSTS="*" \
-	cargo run
+	docker run --rm \
+	-e RUST_LOG=warn,libeagna=debug,eagna=debug \
+	-e PG_URL="${PG_URL}" \
+	-e REDIS_URL="${REDIS_URL}" \
+	-e BIND="0.0.0.0:8080" \
+	-e ACCESS_ALLOW_HOSTS="*" \
+	-p 8080:8080 \
+	crop-backend
 
 
 .PHONY: print_schema
