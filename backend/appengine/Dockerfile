@@ -1,4 +1,4 @@
-FROM rust:1.36.0 as builder
+FROM rust:1.40.0 as builder
 ENV USER=root 
 # MODE *MUST* be one of "debug" or "release"
 ARG BUILD_MODE
@@ -18,7 +18,7 @@ RUN touch src/lib.rs src/main.rs
 ## Build whole source code
 RUN ./build-with-env.sh && cp target/${BUILD_MODE}/eagna /usr/bin/eagna
 
-FROM rust:1.36.0
+FROM rust:1.40.0
 WORKDIR /root/
 COPY --from=builder /usr/bin/eagna ./
 RUN apt-get update && apt-get install -y python3-pip && pip3 install google-cloud-storage
