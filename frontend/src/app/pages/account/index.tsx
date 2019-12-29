@@ -28,7 +28,7 @@ const AccountPageWrapper: FC<AccountPageProps> = ({ history }) => {
 
   useEffect(() => {
     if (user === null) {
-      history.push("/login");
+      history.push("/signin");
     }
   });
 
