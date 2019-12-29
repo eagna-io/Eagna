@@ -18,3 +18,12 @@
 ### テストの追加
 
 /tests/scenarios/*.py ファイルを作成する
+
+## Deploy
+
+herokuにデプロイする
+
+### Staging
+
+- heroku container:push web --arg BUILD_MODE=debug -a crop-backend-staging
+- heroku container:release web -a crop-backend-staging
