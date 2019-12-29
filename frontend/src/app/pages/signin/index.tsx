@@ -6,12 +6,11 @@ import ReactGA from "react-ga";
 import { useSelector } from "react-redux";
 import TextField from "@material-ui/core/TextField";
 
-import { Market, MarketStatus, MarketRepository } from "models/market";
 import { User } from "models/user";
 import { EagnaUserApi } from "infra/eagna/user";
+import { Storage } from "infra/storage";
 import { RootState } from "app/redux";
-import { MinPcWidth } from "app/components/responsive";
-import Header from "app/components/header";
+import { setUser } from "app/redux/user";
 
 interface Props {
   history: History;
@@ -19,6 +18,8 @@ interface Props {
 
 const SigninPageWrapper: FC<Props> = ({ history }) => {
   const user = useSelector((state: RootState) => state.user.user);
+  const [email, setEmail] = useState("");
+  const [pass, setPass] = useState("");
 
   useEffect(() => {
     ReactGA.pageview("/account");
@@ -30,21 +31,33 @@ const SigninPageWrapper: FC<Props> = ({ history }) => {
     }
   });
 
-  return <SigninPage />;
-};
-
-export default withRouter(SigninPageWrapper);
-
-const SigninPage: FC = () => {
-  const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
-
   const onClick = async () => {
+    // アクセストークンを取得
     const token = await EagnaUserApi.createAccessToken({
       email,
       password: pass
     });
-    alert(token);
+    if (!token) {
+      // TODO : alertを使わない
+      alert("ログインに失敗しました");
+      return;
+    }
+
+    // アクセストークンを保存
+    Storage.setToken(token);
+
+    // ユーザー情報を取得
+    const user = await EagnaUserApi.queryMe(token);
+    if (!user) {
+      alert("Something goes wrong...");
+      return;
+    }
+
+    // Stateを更新
+    setUser(User.fromInfra(user, token));
+
+    // アカウントページへ遷移
+    history.push("/account");
   };
 
   return (
@@ -69,6 +82,8 @@ const SigninPage: FC = () => {
     </>
   );
 };
+
+export default withRouter(SigninPageWrapper);
 
 const HeaderLogo = styled.img`
   width: 114px;
