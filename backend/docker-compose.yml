@@ -9,7 +9,7 @@ services:
     environment:
       RUST_LOG: warn,libeagna=debug,eagna=debug
       PG_URL: postgres://postgres:postgres@pg/postgres
-      REDIS_URL: redis://rd:6379
+      REDIS_URL: redis://redis:6379
       PORT: 8080
       ACCESS_ALLOW_HOSTS: '*'
     ports:
