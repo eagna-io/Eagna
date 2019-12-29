@@ -5,12 +5,8 @@ import { Provider as ReduxProvider } from "react-redux";
 import { StylesProvider } from "@material-ui/core/styles";
 
 import { Store } from "./redux";
-import TopPage from "./pages/top";
-import LoginPage from "./pages/login";
 import AccountPage from "./pages/account";
 import MarketPage from "./pages/market";
-import PrizeListPage from "./pages/prize-list";
-import PrizePage from "./pages/prize";
 import AdminAddMarketPage from "./pages/admin_add_market";
 import AdminResolveMarketPage from "./pages/admin_resolve_market";
 import PlainTextPage from "./pages/plain_text";
@@ -34,19 +30,11 @@ export default App;
 const AppRouter: FC = () => (
   <Router>
     <Switch>
-      <Route path="/" exact component={TopPage} />
-      <Route path="/login" exact component={LoginPage} />
       <Route path="/account" exact component={AccountPage} />
       <Route
         path="/market/:id"
         exact
         render={({ match }) => <MarketPage marketId={match.params.id} />}
-      />
-      <Route path="/prize" exact component={PrizeListPage} />
-      <Route
-        path="/prize/:id"
-        exact
-        render={({ match }) => <PrizePage prizeId={match.params.id} />}
       />
       <Route path="/admin/add_market" exact component={AdminAddMarketPage} />
       <Route
