@@ -1,6 +1,6 @@
 .PHONY: build-docker
 build-docker:
-	docker build -t crop-backend -f appengine/Dockerfile --build-arg BUILD_MODE=debug --rm=false .
+	docker build -t crop-backend --build-arg BUILD_MODE=debug --rm=false .
 
 .PHONY: start-db
 PG_URL:=postgres://postgres:postgres@localhost:5432/postgres
