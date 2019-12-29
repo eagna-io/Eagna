@@ -5,6 +5,7 @@ import { Provider as ReduxProvider } from "react-redux";
 import { StylesProvider } from "@material-ui/core/styles";
 
 import { Store } from "./redux";
+import SigninPage from "./pages/signin";
 import AccountPage from "./pages/account";
 import MarketPage from "./pages/market";
 import AdminAddMarketPage from "./pages/admin_add_market";
@@ -30,6 +31,7 @@ export default App;
 const AppRouter: FC = () => (
   <Router>
     <Switch>
+      <Route path="/signin" exact component={SigninPage} />
       <Route path="/account" exact component={AccountPage} />
       <Route
         path="/market/:id"
