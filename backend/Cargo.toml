@@ -14,7 +14,6 @@ path = "src/main.rs"
 
 [dependencies]
 rouille = "~3.0"
-reqwest = "~0.9"
 redis = "~0.13"
 diesel = { version = "~1.4", features = ["postgres", "chrono", "uuid", "uuidv07"] }
 diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
