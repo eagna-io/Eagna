@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { withRouter } from "react-router-dom";
 import { History } from "history";
 import ReactGA from "react-ga";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import TextField from "@material-ui/core/TextField";
 
 import { User } from "models/user";
@@ -20,6 +20,7 @@ const SigninPageWrapper: FC<Props> = ({ history }) => {
   const user = useSelector((state: RootState) => state.user.user);
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
+  const dispatch = useDispatch();
 
   useEffect(() => {
     ReactGA.pageview("/account");
@@ -54,7 +55,7 @@ const SigninPageWrapper: FC<Props> = ({ history }) => {
     }
 
     // Stateを更新
-    setUser(User.fromInfra(user, token));
+    dispatch(setUser(User.fromInfra(user, token)));
 
     // アカウントページへ遷移
     history.push("/account");
