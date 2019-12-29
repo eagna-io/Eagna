@@ -19,7 +19,7 @@ run-dev:
 	-e RUST_LOG=warn,libeagna=debug,eagna=debug \
 	-e PG_URL="${PG_URL}" \
 	-e REDIS_URL="${REDIS_URL}" \
-	-e BIND="0.0.0.0:8080" \
+	-e PORT="8080" \
 	-e ACCESS_ALLOW_HOSTS="*" \
 	-p 8080:8080 \
 	crop-backend
