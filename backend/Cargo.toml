@@ -18,11 +18,15 @@ redis = "~0.13"
 diesel = { version = "~1.4", features = ["postgres", "chrono", "uuid", "uuidv07"] }
 diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
 serde = { version = "~1.0", features = ["derive", "rc"] }
+serde_json = "1.0"
 chrono = { version = "~0.4", features = ["serde"] }
+hyper = "~0.13"
+hyper-tls = "~0.4"
+tokio = { version = "~0.2", features = ["macros", "rt-threaded"] }
 num-rational = "~0.2"
 arrayvec = { version = "~0.5", features = ["serde"] }
 lazycell = "~1.2"
-lazy_static = "~1.4"
+lazy_static = "1.4"
 regex = "~1.3"
 data-encoding = "~2.1"
 ring = "~0.16"
