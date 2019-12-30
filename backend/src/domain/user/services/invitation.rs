@@ -11,11 +11,11 @@ lazy_static::lazy_static! {
 pub struct UserInviteService {}
 
 impl UserInviteService {
-    fn secret(&self) -> &[u8] {
+    fn secret() -> &'static [u8] {
         SECRET.as_ref()
     }
 
-    pub fn publish_invitation_token<S>(&self, email: S) -> InvitationToken
+    pub fn publish_invitation_token<S>(email: S) -> InvitationToken
     where
         S: Into<String>,
     {
@@ -26,17 +26,14 @@ impl UserInviteService {
             exp: now as usize + EXPIRES_IN_SECS,
         };
 
-        let jwt = jsonwebtoken::encode(&Header::default(), &claim, self.secret()).unwrap();
+        let jwt = jsonwebtoken::encode(&Header::default(), &claim, Self::secret()).unwrap();
         InvitationToken(jwt)
     }
 
-    pub fn validate_invitation_token(
-        &self,
-        token: &InvitationToken,
-    ) -> Result<Invitation, JwtError> {
+    pub fn validate_invitation_token(token: &InvitationToken) -> Result<Invitation, JwtError> {
         let email = jsonwebtoken::decode::<JWTClaim>(
             token.0.as_str(),
-            self.secret(),
+            Self::secret(),
             &Validation::default(),
         )?
         .claims
@@ -51,6 +48,12 @@ pub struct Invitation {
 }
 
 pub struct InvitationToken(String);
+
+impl InvitationToken {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct JWTClaim {
