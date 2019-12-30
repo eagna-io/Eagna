@@ -20,6 +20,9 @@ use uuid::Uuid;
 
 pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     router!(req,
+        (POST) (/users/invitation/) => {
+            users::invitation::post::handler(infra, req)
+        },
         (POST) (/users/me/access_token/) => {
             users::me::access_token::post::handler(infra, req)
         },
