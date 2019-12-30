@@ -19,7 +19,7 @@ RUN ./build-with-env.sh && cp target/${BUILD_MODE}/eagna /usr/bin/eagna
 
 FROM debian:buster-slim
 WORKDIR /home/
-RUN apt-get update && apt-get install -y libpq-dev
+RUN apt-get update && apt-get install -y libpq-dev libssl1.1 ca-certificates
 COPY --from=builder /usr/bin/eagna ./
 RUN adduser takatom
 USER takatom
