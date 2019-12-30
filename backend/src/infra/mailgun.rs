@@ -1,3 +1,4 @@
+use failure::{err_msg, Fallible};
 use hyper::{client::HttpConnector, Body, Client, Request, StatusCode};
 use hyper_tls::HttpsConnector;
 use std::borrow::Cow;
@@ -17,7 +18,7 @@ lazy_static::lazy_static! {
 }
 
 #[tokio::main]
-pub async fn send_mail_inner(mail: Mail) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub async fn send_mail(mail: Mail) -> Fallible<()> {
     let req = Request::post(MAILGUN_MESSAGE_API_URI.as_str())
         .header("content-type", "application/json")
         .body(Body::from(serde_json::to_string(&mail)?))?;
@@ -27,7 +28,7 @@ pub async fn send_mail_inner(mail: Mail) -> Result<(), Box<dyn std::error::Error
         return Ok(());
     } else {
         log::warn!("Failed to send mail. StatusCode is {:?}", res.status());
-        return Err("Failed to send mail".into());
+        return Err(err_msg("Failed to send mail"));
     }
 }
 
