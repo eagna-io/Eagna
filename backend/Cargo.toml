@@ -17,7 +17,7 @@ arrayvec = { version = "~0.5", features = ["serde"] }
 chrono = { version = "~0.4", features = ["serde"] }
 env_logger = "~0.7"
 data-encoding = "~2.1"
-derive_more = "~0.15"
+derive_more = "~0.99"
 diesel = { version = "~1.4", features = ["postgres", "chrono", "uuid", "uuidv07"] }
 diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
 failure = "~0.1"
