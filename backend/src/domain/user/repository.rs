@@ -3,7 +3,9 @@ pub mod access_token;
 use crate::domain::user::*;
 use crate::domain::{market::MarketId, point::Point, prize::PrizeId};
 use crate::infra::postgres::{
-    types::PrizeTradeStatus as InfraPrizeTradeStatus, user::NewPrizeTradeRecord, PostgresInfra,
+    types::PrizeTradeStatus as InfraPrizeTradeStatus,
+    user::{NewPrizeTradeRecord, NewUser as NewUserInfra},
+    PostgresInfra,
 };
 use failure::Fallible;
 
@@ -13,6 +15,16 @@ pub struct UserRepository<'a> {
 }
 
 impl<'a> UserRepository<'a> {
+    pub fn save_user(&self, new_user: &NewUser) -> Fallible<()> {
+        self.postgres.save_user(NewUserInfra {
+            id: *new_user.id.as_uuid(),
+            name: new_user.name.as_str(),
+            email: new_user.email.as_str(),
+            credential: &new_user.cred.cred()[..],
+            salt: &new_user.cred.salt()[..],
+        })
+    }
+
     pub fn query_user(&self, user_id: &UserId) -> Result<Option<QueryUser<'a>>, failure::Error> {
         let user = match self.postgres.query_user(user_id.as_uuid())? {
             None => return Ok(None),
