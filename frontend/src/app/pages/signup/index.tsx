@@ -36,15 +36,27 @@ export default () => {
   }, []);
 
   const onClick = async () => {
+    if (token === undefined) {
+      return;
+    }
+
     // 新規ユーザー作成
-    // TODO
-    const token = "";
+    const accessToken = await EagnaUserApi.create({
+      name,
+      password: pass,
+      invitationToken: token
+    });
+
+    if (accessToken === null) {
+      alert("このメールアドレスは既に登録済みです");
+      return;
+    }
 
     // アクセストークンを保存
-    Storage.setToken(token);
+    Storage.setToken(accessToken);
 
     // ユーザー情報を取得
-    const user = await EagnaUserApi.queryMe(token);
+    const user = await EagnaUserApi.queryMe(accessToken);
     if (!user) {
       alert("Something goes wrong...");
       return;
