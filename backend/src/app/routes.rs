@@ -29,8 +29,8 @@ pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
         (DELETE) (/users/me/access_token/) => {
             users::me::access_token::delete::handler(infra, req)
         },
-        (PUT) (/users/me/) => {
-            users::me::put::handler(infra, req)
+        (POST) (/users/me/) => {
+            users::me::post::handler(infra, req)
         },
         (GET) (/users/me/) => {
             users::me::get(infra, req)

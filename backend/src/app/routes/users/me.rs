@@ -1,6 +1,6 @@
 pub mod access_token;
+pub mod post;
 pub mod prize_trade_history;
-pub mod put;
 
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::user::*;
