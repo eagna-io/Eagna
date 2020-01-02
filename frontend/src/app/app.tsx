@@ -6,6 +6,7 @@ import { StylesProvider } from "@material-ui/core/styles";
 
 import { Store } from "./redux";
 import SigninPage from "./pages/signin";
+import SignupPage from "./pages/signup";
 import AccountPage from "./pages/account";
 import MarketPage from "./pages/market";
 import AdminAddMarketPage from "./pages/admin_add_market";
@@ -32,6 +33,7 @@ const AppRouter: FC = () => (
   <Router>
     <Switch>
       <Route path="/signin" exact component={SigninPage} />
+      <Route path="/signup" exact component={SignupPage} />
       <Route path="/account" exact component={AccountPage} />
       <Route
         path="/market/:id"
