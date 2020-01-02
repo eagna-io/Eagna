@@ -24,19 +24,20 @@ export class EagnaUserApi {
       .catch(e => null);
   }
 
-  static create(
-    user: {
-      name: string;
-      email: string;
-    },
-    accessToken: string
-  ): Promise<User> {
+  // 新規ユーザー登録を行う
+  // 既に登録済みの場合はnull
+  static create(user: {
+    name: string;
+    password: string;
+    invitationToken: string;
+  }): Promise<string | null> {
     return EagnaBackendApi.post({
-      path: "/users/",
-      accessToken: accessToken,
-      decoder: userDecoder,
+      path: "/users/me/",
+      decoder: D.object({ token: D.string() }),
       body: user
-    });
+    })
+      .then(({ token }) => token)
+      .catch(e => null);
   }
 }
 

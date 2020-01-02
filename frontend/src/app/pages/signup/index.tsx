@@ -23,7 +23,6 @@ export default () => {
   const [confirmed, setConfirmed] = useState(false);
   const dispatch = useDispatch();
 
-  console.warn(token);
   const email = decodeJWT(token || "");
 
   useEffect(() => {
