@@ -8,6 +8,10 @@ impl NonEmptyString {
         self.0.as_str()
     }
 
+    pub fn into_string(self) -> String {
+        self.0
+    }
+
     pub fn from_str(s: String) -> Result<NonEmptyString, EmptyStringError> {
         if s.is_empty() {
             Err(EmptyStringError())
