@@ -3,6 +3,7 @@ use crate::infra::postgres::{user::QueryUserCredentials, PostgresInfra};
 use arrayvec::ArrayString;
 use data_encoding::HEXUPPER;
 use failure::{err_msg, Fallible};
+use getset::Getters;
 use rand::{thread_rng, Rng};
 use ring::{digest, pbkdf2};
 use std::num::NonZeroU32;
@@ -63,7 +64,8 @@ impl User for AuthorizedUser {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Getters)]
+#[get = "pub"]
 pub struct Credentials {
     salt: [u8; CRED_LEN],
     cred: [u8; CRED_LEN],

@@ -1,4 +1,5 @@
 pub mod access_token;
+pub mod post;
 pub mod prize_trade_history;
 
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};

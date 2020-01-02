@@ -5,6 +5,7 @@ pub enum FailureResponse {
     ResourceNotFound,
     InvalidPayload,
     Unauthorized,
+    Conflict,
     ServerError,
 }
 
@@ -23,6 +24,7 @@ impl FailureResponse {
             ResourceNotFound => (404, 0, "Resource not found"),
             InvalidPayload => (400, 1, "Invalid payload"),
             Unauthorized => (401, 2, "Invalid token"),
+            Conflict => (409, 3, "Conflict"),
             ServerError => (500, 100, "Server error"),
         }
     }

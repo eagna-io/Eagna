@@ -5,6 +5,7 @@ use crate::domain::{
     market::MarketId,
     point::Point,
     prize::{Prize, PrizeId},
+    user::services::auth::Credentials,
 };
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use chrono::{DateTime, Utc};
@@ -129,18 +130,29 @@ impl_user!(UserWithPrizeTradeRequest);
 impl_user_with_attrs!(UserWithPrizeTradeRequest);
 impl_user_with_market_reward_history!(UserWithPrizeTradeRequest);
 
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
+/*
+ * ==================
+ *  NewUser model
+ * ==================
+ */
+#[derive(Clone, Getters, Into)]
 #[get = "pub"]
 pub struct NewUser {
-    pub(super) id: UserId,
-    pub(super) name: UserName,
-    pub(super) email: UserEmail,
+    id: UserId,
+    name: UserName,
+    email: UserEmail,
+    cred: Credentials,
 }
 
 impl NewUser {
     /// 新たにエンティティが作られる時の関数
-    pub fn new(id: UserId, name: UserName, email: UserEmail) -> NewUser {
-        NewUser { id, name, email }
+    pub fn new(name: UserName, email: UserEmail, cred: Credentials) -> NewUser {
+        NewUser {
+            id: UserId::new(),
+            name,
+            email,
+            cred,
+        }
     }
 }
 
@@ -186,10 +198,20 @@ impl UserWithMarketRewardHistory for NewUser {
     }
 }
 
+/*
+ * ===================
+ * Attribute models
+ * ===================
+ */
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, From)]
 pub struct UserId(Uuid);
 
 impl UserId {
+    pub fn new() -> UserId {
+        UserId(Uuid::new_v4())
+    }
+
     pub fn as_uuid(&self) -> &Uuid {
         &self.0
     }
@@ -214,6 +236,10 @@ pub struct UserEmail(NonEmptyString);
 impl UserEmail {
     pub fn as_str(&self) -> &str {
         self.0.as_str()
+    }
+
+    pub fn into_string(self) -> String {
+        self.0.into_string()
     }
 
     pub fn from_str(s: String) -> Result<Self, EmptyStringError> {

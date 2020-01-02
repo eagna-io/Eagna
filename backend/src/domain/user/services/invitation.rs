@@ -47,6 +47,7 @@ pub struct Invitation {
     pub email: String,
 }
 
+#[derive(From)]
 pub struct InvitationToken(String);
 
 impl InvitationToken {
