@@ -208,6 +208,10 @@ impl UserWithMarketRewardHistory for NewUser {
 pub struct UserId(Uuid);
 
 impl UserId {
+    pub fn new() -> UserId {
+        UserId(Uuid::new_v4())
+    }
+
     pub fn as_uuid(&self) -> &Uuid {
         &self.0
     }
