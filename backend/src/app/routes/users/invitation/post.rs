@@ -37,7 +37,7 @@ fn invitation_mail_html(token: &str) -> String {
     format!(
         r#"
         管理者からCropへの招待が届きました! <br />
-        <a href="https://crop-pm.com/signup/?token={}">こちらのリンク</a> から参加登録をお願い致します!<br />
+        <a href="https://crop-pm.com/signup/{}">こちらのリンク</a> から参加登録をお願い致します!<br />
         <br />
         Crop運営
         "#,
