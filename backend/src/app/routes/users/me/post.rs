@@ -55,6 +55,7 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct ReqData {
     name: NonEmptyString,
     password: NonEmptyString,
