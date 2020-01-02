@@ -17,11 +17,11 @@ pub struct UserRepository<'a> {
 impl<'a> UserRepository<'a> {
     pub fn save_user(&self, new_user: &NewUser) -> Fallible<()> {
         self.postgres.save_user(NewUserInfra {
-            id: *new_user.id.as_uuid(),
-            name: new_user.name.as_str(),
-            email: new_user.email.as_str(),
-            credential: &new_user.cred.cred()[..],
-            salt: &new_user.cred.salt()[..],
+            id: *new_user.id().as_uuid(),
+            name: new_user.name().as_str(),
+            email: new_user.email().as_str(),
+            credential: &new_user.cred().cred()[..],
+            salt: &new_user.cred().salt()[..],
         })
     }
 

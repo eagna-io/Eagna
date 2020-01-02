@@ -135,13 +135,13 @@ impl_user_with_market_reward_history!(UserWithPrizeTradeRequest);
  *  NewUser model
  * ==================
  */
-#[derive(Clone, Getters)]
+#[derive(Clone, Getters, Into)]
 #[get = "pub"]
 pub struct NewUser {
-    pub(super) id: UserId,
-    pub(super) name: UserName,
-    pub(super) email: UserEmail,
-    pub(super) cred: Credentials,
+    id: UserId,
+    name: UserName,
+    email: UserEmail,
+    cred: Credentials,
 }
 
 impl NewUser {
