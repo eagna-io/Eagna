@@ -238,6 +238,10 @@ impl UserEmail {
         self.0.as_str()
     }
 
+    pub fn into_string(self) -> String {
+        self.0.into_string()
+    }
+
     pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
         Ok(UserEmail(NonEmptyString::from_str(s)?))
     }
