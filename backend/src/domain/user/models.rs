@@ -146,9 +146,9 @@ pub struct NewUser {
 
 impl NewUser {
     /// 新たにエンティティが作られる時の関数
-    pub fn new(id: UserId, name: UserName, email: UserEmail, cred: Credentials) -> NewUser {
+    pub fn new(name: UserName, email: UserEmail, cred: Credentials) -> NewUser {
         NewUser {
-            id,
+            id: UserId::new(),
             name,
             email,
             cred,
