@@ -33,7 +33,7 @@ const AppRouter: FC = () => (
   <Router>
     <Switch>
       <Route path="/signin" exact component={SigninPage} />
-      <Route path="/signup" exact component={SignupPage} />
+      <Route path="/signup/:token" exact component={SignupPage} />
       <Route path="/account" exact component={AccountPage} />
       <Route
         path="/market/:id"

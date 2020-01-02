@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import jwt_decode from "jwt-decode";
 
 import { User } from "models/user";
 import { EagnaUserApi } from "infra/eagna/user";
@@ -22,6 +23,7 @@ export default () => {
   const [confirmed, setConfirmed] = useState(false);
   const dispatch = useDispatch();
 
+  console.warn(token);
   const email = decodeJWT(token || "");
 
   useEffect(() => {
@@ -120,8 +122,18 @@ export default () => {
 };
 
 const decodeJWT = (token: string): string => {
-  return "info@hoge.com";
+  try {
+    const decoded = jwt_decode<JWTClaim>(token).email;
+    console.warn(decoded);
+    return decoded;
+  } catch {
+    return "";
+  }
 };
+
+interface JWTClaim {
+  email: string;
+}
 
 const HeaderLogo = styled.img`
   width: 228px;
