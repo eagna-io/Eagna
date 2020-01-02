@@ -51,14 +51,3 @@ pub struct Mail {
     pub subject: Cow<'static, str>,
     pub html: Cow<'static, str>,
 }
-
-impl Mail {
-    fn to_tuple_array(&self) -> [(&'static str, &Cow<'static, str>); 4] {
-        [
-            ("from", &self.from),
-            ("to", &self.to),
-            ("subject", &self.subject),
-            ("html", &self.html),
-        ]
-    }
-}
