@@ -63,7 +63,7 @@ export default () => {
     }
 
     // Stateを更新
-    dispatch(setUser(User.fromInfra(user, token)));
+    dispatch(setUser(User.fromInfra(user, accessToken)));
 
     // アカウントページへ遷移
     history.push("/account");
