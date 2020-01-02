@@ -15,7 +15,7 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
     let req_data = json_input::<ReqData>(req).map_err(|_| FailureResponse::InvalidPayload)?;
     let invitation_token = InvitationToken::from(req_data.invitation_token);
 
-    // token の生成
+    // token のvalidation
     let Invitation { email } = UserInviteService::validate_invitation_token(&invitation_token)
         .map_err(|_| FailureResponse::Unauthorized)?;
 
@@ -26,7 +26,14 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
         UserEmail::from_str(email)?,
         cred,
     );
-    UserRepository::from(infra.get_postgres()?).save_user(&new_user)?;
+    UserRepository::from(infra.get_postgres()?)
+        .save_user(&new_user)
+        .map_err(|e| {
+            log::warn!("Failed to save a new user.");
+            log::warn!("----  {:?} : {:?}", new_user.name(), new_user.email());
+            log::warn!("----  {:?}", e);
+            FailureResponse::Conflict
+        })?;
 
     // アクセストークンの発行
     let access_token = new_user.new_access_token();
