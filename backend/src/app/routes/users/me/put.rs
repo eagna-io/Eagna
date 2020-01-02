@@ -1,7 +1,7 @@
 use crate::app::{FailureResponse, InfraManager};
 use crate::domain::user::{
-    models::{NewUser, UserEmail, UserName},
-    repository::UserRepository,
+    models::{NewUser, User as _, UserEmail, UserName},
+    repository::{access_token::AccessTokenRepository, UserRepository},
     services::{
         auth::UserAuthService,
         invitation::{Invitation, InvitationToken, UserInviteService},
@@ -28,6 +28,10 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
     );
     UserRepository::from(infra.get_postgres()?).save_user(&new_user)?;
 
+    // アクセストークンの発行
+    let access_token = new_user.new_access_token();
+    AccessTokenRepository::from(infra.get_redis()?).save(&access_token)?;
+
     // 登録成功メールの送信
     let user_email = <NewUser as Into<(_, _, UserEmail, _)>>::into(new_user).2;
     send_mail(Mail {
@@ -38,7 +42,7 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
     })?;
 
     Ok(Response::json(&ResData {
-        token: invitation_token.as_str(),
+        token: access_token.id.as_str(),
     })
     .with_status_code(200))
 }
