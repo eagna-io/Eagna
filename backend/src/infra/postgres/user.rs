@@ -34,10 +34,14 @@ pub trait PostgresUserInfra {
     ) -> Result<Vec<QueryMarketRewardRecord>, failure::Error>;
 }
 
+#[derive(Insertable)]
+#[table_name = "users"]
 pub struct NewUser<'a> {
     pub id: Uuid,
     pub name: &'a str,
     pub email: &'a str,
+    pub credential: &'a [u8],
+    pub salt: &'a [u8],
 }
 
 pub struct QueryUser {
@@ -76,11 +80,7 @@ pub struct QueryMarketRewardRecord {
 impl PostgresUserInfra for Postgres {
     fn save_user<'a>(&self, new_user: NewUser<'a>) -> Result<(), failure::Error> {
         diesel::insert_into(users::table)
-            .values(InsertableUser {
-                id: new_user.id,
-                name: new_user.name,
-                email: new_user.email,
-            })
+            .values(new_user)
             .execute(&self.conn)?;
         Ok(())
     }
@@ -193,14 +193,6 @@ impl PostgresUserInfra for Postgres {
             })
             .collect())
     }
-}
-
-#[derive(Insertable)]
-#[table_name = "users"]
-struct InsertableUser<'a> {
-    id: Uuid,
-    name: &'a str,
-    email: &'a str,
 }
 
 #[derive(Queryable)]
