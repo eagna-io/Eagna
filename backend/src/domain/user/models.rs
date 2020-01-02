@@ -5,6 +5,7 @@ use crate::domain::{
     market::MarketId,
     point::Point,
     prize::{Prize, PrizeId},
+    user::services::auth::Credentials,
 };
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use chrono::{DateTime, Utc};
@@ -129,18 +130,29 @@ impl_user!(UserWithPrizeTradeRequest);
 impl_user_with_attrs!(UserWithPrizeTradeRequest);
 impl_user_with_market_reward_history!(UserWithPrizeTradeRequest);
 
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
+/*
+ * ==================
+ *  NewUser model
+ * ==================
+ */
+#[derive(Clone, Getters)]
 #[get = "pub"]
 pub struct NewUser {
     pub(super) id: UserId,
     pub(super) name: UserName,
     pub(super) email: UserEmail,
+    pub(super) cred: Credentials,
 }
 
 impl NewUser {
     /// 新たにエンティティが作られる時の関数
-    pub fn new(id: UserId, name: UserName, email: UserEmail) -> NewUser {
-        NewUser { id, name, email }
+    pub fn new(id: UserId, name: UserName, email: UserEmail, cred: Credentials) -> NewUser {
+        NewUser {
+            id,
+            name,
+            email,
+            cred,
+        }
     }
 }
 
@@ -185,6 +197,12 @@ impl UserWithMarketRewardHistory for NewUser {
         &EMPTY_VEC
     }
 }
+
+/*
+ * ===================
+ * Attribute models
+ * ===================
+ */
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, From)]
 pub struct UserId(Uuid);
