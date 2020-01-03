@@ -20,6 +20,7 @@ pub trait RedisInfra: Send + 'static {
     fn delete_access_token(&self, access_token_id: &str) -> Result<(), failure::Error>;
 }
 
+#[derive(Clone)]
 pub struct Redis {
     conn: Arc<Mutex<RedisConn>>,
 }
