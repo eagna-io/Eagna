@@ -4,18 +4,23 @@ use crate::infra::mailgun::{send_mail, Mail};
 use rouille::{input::json_input, Request, Response};
 
 pub fn handler(_infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
-    let ReqData { email } = json_input(req).map_err(|_| FailureResponse::InvalidPayload)?;
+    let ReqData {
+        email,
+        without_email,
+    } = json_input(req).map_err(|_| FailureResponse::InvalidPayload)?;
 
     // token の生成
     let invitation_token = UserInviteService::publish_invitation_token(email.clone());
 
     // 招待メールの送信
-    send_mail(Mail {
-        from: "noreply@crop-pm.com".into(),
-        to: email.into(),
-        subject: "Cropへの招待が届きました!".into(),
-        html: invitation_mail_html(invitation_token.as_str()).into(),
-    })?;
+    if !without_email {
+        send_mail(Mail {
+            from: "noreply@crop-pm.com".into(),
+            to: email.into(),
+            subject: "Cropへの招待が届きました!".into(),
+            html: invitation_mail_html(invitation_token.as_str()).into(),
+        })?;
+    }
 
     Ok(Response::json(&ResData {
         token: invitation_token.as_str(),
@@ -24,8 +29,11 @@ pub fn handler(_infra: &InfraManager, req: &Request) -> Result<Response, Failure
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct ReqData {
     email: String,
+    #[serde(default)] // false
+    without_email: bool,
 }
 
 #[derive(Serialize)]
