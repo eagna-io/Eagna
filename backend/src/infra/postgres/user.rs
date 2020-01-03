@@ -44,12 +44,14 @@ pub struct NewUser<'a> {
     pub salt: &'a [u8],
 }
 
+#[derive(Queryable)]
 pub struct QueryUser {
     pub name: String,
     pub email: String,
     pub is_admin: bool,
 }
 
+#[derive(Queryable)]
 pub struct QueryUserCredentials {
     pub id: Uuid,
     pub cred: Vec<u8>,
@@ -89,13 +91,9 @@ impl PostgresUserInfra for Postgres {
         match users::table
             .filter(users::id.eq(user_id))
             .select((users::name, users::email, users::is_admin))
-            .first::<QueryableUser>(&self.conn)
+            .first::<QueryUser>(&self.conn)
         {
-            Ok(query_res) => Ok(Some(QueryUser {
-                name: query_res.name,
-                email: query_res.email,
-                is_admin: query_res.is_admin,
-            })),
+            Ok(user) => Ok(Some(user)),
             Err(PgError::NotFound) => Ok(None),
             Err(e) => Err(e.into()),
         }
@@ -105,9 +103,9 @@ impl PostgresUserInfra for Postgres {
         match users::table
             .filter(users::email.eq(email))
             .select((users::id, users::credential, users::salt))
-            .first::<(Uuid, Vec<u8>, Vec<u8>)>(&self.conn)
+            .first::<QueryUserCredentials>(&self.conn)
         {
-            Ok((id, cred, salt)) => Ok(Some(QueryUserCredentials { id, cred, salt })),
+            Ok(creds) => Ok(Some(creds)),
             Err(PgError::NotFound) => Ok(None),
             Err(e) => Err(e.into()),
         }
@@ -193,13 +191,6 @@ impl PostgresUserInfra for Postgres {
             })
             .collect())
     }
-}
-
-#[derive(Queryable)]
-struct QueryableUser {
-    name: String,
-    email: String,
-    is_admin: bool,
 }
 
 #[derive(Insertable)]
