@@ -88,6 +88,9 @@ impl<'a> UserWithAttrs for QueryUser<'a> {
     fn email(&self) -> &UserEmail {
         &self.email
     }
+    fn coin(&self) -> u32 {
+        self.coin
+    }
     fn is_admin(&self) -> bool {
         self.is_admin
     }

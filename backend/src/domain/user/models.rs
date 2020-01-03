@@ -39,6 +39,7 @@ macro_rules! impl_user {
 pub trait UserWithAttrs: User {
     fn name(&self) -> &UserName;
     fn email(&self) -> &UserEmail;
+    fn coin(&self) -> u32;
     fn is_admin(&self) -> bool;
 }
 
@@ -50,6 +51,9 @@ macro_rules! impl_user_with_attrs {
             }
             fn email(&self) -> &UserEmail {
                 self.user.email()
+            }
+            fn coin(&self) -> u32 {
+                self.user.coin()
             }
             fn is_admin(&self) -> bool {
                 self.user.is_admin()
@@ -168,6 +172,9 @@ impl UserWithAttrs for NewUser {
     }
     fn email(&self) -> &UserEmail {
         &self.email
+    }
+    fn coin(&self) -> u32 {
+        0
     }
     fn is_admin(&self) -> bool {
         false
