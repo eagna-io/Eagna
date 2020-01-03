@@ -42,7 +42,7 @@ export class EagnaBackendApi {
       })
     };
     if (args.accessToken != null) {
-      option.headers.set("Authorization", `Bearer: ${args.accessToken}`);
+      option.headers.set("Authorization", `Bearer ${args.accessToken}`);
     }
     if (args.body != null) {
       option = Object.assign({ body: JSON.stringify(args.body) }, option);
