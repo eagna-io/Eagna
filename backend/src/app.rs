@@ -1,4 +1,5 @@
 mod auth;
+mod errors;
 mod failure_response;
 mod infra_manager;
 mod req;

@@ -23,6 +23,7 @@ diesel = { version = "~1.4", features = ["postgres", "chrono", "uuid", "uuidv07"
 diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
 failure = "~0.1"
 getset = "~0.0.8"
+http = "~0.1"
 hyper = "~0.13"
 hyper-tls = "~0.4"
 jsonwebtoken = "7.0.0-alpha.2"
@@ -38,5 +39,7 @@ rouille = "~3.0"
 serde = { version = "~1.0", features = ["derive", "rc"] }
 serde_urlencoded = "~0.6"
 sha2 = "~0.8"
+thiserror = "1.0"
 tokio = { version = "~0.2", features = ["macros", "rt-threaded"] }
 uuid = { version = "~0.7", features = ["v4", "serde"] }
+warp = "~0.1"
