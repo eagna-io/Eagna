@@ -10,6 +10,18 @@ pub struct Error {
     msg: Cow<'static, str>,
 }
 
+impl Error {
+    pub fn internal_error<E>(e: E) -> Error
+    where
+        E: std::fmt::Display,
+    {
+        Error {
+            status: StatusCode::INTERNAL_SERVER_ERROR,
+            msg: e.to_string().into(),
+        }
+    }
+}
+
 pub fn recover(err: Rejection) -> Result<impl Reply, Rejection> {
     if let Some(err) = err.find_cause::<Error>() {
         Ok(warp::reply::with_status(

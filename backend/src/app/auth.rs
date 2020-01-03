@@ -47,7 +47,7 @@ impl std::str::FromStr for BearerToken {
 fn query_user(token: AccessTokenId, redis: Redis) -> Result<AccessToken, Error> {
     AccessTokenRepository::from(&redis as &dyn RedisInfra)
         .query(&token)
-        .map_err(|e| Error::from((StatusCode::INTERNAL_SERVER_ERROR, e.to_string().into())))?
+        .map_err(Error::internal_error)?
         .ok_or(Error::from((
             StatusCode::UNAUTHORIZED,
             "Unauthorized".into(),
