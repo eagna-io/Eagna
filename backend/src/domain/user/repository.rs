@@ -1,9 +1,8 @@
 pub mod access_token;
 
+use crate::domain::point::Point;
 use crate::domain::user::*;
-use crate::domain::{market::MarketId, point::Point, prize::PrizeId};
 use crate::infra::postgres::{
-    types::PrizeTradeStatus as InfraPrizeTradeStatus,
     user::{NewPrizeTradeRecord, NewUser as NewUserInfra},
     PostgresInfra,
 };
@@ -104,44 +103,6 @@ pub trait UserWithPg: User + Sized {
         Ok(WithPoint {
             user: self,
             point: Point::from(point),
-        })
-    }
-
-    fn with_prize_trade_history(self) -> Result<WithPrizeTradeHistory<Self>, failure::Error> {
-        let history = self
-            .pg()
-            .query_user_prize_trade_records(self.id().as_uuid())?
-            .into_iter()
-            .map(|record| PrizeTradeRecord {
-                id: record.id,
-                prize_id: PrizeId::from(record.prize_id),
-                point: Point::from(record.point),
-                time: record.time,
-                status: match record.status {
-                    InfraPrizeTradeStatus::Requested => PrizeTradeStatus::Requested,
-                    InfraPrizeTradeStatus::Processed => PrizeTradeStatus::Processed,
-                },
-            })
-            .collect();
-        Ok(WithPrizeTradeHistory {
-            user: self,
-            prize_trade_history: history,
-        })
-    }
-
-    fn with_market_reward_history(self) -> Result<WithMarketRewardHistory<Self>, failure::Error> {
-        let history = self
-            .pg()
-            .query_user_market_reward_records(self.id().as_uuid())?
-            .into_iter()
-            .map(|record| MarketRewardRecord {
-                market_id: MarketId::from(record.market_id),
-                point: Point::from(record.point),
-            })
-            .collect();
-        Ok(WithMarketRewardHistory {
-            user: self,
-            market_reward_records: history,
         })
     }
 }
