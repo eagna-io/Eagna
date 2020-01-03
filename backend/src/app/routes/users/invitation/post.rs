@@ -1,9 +1,18 @@
-use crate::app::{FailureResponse, InfraManager};
-use crate::domain::user::services::invitation::UserInviteService;
+use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
+use crate::domain::user::{repository::UserRepository, services::invitation::UserInviteService};
 use crate::infra::mailgun::{send_mail, Mail};
 use rouille::{input::json_input, Request, Response};
 
-pub fn handler(_infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
+pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
+    let access_token = validate_bearer_header(infra, req)?;
+
+    let user = UserRepository::from(infra.get_postgres()?)
+        .query_user(&access_token.user_id)?
+        .unwrap();
+    if !user.is_admin() {
+        return Err(FailureResponse::Unauthorized);
+    }
+
     let ReqData {
         email,
         without_email,
