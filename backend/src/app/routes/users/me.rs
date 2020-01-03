@@ -1,6 +1,5 @@
 pub mod access_token;
 pub mod post;
-pub mod prize_trade_history;
 
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::user::*;
@@ -13,7 +12,7 @@ pub fn get(infra: &InfraManager, req: &Request) -> Result<Response, FailureRespo
     let repo = UserRepository::from(infra.get_postgres()?);
     let user = match repo.query_user(&access_token.user_id)? {
         None => return Err(FailureResponse::Unauthorized),
-        Some(user) => user.with_point()?,
+        Some(user) => user,
     };
     Ok(Response::json(&ResUser::from(&user)))
 }
@@ -38,7 +37,7 @@ struct ResUserMarketRewardRecord {
 
 impl<'a, U> From<&'a U> for ResUser<'a>
 where
-    U: UserWithAttrs + UserWithPoint,
+    U: UserWithAttrs,
 {
     fn from(user: &'a U) -> ResUser<'a> {
         ResUser {
@@ -48,15 +47,6 @@ where
             is_admin: user.is_admin(),
             coin: user.coin(),
             point: user.point().as_u32(),
-        }
-    }
-}
-
-impl<'a> From<&'a MarketRewardRecord> for ResUserMarketRewardRecord {
-    fn from(record: &'a MarketRewardRecord) -> ResUserMarketRewardRecord {
-        ResUserMarketRewardRecord {
-            market_id: *record.market_id().as_uuid(),
-            point: record.point().as_u32(),
         }
     }
 }

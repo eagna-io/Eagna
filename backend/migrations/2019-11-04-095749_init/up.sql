@@ -3,6 +3,7 @@ CREATE TABLE users (
   name          TEXT NOT NULL,
   email         TEXT UNIQUE NOT NULL,
   coin          INTEGER NOT NULL DEFAULT 0,
+  point         INTEGER NOT NULL DEFAULT 0,
   is_admin      BOOLEAN NOT NULL DEFAULT False,
   created       TIMESTAMPTZ NOT NULL DEFAULT now(),
   credential    BYTEA NOT NULL, -- 64byte

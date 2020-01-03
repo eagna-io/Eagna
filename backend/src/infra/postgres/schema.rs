@@ -125,6 +125,7 @@ table! {
         name -> Text,
         email -> Text,
         coin -> Int4,
+        point -> Int4,
         is_admin -> Bool,
         created -> Timestamptz,
         credential -> Bytea,
