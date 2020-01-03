@@ -8,6 +8,7 @@ use crate::infra::postgres::{
     PostgresInfra,
 };
 use failure::Fallible;
+use getset::{CopyGetters, Getters};
 
 #[derive(From)]
 pub struct UserRepository<'a> {
@@ -57,10 +58,15 @@ impl<'a> UserRepository<'a> {
     }
 }
 
+#[derive(Getters, CopyGetters)]
 pub struct QueryUser<'a> {
+    #[get = "pub"]
     id: UserId,
+    #[get = "pub"]
     name: UserName,
+    #[get = "pub"]
     email: UserEmail,
+    #[get_copy = "pub"]
     is_admin: bool,
 
     pg: &'a dyn PostgresInfra,
