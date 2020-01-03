@@ -161,7 +161,7 @@ def content_type_json(headers):
 
 
 def bearer_token(headers, token):
-    headers['Authorization'] = f"Bearer: {token}"
+    headers['Authorization'] = f"Bearer {token}"
     return headers
 
 

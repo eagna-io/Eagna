@@ -26,7 +26,7 @@ pub fn validate_bearer_header(
 
 fn extract_token(header_val: &str) -> Result<AccessTokenId, FailureResponse> {
     lazy_static::lazy_static! {
-        static ref BEARER_TOKEN_REGEX: Regex = Regex::new(r"^Bearer: (.+)$").unwrap();
+        static ref BEARER_TOKEN_REGEX: Regex = Regex::new(r"^Bearer (.+)$").unwrap();
     }
     BEARER_TOKEN_REGEX
         .captures(header_val)
