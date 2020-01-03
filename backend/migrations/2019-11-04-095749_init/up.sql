@@ -2,10 +2,13 @@ CREATE TABLE users (
   id            UUID PRIMARY KEY,
   name          TEXT NOT NULL,
   email         TEXT UNIQUE NOT NULL,
+  coin          INTEGER NOT NULL DEFAULT 0,
   is_admin      BOOLEAN NOT NULL DEFAULT False,
   created       TIMESTAMPTZ NOT NULL DEFAULT now(),
   credential    BYTEA NOT NULL, -- 64byte
   salt          BYTEA NOT NULL -- 64byte
+
+  CONSTRAINT coin_larger_than_zero CHECK ( coin >= 0 )
 );
 
 CREATE TYPE market_status AS ENUM (

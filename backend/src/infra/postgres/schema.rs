@@ -124,6 +124,7 @@ table! {
         id -> Uuid,
         name -> Text,
         email -> Text,
+        coin -> Int4,
         is_admin -> Bool,
         created -> Timestamptz,
         credential -> Bytea,
