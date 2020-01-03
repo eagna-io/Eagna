@@ -35,6 +35,7 @@ impl<'a> UserRepository<'a> {
             id: *user_id,
             name: UserName::from_str(user.name)?,
             email: UserEmail::from_str(user.email)?,
+            coin: user.coin as u32,
             is_admin: user.is_admin,
             pg: self.postgres,
         }))
@@ -66,6 +67,8 @@ pub struct QueryUser<'a> {
     name: UserName,
     #[get = "pub"]
     email: UserEmail,
+    #[get_copy = "pub"]
+    coin: u32,
     #[get_copy = "pub"]
     is_admin: bool,
 

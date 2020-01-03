@@ -48,6 +48,7 @@ pub struct NewUser<'a> {
 pub struct QueryUser {
     pub name: String,
     pub email: String,
+    pub coin: i32, // >= 0
     pub is_admin: bool,
 }
 
@@ -90,7 +91,7 @@ impl PostgresUserInfra for Postgres {
     fn query_user(&self, user_id: &Uuid) -> Result<Option<QueryUser>, failure::Error> {
         match users::table
             .filter(users::id.eq(user_id))
-            .select((users::name, users::email, users::is_admin))
+            .select((users::name, users::email, users::coin, users::is_admin))
             .first::<QueryUser>(&self.conn)
         {
             Ok(user) => Ok(Some(user)),
