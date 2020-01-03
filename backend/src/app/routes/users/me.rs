@@ -29,6 +29,7 @@ struct ResUser<'a> {
     name: &'a str,
     email: &'a str,
     is_admin: bool,
+    coin: u32,
     point: u32,
     prize_trade_history: Vec<ResUserPrizeTradeRecord>,
     market_reward_history: Vec<ResUserMarketRewardRecord>,
@@ -51,6 +52,7 @@ where
             name: user.name().as_str(),
             email: user.email().as_str(),
             is_admin: user.is_admin(),
+            coin: user.coin(),
             point: user.point().as_u32(),
             prize_trade_history: user
                 .prize_trade_history()
