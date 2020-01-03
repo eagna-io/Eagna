@@ -1,6 +1,5 @@
 pub mod market;
 pub mod organizer;
-pub mod prize;
 #[allow(unused_imports)]
 mod schema;
 pub mod types;
@@ -16,7 +15,6 @@ pub trait PostgresInfra:
     market::PostgresMarketInfra
     + user::PostgresUserInfra
     + organizer::PostgresOrganizerInfra
-    + prize::PostgresPrizeInfra
     + Send
     + 'static
 {

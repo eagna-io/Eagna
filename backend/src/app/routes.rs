@@ -10,7 +10,6 @@
 //! どんなパラメータなのかが明示的にわからなければならない。
 mod cronjob;
 mod markets;
-mod prizes;
 mod users;
 
 use super::{FailureResponse, InfraManager};
@@ -52,12 +51,6 @@ pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
         },
         (POST) (/markets/{id: Uuid}/orders/) => {
             markets::orders::post(infra, req, id)
-        },
-        (GET) (/prizes/) => {
-            prizes::get_list(infra, req)
-        },
-        (POST) (/prizes/) => {
-            prizes::post(infra, req)
         },
         (GET) (/cronjob/check_markets/) => {
             cronjob::check_markets::get(infra, req)

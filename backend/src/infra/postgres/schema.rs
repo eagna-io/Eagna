@@ -90,36 +90,6 @@ table! {
     use diesel::sql_types::*;
     use crate::infra::postgres::types::*;
 
-    prizes (id) {
-        id -> Uuid,
-        name -> Text,
-        description -> Text,
-        thumbnail_url -> Text,
-        point -> Int4,
-        available -> Bool,
-        created -> Timestamptz,
-    }
-}
-
-table! {
-    use diesel::sql_types::*;
-    use crate::infra::postgres::types::*;
-
-    user_prize_trade_records (id) {
-        id -> Uuid,
-        user_id -> Uuid,
-        prize_id -> Uuid,
-        point -> Int4,
-        time -> Timestamptz,
-        status -> Prize_trade_status,
-        processed_at -> Nullable<Timestamptz>,
-    }
-}
-
-table! {
-    use diesel::sql_types::*;
-    use crate::infra::postgres::types::*;
-
     users (id) {
         id -> Uuid,
         name -> Text,
@@ -140,8 +110,6 @@ joinable!(market_tokens -> markets (market_id));
 joinable!(markets -> organizers (organizer_id));
 joinable!(orders -> markets (market_id));
 joinable!(orders -> users (user_id));
-joinable!(user_prize_trade_records -> prizes (prize_id));
-joinable!(user_prize_trade_records -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     market_prizes,
@@ -150,7 +118,5 @@ allow_tables_to_appear_in_same_query!(
     market_tokens,
     orders,
     organizers,
-    prizes,
-    user_prize_trade_records,
     users,
 );
