@@ -36,8 +36,20 @@ impl<'a> UserRepository<'a> {
             is_admin: user.is_admin,
         }))
     }
+
+    pub fn update_user<U>(&self, user: &U) -> Fallible<()>
+    where
+        U: UpdatableUser,
+    {
+        user.update_user(self.postgres)
+    }
 }
 
+/*
+ * ===================
+ * QueryUser
+ * ===================
+ */
 #[derive(Getters, CopyGetters)]
 pub struct QueryUser {
     #[get = "pub"]
@@ -75,5 +87,23 @@ impl UserWithAttrs for QueryUser {
     }
     fn is_admin(&self) -> bool {
         self.is_admin
+    }
+}
+
+/*
+ * =====================
+ * UpdatableUser
+ * =====================
+ */
+pub trait UpdatableUser {
+    fn update_user(&self, pg: &dyn PostgresInfra) -> Fallible<()>;
+}
+
+impl<U> UpdatableUser for UserProvidedCoin<U>
+where
+    U: UserWithAttrs,
+{
+    fn update_user(&self, pg: &dyn PostgresInfra) -> Fallible<()> {
+        todo!()
     }
 }
