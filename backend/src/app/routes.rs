@@ -34,6 +34,9 @@ pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
         (GET) (/users/me/) => {
             users::me::get(infra, req)
         },
+        (PATCH) (/users/{id: Uuid}) => {
+            users::patch::handler(infra, req, id)
+        },
         (GET) (/markets/) => {
             markets::get_list(infra, req)
         },
