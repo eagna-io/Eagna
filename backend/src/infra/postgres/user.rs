@@ -17,6 +17,8 @@ pub trait PostgresUserInfra {
         &self,
         user_id: &Uuid,
     ) -> Result<Vec<QueryMarketRewardRecord>, failure::Error>;
+
+    fn update_user_coin(&self, user_id: &Uuid, coin: u32) -> Fallible<()>;
 }
 
 #[derive(Insertable)]
@@ -105,6 +107,13 @@ impl PostgresUserInfra for Postgres {
                 point: record.point as u32,
             })
             .collect())
+    }
+
+    fn update_user_coin(&self, user_id: &Uuid, coin: u32) -> Fallible<()> {
+        diesel::update(users::table.filter(users::id.eq(user_id)))
+            .set(users::coin.eq(coin as i32))
+            .execute(&self.conn)?;
+        Ok(())
     }
 }
 

@@ -104,6 +104,6 @@ where
     U: UserWithAttrs,
 {
     fn update_user(&self, pg: &dyn PostgresInfra) -> Fallible<()> {
-        todo!()
+        pg.update_user_coin(self.id().as_uuid(), self.coin())
     }
 }
