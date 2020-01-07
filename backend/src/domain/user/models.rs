@@ -3,6 +3,7 @@ pub mod access_token;
 use self::access_token::AccessToken;
 use crate::domain::{point::Point, user::services::auth::Credentials};
 use crate::primitive::{EmptyStringError, NonEmptyString};
+use failure::Fallible;
 use getset::Getters;
 use uuid::Uuid;
 
@@ -26,6 +27,20 @@ pub trait UserWithAttrs: User {
     fn point(&self) -> Point;
     fn is_admin(&self) -> bool;
 
+    fn into_admin(self) -> Fallible<Admin<Self>> {
+        if self.is_admin() {
+            Ok(Admin { user: self })
+        } else {
+            Err(failure::err_msg(format!(
+                "{:?} is not an Admin user",
+                self.id()
+            )))
+        }
+    }
+}
+
+/// このprivateなメソッドを定義するために利用
+trait UserWithAttrsExt: UserWithAttrs {
     fn provide_coin(self, provided: u32) -> UserProvidedCoin<Self> {
         UserProvidedCoin {
             user: self,
@@ -33,6 +48,8 @@ pub trait UserWithAttrs: User {
         }
     }
 }
+
+impl<U> UserWithAttrsExt for U where U: UserWithAttrs {}
 
 /*
  * ==================
@@ -91,6 +108,7 @@ impl UserWithAttrs for NewUser {
  *
  * - コインを付与されたユーザーを表すモデル
  * - Repositoryに保存できる
+ * - Admin::provide_coin_to_user メソッドを通じて生成する
  */
 pub struct UserProvidedCoin<U> {
     user: U,
@@ -118,6 +136,30 @@ impl<U: UserWithAttrs> UserWithAttrs for UserProvidedCoin<U> {
     }
     fn is_admin(&self) -> bool {
         self.user.is_admin()
+    }
+}
+
+/*
+ * ==============
+ * Admin model
+ * ==============
+ */
+pub struct Admin<U> {
+    user: U,
+}
+
+impl<U> Admin<U> {
+    pub fn provide_coin_to_user<UU>(&self, user: UU, coin: u32) -> UserProvidedCoin<UU>
+    where
+        UU: UserWithAttrs,
+    {
+        user.provide_coin(coin)
+    }
+}
+
+impl<U: User> User for Admin<U> {
+    fn id(&self) -> &UserId {
+        self.user.id()
     }
 }
 
