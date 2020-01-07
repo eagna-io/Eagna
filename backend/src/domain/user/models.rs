@@ -25,6 +25,13 @@ pub trait UserWithAttrs: User {
     fn coin(&self) -> u32;
     fn point(&self) -> Point;
     fn is_admin(&self) -> bool;
+
+    fn provide_coin(self, provided: u32) -> UserProvidedCoin<Self> {
+        UserProvidedCoin {
+            user: self,
+            provided,
+        }
+    }
 }
 
 /*
@@ -74,6 +81,43 @@ impl UserWithAttrs for NewUser {
     }
     fn is_admin(&self) -> bool {
         false
+    }
+}
+
+/*
+ * =================
+ * UserProvidedCoin model
+ * =================
+ *
+ * - コインを付与されたユーザーを表すモデル
+ * - Repositoryに保存できる
+ */
+pub struct UserProvidedCoin<U> {
+    user: U,
+    provided: u32,
+}
+
+impl<U: User> User for UserProvidedCoin<U> {
+    fn id(&self) -> &UserId {
+        self.user.id()
+    }
+}
+
+impl<U: UserWithAttrs> UserWithAttrs for UserProvidedCoin<U> {
+    fn name(&self) -> &UserName {
+        &self.user.name()
+    }
+    fn email(&self) -> &UserEmail {
+        &self.user.email()
+    }
+    fn coin(&self) -> u32 {
+        self.user.coin() + self.provided
+    }
+    fn point(&self) -> Point {
+        self.user.point()
+    }
+    fn is_admin(&self) -> bool {
+        self.user.is_admin()
     }
 }
 
