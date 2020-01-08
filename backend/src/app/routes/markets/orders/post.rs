@@ -1,6 +1,9 @@
 use super::{ReqOrder, ResOrder};
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::{market::*, user::*};
+use crate::domain::{
+    market::*,
+    user::repository::{QueryUser, UserRepository},
+};
 use crate::infra::postgres::transaction;
 
 use rouille::{input::json::json_input, Request, Response};
@@ -19,8 +22,11 @@ pub fn post(
     validate_req_order(&req_data)?;
 
     let user_id = validate_bearer_header(infra, req)?.user_id;
-
     let postgres = infra.get_postgres()?;
+    let user = UserRepository::from(postgres)
+        .query_user(&user_id)?
+        .ok_or(FailureResponse::InvalidPayload)?;
+
     let added_order = transaction(postgres, || {
         let market_repo = MarketRepository::from(postgres);
 
@@ -38,7 +44,7 @@ pub fn post(
             }
         };
 
-        let added_order = add_order(&mut open_market, &user_id, &req_data)?;
+        let added_order = add_order(&mut open_market, &user, &req_data)?;
 
         market_repo.save_market(&Market::from(open_market))?;
 
@@ -61,11 +67,11 @@ fn validate_req_order(req_order: &ReqOrder) -> Result<(), FailureResponse> {
 
 fn add_order(
     open_market: &mut OpenMarket,
-    user_id: &UserId,
+    user: &QueryUser,
     req_order: &ReqOrder,
 ) -> Result<Order, FailureResponse> {
     let new_order = open_market.try_add_order(
-        user_id,
+        user,
         &req_order.token_name,
         &AmountToken::from(req_order.amount_token),
     )?;

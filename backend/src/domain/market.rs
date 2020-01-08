@@ -14,7 +14,7 @@ use crate::domain::{
     lmsr,
     organizer::{Organizer, OrganizerId},
     point::Point,
-    user::UserId,
+    user::{UserId, UserWithAttrs},
 };
 use crate::primitive::{NonEmptyString, NonEmptyVec};
 use chrono::{DateTime, Utc};
@@ -225,15 +225,18 @@ impl OpenMarket {
     /// をチェックする.
     /// チェックが通った場合にのみ、NormalOrderを追加する
     /// amount_token が0より大きければBUY、0より小さければSELLのオーダー
-    pub fn try_add_order(
+    pub fn try_add_order<U>(
         &mut self,
-        user_id: &UserId,
+        user: &U,
         token_name: &NonEmptyString,
         amount_token: &AmountToken,
-    ) -> Result<&Order, TryOrderError> {
+    ) -> Result<&Order, TryOrderError>
+    where
+        U: UserWithAttrs,
+    {
         log::debug!(
             "Try add a new order [ user : {:?}, token : {:?}, amount: {:?}",
-            user_id,
+            user.id(),
             token_name,
             amount_token
         );
@@ -252,14 +255,14 @@ impl OpenMarket {
             // 売り注文なので、トークンの残高をチェックする
             let token_balance = self
                 .orders
-                .compute_balance_of_user_token(user_id, token_name);
+                .compute_balance_of_user_token(user.id(), token_name);
             if token_balance + *amount_token < AmountToken::zero() {
                 return Err(TryOrderError::InsufficientBalance);
             }
         } else {
             // 買い注文なので、コインの残高をチェックする
-            let coin_balance = self.orders.compute_balance_of_user_coin(user_id);
-            if coin_balance + amount_coin < AmountCoin::zero() {
+            let coin_balance = self.orders.compute_balance_of_user_coin(user.id());
+            if user.coin() + amount_coin < AmountCoin::zero() {
                 return Err(TryOrderError::InsufficientBalance);
             }
         }
@@ -270,7 +273,7 @@ impl OpenMarket {
 
         Ok(self
             .orders
-            .add(*user_id, token_name.clone(), *amount_token, amount_coin))
+            .add(*user.id(), token_name.clone(), *amount_token, amount_coin))
     }
 
     /// 指定のTokenを、指定の数量売る/買うとき、増える/減るCoinの量
