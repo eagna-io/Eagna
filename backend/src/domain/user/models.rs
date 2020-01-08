@@ -1,14 +1,8 @@
 pub mod access_token;
 
 use self::access_token::AccessToken;
-use crate::domain::{
-    market::MarketId,
-    point::Point,
-    prize::{Prize, PrizeId},
-    user::services::auth::Credentials,
-};
+use crate::domain::{point::Point, user::services::auth::Credentials};
 use crate::primitive::{EmptyStringError, NonEmptyString};
-use chrono::{DateTime, Utc};
 use failure::Fallible;
 use getset::Getters;
 use uuid::Uuid;
@@ -25,110 +19,37 @@ pub trait User: Sized {
     }
 }
 
-macro_rules! impl_user {
-    ($ty: ident) => {
-        impl<U: User> User for $ty<U> {
-            fn id(&self) -> &UserId {
-                self.user.id()
-            }
-        }
-    };
-}
-
 /// 基本的な属性を保持するUserモデルを表現するインターフェイス
 pub trait UserWithAttrs: User {
     fn name(&self) -> &UserName;
     fn email(&self) -> &UserEmail;
-    fn is_admin(&self) -> bool;
-}
-
-macro_rules! impl_user_with_attrs {
-    ($ty: ident) => {
-        impl<U: UserWithAttrs> UserWithAttrs for $ty<U> {
-            fn name(&self) -> &UserName {
-                self.user.name()
-            }
-            fn email(&self) -> &UserEmail {
-                self.user.email()
-            }
-            fn is_admin(&self) -> bool {
-                self.user.is_admin()
-            }
-        }
-    };
-}
-
-pub trait UserWithPoint: User {
+    fn coin(&self) -> u32;
     fn point(&self) -> Point;
+    fn is_admin(&self) -> bool;
 
-    fn request_prize_trade(self, prize: &Prize) -> Fallible<UserWithPrizeTradeRequest<Self>> {
-        if self.point() - *prize.point() < Point::zero() {
-            return Err(failure::err_msg(
-                "user does not have enough point to request prize trade",
-            ));
+    fn into_admin(self) -> Fallible<Admin<Self>> {
+        if self.is_admin() {
+            Ok(Admin { user: self })
+        } else {
+            Err(failure::err_msg(format!(
+                "{:?} is not an Admin user",
+                self.id()
+            )))
         }
-        let record = PrizeTradeRecord::new(prize);
-        Ok(UserWithPrizeTradeRequest {
+    }
+}
+
+/// このprivateなメソッドを定義するために利用
+trait UserWithAttrsExt: UserWithAttrs {
+    fn provide_coin(self, provided: u32) -> UserProvidedCoin<Self> {
+        UserProvidedCoin {
             user: self,
-            requested_prize_trade_record: record,
-        })
+            provided,
+        }
     }
 }
 
-macro_rules! impl_user_with_point {
-    ($ty: ident) => {
-        impl<U: UserWithPoint> UserWithPoint for $ty<U> {
-            fn point(&self) -> Point {
-                self.user.point()
-            }
-        }
-    };
-}
-
-pub trait UserWithPrizeTradeHistory: User {
-    fn prize_trade_history(&self) -> &Vec<PrizeTradeRecord>;
-}
-
-macro_rules! impl_user_with_prize_trade_history {
-    ($ty: ident) => {
-        impl<U: UserWithPrizeTradeHistory> UserWithPrizeTradeHistory for $ty<U> {
-            fn prize_trade_history(&self) -> &Vec<PrizeTradeRecord> {
-                self.user.prize_trade_history()
-            }
-        }
-    };
-}
-
-pub trait UserWithMarketRewardHistory: User {
-    fn market_reward_history(&self) -> &Vec<MarketRewardRecord>;
-}
-
-macro_rules! impl_user_with_market_reward_history {
-    ($ty: ident) => {
-        impl<U: UserWithMarketRewardHistory> UserWithMarketRewardHistory for $ty<U> {
-            fn market_reward_history(&self) -> &Vec<MarketRewardRecord> {
-                self.user.market_reward_history()
-            }
-        }
-    };
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
-#[get = "pub"]
-pub struct UserWithPrizeTradeRequest<U> {
-    user: U,
-    requested_prize_trade_record: PrizeTradeRecord,
-}
-
-impl<U: UserWithPoint> UserWithPoint for UserWithPrizeTradeRequest<U> {
-    fn point(&self) -> Point {
-        self.user.point() - self.requested_prize_trade_record.point
-    }
-}
-
-impl_user!(UserWithPrizeTradeRequest);
-impl_user_with_attrs!(UserWithPrizeTradeRequest);
-impl_user_with_market_reward_history!(UserWithPrizeTradeRequest);
+impl<U> UserWithAttrsExt for U where U: UserWithAttrs {}
 
 /*
  * ==================
@@ -169,32 +90,76 @@ impl UserWithAttrs for NewUser {
     fn email(&self) -> &UserEmail {
         &self.email
     }
+    fn coin(&self) -> u32 {
+        0
+    }
+    fn point(&self) -> Point {
+        Point::zero()
+    }
     fn is_admin(&self) -> bool {
         false
     }
 }
 
-impl UserWithPoint for NewUser {
+/*
+ * =================
+ * UserProvidedCoin model
+ * =================
+ *
+ * - コインを付与されたユーザーを表すモデル
+ * - Repositoryに保存できる
+ * - Admin::provide_coin_to_user メソッドを通じて生成する
+ */
+pub struct UserProvidedCoin<U> {
+    user: U,
+    provided: u32,
+}
+
+impl<U: User> User for UserProvidedCoin<U> {
+    fn id(&self) -> &UserId {
+        self.user.id()
+    }
+}
+
+impl<U: UserWithAttrs> UserWithAttrs for UserProvidedCoin<U> {
+    fn name(&self) -> &UserName {
+        &self.user.name()
+    }
+    fn email(&self) -> &UserEmail {
+        &self.user.email()
+    }
+    fn coin(&self) -> u32 {
+        self.user.coin() + self.provided
+    }
     fn point(&self) -> Point {
-        Point::zero()
+        self.user.point()
+    }
+    fn is_admin(&self) -> bool {
+        self.user.is_admin()
     }
 }
 
-impl UserWithPrizeTradeHistory for NewUser {
-    fn prize_trade_history(&self) -> &Vec<PrizeTradeRecord> {
-        lazy_static::lazy_static! {
-            static ref EMPTY_VEC: Vec<PrizeTradeRecord> = Vec::new();
-        }
-        &EMPTY_VEC
+/*
+ * ==============
+ * Admin model
+ * ==============
+ */
+pub struct Admin<U> {
+    user: U,
+}
+
+impl<U> Admin<U> {
+    pub fn provide_coin_to_user<UU>(&self, user: UU, coin: u32) -> UserProvidedCoin<UU>
+    where
+        UU: UserWithAttrs,
+    {
+        user.provide_coin(coin)
     }
 }
 
-impl UserWithMarketRewardHistory for NewUser {
-    fn market_reward_history(&self) -> &Vec<MarketRewardRecord> {
-        lazy_static::lazy_static! {
-            static ref EMPTY_VEC: Vec<MarketRewardRecord> = Vec::new();
-        }
-        &EMPTY_VEC
+impl<U: User> User for Admin<U> {
+    fn id(&self) -> &UserId {
+        self.user.id()
     }
 }
 
@@ -245,43 +210,4 @@ impl UserEmail {
     pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
         Ok(UserEmail(NonEmptyString::from_str(s)?))
     }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
-#[get = "pub"]
-pub struct PrizeTradeRecord {
-    pub(super) id: Uuid,
-    pub(super) prize_id: PrizeId,
-    pub(super) point: Point,
-    pub(super) time: DateTime<Utc>,
-    pub(super) status: PrizeTradeStatus,
-}
-
-impl PrizeTradeRecord {
-    /// PrizeTradeRecord モデルを新規作成する。
-    /// `Prize` を要求することで、その `Prize` が
-    /// 実際に存在していることを証明する。
-    /// `UserWithPoint::request_prize_trade` メソッドから呼び出される。
-    fn new(prize: &Prize) -> PrizeTradeRecord {
-        PrizeTradeRecord {
-            id: Uuid::new_v4(),
-            prize_id: *prize.id(),
-            point: *prize.point(),
-            time: Utc::now(),
-            status: PrizeTradeStatus::Requested,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PrizeTradeStatus {
-    Requested,
-    Processed,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
-#[get = "pub"]
-pub struct MarketRewardRecord {
-    pub(super) market_id: MarketId,
-    pub(super) point: Point,
 }

@@ -2,10 +2,14 @@ CREATE TABLE users (
   id            UUID PRIMARY KEY,
   name          TEXT NOT NULL,
   email         TEXT UNIQUE NOT NULL,
+  coin          INTEGER NOT NULL DEFAULT 0,
+  point         INTEGER NOT NULL DEFAULT 0,
   is_admin      BOOLEAN NOT NULL DEFAULT False,
   created       TIMESTAMPTZ NOT NULL DEFAULT now(),
   credential    BYTEA NOT NULL, -- 64byte
   salt          BYTEA NOT NULL -- 64byte
+
+  CONSTRAINT coin_larger_than_zero CHECK ( coin >= 0 )
 );
 
 CREATE TYPE market_status AS ENUM (
@@ -114,41 +118,4 @@ CREATE TABLE market_reward_records (
   CONSTRAINT user_reward_point_history_user_fkey FOREIGN KEY(user_id)
     REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT point_larger_than_zero CHECK ( point > 0 )
-);
-
--- Userがpointと交換可能な景品
-CREATE TABLE prizes (
-  id            UUID NOT NULL PRIMARY KEY,
-  name          TEXT NOT NULL,
-  description   TEXT NOT NULL,
-  thumbnail_url TEXT NOT NULL,
-  -- prizeを交換するのに必要なポイント量。0より大きい。
-  point         INTEGER NOT NULL,
-  -- prizeが交換可能かどうか。
-  available     BOOLEAN NOT NULL DEFAULT true,
-  created       TIMESTAMPTZ NOT NULL DEFAULT now(),
-
-  CONSTRAINT point_larger_than_zero CHECK ( point > 0 )
-);
-
-CREATE TYPE prize_trade_status as ENUM (
-  'requested',
-  'processed'
-);
-
-CREATE TABLE user_prize_trade_records (
-  id            UUID PRIMARY KEY,
-  user_id       UUID NOT NULL,
-  prize_id      UUID NOT NULL,
-  -- 消費したポイント。0より大きい。
-  point         INTEGER NOT NULL,
-  time          TIMESTAMPTZ NOT NULL DEFAULT now(),
-  status        prize_trade_status NOT NULL DEFAULT 'requested',
-  processed_at  TIMESTAMPTZ DEFAULT NULL,
-
-  CONSTRAINT user_prize_trade_history_user_fkey FOREIGN KEY(user_id)
-    REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT user_prize_trade_history_prize_fkey FOREIGN KEY(prize_id)
-    REFERENCES prizes(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT price_larger_than_zero CHECK ( point > 0 )
 );

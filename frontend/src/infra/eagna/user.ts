@@ -46,9 +46,8 @@ export interface User {
   name: string;
   email: string;
   isAdmin: boolean;
+  coin: number;
   point: number;
-  prizeTradeHistory: PrizeTradeRecord[];
-  marketRewardHistory: MarketRewardRecord[];
 }
 
 export interface MarketRewardRecord {
@@ -85,7 +84,6 @@ const userDecoder: D.Decoder<User> = D.object({
   name: D.string(),
   email: D.string(),
   isAdmin: D.boolean(),
+  coin: D.number(),
   point: D.number(),
-  prizeTradeHistory: D.array(prizeTraedeItemDecoder),
-  marketRewardHistory: D.array(marketRewardItemDecoder)
 });

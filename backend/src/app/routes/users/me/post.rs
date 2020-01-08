@@ -39,14 +39,16 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
     let access_token = new_user.new_access_token();
     AccessTokenRepository::from(infra.get_redis()?).save(&access_token)?;
 
-    // 登録成功メールの送信
-    let user_email = <NewUser as Into<(_, _, UserEmail, _)>>::into(new_user).2;
-    send_mail(Mail {
-        from: "noreply@crop-pm.com".into(),
-        to: user_email.into_string().into(),
-        subject: "Cropへのご登録ありがとうございます!".into(),
-        html: signup_mail_html().into(),
-    })?;
+    if !req_data.without_email {
+        // 登録成功メールの送信
+        let user_email = <NewUser as Into<(_, _, UserEmail, _)>>::into(new_user).2;
+        send_mail(Mail {
+            from: "noreply@crop-pm.com".into(),
+            to: user_email.into_string().into(),
+            subject: "Cropへのご登録ありがとうございます!".into(),
+            html: signup_mail_html().into(),
+        })?;
+    }
 
     Ok(Response::json(&ResData {
         token: access_token.id.as_str(),
@@ -60,6 +62,8 @@ struct ReqData {
     name: NonEmptyString,
     password: NonEmptyString,
     invitation_token: String,
+    #[serde(default)] // false
+    without_email: bool,
 }
 
 #[derive(Serialize)]

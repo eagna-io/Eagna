@@ -14,8 +14,6 @@ export class User {
     readonly email: string,
     readonly isAdmin: boolean,
     readonly point: number,
-    readonly prizeTradeHistory: PrizeTradeRecord[],
-    readonly marketRewardHistory: MarketRewardRecord[],
     readonly accessToken: string
   ) {}
 
@@ -33,8 +31,6 @@ export class User {
       user.email,
       user.isAdmin,
       user.point,
-      user.prizeTradeHistory,
-      user.marketRewardHistory,
       token
     );
   }
