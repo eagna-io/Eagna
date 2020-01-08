@@ -18,43 +18,7 @@ pub fn resolve_market_uncheck(
 ) -> ResolvedMarket {
     assert!(market.attrs.is_valid_token(&resolved_token_name));
 
-    let point_coin_rate = match market.point_coin_rate() {
-        Ok(rate) => rate,
-        Err(_) => {
-            return ResolvedMarket {
-                id: market.id,
-                attrs: market.attrs,
-                orders: market.orders,
-                token_distribution: market.token_distribution,
-                resolved_token_name,
-                reward_records: RewardRecords(HashMap::new()),
-            };
-        }
-    };
-
-    // 当たりトークンを持っているユーザーにReward Orderを発行する
-    compute_users_token_amount(&market, &resolved_token_name)
-        .into_iter()
-        .for_each(|(user_id, amount_token)| {
-            // 各ユーザーにReward Orderを発行
-            market.orders.add_reward_order(
-                user_id,
-                resolved_token_name.clone(),
-                AmountCoin(REWARD_COIN_PER_TOKEN as i32 * amount_token.as_i32()),
-            );
-        });
-
-    // ユーザーに報酬ポイントを配布
-    let mut rng = rand::thread_rng();
-    let users_reward_point = compute_users_coin_amount(&market)
-        .into_iter()
-        .map(|(user, coin)| {
-            let (int_point, fract_point) = point_coin_rate * coin;
-            let point = int_point + fract_point.to_integer_with_probability(&mut rng);
-            (user, point)
-        })
-        .collect::<HashMap<_, _>>();
-    let reward_records = RewardRecords(users_reward_point);
+    let reward_records = todo!();
 
     ResolvedMarket {
         id: market.id,

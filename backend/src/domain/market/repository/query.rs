@@ -140,7 +140,6 @@ fn build_market_attrs(market: QueryMarket) -> MarketAttrs {
         organizer_id: OrganizerId::from(market.organizer_id),
         description: market.description,
         lmsr_b: lmsr::B::from(market.lmsr_b as u32),
-        total_reward_point: Point::from(market.total_reward_point as u32),
         open: market.open,
         close: market.close,
         tokens: NonEmptyVec::from_vec(

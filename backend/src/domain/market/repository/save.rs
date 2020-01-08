@@ -53,7 +53,6 @@ fn save_upcoming_market(
         organizer_id: market.attrs().organizer_id.as_uuid(),
         description: market.attrs().description.as_str(),
         lmsr_b: market.attrs().lmsr_b.as_u32() as i32,
-        total_reward_point: market.attrs().total_reward_point.as_u32(),
         open: market.attrs().open(),
         close: market.attrs().close(),
         tokens: &mut new_tokens,

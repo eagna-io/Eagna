@@ -38,7 +38,6 @@ table! {
         close -> Timestamptz,
         status -> Market_status,
         resolved_token_name -> Nullable<Text>,
-        total_reward_point -> Int4,
         resolved_at -> Nullable<Timestamptz>,
     }
 }

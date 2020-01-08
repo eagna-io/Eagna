@@ -36,7 +36,6 @@ CREATE TABLE markets (
   status              market_status NOT NULL DEFAULT 'upcoming',
   /* MUST NULL if "status" is NOT 'resolved' */
   resolved_token_name TEXT DEFAULT NULL,
-  total_reward_point  INTEGER NOT NULL,
   resolved_at         TIMESTAMPTZ DEFAULT NULL,
 
   CONSTRAINT market_organizer_fkey FOREIGN KEY(organizer_id)

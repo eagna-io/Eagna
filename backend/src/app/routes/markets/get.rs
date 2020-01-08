@@ -86,7 +86,6 @@ struct ResMarket<'a> {
     organizer_id: &'a Uuid,
     description: &'a str,
     lmsr_b: u32,
-    total_reward_point: u32,
     open: &'a DateTime<Utc>,
     close: &'a DateTime<Utc>,
     tokens: Vec<ResMarketToken<'a>>,
@@ -122,7 +121,6 @@ impl<'a> From<&'a Market> for ResMarket<'a> {
             organizer_id: market.attrs().organizer_id().as_uuid(),
             description: market.attrs().description().as_str(),
             lmsr_b: market.attrs().lmsr_b().as_u32(),
-            total_reward_point: market.attrs().total_reward_point().as_u32(),
             open: market.attrs().open(),
             close: market.attrs().close(),
             tokens: market
