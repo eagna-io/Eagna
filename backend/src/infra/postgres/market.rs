@@ -1,7 +1,4 @@
-use super::{
-    types::{MarketStatus, OrderType},
-    Postgres,
-};
+use super::{types::MarketStatus, Postgres};
 use chrono::{DateTime, Utc};
 use diesel::{dsl::now, pg::expression::dsl::any, prelude::*};
 use uuid::Uuid;
@@ -93,10 +90,9 @@ pub struct NewToken<'a> {
 pub struct NewOrder<'a> {
     pub local_id: i32,
     pub user_id: Uuid,
-    pub token_name: Option<&'a str>,
+    pub token_name: &'a str,
     pub amount_token: i32,
     pub amount_coin: i32,
-    pub type_: OrderType,
     pub time: DateTime<Utc>,
 }
 
@@ -140,10 +136,9 @@ pub struct QueryOrder {
     pub local_id: i32,
     pub user_id: Uuid,
     pub market_id: Uuid,
-    pub token_name: Option<String>,
+    pub token_name: String,
     pub amount_token: i32,
     pub amount_coin: i32,
-    pub type_: OrderType,
     pub time: DateTime<Utc>,
 }
 
@@ -239,7 +234,6 @@ impl PostgresMarketInfra for Postgres {
                 amount_token: order.amount_token,
                 amount_coin: order.amount_coin,
                 time: order.time,
-                type_: order.type_,
                 market_id: *market_id,
             })
             .collect();
@@ -320,7 +314,6 @@ impl PostgresMarketInfra for Postgres {
                 token_name: raw_order.token_name,
                 amount_token: raw_order.amount_token,
                 amount_coin: raw_order.amount_coin,
-                type_: raw_order.type_,
                 time: raw_order.time,
             })
             .collect())
@@ -429,10 +422,9 @@ struct InsertableToken<'a> {
 struct InsertableOrder<'a> {
     market_local_id: i32,
     user_id: Uuid,
-    token_name: Option<&'a str>,
+    token_name: &'a str,
     amount_token: i32,
     amount_coin: i32,
-    type_: OrderType,
     market_id: Uuid,
     time: DateTime<Utc>,
 }
@@ -482,10 +474,9 @@ struct QueryableOrder {
     _unused_id: i32,
     market_local_id: i32,
     user_id: Uuid,
-    token_name: Option<String>,
+    token_name: String,
     amount_token: i32,
     amount_coin: i32,
-    type_: OrderType,
     time: DateTime<Utc>,
     market_id: Uuid,
 }

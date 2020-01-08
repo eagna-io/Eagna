@@ -6,10 +6,3 @@ pub enum MarketStatus {
     Closed,
     Resolved,
 }
-
-#[derive(Debug, Clone, PartialEq, Eq, DbEnum)]
-#[DieselType = "Order_type"]
-pub enum OrderType {
-    Normal,
-    Reward,
-}

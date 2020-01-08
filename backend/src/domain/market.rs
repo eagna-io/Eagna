@@ -225,7 +225,7 @@ impl OpenMarket {
     /// をチェックする.
     /// チェックが通った場合にのみ、NormalOrderを追加する
     /// amount_token が0より大きければBUY、0より小さければSELLのオーダー
-    pub fn try_add_normal_order(
+    pub fn try_add_order(
         &mut self,
         user_id: &UserId,
         token_name: &NonEmptyString,
@@ -270,7 +270,7 @@ impl OpenMarket {
 
         Ok(self
             .orders
-            .add_normal_order(*user_id, token_name.clone(), *amount_token, amount_coin))
+            .add(*user_id, token_name.clone(), *amount_token, amount_coin))
     }
 
     /// 指定のTokenを、指定の数量売る/買うとき、増える/減るCoinの量
@@ -343,8 +343,8 @@ impl TokenDistribution {
 
         let mut token_distribution = TokenDistribution(map);
 
-        for normal_order in orders.filter_normal_orders() {
-            token_distribution.update_add(&normal_order.token_name(), *normal_order.amount_token())
+        for order in orders.iter() {
+            token_distribution.update_add(&order.token_name(), *order.amount_token())
         }
 
         token_distribution

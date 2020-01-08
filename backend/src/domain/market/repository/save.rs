@@ -1,9 +1,5 @@
 use super::*;
-use crate::infra::postgres::{
-    market::*,
-    types::{MarketStatus as InfraMarketStatus, OrderType as InfraOrderType},
-    PostgresInfra,
-};
+use crate::infra::postgres::{market::*, types::MarketStatus as InfraMarketStatus, PostgresInfra};
 
 // RepositoryにMarketを記録する
 // まだ存在しない場合は新しく記録する。
@@ -69,10 +65,9 @@ fn save_open_market(
             let new_order = NewOrder {
                 local_id: order.id().as_i32(),
                 user_id: *order.user_id().as_uuid(),
-                token_name: order.token_name().map(|tn| tn.as_str()),
+                token_name: order.token_name().as_str(),
                 amount_token: order.amount_token().as_i32(),
                 amount_coin: order.amount_coin().as_i32(),
-                type_: convert_order_type_to_infra(order.type_()),
                 time: *order.time(),
             };
             postgres.insert_orders(market.id().as_uuid(), &mut std::iter::once(new_order))
@@ -94,18 +89,6 @@ fn save_resolved_market(
     // status を resolved に変更し、resolved_token_name を設定する
     postgres.resolve_market(market.id().as_uuid(), market.resolved_token_name().as_str())?;
 
-    // RewardOrder を記録する
-    let mut reward_orders = market.orders().filter_reward_orders().map(|o| NewOrder {
-        local_id: o.id().as_i32(),
-        user_id: *o.user_id().as_uuid(),
-        token_name: Some(o.token_name().as_str()),
-        amount_token: 0,
-        amount_coin: o.amount_coin().as_i32(),
-        type_: InfraOrderType::Reward,
-        time: *o.time(),
-    });
-    postgres.insert_orders(market.id().as_uuid(), &mut reward_orders)?;
-
     // RewardRecord を記録する
     let mut reward_records = market
         .reward_records
@@ -115,11 +98,4 @@ fn save_resolved_market(
             point: point.as_u32() as i32,
         });
     postgres.insert_reward_records(*market.id().as_uuid(), &mut reward_records)
-}
-
-fn convert_order_type_to_infra(s: OrderType) -> InfraOrderType {
-    match s {
-        OrderType::Normal => InfraOrderType::Normal,
-        OrderType::Reward => InfraOrderType::Reward,
-    }
 }

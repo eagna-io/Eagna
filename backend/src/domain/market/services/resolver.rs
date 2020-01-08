@@ -1,8 +1,8 @@
 use crate::domain::{
     market::{
         num::{AmountCoin, AmountToken},
-        order::{NormalOrder, Order},
-        AbstractMarket, ClosedMarket, ResolvedMarket, RewardRecords,
+        order::Order,
+        ClosedMarket, ResolvedMarket,
     },
     user::UserId,
 };
@@ -40,7 +40,7 @@ fn compute_users_token_amount(
     market
         .orders
         .iter()
-        .filter_map(|order| filter_map_related_normal_order(order, token_name))
+        .filter(|order| order.token_name() == token_name)
         .for_each(|order| {
             let cur_token_amount = user_token_map
                 .entry(*order.user_id())
@@ -49,29 +49,4 @@ fn compute_users_token_amount(
         });
 
     user_token_map
-}
-
-// 対象のTokenを取引したNormalOrderのみを抽出
-fn filter_map_related_normal_order<'a>(
-    order: &'a Order,
-    token_name: &'a NonEmptyString,
-) -> Option<&'a NormalOrder> {
-    match order {
-        Order::Normal(ref n) if n.token_name() == token_name => Some(n),
-        _ => None,
-    }
-}
-
-// 各ユーザーが持っているコイン量を計算
-fn compute_users_coin_amount(market: &ClosedMarket) -> HashMap<UserId, AmountCoin> {
-    let mut user_coin_map = HashMap::new();
-
-    market.orders.iter().for_each(|order| {
-        let cur_amount = user_coin_map
-            .entry(*order.user_id())
-            .or_insert(AmountCoin(0));
-        *cur_amount += *order.amount_coin();
-    });
-
-    user_coin_map
 }

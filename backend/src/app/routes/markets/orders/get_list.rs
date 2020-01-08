@@ -26,11 +26,7 @@ pub fn get_list(
             .collect();
         Ok(Response::json(&RespBody { orders: my_orders }))
     } else {
-        let orders = market
-            .orders()
-            .filter_normal_orders()
-            .map(|o| ResOrder::from(o))
-            .collect();
+        let orders = market.orders().iter().map(|o| ResOrder::from(o)).collect();
 
         Ok(Response::json(&RespBody { orders: orders }))
     }

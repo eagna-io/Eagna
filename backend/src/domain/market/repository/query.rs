@@ -1,10 +1,6 @@
 use super::*;
 use crate::domain::{organizer::OrganizerId, point::Point};
-use crate::infra::postgres::{
-    market::*,
-    types::{MarketStatus as InfraMarketStatus, OrderType as InfraOrderType},
-    PostgresInfra,
-};
+use crate::infra::postgres::{market::*, types::MarketStatus as InfraMarketStatus, PostgresInfra};
 use crate::primitive::{NonEmptyString, NonEmptyVec};
 use arrayvec::ArrayVec;
 
@@ -171,21 +167,12 @@ fn convert_marktet_status_to_infra(s: MarketStatus) -> InfraMarketStatus {
 }
 
 fn build_order(order: QueryOrder) -> Order {
-    match order.type_ {
-        InfraOrderType::Normal => Order::from(NormalOrder::from((
-            OrderId::from(order.local_id),
-            UserId::from(order.user_id),
-            NonEmptyString::from_str(order.token_name.unwrap()).unwrap(),
-            AmountToken::from(order.amount_token),
-            AmountCoin::from(order.amount_coin),
-            order.time,
-        ))),
-        InfraOrderType::Reward => Order::from(RewardOrder::from((
-            OrderId::from(order.local_id),
-            UserId::from(order.user_id),
-            NonEmptyString::from_str(order.token_name.unwrap()).unwrap(),
-            AmountCoin::from(order.amount_coin),
-            order.time,
-        ))),
-    }
+    Order::from((
+        OrderId::from(order.local_id),
+        UserId::from(order.user_id),
+        NonEmptyString::from_str(order.token_name).unwrap(),
+        AmountToken::from(order.amount_token),
+        AmountCoin::from(order.amount_coin),
+        order.time,
+    ))
 }

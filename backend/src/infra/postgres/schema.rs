@@ -50,11 +50,9 @@ table! {
         unused -> Int4,
         market_local_id -> Int4,
         user_id -> Uuid,
-        token_name -> Nullable<Text>,
+        token_name -> Text,
         amount_token -> Int4,
         amount_coin -> Int4,
-        #[sql_name = "type"]
-        type_ -> Order_type,
         time -> Timestamptz,
         market_id -> Uuid,
     }
