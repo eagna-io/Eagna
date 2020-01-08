@@ -150,14 +150,6 @@ fn build_market_attrs(market: QueryMarket) -> MarketAttrs {
                 .collect::<Vec<_>>(),
         )
         .unwrap(),
-        prizes: NonEmptyVec::from_vec(
-            market
-                .prizes
-                .into_iter()
-                .map(build_market_prize)
-                .collect::<Vec<_>>(),
-        )
-        .unwrap(),
     }
 }
 
@@ -166,15 +158,6 @@ fn build_market_token(token: QueryToken) -> MarketToken {
         name: NonEmptyString::from_str(token.name).unwrap(),
         description: token.description,
         thumbnail_url: token.thumbnail_url,
-    }
-}
-
-fn build_market_prize(prize: QueryPrize) -> MarketPrize {
-    MarketPrize {
-        id: prize.local_id,
-        name: NonEmptyString::from_str(prize.name).unwrap(),
-        thumbnail_url: prize.thumbnail_url,
-        target: prize.target,
     }
 }
 

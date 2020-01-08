@@ -89,7 +89,6 @@ struct ResMarket<'a> {
     open: &'a DateTime<Utc>,
     close: &'a DateTime<Utc>,
     tokens: Vec<ResMarketToken<'a>>,
-    prizes: Vec<ResMarketPrize<'a>>,
     status: ApiMarketStatus,
     token_distribution: HashMap<&'a str, u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -102,15 +101,6 @@ struct ResMarketToken<'a> {
     name: &'a str,
     description: &'a str,
     thumbnail_url: &'a str,
-}
-
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ResMarketPrize<'a> {
-    id: i32,
-    name: &'a str,
-    thumbnail_url: &'a str,
-    target: &'a str,
 }
 
 impl<'a> From<&'a Market> for ResMarket<'a> {
@@ -128,12 +118,6 @@ impl<'a> From<&'a Market> for ResMarket<'a> {
                 .tokens()
                 .iter()
                 .map(ResMarketToken::from)
-                .collect(),
-            prizes: market
-                .attrs()
-                .prizes()
-                .iter()
-                .map(ResMarketPrize::from)
                 .collect(),
             status: ApiMarketStatus::from(&market.status()),
             token_distribution: market
@@ -155,17 +139,6 @@ impl<'a> From<&'a MarketToken> for ResMarketToken<'a> {
             name: token.name().as_str(),
             description: token.description().as_str(),
             thumbnail_url: token.thumbnail_url().as_str(),
-        }
-    }
-}
-
-impl<'a> From<&'a MarketPrize> for ResMarketPrize<'a> {
-    fn from(prize: &'a MarketPrize) -> ResMarketPrize<'a> {
-        ResMarketPrize {
-            id: *prize.id(),
-            name: prize.name().as_str(),
-            thumbnail_url: prize.thumbnail_url().as_str(),
-            target: prize.target().as_str(),
         }
     }
 }

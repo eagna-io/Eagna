@@ -59,21 +59,6 @@ CREATE TABLE market_tokens (
 
 CREATE INDEX ON market_tokens (market_id);
 
-CREATE TABLE market_prizes (
-  /* Required by diesel. But not used by program */
-  unused_id       SERIAL PRIMARY KEY,
-  /* A locally unique number in each market */
-  market_local_id INTEGER NOT NULL,
-  name            TEXT NOT NULL,
-  thumbnail_url   TEXT NOT NULL,
-  target          TEXT NOT NULL,
-  market_id       UUID NOT NULL,
-
-  UNIQUE (market_id, market_local_id),
-  CONSTRAINT market_prizes_fkey FOREIGN KEY(market_id)
-    REFERENCES markets(id) ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
 CREATE TYPE order_type AS ENUM (
  'normal',
  'coin_supply',

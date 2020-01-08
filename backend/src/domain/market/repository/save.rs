@@ -41,12 +41,6 @@ fn save_upcoming_market(
             thumbnail_url: token.thumbnail_url.as_str(),
             idx: idx as i32,
         });
-    let mut new_prizes = market.attrs().prizes.iter().map(|prize| NewPrize {
-        local_id: prize.id,
-        name: prize.name.as_str(),
-        thumbnail_url: prize.thumbnail_url.as_str(),
-        target: prize.target().as_str(),
-    });
     let new_market = NewMarket {
         id: market.id().as_uuid(),
         title: market.attrs().title.as_str(),
@@ -56,7 +50,6 @@ fn save_upcoming_market(
         open: market.attrs().open(),
         close: market.attrs().close(),
         tokens: &mut new_tokens,
-        prizes: &mut new_prizes,
     };
 
     postgres.insert_upcoming_market(new_market)

@@ -80,7 +80,6 @@ pub struct NewMarket<'a> {
     pub close: &'a DateTime<Utc>,
     // tokenのidxカラムは、この順序で設定される。
     pub tokens: &'a mut dyn Iterator<Item = NewToken<'a>>,
-    pub prizes: &'a mut dyn Iterator<Item = NewPrize<'a>>,
     // status は常にUpcoming
 }
 
@@ -89,13 +88,6 @@ pub struct NewToken<'a> {
     pub description: &'a str,
     pub thumbnail_url: &'a str,
     pub idx: i32,
-}
-
-pub struct NewPrize<'a> {
-    pub local_id: i32,
-    pub name: &'a str,
-    pub thumbnail_url: &'a str,
-    pub target: &'a str,
 }
 
 pub struct NewOrder<'a> {
@@ -125,7 +117,6 @@ pub struct QueryMarket {
     pub status: MarketStatus,
     // tokenのidxカラム順にソートされている
     pub tokens: Vec<QueryToken>,
-    pub prizes: Vec<QueryPrize>,
     pub resolved_token_name: Option<String>,
     pub resolved_at: Option<DateTime<Utc>>,
     pub reward_records: Option<Vec<QueryRewardRecord>>,
@@ -136,14 +127,6 @@ pub struct QueryToken {
     pub name: String,
     pub description: String,
     pub thumbnail_url: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct QueryPrize {
-    pub local_id: i32,
-    pub name: String,
-    pub thumbnail_url: String,
-    pub target: String,
 }
 
 #[derive(Debug, Clone)]
@@ -170,7 +153,7 @@ pub struct QueryOrder {
  * ==================
  */
 
-use super::schema::{market_prizes, market_reward_records, market_tokens, markets, orders};
+use super::schema::{market_reward_records, market_tokens, markets, orders};
 
 impl PostgresMarketInfra for Postgres {
     fn lock_market(&self, market_id: &Uuid) -> Result<(), failure::Error> {
@@ -212,21 +195,6 @@ impl PostgresMarketInfra for Postgres {
             .collect();
         diesel::insert_into(market_tokens::table)
             .values(insert_tokens)
-            .execute(&self.conn)?;
-
-        // Insert prizes
-        let insert_prizes: Vec<_> = market
-            .prizes
-            .map(|prize| InsertablePrize {
-                market_local_id: prize.local_id,
-                name: prize.name,
-                thumbnail_url: prize.thumbnail_url,
-                target: prize.target,
-                market_id: &market_id,
-            })
-            .collect();
-        diesel::insert_into(market_prizes::table)
-            .values(insert_prizes)
             .execute(&self.conn)?;
 
         Ok(())
@@ -318,11 +286,6 @@ impl PostgresMarketInfra for Postgres {
             .order(market_tokens::columns::idx.asc())
             .load::<QueryableToken>(&self.conn)?;
 
-        // QueryablePrize を取得
-        let raw_market_prizes = market_prizes::table
-            .filter(market_prizes::columns::market_id.eq(id))
-            .load::<QueryablePrize>(&self.conn)?;
-
         // statusがresolvedのとき、QueryableRewardRecordsを取得
         let reward_records = if raw_market.status == MarketStatus::Resolved {
             Some(
@@ -334,12 +297,7 @@ impl PostgresMarketInfra for Postgres {
             None
         };
 
-        let market = QueryMarket::from_parts(
-            raw_market,
-            raw_market_tokens,
-            raw_market_prizes,
-            reward_records,
-        );
+        let market = QueryMarket::from_parts(raw_market, raw_market_tokens, reward_records);
 
         Ok(Some(market))
     }
@@ -410,7 +368,6 @@ impl QueryMarket {
     fn from_parts(
         raw_market: QueryableMarket,
         raw_tokens: Vec<QueryableToken>,
-        raw_prizes: Vec<QueryablePrize>,
         raw_reward_records: Option<Vec<QueryableRewardRecords>>,
     ) -> QueryMarket {
         QueryMarket {
@@ -430,15 +387,6 @@ impl QueryMarket {
                     name: token.name,
                     description: token.description,
                     thumbnail_url: token.thumbnail_url,
-                })
-                .collect(),
-            prizes: raw_prizes
-                .into_iter()
-                .map(|prize| QueryPrize {
-                    local_id: prize.market_local_id,
-                    name: prize.name,
-                    thumbnail_url: prize.thumbnail_url,
-                    target: prize.target,
                 })
                 .collect(),
             reward_records: raw_reward_records.map(|records| {
@@ -474,16 +422,6 @@ struct InsertableToken<'a> {
     thumbnail_url: &'a str,
     market_id: &'a Uuid,
     idx: i32,
-}
-
-#[derive(Insertable)]
-#[table_name = "market_prizes"]
-struct InsertablePrize<'a> {
-    market_local_id: i32,
-    name: &'a str,
-    thumbnail_url: &'a str,
-    target: &'a str,
-    market_id: &'a Uuid,
 }
 
 #[derive(Insertable)]
@@ -529,16 +467,6 @@ struct QueryableToken {
     thumbnail_url: String,
     market_id: Uuid,
     idx: i32,
-}
-
-#[derive(Clone, Queryable)]
-struct QueryablePrize {
-    _unused_id: i32,
-    market_local_id: i32,
-    name: String,
-    thumbnail_url: String,
-    target: String,
-    market_id: Uuid,
 }
 
 #[derive(Clone, Queryable)]

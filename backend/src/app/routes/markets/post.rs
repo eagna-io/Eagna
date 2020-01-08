@@ -1,5 +1,5 @@
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::{lmsr, market::*, organizer::*, point::*, user::*};
+use crate::domain::{lmsr, market::*, organizer::*, user::*};
 use crate::infra::postgres::{transaction, PostgresInfra};
 use crate::primitive::{NonEmptyString, NonEmptyVec};
 
@@ -75,14 +75,6 @@ fn create_new_market(req: ReqPostMarket, organizer: &Organizer) -> Market {
             .collect(),
     )
     .unwrap();
-    let new_prizes = NonEmptyVec::from_vec(
-        req.prizes
-            .into_iter()
-            .enumerate()
-            .map(|(i, prize)| create_new_market_prize(i as i32, prize))
-            .collect(),
-    )
-    .unwrap();
     Market::new(
         req.title,
         organizer,
@@ -91,16 +83,11 @@ fn create_new_market(req: ReqPostMarket, organizer: &Organizer) -> Market {
         req.open,
         req.close,
         new_tokens,
-        new_prizes,
     )
 }
 
 fn create_new_market_token(req: ReqMarketToken) -> MarketToken {
     MarketToken::new(req.name, req.description, req.thumbnail_url)
-}
-
-fn create_new_market_prize(id: i32, req: ReqMarketPrize) -> MarketPrize {
-    MarketPrize::new(id, req.name, req.thumbnail_url, req.target)
 }
 
 #[derive(Debug, Deserialize)]
@@ -113,7 +100,6 @@ struct ReqPostMarket {
     open: DateTime<Utc>,
     close: DateTime<Utc>,
     tokens: NonEmptyVec<ReqMarketToken>,
-    prizes: NonEmptyVec<ReqMarketPrize>,
 }
 
 #[derive(Debug, Deserialize)]

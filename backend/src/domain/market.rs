@@ -18,10 +18,7 @@ use crate::domain::{
 };
 use crate::primitive::{NonEmptyString, NonEmptyVec};
 use chrono::{DateTime, Utc};
-use failure::Fallible;
 use getset::Getters;
-use num_rational::Ratio;
-use rand::{Rng, RngCore};
 use std::{collections::HashMap, str::FromStr};
 use uuid::Uuid;
 
@@ -50,7 +47,6 @@ impl Market {
         open: DateTime<Utc>,
         close: DateTime<Utc>,
         tokens: NonEmptyVec<MarketToken>,
-        prizes: NonEmptyVec<MarketPrize>,
     ) -> Market {
         let id = MarketId::new();
         let attrs = MarketAttrs {
@@ -61,7 +57,6 @@ impl Market {
             open,
             close,
             tokens,
-            prizes,
         };
         let orders = MarketOrders::new();
         Market::Upcoming(UpcomingMarket {
@@ -412,7 +407,6 @@ pub struct MarketAttrs {
     // tokens は、DB の market_tokens テーブルに保存されている
     // idx カラムの値でソートされている。
     tokens: NonEmptyVec<MarketToken>,
-    prizes: NonEmptyVec<MarketPrize>,
 }
 
 impl MarketAttrs {
@@ -470,31 +464,6 @@ impl MarketToken {
             name,
             description,
             thumbnail_url,
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Getters)]
-#[get = "pub"]
-pub struct MarketPrize {
-    id: i32,
-    name: NonEmptyString,
-    thumbnail_url: String,
-    target: String,
-}
-
-impl MarketPrize {
-    pub fn new(
-        id: i32,
-        name: NonEmptyString,
-        thumbnail_url: String,
-        target: String,
-    ) -> MarketPrize {
-        MarketPrize {
-            id,
-            name,
-            thumbnail_url,
-            target,
         }
     }
 }
