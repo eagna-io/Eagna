@@ -1,7 +1,7 @@
 pub mod access_token;
 
 use self::access_token::AccessToken;
-use crate::domain::{point::Point, user::services::auth::Credentials};
+use crate::domain::{market::num::AmountCoin, point::Point, user::services::auth::Credentials};
 use crate::primitive::{EmptyStringError, NonEmptyString};
 use failure::Fallible;
 use getset::Getters;
@@ -23,7 +23,7 @@ pub trait User: Sized {
 pub trait UserWithAttrs: User {
     fn name(&self) -> &UserName;
     fn email(&self) -> &UserEmail;
-    fn coin(&self) -> u32;
+    fn coin(&self) -> AmountCoin;
     fn point(&self) -> Point;
     fn is_admin(&self) -> bool;
 
@@ -41,7 +41,7 @@ pub trait UserWithAttrs: User {
 
 /// このprivateなメソッドを定義するために利用
 trait UserWithAttrsExt: UserWithAttrs {
-    fn provide_coin(self, provided: u32) -> UserProvidedCoin<Self> {
+    fn provide_coin(self, provided: AmountCoin) -> UserProvidedCoin<Self> {
         UserProvidedCoin {
             user: self,
             provided,
@@ -90,8 +90,8 @@ impl UserWithAttrs for NewUser {
     fn email(&self) -> &UserEmail {
         &self.email
     }
-    fn coin(&self) -> u32 {
-        0
+    fn coin(&self) -> AmountCoin {
+        AmountCoin::zero()
     }
     fn point(&self) -> Point {
         Point::zero()
@@ -112,7 +112,7 @@ impl UserWithAttrs for NewUser {
  */
 pub struct UserProvidedCoin<U> {
     user: U,
-    provided: u32,
+    provided: AmountCoin,
 }
 
 impl<U: User> User for UserProvidedCoin<U> {
@@ -128,7 +128,7 @@ impl<U: UserWithAttrs> UserWithAttrs for UserProvidedCoin<U> {
     fn email(&self) -> &UserEmail {
         &self.user.email()
     }
-    fn coin(&self) -> u32 {
+    fn coin(&self) -> AmountCoin {
         self.user.coin() + self.provided
     }
     fn point(&self) -> Point {
@@ -149,7 +149,7 @@ pub struct Admin<U> {
 }
 
 impl<U> Admin<U> {
-    pub fn provide_coin_to_user<UU>(&self, user: UU, coin: u32) -> UserProvidedCoin<UU>
+    pub fn provide_coin_to_user<UU>(&self, user: UU, coin: AmountCoin) -> UserProvidedCoin<UU>
     where
         UU: UserWithAttrs,
     {

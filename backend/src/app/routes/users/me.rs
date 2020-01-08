@@ -45,7 +45,7 @@ where
             name: user.name().as_str(),
             email: user.email().as_str(),
             is_admin: user.is_admin(),
-            coin: user.coin(),
+            coin: user.coin().as_i32() as u32,
             point: user.point().as_u32(),
         }
     }

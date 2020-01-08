@@ -1,5 +1,6 @@
 pub mod access_token;
 
+use crate::domain::market::num::AmountCoin;
 use crate::domain::point::Point;
 use crate::domain::user::*;
 use crate::infra::postgres::{user::NewUser as NewUserInfra, PostgresInfra};
@@ -31,7 +32,7 @@ impl<'a> UserRepository<'a> {
             id: *user_id,
             name: UserName::from_str(user.name)?,
             email: UserEmail::from_str(user.email)?,
-            coin: user.coin as u32,
+            coin: AmountCoin::from(user.coin),
             point: Point::from(user.point as u32),
             is_admin: user.is_admin,
         }))
@@ -59,7 +60,7 @@ pub struct QueryUser {
     #[get = "pub"]
     email: UserEmail,
     #[get_copy = "pub"]
-    coin: u32,
+    coin: AmountCoin,
     #[get_copy = "pub"]
     point: Point,
     #[get_copy = "pub"]
@@ -79,7 +80,7 @@ impl UserWithAttrs for QueryUser {
     fn email(&self) -> &UserEmail {
         &self.email
     }
-    fn coin(&self) -> u32 {
+    fn coin(&self) -> AmountCoin {
         self.coin
     }
     fn point(&self) -> Point {
@@ -104,6 +105,6 @@ where
     U: UserWithAttrs,
 {
     fn update_user(&self, pg: &dyn PostgresInfra) -> Fallible<()> {
-        pg.update_user_coin(self.id().as_uuid(), self.coin())
+        pg.update_user_coin(self.id().as_uuid(), self.coin().as_i32() as u32)
     }
 }
