@@ -172,12 +172,6 @@ fn convert_marktet_status_to_infra(s: MarketStatus) -> InfraMarketStatus {
 
 fn build_order(order: QueryOrder) -> Order {
     match order.type_ {
-        InfraOrderType::CoinSupply => Order::from(CoinSupplyOrder::from((
-            OrderId::from(order.local_id),
-            UserId::from(order.user_id),
-            AmountCoin::from(order.amount_coin),
-            order.time,
-        ))),
         InfraOrderType::Normal => Order::from(NormalOrder::from((
             OrderId::from(order.local_id),
             UserId::from(order.user_id),

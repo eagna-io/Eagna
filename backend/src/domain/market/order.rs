@@ -23,22 +23,6 @@ impl MarketOrders {
         self.iter().next_back()
     }
 
-    /// CoinSupplyOrder を履歴に追加する。
-    /// それが適切なものかどうかはチェックしない
-    pub(super) fn add_coin_supply_order(
-        &mut self,
-        user_id: UserId,
-        amount_coin: AmountCoin,
-    ) -> &Order {
-        let order = Order::from(CoinSupplyOrder::new(
-            self.next_order_id(),
-            user_id,
-            amount_coin,
-        ));
-        self.orders.push(order);
-        self.orders.last().unwrap()
-    }
-
     /// NormalOrder を履歴に追加する。
     /// それが適切なものかどうかはチェックしない
     pub(super) fn add_normal_order(
@@ -119,7 +103,6 @@ impl MarketOrders {
 
     pub fn filter_normal_orders(&self) -> impl Iterator<Item = &NormalOrder> {
         self.iter().filter_map(|o| match o {
-            Order::CoinSupply(_) => None,
             Order::Normal(ref n) => Some(n),
             Order::Reward(_) => None,
         })
@@ -127,7 +110,6 @@ impl MarketOrders {
 
     pub fn filter_reward_orders(&self) -> impl Iterator<Item = &RewardOrder> {
         self.iter().filter_map(|o| match o {
-            Order::CoinSupply(_) => None,
             Order::Normal(_) => None,
             Order::Reward(ref r) => Some(r),
         })
@@ -136,7 +118,6 @@ impl MarketOrders {
 
 #[derive(Debug, Clone, PartialEq, Eq, From)]
 pub enum Order {
-    CoinSupply(CoinSupplyOrder),
     Normal(NormalOrder),
     Reward(RewardOrder),
 }
@@ -144,7 +125,6 @@ pub enum Order {
 impl Order {
     pub fn id(&self) -> &OrderId {
         match self {
-            Order::CoinSupply(ref inner) => inner.id(),
             Order::Normal(ref inner) => inner.id(),
             Order::Reward(ref inner) => inner.id(),
         }
@@ -152,7 +132,6 @@ impl Order {
 
     pub fn user_id(&self) -> &UserId {
         match self {
-            Order::CoinSupply(ref inner) => inner.user_id(),
             Order::Normal(ref inner) => inner.user_id(),
             Order::Reward(ref inner) => inner.user_id(),
         }
@@ -160,7 +139,6 @@ impl Order {
 
     pub fn token_name(&self) -> Option<&NonEmptyString> {
         match self {
-            Order::CoinSupply(_) => None,
             Order::Normal(ref inner) => Some(inner.token_name()),
             Order::Reward(_) => None,
         }
@@ -168,7 +146,6 @@ impl Order {
 
     pub fn amount_token(&self) -> AmountToken {
         match self {
-            Order::CoinSupply(_) => AmountToken::zero(),
             Order::Normal(ref inner) => *inner.amount_token(),
             Order::Reward(_) => AmountToken::zero(),
         }
@@ -176,7 +153,6 @@ impl Order {
 
     pub fn amount_coin(&self) -> &AmountCoin {
         match self {
-            Order::CoinSupply(ref inner) => inner.amount_coin(),
             Order::Normal(ref inner) => inner.amount_coin(),
             Order::Reward(ref inner) => inner.amount_coin(),
         }
@@ -184,7 +160,6 @@ impl Order {
 
     pub fn type_(&self) -> OrderType {
         match self {
-            Order::CoinSupply(_) => OrderType::CoinSupply,
             Order::Normal(_) => OrderType::Normal,
             Order::Reward(_) => OrderType::Reward,
         }
@@ -192,29 +167,8 @@ impl Order {
 
     pub fn time(&self) -> &DateTime<Utc> {
         match self {
-            Order::CoinSupply(ref inner) => inner.time(),
             Order::Normal(ref inner) => inner.time(),
             Order::Reward(ref inner) => inner.time(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, From, Getters)]
-#[get = "pub"]
-pub struct CoinSupplyOrder {
-    id: OrderId,
-    user_id: UserId,
-    amount_coin: AmountCoin,
-    time: DateTime<Utc>,
-}
-
-impl CoinSupplyOrder {
-    fn new(id: OrderId, user_id: UserId, amount_coin: AmountCoin) -> CoinSupplyOrder {
-        CoinSupplyOrder {
-            id,
-            user_id,
-            amount_coin,
-            time: Utc::now(),
         }
     }
 }
@@ -295,7 +249,6 @@ impl OrderId {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum OrderType {
-    CoinSupply,
     Normal,
     Reward,
 }

@@ -52,7 +52,6 @@ pub fn post(
 
 fn validate_req_order(req_order: &ReqOrder) -> Result<(), FailureResponse> {
     match req_order.type_ {
-        ApiOrderType::CoinSupply => Ok(()),
         ApiOrderType::Normal => {
             if req_order.amount_token == 0 || req_order.amount_coin == 0 {
                 log::warn!("Received 0 amount order request {:?}", req_order);
@@ -74,7 +73,6 @@ fn add_order(
     req_order: &ReqOrder,
 ) -> Result<Order, FailureResponse> {
     match req_order.type_ {
-        ApiOrderType::CoinSupply => Ok(open_market.try_supply_initial_coin(user_id)?.clone()),
         ApiOrderType::Normal => {
             let new_order = open_market.try_add_normal_order(
                 user_id,

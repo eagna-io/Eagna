@@ -11,6 +11,5 @@ pub enum MarketStatus {
 #[DieselType = "Order_type"]
 pub enum OrderType {
     Normal,
-    CoinSupply,
     Reward,
 }

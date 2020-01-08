@@ -121,14 +121,6 @@ pub trait AbstractMarket {
     fn orders(&self) -> &MarketOrders;
     fn token_distribution(&self) -> &TokenDistribution;
     fn status(&self) -> MarketStatus;
-
-    /// 全Orderを走査するのでOrder数に比例してコストが高くなる
-    fn num_users(&self) -> usize {
-        self.orders()
-            .iter()
-            .filter(|o| o.type_() == OrderType::CoinSupply)
-            .count()
-    }
 }
 
 macro_rules! impl_abstract_market {
@@ -226,23 +218,6 @@ impl OpenMarket {
 
     fn is_closed(&self) -> bool {
         self.attrs.close < Utc::now()
-    }
-
-    /// ユーザーがまだInitialSupplyを受け取っていない場合、
-    /// InitialSupplyを付与する
-    pub fn try_supply_initial_coin(
-        &mut self,
-        user_id: &UserId,
-    ) -> Result<&Order, SupplyInitialCoinError> {
-        log::debug!("Try supply initial coin to {:?}", user_id);
-
-        if self.orders.is_already_supply_initial_coin_to(user_id) {
-            return Err(SupplyInitialCoinError::AlreadyReceived);
-        }
-
-        Ok(self
-            .orders
-            .add_coin_supply_order(*user_id, INITIAL_SUPPLY_COIN))
     }
 
     /// 新しいNormalOrderを追加する。

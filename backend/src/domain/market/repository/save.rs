@@ -119,7 +119,6 @@ fn save_resolved_market(
 
 fn convert_order_type_to_infra(s: OrderType) -> InfraOrderType {
     match s {
-        OrderType::CoinSupply => InfraOrderType::CoinSupply,
         OrderType::Normal => InfraOrderType::Normal,
         OrderType::Reward => InfraOrderType::Reward,
     }

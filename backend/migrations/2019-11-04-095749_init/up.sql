@@ -61,7 +61,6 @@ CREATE INDEX ON market_tokens (market_id);
 
 CREATE TYPE order_type AS ENUM (
  'normal',
- 'coin_supply',
  'reward'
 );
 

@@ -38,7 +38,6 @@ struct ResOrder<'a> {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 enum ApiOrderType {
-    CoinSupply,
     Normal,
     Reward,
 }
@@ -70,7 +69,6 @@ impl<'a> From<&'a NormalOrder> for ResOrder<'a> {
 impl From<OrderType> for ApiOrderType {
     fn from(order: OrderType) -> ApiOrderType {
         match order {
-            OrderType::CoinSupply => ApiOrderType::CoinSupply,
             OrderType::Normal => ApiOrderType::Normal,
             OrderType::Reward => ApiOrderType::Reward,
         }
