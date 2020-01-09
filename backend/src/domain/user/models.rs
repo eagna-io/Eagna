@@ -37,19 +37,15 @@ pub trait UserWithAttrs: User {
             )))
         }
     }
-}
 
-/// このprivateなメソッドを定義するために利用
-trait UserWithAttrsExt: UserWithAttrs {
-    fn provide_coin(self, provided: AmountCoin) -> UserProvidedCoin<Self> {
-        UserProvidedCoin {
+    /// Userのコイン量を新しい値で置き換える
+    fn update_coin(self, new_coin: AmountCoin) -> UserCoinUpdated<Self> {
+        UserCoinUpdated {
             user: self,
-            provided,
+            new_coin,
         }
     }
 }
-
-impl<U> UserWithAttrsExt for U where U: UserWithAttrs {}
 
 /*
  * ==================
@@ -103,25 +99,24 @@ impl UserWithAttrs for NewUser {
 
 /*
  * =================
- * UserProvidedCoin model
+ * UserCoinUpdated model
  * =================
  *
- * - コインを付与されたユーザーを表すモデル
+ * - コイン量が更新されたユーザーを表すモデル
  * - Repositoryに保存できる
- * - Admin::provide_coin_to_user メソッドを通じて生成する
  */
-pub struct UserProvidedCoin<U> {
+pub struct UserCoinUpdated<U> {
     user: U,
-    provided: AmountCoin,
+    new_coin: AmountCoin,
 }
 
-impl<U: User> User for UserProvidedCoin<U> {
+impl<U: User> User for UserCoinUpdated<U> {
     fn id(&self) -> &UserId {
         self.user.id()
     }
 }
 
-impl<U: UserWithAttrs> UserWithAttrs for UserProvidedCoin<U> {
+impl<U: UserWithAttrs> UserWithAttrs for UserCoinUpdated<U> {
     fn name(&self) -> &UserName {
         &self.user.name()
     }
@@ -129,7 +124,7 @@ impl<U: UserWithAttrs> UserWithAttrs for UserProvidedCoin<U> {
         &self.user.email()
     }
     fn coin(&self) -> AmountCoin {
-        self.user.coin() + self.provided
+        self.new_coin
     }
     fn point(&self) -> Point {
         self.user.point()
@@ -148,12 +143,16 @@ pub struct Admin<U> {
     user: U,
 }
 
-impl<U> Admin<U> {
-    pub fn provide_coin_to_user<UU>(&self, user: UU, coin: AmountCoin) -> UserProvidedCoin<UU>
+impl<U> Admin<U>
+where
+    U: User,
+{
+    pub fn provide_coin_to_user<UU>(&self, user: UU, coin: AmountCoin) -> UserCoinUpdated<UU>
     where
         UU: UserWithAttrs,
     {
-        user.provide_coin(coin)
+        let new_coin = user.coin() + coin;
+        user.update_coin(new_coin)
     }
 }
 

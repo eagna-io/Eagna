@@ -100,7 +100,7 @@ pub trait UpdatableUser {
     fn update_user(&self, pg: &dyn PostgresInfra) -> Fallible<()>;
 }
 
-impl<U> UpdatableUser for UserProvidedCoin<U>
+impl<U> UpdatableUser for UserCoinUpdated<U>
 where
     U: UserWithAttrs,
 {
