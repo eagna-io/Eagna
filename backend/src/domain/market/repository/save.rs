@@ -63,7 +63,7 @@ fn save_open_market(
         Some(order) => {
             // 最も新しい order だけ記録する
             let new_order = NewOrder {
-                local_id: order.id().as_i32(),
+                id: order.id().as_uuid(),
                 user_id: *order.user_id().as_uuid(),
                 token_name: order.token_name().as_str(),
                 amount_token: order.amount_token().as_i32(),

@@ -61,9 +61,7 @@ CREATE INDEX ON market_tokens (market_id);
 
 CREATE TABLE orders (
   /* Required by diesel. But not used by program */
-  unused            SERIAL PRIMARY KEY,
-  /* A locally unique number in each market */
-  market_local_id   INTEGER NOT NULL,
+  id                UUID PRIMARY KEY,
   user_id           UUID NOT NULL,
   /* MUST NULL if "type" is 'initial_supply' */
   token_name        TEXT NOT NULL,
@@ -72,7 +70,6 @@ CREATE TABLE orders (
   time              TIMESTAMPTZ NOT NULL DEFAULT now(),
   market_id         UUID NOT NULL,
 
-  UNIQUE (market_id, market_local_id),
   CONSTRAINT order_user_fkey FOREIGN KEY(user_id)
     REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT order_market_fkey FOREIGN KEY(market_id)

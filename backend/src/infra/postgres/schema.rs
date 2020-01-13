@@ -46,9 +46,8 @@ table! {
     use diesel::sql_types::*;
     use crate::infra::postgres::types::*;
 
-    orders (unused) {
-        unused -> Int4,
-        market_local_id -> Int4,
+    orders (id) {
+        id -> Uuid,
         user_id -> Uuid,
         token_name -> Text,
         amount_token -> Int4,

@@ -88,7 +88,7 @@ pub struct NewToken<'a> {
 }
 
 pub struct NewOrder<'a> {
-    pub local_id: i32,
+    pub id: Uuid,
     pub user_id: Uuid,
     pub token_name: &'a str,
     pub amount_token: i32,
@@ -133,7 +133,7 @@ pub struct QueryRewardRecord {
 
 #[derive(Debug, Clone)]
 pub struct QueryOrder {
-    pub local_id: i32,
+    pub id: Uuid,
     pub user_id: Uuid,
     pub market_id: Uuid,
     pub token_name: String,
@@ -228,7 +228,7 @@ impl PostgresMarketInfra for Postgres {
     ) -> Result<(), failure::Error> {
         let insert_orders: Vec<InsertableOrder> = orders
             .map(|order| InsertableOrder {
-                market_local_id: order.local_id,
+                id: order.id,
                 user_id: order.user_id,
                 token_name: order.token_name,
                 amount_token: order.amount_token,
@@ -308,7 +308,7 @@ impl PostgresMarketInfra for Postgres {
             .load::<QueryableOrder>(&self.conn)?
             .into_iter()
             .map(|raw_order| QueryOrder {
-                local_id: raw_order.market_local_id,
+                id: raw_order.id,
                 user_id: raw_order.user_id,
                 market_id: raw_order.market_id,
                 token_name: raw_order.token_name,
@@ -420,7 +420,7 @@ struct InsertableToken<'a> {
 #[derive(Insertable)]
 #[table_name = "orders"]
 struct InsertableOrder<'a> {
-    market_local_id: i32,
+    id: Uuid,
     user_id: Uuid,
     token_name: &'a str,
     amount_token: i32,
@@ -471,8 +471,7 @@ struct QueryableRewardRecords {
 
 #[derive(Clone, Queryable)]
 struct QueryableOrder {
-    _unused_id: i32,
-    market_local_id: i32,
+    id: Uuid,
     user_id: Uuid,
     token_name: String,
     amount_token: i32,

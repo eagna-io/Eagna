@@ -3,6 +3,7 @@ use crate::domain::user::UserId;
 use crate::primitive::NonEmptyString;
 use chrono::{DateTime, Utc};
 use getset::Getters;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MarketOrders {
@@ -44,10 +45,7 @@ impl MarketOrders {
     }
 
     fn next_order_id(&self) -> OrderId {
-        self.iter()
-            .next_back()
-            .map(|o| o.id().next_id())
-            .unwrap_or(OrderId::first())
+        OrderId::new()
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Order> + DoubleEndedIterator {
@@ -110,18 +108,14 @@ impl Order {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, From)]
-pub struct OrderId(i32);
+pub struct OrderId(Uuid);
 
 impl OrderId {
-    fn first() -> OrderId {
-        OrderId(0)
+    fn new() -> OrderId {
+        OrderId(Uuid::new_v4())
     }
 
-    fn next_id(&self) -> OrderId {
-        OrderId(self.0 + 1)
-    }
-
-    pub fn as_i32(&self) -> i32 {
+    pub fn as_uuid(&self) -> Uuid {
         self.0
     }
 }

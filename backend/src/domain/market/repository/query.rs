@@ -168,7 +168,7 @@ fn convert_marktet_status_to_infra(s: MarketStatus) -> InfraMarketStatus {
 
 fn build_order(order: QueryOrder) -> Order {
     Order::from((
-        OrderId::from(order.local_id),
+        OrderId::from(order.id),
         UserId::from(order.user_id),
         NonEmptyString::from_str(order.token_name).unwrap(),
         AmountToken::from(order.amount_token),
