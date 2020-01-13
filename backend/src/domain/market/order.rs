@@ -34,7 +34,7 @@ impl MarketOrders {
         amount_coin: AmountCoin,
     ) -> &Order {
         let order = Order::new(
-            self.next_order_id(),
+            OrderId::new(),
             user_id,
             token_name,
             amount_token,
@@ -42,10 +42,6 @@ impl MarketOrders {
         );
         self.orders.push(order);
         self.orders.last().unwrap()
-    }
-
-    fn next_order_id(&self) -> OrderId {
-        OrderId::new()
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Order> + DoubleEndedIterator {
