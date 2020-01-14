@@ -83,23 +83,29 @@ where
 {
     if req.amount_token > 0 {
         // buy
-        Ok(MarketManager::buy_token(
+        MarketManager::buy_token(
             market,
             user,
             &req.token_name,
             &AmountToken::from(req.amount_token),
             &AmountCoin::from(-req.amount_coin),
         )
-        .map_err(|e| e.source)?)
+        .map_err(|e| {
+            log::info!("User failed to buy because of {}", e.source);
+            FailureResponse::InvalidPayload
+        })
     } else {
         // sell
-        Ok(MarketManager::sell_token(
+        MarketManager::sell_token(
             market,
             user,
             &req.token_name,
             &AmountToken::from(-req.amount_token),
             &AmountCoin::from(req.amount_coin),
         )
-        .map_err(|e| e.source)?)
+        .map_err(|e| {
+            log::info!("User failed to sell because of {}", e.source);
+            FailureResponse::InvalidPayload
+        })
     }
 }
