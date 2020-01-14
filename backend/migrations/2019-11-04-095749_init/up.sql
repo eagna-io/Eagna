@@ -67,19 +67,3 @@ CREATE TABLE orders (
 );
 
 CREATE INDEX ON orders (market_id);
-
--- Market報酬として発行されたpoint報酬の履歴
-CREATE TABLE market_reward_records (
-  -- アプリ的に使用することはないが、dieselのために必要
-  unused_id   SERIAL PRIMARY KEY,
-  market_id   UUID NOT NULL,
-  user_id     UUID NOT NULL,
-  -- 発行したポイント量。0より大きい。0の場合はレコードを追加しない。
-  point       INTEGER NOT NULL,
-
-  CONSTRAINT user_reward_point_history_market_fkey FOREIGN KEY(market_id)
-    REFERENCES markets(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT user_reward_point_history_user_fkey FOREIGN KEY(user_id)
-    REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT point_larger_than_zero CHECK ( point > 0 )
-);
