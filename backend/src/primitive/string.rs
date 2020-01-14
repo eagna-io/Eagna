@@ -12,9 +12,9 @@ impl NonEmptyString {
         self.0
     }
 
-    pub fn from_str(s: String) -> Result<NonEmptyString, EmptyStringError> {
+    pub fn from_str(s: String) -> anyhow::Result<NonEmptyString> {
         if s.is_empty() {
-            Err(EmptyStringError())
+            Err(anyhow::anyhow!("EmptyStringError"))
         } else {
             Ok(NonEmptyString(s))
         }
@@ -35,19 +35,3 @@ where
         Ok(s)
     }
 }
-
-pub struct EmptyStringError();
-
-impl std::fmt::Debug for EmptyStringError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "EmptyStringError")
-    }
-}
-
-impl std::fmt::Display for EmptyStringError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "EmptyStringError")
-    }
-}
-
-impl std::error::Error for EmptyStringError {}

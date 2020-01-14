@@ -6,6 +6,5 @@
 //! アプリケーション層のモデルへの変換はアプリケーション層で行う。
 pub mod lmsr;
 pub mod market;
-pub mod organizer;
 pub mod point;
 pub mod user;

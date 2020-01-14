@@ -19,16 +19,9 @@ CREATE TYPE market_status AS ENUM (
   'resolved'
 );
 
-CREATE TABLE organizers (
-  id            UUID PRIMARY KEY,
-  name          TEXT NOT NULL,
-  thumbnail_url TEXT NOT NULL
-);
-
 CREATE TABLE markets (
   id                  UUID PRIMARY KEY,
   title               TEXT NOT NULL,
-  organizer_id        UUID NOT NULL,
   description         TEXT NOT NULL,
   lmsr_b              INTEGER NOT NULL,
   open                TIMESTAMPTZ NOT NULL,
@@ -36,11 +29,7 @@ CREATE TABLE markets (
   status              market_status NOT NULL DEFAULT 'upcoming',
   /* MUST NULL if "status" is NOT 'resolved' */
   resolved_token_name TEXT DEFAULT NULL,
-  total_reward_point  INTEGER NOT NULL,
-  resolved_at         TIMESTAMPTZ DEFAULT NULL,
-
-  CONSTRAINT market_organizer_fkey FOREIGN KEY(organizer_id)
-    REFERENCES organizers(id) ON UPDATE RESTRICT ON DELETE RESTRICT
+  resolved_at         TIMESTAMPTZ DEFAULT NULL
 );
 
 CREATE TABLE market_tokens (
@@ -60,42 +49,17 @@ CREATE TABLE market_tokens (
 
 CREATE INDEX ON market_tokens (market_id);
 
-CREATE TABLE market_prizes (
-  /* Required by diesel. But not used by program */
-  unused_id       SERIAL PRIMARY KEY,
-  /* A locally unique number in each market */
-  market_local_id INTEGER NOT NULL,
-  name            TEXT NOT NULL,
-  thumbnail_url   TEXT NOT NULL,
-  target          TEXT NOT NULL,
-  market_id       UUID NOT NULL,
-
-  UNIQUE (market_id, market_local_id),
-  CONSTRAINT market_prizes_fkey FOREIGN KEY(market_id)
-    REFERENCES markets(id) ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
-CREATE TYPE order_type AS ENUM (
- 'normal',
- 'coin_supply',
- 'reward'
-);
-
 CREATE TABLE orders (
   /* Required by diesel. But not used by program */
-  unused            SERIAL PRIMARY KEY,
-  /* A locally unique number in each market */
-  market_local_id   INTEGER NOT NULL,
+  id                UUID PRIMARY KEY,
   user_id           UUID NOT NULL,
   /* MUST NULL if "type" is 'initial_supply' */
-  token_name        TEXT,
+  token_name        TEXT NOT NULL,
   amount_token      INTEGER NOT NULL,
   amount_coin       INTEGER NOT NULL,
-  type              order_type NOT NULL DEFAULT 'normal',
   time              TIMESTAMPTZ NOT NULL DEFAULT now(),
   market_id         UUID NOT NULL,
 
-  UNIQUE (market_id, market_local_id),
   CONSTRAINT order_user_fkey FOREIGN KEY(user_id)
     REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT order_market_fkey FOREIGN KEY(market_id)
@@ -103,19 +67,3 @@ CREATE TABLE orders (
 );
 
 CREATE INDEX ON orders (market_id);
-
--- Market報酬として発行されたpoint報酬の履歴
-CREATE TABLE market_reward_records (
-  -- アプリ的に使用することはないが、dieselのために必要
-  unused_id   SERIAL PRIMARY KEY,
-  market_id   UUID NOT NULL,
-  user_id     UUID NOT NULL,
-  -- 発行したポイント量。0より大きい。0の場合はレコードを追加しない。
-  point       INTEGER NOT NULL,
-
-  CONSTRAINT user_reward_point_history_market_fkey FOREIGN KEY(market_id)
-    REFERENCES markets(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT user_reward_point_history_user_fkey FOREIGN KEY(user_id)
-    REFERENCES users(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT point_larger_than_zero CHECK ( point > 0 )
-);

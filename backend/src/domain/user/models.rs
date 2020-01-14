@@ -1,9 +1,8 @@
 pub mod access_token;
 
 use self::access_token::AccessToken;
-use crate::domain::{point::Point, user::services::auth::Credentials};
-use crate::primitive::{EmptyStringError, NonEmptyString};
-use failure::Fallible;
+use crate::domain::{market::num::AmountCoin, point::Point, user::services::auth::Credentials};
+use crate::primitive::NonEmptyString;
 use getset::Getters;
 use uuid::Uuid;
 
@@ -23,33 +22,26 @@ pub trait User: Sized {
 pub trait UserWithAttrs: User {
     fn name(&self) -> &UserName;
     fn email(&self) -> &UserEmail;
-    fn coin(&self) -> u32;
+    fn coin(&self) -> AmountCoin;
     fn point(&self) -> Point;
     fn is_admin(&self) -> bool;
 
-    fn into_admin(self) -> Fallible<Admin<Self>> {
+    fn into_admin(self) -> anyhow::Result<Admin<Self>> {
         if self.is_admin() {
             Ok(Admin { user: self })
         } else {
-            Err(failure::err_msg(format!(
-                "{:?} is not an Admin user",
-                self.id()
-            )))
+            Err(anyhow::anyhow!("{:?} is not an Admin user", self.id()))
         }
     }
-}
 
-/// このprivateなメソッドを定義するために利用
-trait UserWithAttrsExt: UserWithAttrs {
-    fn provide_coin(self, provided: u32) -> UserProvidedCoin<Self> {
-        UserProvidedCoin {
+    /// Userのコイン量を新しい値で置き換える
+    fn update_coin(self, new_coin: AmountCoin) -> UserCoinUpdated<Self> {
+        UserCoinUpdated {
             user: self,
-            provided,
+            new_coin,
         }
     }
 }
-
-impl<U> UserWithAttrsExt for U where U: UserWithAttrs {}
 
 /*
  * ==================
@@ -90,8 +82,8 @@ impl UserWithAttrs for NewUser {
     fn email(&self) -> &UserEmail {
         &self.email
     }
-    fn coin(&self) -> u32 {
-        0
+    fn coin(&self) -> AmountCoin {
+        AmountCoin::zero()
     }
     fn point(&self) -> Point {
         Point::zero()
@@ -103,33 +95,32 @@ impl UserWithAttrs for NewUser {
 
 /*
  * =================
- * UserProvidedCoin model
+ * UserCoinUpdated model
  * =================
  *
- * - コインを付与されたユーザーを表すモデル
+ * - コイン量が更新されたユーザーを表すモデル
  * - Repositoryに保存できる
- * - Admin::provide_coin_to_user メソッドを通じて生成する
  */
-pub struct UserProvidedCoin<U> {
+pub struct UserCoinUpdated<U> {
     user: U,
-    provided: u32,
+    new_coin: AmountCoin,
 }
 
-impl<U: User> User for UserProvidedCoin<U> {
+impl<U: User> User for UserCoinUpdated<U> {
     fn id(&self) -> &UserId {
         self.user.id()
     }
 }
 
-impl<U: UserWithAttrs> UserWithAttrs for UserProvidedCoin<U> {
+impl<U: UserWithAttrs> UserWithAttrs for UserCoinUpdated<U> {
     fn name(&self) -> &UserName {
         &self.user.name()
     }
     fn email(&self) -> &UserEmail {
         &self.user.email()
     }
-    fn coin(&self) -> u32 {
-        self.user.coin() + self.provided
+    fn coin(&self) -> AmountCoin {
+        self.new_coin
     }
     fn point(&self) -> Point {
         self.user.point()
@@ -148,12 +139,16 @@ pub struct Admin<U> {
     user: U,
 }
 
-impl<U> Admin<U> {
-    pub fn provide_coin_to_user<UU>(&self, user: UU, coin: u32) -> UserProvidedCoin<UU>
+impl<U> Admin<U>
+where
+    U: User,
+{
+    pub fn provide_coin_to_user<UU>(&self, user: UU, coin: AmountCoin) -> UserCoinUpdated<UU>
     where
         UU: UserWithAttrs,
     {
-        user.provide_coin(coin)
+        let new_coin = user.coin() + coin;
+        user.update_coin(new_coin)
     }
 }
 
@@ -190,7 +185,7 @@ impl UserName {
         self.0.as_str()
     }
 
-    pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
+    pub fn from_str(s: String) -> anyhow::Result<Self> {
         Ok(UserName(NonEmptyString::from_str(s)?))
     }
 }
@@ -207,7 +202,7 @@ impl UserEmail {
         self.0.into_string()
     }
 
-    pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
+    pub fn from_str(s: String) -> anyhow::Result<Self> {
         Ok(UserEmail(NonEmptyString::from_str(s)?))
     }
 }

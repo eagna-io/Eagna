@@ -1,7 +1,9 @@
 use super::ApiMarketStatus;
-use crate::app::{get_param, get_params, validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::market::*;
-
+use crate::app::{get_params, FailureResponse, InfraManager};
+use crate::domain::market::{
+    models::{Market, MarketId, MarketStatus, MarketToken},
+    repository::MarketRepository,
+};
 use arrayvec::ArrayVec;
 use chrono::{DateTime, Utc};
 use rouille::{Request, Response};
@@ -25,30 +27,17 @@ pub fn get(
 }
 
 pub fn get_list(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
-    let market_ids = query_market_ids(infra, req)?;
-    let markets =
-        MarketRepository::from(infra.get_postgres()?).query_markets(market_ids.as_slice())?;
-    let resp_data: Vec<_> = markets.iter().map(ResMarket::from).collect();
+    let repo = MarketRepository::from(infra.get_postgres()?);
+    let markets = query_market_ids(infra, req)?
+        .iter()
+        .map(|id| Ok(repo.query_market(id)?.unwrap()))
+        .collect::<Result<Vec<_>, FailureResponse>>()?;
+    let res_data = markets.iter().map(ResMarket::from).collect::<Vec<_>>();
 
-    Ok(Response::json(&resp_data))
+    Ok(Response::json(&res_data))
 }
 
 fn query_market_ids(infra: &InfraManager, req: &Request) -> Result<Vec<MarketId>, FailureResponse> {
-    if let Some("true") = get_param(req, "participated") {
-        // ユーザーが参加している/参加したマーケット一覧を取得
-        let access_token = validate_bearer_header(infra, req)?;
-        Ok(MarketRepository::from(infra.get_postgres()?)
-            .query_market_ids_participated_by_user(&access_token.user_id)?)
-    } else {
-        // 指定されたstatusのマーケット一覧を取得
-        query_market_ids_by_status(infra, req)
-    }
-}
-
-fn query_market_ids_by_status(
-    infra: &InfraManager,
-    req: &Request,
-) -> Result<Vec<MarketId>, FailureResponse> {
     let mut statuses = ArrayVec::<[MarketStatus; 4]>::new();
     get_params(req, "status").for_each(|s| match s {
         "upcoming" => {
@@ -81,16 +70,13 @@ fn query_market_ids_by_status(
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ResMarket<'a> {
-    id: &'a Uuid,
+    id: Uuid,
     title: &'a str,
-    organizer_id: &'a Uuid,
     description: &'a str,
     lmsr_b: u32,
-    total_reward_point: u32,
     open: &'a DateTime<Utc>,
     close: &'a DateTime<Utc>,
     tokens: Vec<ResMarketToken<'a>>,
-    prizes: Vec<ResMarketPrize<'a>>,
     status: ApiMarketStatus,
     token_distribution: HashMap<&'a str, u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -105,24 +91,13 @@ struct ResMarketToken<'a> {
     thumbnail_url: &'a str,
 }
 
-#[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
-struct ResMarketPrize<'a> {
-    id: i32,
-    name: &'a str,
-    thumbnail_url: &'a str,
-    target: &'a str,
-}
-
-impl<'a> From<&'a Market> for ResMarket<'a> {
-    fn from(market: &'a Market) -> ResMarket<'a> {
+impl<'a, M: Market> From<&'a M> for ResMarket<'a> {
+    fn from(market: &'a M) -> ResMarket<'a> {
         ResMarket {
-            id: market.id().as_uuid(),
+            id: *market.id().as_uuid(),
             title: market.attrs().title().as_str(),
-            organizer_id: market.attrs().organizer_id().as_uuid(),
             description: market.attrs().description().as_str(),
             lmsr_b: market.attrs().lmsr_b().as_u32(),
-            total_reward_point: market.attrs().total_reward_point().as_u32(),
             open: market.attrs().open(),
             close: market.attrs().close(),
             tokens: market
@@ -131,22 +106,13 @@ impl<'a> From<&'a Market> for ResMarket<'a> {
                 .iter()
                 .map(ResMarketToken::from)
                 .collect(),
-            prizes: market
-                .attrs()
-                .prizes()
-                .iter()
-                .map(ResMarketPrize::from)
-                .collect(),
             status: ApiMarketStatus::from(&market.status()),
             token_distribution: market
-                .token_distribution()
+                .compute_token_distribution()
                 .iter()
                 .map(|(name, amount)| (name.as_str(), amount.as_i32() as u32))
                 .collect(),
-            resolved_token_name: match market {
-                Market::Resolved(ref inner) => Some(inner.resolved_token_name()),
-                _ => None,
-            },
+            resolved_token_name: market.maybe_resolved_token_name().map(|s| s.as_str()),
         }
     }
 }
@@ -157,17 +123,6 @@ impl<'a> From<&'a MarketToken> for ResMarketToken<'a> {
             name: token.name().as_str(),
             description: token.description().as_str(),
             thumbnail_url: token.thumbnail_url().as_str(),
-        }
-    }
-}
-
-impl<'a> From<&'a MarketPrize> for ResMarketPrize<'a> {
-    fn from(prize: &'a MarketPrize) -> ResMarketPrize<'a> {
-        ResMarketPrize {
-            id: *prize.id(),
-            name: prize.name().as_str(),
-            thumbnail_url: prize.thumbnail_url().as_str(),
-            target: prize.target().as_str(),
         }
     }
 }

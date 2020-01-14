@@ -1,6 +1,9 @@
 use super::ResOrder;
 use crate::app::{get_params, validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::market::*;
+use crate::domain::market::{
+    models::{Market as _, MarketId},
+    repository::MarketRepository,
+};
 use rouille::{Request, Response};
 use uuid::Uuid;
 
@@ -26,11 +29,7 @@ pub fn get_list(
             .collect();
         Ok(Response::json(&RespBody { orders: my_orders }))
     } else {
-        let orders = market
-            .orders()
-            .filter_normal_orders()
-            .map(|o| ResOrder::from(o))
-            .collect();
+        let orders = market.orders().iter().map(|o| ResOrder::from(o)).collect();
 
         Ok(Response::json(&RespBody { orders: orders }))
     }

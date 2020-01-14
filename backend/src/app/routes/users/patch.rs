@@ -1,4 +1,5 @@
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
+use crate::domain::market::num::AmountCoin;
 use crate::domain::user::{
     models::{UserId, UserWithAttrs as _},
     repository::UserRepository,
@@ -25,12 +26,12 @@ pub fn handler(
     let user = repo
         .query_user(&UserId::from(user_id))?
         .ok_or(FailureResponse::InvalidPayload)?;
-    let provided_user = admin.provide_coin_to_user(user, provided_coin);
+    let provided_user = admin.provide_coin_to_user(user, AmountCoin::from(provided_coin as i32));
 
     repo.update_user(&provided_user)?;
 
     Ok(Response::json(&ResData {
-        current_coin: provided_user.coin(),
+        current_coin: provided_user.coin().as_i32() as u32,
     }))
 }
 

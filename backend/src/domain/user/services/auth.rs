@@ -2,7 +2,6 @@ use crate::domain::user::models::{User, UserId};
 use crate::infra::postgres::{user::QueryUserCredentials, PostgresInfra};
 use arrayvec::ArrayString;
 use data_encoding::HEXUPPER;
-use failure::{err_msg, Fallible};
 use getset::Getters;
 use rand::{thread_rng, Rng};
 use ring::{digest, pbkdf2};
@@ -23,11 +22,15 @@ impl<'a> UserAuthService<'a> {
     /// つまりUserのsigninに使用する。
     /// 成功した場合はOk(AuthorizedUser)を返す。
     /// 失敗した場合はErr(_) を返す。
-    pub fn authenticate(&self, email: &str, attempted_pass: &str) -> Fallible<AuthorizedUser> {
+    pub fn authenticate(
+        &self,
+        email: &str,
+        attempted_pass: &str,
+    ) -> anyhow::Result<AuthorizedUser> {
         let QueryUserCredentials { id, cred, salt } = self
             .db
             .query_user_credentials(email)?
-            .ok_or(err_msg("Authentication failed"))?;
+            .ok_or(anyhow::anyhow!("Authentication failed"))?;
 
         Self::verify_credentials(salt.as_slice(), cred.as_slice(), attempted_pass)?;
 
@@ -36,9 +39,9 @@ impl<'a> UserAuthService<'a> {
         })
     }
 
-    fn verify_credentials(salt: &[u8], cred: &[u8], attempted_pass: &str) -> Fallible<()> {
+    fn verify_credentials(salt: &[u8], cred: &[u8], attempted_pass: &str) -> anyhow::Result<()> {
         pbkdf2::verify(ALGO, N_ITER, salt, attempted_pass.as_bytes(), cred)
-            .map_err(|_| err_msg("Authentication failed"))
+            .map_err(|_| anyhow::anyhow!("Authentication failed"))
     }
 
     pub fn derive_credentials(raw_pass: &str) -> Credentials {

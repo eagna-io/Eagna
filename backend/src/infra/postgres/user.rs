@@ -1,24 +1,15 @@
-use super::{
-    schema::{market_reward_records, users},
-    Postgres,
-};
+use super::{schema::users, Postgres};
 use diesel::{prelude::*, result::Error as PgError};
-use failure::Fallible;
 use uuid::Uuid;
 
 pub trait PostgresUserInfra {
-    fn save_user<'a>(&self, new_user: NewUser<'a>) -> Result<(), failure::Error>;
+    fn save_user<'a>(&self, new_user: NewUser<'a>) -> anyhow::Result<()>;
 
-    fn query_user(&self, user_id: &Uuid) -> Result<Option<QueryUser>, failure::Error>;
+    fn query_user(&self, user_id: &Uuid) -> anyhow::Result<Option<QueryUser>>;
 
-    fn query_user_credentials(&self, email: &str) -> Fallible<Option<QueryUserCredentials>>;
+    fn query_user_credentials(&self, email: &str) -> anyhow::Result<Option<QueryUserCredentials>>;
 
-    fn query_user_market_reward_records(
-        &self,
-        user_id: &Uuid,
-    ) -> Result<Vec<QueryMarketRewardRecord>, failure::Error>;
-
-    fn update_user_coin(&self, user_id: &Uuid, coin: u32) -> Fallible<()>;
+    fn update_user_coin(&self, user_id: &Uuid, coin: u32) -> anyhow::Result<()>;
 }
 
 #[derive(Insertable)]
@@ -53,14 +44,14 @@ pub struct QueryMarketRewardRecord {
 }
 
 impl PostgresUserInfra for Postgres {
-    fn save_user<'a>(&self, new_user: NewUser<'a>) -> Result<(), failure::Error> {
+    fn save_user<'a>(&self, new_user: NewUser<'a>) -> anyhow::Result<()> {
         diesel::insert_into(users::table)
             .values(new_user)
             .execute(&self.conn)?;
         Ok(())
     }
 
-    fn query_user(&self, user_id: &Uuid) -> Result<Option<QueryUser>, failure::Error> {
+    fn query_user(&self, user_id: &Uuid) -> anyhow::Result<Option<QueryUser>> {
         match users::table
             .filter(users::id.eq(user_id))
             .select((
@@ -78,7 +69,7 @@ impl PostgresUserInfra for Postgres {
         }
     }
 
-    fn query_user_credentials(&self, email: &str) -> Fallible<Option<QueryUserCredentials>> {
+    fn query_user_credentials(&self, email: &str) -> anyhow::Result<Option<QueryUserCredentials>> {
         match users::table
             .filter(users::email.eq(email))
             .select((users::id, users::credential, users::salt))
@@ -90,35 +81,10 @@ impl PostgresUserInfra for Postgres {
         }
     }
 
-    fn query_user_market_reward_records(
-        &self,
-        user_id: &Uuid,
-    ) -> Result<Vec<QueryMarketRewardRecord>, failure::Error> {
-        Ok(market_reward_records::table
-            .filter(market_reward_records::user_id.eq(user_id))
-            .select((
-                market_reward_records::market_id,
-                market_reward_records::point,
-            ))
-            .load::<QueryableMarketRewardRecord>(&self.conn)?
-            .into_iter()
-            .map(|record| QueryMarketRewardRecord {
-                market_id: record.market_id,
-                point: record.point as u32,
-            })
-            .collect())
-    }
-
-    fn update_user_coin(&self, user_id: &Uuid, coin: u32) -> Fallible<()> {
+    fn update_user_coin(&self, user_id: &Uuid, coin: u32) -> anyhow::Result<()> {
         diesel::update(users::table.filter(users::id.eq(user_id)))
             .set(users::coin.eq(coin as i32))
             .execute(&self.conn)?;
         Ok(())
     }
-}
-
-#[derive(Queryable)]
-struct QueryableMarketRewardRecord {
-    market_id: Uuid,
-    point: i32,
 }

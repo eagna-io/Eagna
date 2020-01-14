@@ -1,5 +1,5 @@
 pub mod market;
-pub mod organizer;
+pub mod order;
 #[allow(unused_imports)]
 mod schema;
 pub mod types;
@@ -12,23 +12,19 @@ use diesel::{
 };
 
 pub trait PostgresInfra:
-    market::PostgresMarketInfra
-    + user::PostgresUserInfra
-    + organizer::PostgresOrganizerInfra
-    + Send
-    + 'static
+    market::PostgresMarketInfra + user::PostgresUserInfra + order::PostgresOrderInfra + Send + 'static
 {
-    fn begin_transaction(&self) -> Result<(), failure::Error>;
+    fn begin_transaction(&self) -> anyhow::Result<()>;
 
-    fn commit(&self) -> Result<(), failure::Error>;
+    fn commit(&self) -> anyhow::Result<()>;
 
-    fn rollback(&self) -> Result<(), failure::Error>;
+    fn rollback(&self) -> anyhow::Result<()>;
 }
 
 pub fn transaction<F, T, E>(pg: &dyn PostgresInfra, f: F) -> Result<T, E>
 where
-    F: FnOnce() -> Result<T, E>,
-    E: From<failure::Error>,
+    F: FnOnce() -> anyhow::Result<T, E>,
+    E: From<anyhow::Error>,
 {
     pg.begin_transaction()?;
     match f() {
@@ -55,21 +51,21 @@ pub struct Postgres {
 }
 
 impl PostgresInfra for Postgres {
-    fn begin_transaction(&self) -> Result<(), failure::Error> {
+    fn begin_transaction(&self) -> anyhow::Result<()> {
         self.conn
             .transaction_manager()
             .begin_transaction(&self.conn)?;
         Ok(())
     }
 
-    fn commit(&self) -> Result<(), failure::Error> {
+    fn commit(&self) -> anyhow::Result<()> {
         self.conn
             .transaction_manager()
             .commit_transaction(&self.conn)?;
         Ok(())
     }
 
-    fn rollback(&self) -> Result<(), failure::Error> {
+    fn rollback(&self) -> anyhow::Result<()> {
         self.conn
             .transaction_manager()
             .rollback_transaction(&self.conn)?;
@@ -89,7 +85,7 @@ impl PostgresFactory {
 }
 
 impl InfraFactory<Postgres> for PostgresFactory {
-    fn create(&self) -> Result<Postgres, failure::Error> {
+    fn create(&self) -> anyhow::Result<Postgres> {
         Ok(Postgres {
             conn: PgConnection::establish(self.url.as_str())?,
         })

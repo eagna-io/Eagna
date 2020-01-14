@@ -1,8 +1,13 @@
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::{lmsr, market::*, organizer::*, point::*, user::*};
-use crate::infra::postgres::{transaction, PostgresInfra};
+use crate::domain::lmsr;
+use crate::domain::market::{
+    models::{Market as _, MarketToken},
+    repository::MarketRepository,
+    services::manager::{MarketManager, NewMarket},
+};
+use crate::domain::user::*;
+use crate::infra::postgres::transaction;
 use crate::primitive::{NonEmptyString, NonEmptyVec};
-
 use chrono::{DateTime, Utc};
 use rouille::{input::json::json_input, Request, Response};
 use uuid::Uuid;
@@ -20,8 +25,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
             FailureResponse::InvalidPayload
         })?;
 
-        let organizer = query_organizer(postgres, &req_market.organizer_id)?;
-        let new_market = create_new_market(req_market, &organizer);
+        let new_market = create_new_market(req_market);
 
         let market_repo = MarketRepository::from(postgres);
         market_repo.save_market(&new_market)?;
@@ -52,22 +56,7 @@ fn authorize(user_repo: UserRepository, user_id: &UserId) -> Result<(), FailureR
     }
 }
 
-fn query_organizer(
-    postgres: &dyn PostgresInfra,
-    organizer_id: &Uuid,
-) -> Result<Organizer, FailureResponse> {
-    let organizer_repo = OrganizerRepository::from(postgres);
-
-    match organizer_repo.query_organizer(&OrganizerId::from(*organizer_id))? {
-        Some(organizer) => Ok(organizer),
-        None => {
-            log::warn!("Client try to create a new market with invalid organizer id");
-            Err(FailureResponse::InvalidPayload)
-        }
-    }
-}
-
-fn create_new_market(req: ReqPostMarket, organizer: &Organizer) -> Market {
+fn create_new_market(req: ReqPostMarket) -> NewMarket {
     let new_tokens = NonEmptyVec::from_vec(
         req.tokens
             .into_iter()
@@ -75,24 +64,13 @@ fn create_new_market(req: ReqPostMarket, organizer: &Organizer) -> Market {
             .collect(),
     )
     .unwrap();
-    let new_prizes = NonEmptyVec::from_vec(
-        req.prizes
-            .into_iter()
-            .enumerate()
-            .map(|(i, prize)| create_new_market_prize(i as i32, prize))
-            .collect(),
-    )
-    .unwrap();
-    Market::new(
+    MarketManager::create(
         req.title,
-        organizer,
         req.description,
         lmsr::B::from(req.lmsr_b),
-        Point::from(req.total_reward_point),
         req.open,
         req.close,
         new_tokens,
-        new_prizes,
     )
 }
 
@@ -100,22 +78,15 @@ fn create_new_market_token(req: ReqMarketToken) -> MarketToken {
     MarketToken::new(req.name, req.description, req.thumbnail_url)
 }
 
-fn create_new_market_prize(id: i32, req: ReqMarketPrize) -> MarketPrize {
-    MarketPrize::new(id, req.name, req.thumbnail_url, req.target)
-}
-
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct ReqPostMarket {
     title: NonEmptyString,
-    organizer_id: Uuid,
     description: String,
     lmsr_b: u32,
-    total_reward_point: u32,
     open: DateTime<Utc>,
     close: DateTime<Utc>,
     tokens: NonEmptyVec<ReqMarketToken>,
-    prizes: NonEmptyVec<ReqMarketPrize>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -124,14 +95,6 @@ struct ReqMarketToken {
     name: NonEmptyString,
     description: String,
     thumbnail_url: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ReqMarketPrize {
-    name: NonEmptyString,
-    thumbnail_url: String,
-    target: String,
 }
 
 #[derive(Debug, Serialize)]
