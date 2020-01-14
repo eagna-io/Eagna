@@ -7,10 +7,12 @@ use crate::domain::market::{
     num::{AmountCoin, AmountToken},
     order::{MarketOrders, Order},
 };
-use crate::domain::user::models::{User as _, UserCoinUpdated, UserWithAttrs};
+use crate::domain::num::point::Point;
+use crate::domain::user::models::{User, UserCoinUpdated, UserId, UserWithAttrs};
 use crate::primitive::{NonEmptyString, NonEmptyVec};
 use anyhow::anyhow;
 use chrono::{DateTime, Utc};
+use std::collections::HashMap;
 use thiserror::Error;
 
 pub const MAX_SLIP_RATE: f64 = 0.05;
@@ -314,11 +316,37 @@ impl MarketManager {
     pub fn resolve<M>(
         market: M,
         resolved_token_name: NonEmptyString,
-    ) -> anyhow::Result<NewResolvedMarket<M>>
+    ) -> (NewResolvedMarket<M>, Vec<UserPointIncreased>)
     where
         M: ClosedMarket,
     {
-        todo!()
+        let updated_users = market
+            .orders()
+            .iter()
+            .filter(|o| o.token_name() == &resolved_token_name)
+            .fold(
+                HashMap::<UserId, AmountToken>::new(),
+                |mut user_token, order| {
+                    let amount_token = user_token
+                        .entry(*order.user_id())
+                        .or_insert(AmountToken::zero());
+                    *amount_token += *order.amount_token();
+                    user_token
+                },
+            )
+            .into_iter()
+            .map(|(user_id, amount_token)| UserPointIncreased {
+                id: user_id,
+                point_increased: Point::from(amount_token.as_i32() * 1000),
+            })
+            .collect::<Vec<_>>();
+
+        let updated_market = NewResolvedMarket {
+            inner: market,
+            resolved_token_name,
+        };
+
+        (updated_market, updated_users)
     }
 }
 
@@ -345,5 +373,16 @@ impl<M: Market> Market for NewResolvedMarket<M> {
 impl<M: Market> ResolvedMarket for NewResolvedMarket<M> {
     fn resolved_token_name(&self) -> &NonEmptyString {
         &self.resolved_token_name
+    }
+}
+
+pub struct UserPointIncreased {
+    id: UserId,
+    point_increased: Point,
+}
+
+impl User for UserPointIncreased {
+    fn id(&self) -> &UserId {
+        &self.id
     }
 }
