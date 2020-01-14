@@ -1,22 +1,36 @@
 name: Rust
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'backend/Cargo.toml'
+      - 'backend/Cargo.lock'
+      - 'backend/src/**.rs'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'backend/Cargo.toml'
+      - 'backend/Cargo.lock'
+      - 'backend/src/**.rs'
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
     - name: Check
-      run: cargo check
+      run: cd backend && cargo check
     - name: Build
-      run: cargo build --verbose
+      run: cd backend && cargo build --verbose
     - name: Cache cargo build
       uses: actions/cache@v1
       with:
-        path: target
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+        path: backend/target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('backend/Cargo.lock') }}
     - name: Run tests
-      run: cargo test --verbose
+      run: cd backend && cargo test --verbose
