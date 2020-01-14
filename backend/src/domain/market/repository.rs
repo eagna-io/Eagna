@@ -230,7 +230,7 @@ impl QueryMarket {
     where
         Self: Sized,
     {
-        if self.status() == MarketStatus::Upcoming {
+        if self.status() == MarketStatus::Open {
             Some(Market_OpenMarket {
                 id: self.id,
                 attrs: self.attrs,
@@ -246,7 +246,7 @@ impl QueryMarket {
     where
         Self: Sized,
     {
-        if self.status() == MarketStatus::Upcoming {
+        if self.status() == MarketStatus::Closed {
             Some(Market_ClosedMarket {
                 id: self.id,
                 attrs: self.attrs,
@@ -262,7 +262,7 @@ impl QueryMarket {
     where
         Self: Sized,
     {
-        if self.status() == MarketStatus::Upcoming {
+        if self.status() == MarketStatus::Resolved {
             Some(Market_ResolvedMarket {
                 id: self.id,
                 attrs: self.attrs,
