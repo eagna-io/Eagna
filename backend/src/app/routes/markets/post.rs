@@ -82,7 +82,6 @@ fn create_new_market_token(req: ReqMarketToken) -> MarketToken {
 #[serde(rename_all = "camelCase")]
 struct ReqPostMarket {
     title: NonEmptyString,
-    organizer_id: Uuid,
     description: String,
     lmsr_b: u32,
     open: DateTime<Utc>,
