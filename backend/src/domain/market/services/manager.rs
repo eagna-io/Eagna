@@ -2,7 +2,7 @@ use crate::domain::lmsr;
 use crate::domain::market::{
     models::{
         ClosedMarket, Market, MarketAttrs, MarketId, MarketStatus, MarketToken, OpenMarket,
-        UpcomingMarket,
+        ResolvedMarket, UpcomingMarket,
     },
     num::{AmountCoin, AmountToken},
     order::{MarketOrders, Order},
@@ -304,3 +304,46 @@ impl<M: Market> Market for NewClosedMarket<M> {
 }
 
 impl<M: Market> ClosedMarket for NewClosedMarket<M> {}
+
+/*
+ * =======================
+ * MarketManager::resolve
+ * =======================
+ */
+impl MarketManager {
+    pub fn resolve<M>(
+        market: M,
+        resolved_token_name: NonEmptyString,
+    ) -> anyhow::Result<NewResolvedMarket<M>>
+    where
+        M: ClosedMarket,
+    {
+        todo!()
+    }
+}
+
+pub struct NewResolvedMarket<M> {
+    inner: M,
+    resolved_token_name: NonEmptyString,
+}
+
+impl<M: Market> Market for NewResolvedMarket<M> {
+    fn id(&self) -> MarketId {
+        self.inner.id()
+    }
+    fn attrs(&self) -> &MarketAttrs {
+        self.inner.attrs()
+    }
+    fn status(&self) -> MarketStatus {
+        MarketStatus::Resolved
+    }
+    fn orders(&self) -> &MarketOrders {
+        self.inner.orders()
+    }
+}
+
+impl<M: Market> ResolvedMarket for NewResolvedMarket<M> {
+    fn resolved_token_name(&self) -> &NonEmptyString {
+        &self.resolved_token_name
+    }
+}
