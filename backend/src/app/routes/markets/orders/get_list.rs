@@ -1,6 +1,9 @@
 use super::ResOrder;
 use crate::app::{get_params, validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::market::*;
+use crate::domain::market::{
+    models::{Market as _, MarketId},
+    repository::MarketRepository,
+};
 use rouille::{Request, Response};
 use uuid::Uuid;
 

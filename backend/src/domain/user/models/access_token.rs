@@ -1,7 +1,5 @@
 use super::UserId;
-
 use arrayvec::ArrayString;
-use failure::Fallible;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
 /// 1週間Tokenをcacheする
@@ -34,9 +32,9 @@ impl AccessTokenId {
         AccessTokenId(ArrayString::from(&random_str).unwrap())
     }
 
-    pub fn try_from_str(s: &str) -> Fallible<AccessTokenId> {
+    pub fn try_from_str(s: &str) -> anyhow::Result<AccessTokenId> {
         ArrayString::from(s)
-            .map_err(|e| failure::Error::from(e.simplify()))
+            .map_err(|e| anyhow::Error::from(e.simplify()))
             .map(|inner| AccessTokenId(inner))
     }
 

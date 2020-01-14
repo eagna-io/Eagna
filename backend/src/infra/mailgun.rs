@@ -1,4 +1,3 @@
-use failure::{err_msg, Fallible};
 use hyper::{client::HttpConnector, Body, Client, Request, StatusCode};
 use hyper_tls::HttpsConnector;
 use std::borrow::Cow;
@@ -22,7 +21,7 @@ lazy_static::lazy_static! {
 }
 
 #[tokio::main]
-pub async fn send_mail(mail: Mail) -> Fallible<()> {
+pub async fn send_mail(mail: Mail) -> anyhow::Result<()> {
     let req = Request::post(MAILGUN_MESSAGE_API_URI.as_str())
         .header("content-type", "application/x-www-form-urlencoded")
         .header("authorization", AUTH_HEADER_VAL.as_str())
@@ -40,7 +39,7 @@ pub async fn send_mail(mail: Mail) -> Fallible<()> {
             status,
             body
         );
-        return Err(err_msg("Failed to send mail"));
+        return Err(anyhow::anyhow!("Failed to send mail"));
     }
 }
 

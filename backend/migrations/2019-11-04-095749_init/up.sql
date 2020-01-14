@@ -19,16 +19,9 @@ CREATE TYPE market_status AS ENUM (
   'resolved'
 );
 
-CREATE TABLE organizers (
-  id            UUID PRIMARY KEY,
-  name          TEXT NOT NULL,
-  thumbnail_url TEXT NOT NULL
-);
-
 CREATE TABLE markets (
   id                  UUID PRIMARY KEY,
   title               TEXT NOT NULL,
-  organizer_id        UUID NOT NULL,
   description         TEXT NOT NULL,
   lmsr_b              INTEGER NOT NULL,
   open                TIMESTAMPTZ NOT NULL,
@@ -36,10 +29,7 @@ CREATE TABLE markets (
   status              market_status NOT NULL DEFAULT 'upcoming',
   /* MUST NULL if "status" is NOT 'resolved' */
   resolved_token_name TEXT DEFAULT NULL,
-  resolved_at         TIMESTAMPTZ DEFAULT NULL,
-
-  CONSTRAINT market_organizer_fkey FOREIGN KEY(organizer_id)
-    REFERENCES organizers(id) ON UPDATE RESTRICT ON DELETE RESTRICT
+  resolved_at         TIMESTAMPTZ DEFAULT NULL
 );
 
 CREATE TABLE market_tokens (

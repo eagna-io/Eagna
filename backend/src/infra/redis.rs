@@ -10,14 +10,11 @@ pub trait RedisInfra: Send + 'static {
         access_token_id: &str,
         user_id: &Uuid,
         expire_sec: usize,
-    ) -> Result<(), failure::Error>;
+    ) -> anyhow::Result<()>;
 
-    fn query_user_id_by_access_token(
-        &self,
-        access_token_id: &str,
-    ) -> Result<Option<Uuid>, failure::Error>;
+    fn query_user_id_by_access_token(&self, access_token_id: &str) -> anyhow::Result<Option<Uuid>>;
 
-    fn delete_access_token(&self, access_token_id: &str) -> Result<(), failure::Error>;
+    fn delete_access_token(&self, access_token_id: &str) -> anyhow::Result<()>;
 }
 
 pub struct Redis {
@@ -30,7 +27,7 @@ impl RedisInfra for Redis {
         access_token_id: &str,
         user_id: &Uuid,
         expire_sec: usize,
-    ) -> Result<(), failure::Error> {
+    ) -> anyhow::Result<()> {
         let mut user_id_buf = Uuid::encode_buffer();
         let user_id_str = user_id.to_simple_ref().encode_lower(&mut user_id_buf) as &_;
         Ok(self
@@ -40,10 +37,7 @@ impl RedisInfra for Redis {
             .set_ex(access_token_id, user_id_str, expire_sec)?)
     }
 
-    fn query_user_id_by_access_token(
-        &self,
-        access_token_id: &str,
-    ) -> Result<Option<Uuid>, failure::Error> {
+    fn query_user_id_by_access_token(&self, access_token_id: &str) -> anyhow::Result<Option<Uuid>> {
         Ok(self
             .conn
             .lock()
@@ -52,7 +46,7 @@ impl RedisInfra for Redis {
             .map(|user_id| Uuid::parse_str(user_id.as_str()).unwrap()))
     }
 
-    fn delete_access_token(&self, access_token_id: &str) -> Result<(), failure::Error> {
+    fn delete_access_token(&self, access_token_id: &str) -> anyhow::Result<()> {
         self.conn.lock().unwrap().del(access_token_id)?;
         Ok(())
     }
@@ -70,7 +64,7 @@ impl RedisFactory {
 }
 
 impl InfraFactory<Redis> for RedisFactory {
-    fn create(&self) -> Result<Redis, failure::Error> {
+    fn create(&self) -> anyhow::Result<Redis> {
         let client = RedisClient::open(self.url.as_str())?;
         Ok(Redis {
             conn: Arc::new(Mutex::new(client.get_connection()?)),

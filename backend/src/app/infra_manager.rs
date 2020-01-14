@@ -8,11 +8,11 @@ pub struct InfraManager {
 }
 
 impl InfraManager {
-    pub fn get_redis(&self) -> Result<&dyn RedisInfra, failure::Error> {
+    pub fn get_redis(&self) -> anyhow::Result<&dyn RedisInfra> {
         self.redis.get().map(|i| i.as_ref())
     }
 
-    pub fn get_postgres(&self) -> Result<&dyn PostgresInfra, failure::Error> {
+    pub fn get_postgres(&self) -> anyhow::Result<&dyn PostgresInfra> {
         self.postgres.get().map(|i| i.as_ref())
     }
 }
@@ -57,7 +57,7 @@ impl<I: Send + 'static> LazyInfra<I> {
         }
     }
 
-    pub fn get(&self) -> Result<&I, failure::Error> {
+    pub fn get(&self) -> anyhow::Result<&I> {
         if !self.infra.filled() {
             let _never_err = self.infra.fill(self.factory.create()?);
         }
@@ -90,7 +90,7 @@ where
     F: InfraFactory<I>,
     I: PostgresInfra,
 {
-    fn create(&self) -> Result<Box<dyn PostgresInfra>, failure::Error> {
+    fn create(&self) -> anyhow::Result<Box<dyn PostgresInfra>> {
         Ok(Box::new(self.factory.create()?))
     }
 }
@@ -100,7 +100,7 @@ where
     F: InfraFactory<I>,
     I: RedisInfra,
 {
-    fn create(&self) -> Result<Box<dyn RedisInfra>, failure::Error> {
+    fn create(&self) -> anyhow::Result<Box<dyn RedisInfra>> {
         Ok(Box::new(self.factory.create()?))
     }
 }

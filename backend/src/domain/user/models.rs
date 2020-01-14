@@ -2,7 +2,7 @@ pub mod access_token;
 
 use self::access_token::AccessToken;
 use crate::domain::{market::num::AmountCoin, point::Point, user::services::auth::Credentials};
-use crate::primitive::{EmptyStringError, NonEmptyString};
+use crate::primitive::NonEmptyString;
 use failure::Fallible;
 use getset::Getters;
 use uuid::Uuid;
@@ -189,7 +189,7 @@ impl UserName {
         self.0.as_str()
     }
 
-    pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
+    pub fn from_str(s: String) -> anyhow::Result<Self> {
         Ok(UserName(NonEmptyString::from_str(s)?))
     }
 }
@@ -206,7 +206,7 @@ impl UserEmail {
         self.0.into_string()
     }
 
-    pub fn from_str(s: String) -> Result<Self, EmptyStringError> {
+    pub fn from_str(s: String) -> anyhow::Result<Self> {
         Ok(UserEmail(NonEmptyString::from_str(s)?))
     }
 }

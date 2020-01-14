@@ -1,4 +1,3 @@
-use super::MAX_SLIP_RATE;
 use std::{iter::Sum, ops::Mul};
 
 #[derive(
@@ -96,10 +95,6 @@ impl AmountCoin {
         } else {
             false
         }
-    }
-
-    pub fn is_around_slip_range(&self, target: &AmountCoin) -> bool {
-        self.is_around(target, MAX_SLIP_RATE)
     }
 }
 

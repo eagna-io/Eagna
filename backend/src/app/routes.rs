@@ -47,7 +47,8 @@ pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
             markets::get(infra, req, id)
         },
         (PUT) (/markets/{id: Uuid}/) => {
-            markets::put(infra, req, id)
+            // markets::put(infra, req, id)
+            todo!()
         },
         (GET) (/markets/{id: Uuid}/orders/) => {
             markets::orders::get_list(infra, req, id)

@@ -20,9 +20,9 @@ impl<T> NonEmptyVec<T> {
         self.0.into_iter()
     }
 
-    pub fn from_vec(vec: Vec<T>) -> Result<Self, EmptyVecError> {
+    pub fn from_vec(vec: Vec<T>) -> anyhow::Result<Self> {
         if vec.is_empty() {
-            Err(EmptyVecError())
+            Err(anyhow::anyhow!("EmptyVecError"))
         } else {
             Ok(NonEmptyVec(vec))
         }
@@ -41,19 +41,3 @@ where
         Ok(vec)
     }
 }
-
-pub struct EmptyVecError();
-
-impl std::fmt::Debug for EmptyVecError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "EmptyVecError")
-    }
-}
-
-impl std::fmt::Display for EmptyVecError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "EmptyVecError")
-    }
-}
-
-impl std::error::Error for EmptyVecError {}

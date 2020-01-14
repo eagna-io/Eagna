@@ -4,7 +4,6 @@ use crate::domain::market::num::AmountCoin;
 use crate::domain::point::Point;
 use crate::domain::user::*;
 use crate::infra::postgres::{user::NewUser as NewUserInfra, PostgresInfra};
-use failure::Fallible;
 use getset::{CopyGetters, Getters};
 
 #[derive(From)]
@@ -13,7 +12,7 @@ pub struct UserRepository<'a> {
 }
 
 impl<'a> UserRepository<'a> {
-    pub fn save_user(&self, new_user: &NewUser) -> Fallible<()> {
+    pub fn save_user(&self, new_user: &NewUser) -> anyhow::Result<()> {
         self.postgres.save_user(NewUserInfra {
             id: *new_user.id().as_uuid(),
             name: new_user.name().as_str(),
@@ -23,7 +22,7 @@ impl<'a> UserRepository<'a> {
         })
     }
 
-    pub fn query_user(&self, user_id: &UserId) -> Result<Option<QueryUser>, failure::Error> {
+    pub fn query_user(&self, user_id: &UserId) -> anyhow::Result<Option<QueryUser>> {
         let user = match self.postgres.query_user(user_id.as_uuid())? {
             None => return Ok(None),
             Some(res) => res,
@@ -38,7 +37,7 @@ impl<'a> UserRepository<'a> {
         }))
     }
 
-    pub fn update_user<U>(&self, user: &U) -> Fallible<()>
+    pub fn update_user<U>(&self, user: &U) -> anyhow::Result<()>
     where
         U: UpdatableUser,
     {
@@ -97,14 +96,14 @@ impl UserWithAttrs for QueryUser {
  * =====================
  */
 pub trait UpdatableUser {
-    fn update_user(&self, pg: &dyn PostgresInfra) -> Fallible<()>;
+    fn update_user(&self, pg: &dyn PostgresInfra) -> anyhow::Result<()>;
 }
 
 impl<U> UpdatableUser for UserCoinUpdated<U>
 where
     U: UserWithAttrs,
 {
-    fn update_user(&self, pg: &dyn PostgresInfra) -> Fallible<()> {
+    fn update_user(&self, pg: &dyn PostgresInfra) -> anyhow::Result<()> {
         pg.update_user_coin(self.id().as_uuid(), self.coin().as_i32() as u32)
     }
 }

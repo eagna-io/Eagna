@@ -1,5 +1,5 @@
 use crate::app::{FailureResponse, InfraManager};
-use crate::domain::market::*;
+use crate::domain::market::{repository::MarketRepository, services::manager::MarketManager};
 use crate::infra::postgres::transaction;
 
 use rouille::{Request, Response};
@@ -52,9 +52,13 @@ fn check_open(infra: &InfraManager) -> Result<Vec<Uuid>, FailureResponse> {
 
             market_repo.lock_market(&market_id)?;
 
-            if let Market::Upcoming(m) = market_repo.query_market(&market_id)?.unwrap() {
-                let opened_market = m.try_open().unwrap();
-                market_repo.save_market(&Market::from(opened_market))?;
+            if let Some(m) = market_repo
+                .query_market(&market_id)?
+                .unwrap() // ↑で取得したidで検索しているのでunwrapできる
+                .into_upcoming_market()
+            {
+                let opened_market = MarketManager::open(m)?;
+                market_repo.update_market(&opened_market)?;
                 opened_market_ids.push(*market_id.as_uuid());
             };
 
@@ -82,9 +86,13 @@ fn check_close(infra: &InfraManager) -> Result<Vec<Uuid>, FailureResponse> {
             let market_repo = MarketRepository::from(postgres);
             market_repo.lock_market(&market_id)?;
 
-            if let Market::Open(m) = market_repo.query_market(&market_id)?.unwrap() {
-                let closed_market = m.try_close().unwrap();
-                market_repo.save_market(&Market::from(closed_market))?;
+            if let Some(m) = market_repo
+                .query_market(&market_id)?
+                .unwrap()
+                .into_open_market()
+            {
+                let closed_market = MarketManager::close(m).unwrap();
+                market_repo.update_market(&closed_market)?;
                 closed_market_ids.push(*market_id.as_uuid());
             }
 

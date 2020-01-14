@@ -1,8 +1,13 @@
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::{lmsr, market::*, organizer::*, user::*};
-use crate::infra::postgres::{transaction, PostgresInfra};
+use crate::domain::lmsr;
+use crate::domain::market::{
+    models::{Market as _, MarketToken},
+    repository::MarketRepository,
+    services::manager::{MarketManager, NewMarket},
+};
+use crate::domain::user::*;
+use crate::infra::postgres::transaction;
 use crate::primitive::{NonEmptyString, NonEmptyVec};
-
 use chrono::{DateTime, Utc};
 use rouille::{input::json::json_input, Request, Response};
 use uuid::Uuid;
@@ -20,8 +25,7 @@ pub fn post(infra: &InfraManager, req: &Request) -> Result<Response, FailureResp
             FailureResponse::InvalidPayload
         })?;
 
-        let organizer = query_organizer(postgres, &req_market.organizer_id)?;
-        let new_market = create_new_market(req_market, &organizer);
+        let new_market = create_new_market(req_market);
 
         let market_repo = MarketRepository::from(postgres);
         market_repo.save_market(&new_market)?;
@@ -52,22 +56,7 @@ fn authorize(user_repo: UserRepository, user_id: &UserId) -> Result<(), FailureR
     }
 }
 
-fn query_organizer(
-    postgres: &dyn PostgresInfra,
-    organizer_id: &Uuid,
-) -> Result<Organizer, FailureResponse> {
-    let organizer_repo = OrganizerRepository::from(postgres);
-
-    match organizer_repo.query_organizer(&OrganizerId::from(*organizer_id))? {
-        Some(organizer) => Ok(organizer),
-        None => {
-            log::warn!("Client try to create a new market with invalid organizer id");
-            Err(FailureResponse::InvalidPayload)
-        }
-    }
-}
-
-fn create_new_market(req: ReqPostMarket, organizer: &Organizer) -> Market {
+fn create_new_market(req: ReqPostMarket) -> NewMarket {
     let new_tokens = NonEmptyVec::from_vec(
         req.tokens
             .into_iter()
@@ -75,9 +64,8 @@ fn create_new_market(req: ReqPostMarket, organizer: &Organizer) -> Market {
             .collect(),
     )
     .unwrap();
-    Market::new(
+    MarketManager::create(
         req.title,
-        organizer,
         req.description,
         lmsr::B::from(req.lmsr_b),
         req.open,

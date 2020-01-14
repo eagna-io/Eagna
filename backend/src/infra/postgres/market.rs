@@ -18,9 +18,9 @@ pub trait PostgresMarketInfra {
     // Postgres の FOR UPDATE ロックを使用する想定
     fn lock_market(&self, market_id: &Uuid) -> anyhow::Result<()>;
 
-    fn insert_market<'a, I>(
+    fn insert_market<'a>(
         &self,
-        market: NewMarket<'a>,
+        market: &NewMarket<'a>,
         tokens: &Vec<NewToken<'a>>,
     ) -> anyhow::Result<()>;
 
@@ -50,12 +50,12 @@ pub trait PostgresMarketInfra {
 #[derive(Debug, Insertable)]
 #[table_name = "markets"]
 pub struct NewMarket<'a> {
-    pub id: &'a Uuid,
+    pub id: Uuid,
     pub title: &'a str,
     pub description: &'a str,
     pub lmsr_b: i32,
-    pub open: &'a DateTime<Utc>,
-    pub close: &'a DateTime<Utc>,
+    pub open: DateTime<Utc>,
+    pub close: DateTime<Utc>,
 }
 
 #[derive(Debug, Insertable)]
@@ -64,7 +64,7 @@ pub struct NewToken<'a> {
     pub name: &'a str,
     pub description: &'a str,
     pub thumbnail_url: &'a str,
-    pub market_id: &'a Uuid,
+    pub market_id: Uuid,
     pub idx: i32,
 }
 
@@ -83,6 +83,7 @@ pub struct QueryMarket {
 
 #[derive(Debug, Clone, Queryable)]
 pub struct QueryToken {
+    pub id: i32,
     pub name: String,
     pub description: String,
     pub thumbnail_url: String,
@@ -104,10 +105,10 @@ impl PostgresMarketInfra for Postgres {
             .first::<Uuid>(&self.conn)?;
         Ok(())
     }
-    fn insert_market<'a, I>(
+    fn insert_market<'a>(
         &self,
-        market: NewMarket<'a>,
-        tokens: Vec<NewToken<'a>>,
+        market: &NewMarket<'a>,
+        tokens: &Vec<NewToken<'a>>,
     ) -> anyhow::Result<()> {
         // Insert market
         diesel::insert_into(markets::table)

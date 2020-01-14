@@ -1,18 +1,18 @@
-use super::{AmountCoin, AmountToken};
+use crate::domain::market::num::{AmountCoin, AmountToken};
 use crate::domain::user::UserId;
 use crate::primitive::NonEmptyString;
 use chrono::{DateTime, Utc};
 use getset::Getters;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, From)]
 pub struct MarketOrders {
     /// 時系列順にソートされている必要がある
     pub(super) orders: Vec<Order>,
 }
 
 impl MarketOrders {
-    pub(super) fn new() -> MarketOrders {
+    pub const fn new() -> MarketOrders {
         MarketOrders { orders: Vec::new() }
     }
 
@@ -26,22 +26,9 @@ impl MarketOrders {
 
     /// Order を履歴に追加する。
     /// それが適切なものかどうかはチェックしない
-    pub(super) fn add(
-        &mut self,
-        user_id: UserId,
-        token_name: NonEmptyString,
-        amount_token: AmountToken,
-        amount_coin: AmountCoin,
-    ) -> &Order {
-        let order = Order::new(
-            OrderId::new(),
-            user_id,
-            token_name,
-            amount_token,
-            amount_coin,
-        );
+    pub fn add(mut self, order: Order) -> MarketOrders {
         self.orders.push(order);
-        self.orders.last().unwrap()
+        self
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Order> + DoubleEndedIterator {
@@ -53,12 +40,6 @@ impl MarketOrders {
         user_id: &'a UserId,
     ) -> impl Iterator<Item = &'a Order> {
         self.iter().filter(move |o| o.user_id() == user_id)
-    }
-
-    pub fn compute_balance_of_user_coin(&self, user_id: &UserId) -> AmountCoin {
-        self.iter_related_to_user(user_id)
-            .map(|order| order.amount_coin())
-            .sum()
     }
 
     pub fn compute_balance_of_user_token(
@@ -85,15 +66,14 @@ pub struct Order {
 }
 
 impl Order {
-    fn new(
-        id: OrderId,
+    pub fn new(
         user_id: UserId,
         token_name: NonEmptyString,
         amount_token: AmountToken,
         amount_coin: AmountCoin,
     ) -> Order {
         Order {
-            id,
+            id: OrderId::new(),
             user_id,
             token_name,
             amount_token,

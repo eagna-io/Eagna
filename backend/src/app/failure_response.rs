@@ -43,9 +43,13 @@ impl Into<Response> for FailureResponse {
     }
 }
 
-impl<E: failure::AsFail> From<E> for FailureResponse {
+impl<E> From<E> for FailureResponse
+where
+    anyhow::Error: From<E>,
+{
     fn from(e: E) -> FailureResponse {
-        log::info!("Convert error into failure response : {:?}", e.as_fail());
+        log::info!("Convert error into failure response");
+        log::info!("    {:?}", anyhow::Error::from(e));
         FailureResponse::ServerError
     }
 }

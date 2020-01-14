@@ -4,7 +4,7 @@ mod post;
 pub use get_list::get_list;
 pub use post::post;
 
-use crate::domain::market::Order;
+use crate::domain::market::order::Order;
 use crate::primitive::NonEmptyString;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};

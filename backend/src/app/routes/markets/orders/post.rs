@@ -1,8 +1,14 @@
 use super::{ReqOrder, ResOrder};
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::{
-    market::*,
-    user::repository::{QueryUser, UserRepository},
+use crate::domain::market::{
+    models::{MarketId, OpenMarket},
+    num::{AmountCoin, AmountToken},
+    repository::MarketRepository,
+    services::manager::{MarketManager, OpenMarketOrderAdded},
+};
+use crate::domain::user::{
+    models::{UserCoinUpdated, UserWithAttrs},
+    repository::UserRepository,
 };
 use crate::infra::postgres::transaction;
 
@@ -27,33 +33,34 @@ pub fn post(
         .query_user(&user_id)?
         .ok_or(FailureResponse::InvalidPayload)?;
 
-    let added_order = transaction(postgres, || {
+    transaction(postgres, || {
         let market_repo = MarketRepository::from(postgres);
 
         market_repo.lock_market(&MarketId::from(market_id))?;
 
-        let mut open_market = match market_repo.query_market(&MarketId::from(market_id))? {
-            Some(Market::Open(m)) => m,
-            Some(_) => {
-                log::warn!("User requests order for not opened market : ${}", market_id);
-                return Err(FailureResponse::ResourceNotFound);
-            }
+        let open_market = match market_repo.query_market(&MarketId::from(market_id))? {
+            Some(m) => match m.into_open_market() {
+                Some(open_market) => open_market,
+                None => {
+                    log::warn!("User requests order for not opened market : ${}", market_id);
+                    return Err(FailureResponse::ResourceNotFound);
+                }
+            },
             None => {
                 log::warn!("User requests order for not exist market : ${}", market_id);
                 return Err(FailureResponse::ResourceNotFound);
             }
         };
 
-        let added_order = add_order(&mut open_market, &user, &req_data)?;
+        let (updated_market, updated_user) = add_order(open_market, user, &req_data)?;
 
-        market_repo.save_market(&Market::from(open_market))?;
+        market_repo.update_market(&updated_market)?;
+        UserRepository::from(postgres).update_user(&updated_user)?;
 
-        Ok(added_order)
-    })?;
+        let res_data = ResOrder::from(updated_market.added_order());
 
-    let res_data = ResOrder::from(&added_order);
-
-    Ok(Response::json(&res_data).with_status_code(201))
+        Ok(Response::json(&res_data).with_status_code(201))
+    })
 }
 
 fn validate_req_order(req_order: &ReqOrder) -> Result<(), FailureResponse> {
@@ -65,23 +72,34 @@ fn validate_req_order(req_order: &ReqOrder) -> Result<(), FailureResponse> {
     }
 }
 
-fn add_order(
-    open_market: &mut OpenMarket,
-    user: &QueryUser,
-    req_order: &ReqOrder,
-) -> Result<Order, FailureResponse> {
-    let new_order = open_market.try_add_order(
-        user,
-        &req_order.token_name,
-        &AmountToken::from(req_order.amount_token),
-    )?;
-    if new_order
-        .amount_coin()
-        .is_around_slip_range(&AmountCoin::from(req_order.amount_coin))
-    {
-        Ok(new_order.clone())
+fn add_order<M, U>(
+    market: M,
+    user: U,
+    req: &ReqOrder,
+) -> Result<(OpenMarketOrderAdded<M>, UserCoinUpdated<U>), FailureResponse>
+where
+    M: OpenMarket,
+    U: UserWithAttrs,
+{
+    if req.amount_token > 0 {
+        // buy
+        Ok(MarketManager::buy_token(
+            market,
+            user,
+            &req.token_name,
+            &AmountToken::from(req.amount_token),
+            &AmountCoin::from(-req.amount_coin),
+        )
+        .map_err(|e| e.source)?)
     } else {
-        log::info!("Slip is detected");
-        Err(FailureResponse::InvalidPayload)
+        // sell
+        Ok(MarketManager::sell_token(
+            market,
+            user,
+            &req.token_name,
+            &AmountToken::from(-req.amount_token),
+            &AmountCoin::from(req.amount_coin),
+        )
+        .map_err(|e| e.source)?)
     }
 }

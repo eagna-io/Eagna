@@ -17,7 +17,6 @@ table! {
     markets (id) {
         id -> Uuid,
         title -> Text,
-        organizer_id -> Uuid,
         description -> Text,
         lmsr_b -> Int4,
         open -> Timestamptz,
@@ -61,17 +60,6 @@ table! {
     use diesel::sql_types::*;
     use crate::infra::postgres::types::*;
 
-    organizers (id) {
-        id -> Uuid,
-        name -> Text,
-        thumbnail_url -> Text,
-    }
-}
-
-table! {
-    use diesel::sql_types::*;
-    use crate::infra::postgres::types::*;
-
     users (id) {
         id -> Uuid,
         name -> Text,
@@ -88,7 +76,6 @@ table! {
 joinable!(market_reward_records -> markets (market_id));
 joinable!(market_reward_records -> users (user_id));
 joinable!(market_tokens -> markets (market_id));
-joinable!(markets -> organizers (organizer_id));
 joinable!(orders -> markets (market_id));
 joinable!(orders -> users (user_id));
 
@@ -97,6 +84,5 @@ allow_tables_to_appear_in_same_query!(
     markets,
     market_tokens,
     orders,
-    organizers,
     users,
 );
