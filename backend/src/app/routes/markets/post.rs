@@ -97,14 +97,6 @@ struct ReqMarketToken {
     thumbnail_url: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct ReqMarketPrize {
-    name: NonEmptyString,
-    thumbnail_url: String,
-    target: String,
-}
-
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ResPostMarket<'a> {
