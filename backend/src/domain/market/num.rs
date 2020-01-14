@@ -1,21 +1,6 @@
 use std::{iter::Sum, ops::Mul};
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Add,
-    Sub,
-    Neg,
-    AddAssign,
-    From,
-    Serialize,
-    Deserialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Add, Sub, Neg, AddAssign, From)]
 pub struct AmountToken(pub(super) i32);
 
 impl AmountToken {
@@ -52,22 +37,7 @@ macro_rules! impl_sum {
 
 impl_sum!(AmountToken);
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Add,
-    Sub,
-    Neg,
-    AddAssign,
-    From,
-    Serialize,
-    Deserialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Add, Sub, Neg, AddAssign, From)]
 pub struct AmountCoin(pub(super) i32);
 
 impl AmountCoin {
