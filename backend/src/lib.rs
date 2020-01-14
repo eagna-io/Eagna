@@ -6,8 +6,6 @@ extern crate diesel_derive_enum;
 extern crate serde;
 #[macro_use]
 extern crate derive_more;
-#[macro_use]
-extern crate failure;
 
 pub mod app;
 pub mod domain;

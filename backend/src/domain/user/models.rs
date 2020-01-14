@@ -3,7 +3,6 @@ pub mod access_token;
 use self::access_token::AccessToken;
 use crate::domain::{market::num::AmountCoin, point::Point, user::services::auth::Credentials};
 use crate::primitive::NonEmptyString;
-use failure::Fallible;
 use getset::Getters;
 use uuid::Uuid;
 
@@ -27,14 +26,11 @@ pub trait UserWithAttrs: User {
     fn point(&self) -> Point;
     fn is_admin(&self) -> bool;
 
-    fn into_admin(self) -> Fallible<Admin<Self>> {
+    fn into_admin(self) -> anyhow::Result<Admin<Self>> {
         if self.is_admin() {
             Ok(Admin { user: self })
         } else {
-            Err(failure::err_msg(format!(
-                "{:?} is not an Admin user",
-                self.id()
-            )))
+            Err(anyhow::anyhow!("{:?} is not an Admin user", self.id()))
         }
     }
 
