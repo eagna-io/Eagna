@@ -136,7 +136,10 @@ impl MarketManager {
             return err!(AddOrderErrorType::InsufficientCoinBalance);
         }
         if !price.is_around(price_expected, MAX_SLIP_RATE) {
-            return err!(AddOrderErrorType::PriceSlip);
+            return err!(AddOrderErrorType::PriceSlip {
+                price,
+                expected: *price_expected
+            });
         }
 
         // Userのコイン量を更新
@@ -192,7 +195,10 @@ impl MarketManager {
         // 売却によって得られるコイン量
         let gain = market.compute_gain_of_sell(token_name, *amount_token);
         if !gain.is_around(gain_expected, MAX_SLIP_RATE) {
-            return err!(AddOrderErrorType::PriceSlip);
+            return err!(AddOrderErrorType::PriceSlip {
+                price: gain,
+                expected: *gain_expected
+            });
         }
 
         let new_user_coin = user.coin() + gain;
@@ -254,8 +260,11 @@ pub enum AddOrderErrorType {
     InsufficientTokenBalance,
     #[error("User does not have enough coin")]
     InsufficientCoinBalance,
-    #[error("Token price is not around of expected price")]
-    PriceSlip,
+    #[error("Token price is {price:?} but expected price is {expected:?}")]
+    PriceSlip {
+        price: AmountCoin,
+        expected: AmountCoin,
+    },
 }
 
 /*
