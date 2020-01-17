@@ -1,11 +1,12 @@
 import React, { FC } from "react";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import { User } from "models/user";
 import { MarketStatus, MarketToken } from "models/market";
 import { Order, OrderRepository } from "models/order";
 import { RootState } from "app/redux";
+import { updateUserCoin } from "app/redux/user";
 import { pc } from "app/components/responsive";
 
 import { useMarket } from "../data_provider";
@@ -17,7 +18,8 @@ interface OrderComponentProps {
 export default ({ token }: OrderComponentProps) => {
   const user = useSelector((state: RootState) => state.user.user);
   const { market, distribution, lmsr, myHistory, updateMarket } = useMarket();
-  const [requesting, setRequesting] = React.useState();
+  const [requesting, setRequesting] = React.useState(false);
+  const dispatch = useDispatch();
 
   const currentCost = lmsr.computeCost();
 
@@ -59,56 +61,42 @@ export default ({ token }: OrderComponentProps) => {
       />
     );
   } else {
-    if (!myHistory) {
-      // マーケットに未参加状態
+    if (!(user instanceof User)) {
       return (
         <BaseOrderComponent
           token={token}
-          msg="「参加する」ボタンを押すと取引ができるようになります"
+          msg="ログインが必要です"
           buyPrice={buyPrice}
           sellPrice={sellPrice}
         />
       );
     } else {
-      if (!(user instanceof User)) {
-        return (
-          <BaseOrderComponent
-            token={token}
-            msg="ログインが必要です"
-            buyPrice={buyPrice}
-            sellPrice={sellPrice}
-          />
-        );
-      } else {
-        const buyable = user.coin >= buyPrice;
-        const sellable = myHistory.assets.getToken(token.name) >= 1;
-        const requestOrder = async (
-          amountToken: number,
-          amountCoin: number
-        ) => {
-          setRequesting(true);
-          const order = Order.normal({
-            tokenName: token.name,
-            amountToken,
-            amountCoin
-          });
-          const res = await OrderRepository.create(market, user, order);
-          console.log(res);
-          await updateMarket();
-          setRequesting(false);
-        };
-        return (
-          <BaseOrderComponent
-            token={token}
-            buyable={buyable}
-            sellable={sellable}
-            buyPrice={buyPrice}
-            sellPrice={sellPrice}
-            requestOrder={requestOrder}
-            requesting={requesting}
-          />
-        );
-      }
+      const buyable = user.coin >= buyPrice;
+      const sellable = myHistory.assets.getToken(token.name) >= 1;
+      const requestOrder = async (amountToken: number, amountCoin: number) => {
+        setRequesting(true);
+        const order = Order.normal({
+          tokenName: token.name,
+          amountToken,
+          amountCoin
+        });
+        const res = await OrderRepository.create(market, user, order);
+        console.log(res);
+        await updateMarket();
+        dispatch(updateUserCoin(user.coin + res.amountCoin));
+        setRequesting(false);
+      };
+      return (
+        <BaseOrderComponent
+          token={token}
+          buyable={buyable}
+          sellable={sellable}
+          buyPrice={buyPrice}
+          sellPrice={sellPrice}
+          requestOrder={requestOrder}
+          requesting={requesting}
+        />
+      );
     }
   }
 };

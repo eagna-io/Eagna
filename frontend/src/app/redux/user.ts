@@ -36,7 +36,7 @@ export function clearUser(): Action {
   };
 }
 
-export function updateUserCoin(user: User, newCoin: number): Action {
+export function updateUserCoin(newCoin: number): Action {
   return {
     type: ActionType.UpdateUserCoin,
     newCoin
