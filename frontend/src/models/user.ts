@@ -7,10 +7,11 @@ import { Storage } from "infra/storage";
 // 現在ログインしているユーザー
 export class User {
   constructor(
-    readonly uid: string,
+    readonly id: string,
     readonly name: string,
     readonly email: string,
     readonly isAdmin: boolean,
+    readonly coin: number, // TODO: chipに直す
     readonly point: number,
     readonly accessToken: string
   ) {}
@@ -28,6 +29,7 @@ export class User {
       user.name,
       user.email,
       user.isAdmin,
+      user.coin,
       user.point,
       token
     );
