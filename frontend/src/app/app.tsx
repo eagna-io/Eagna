@@ -9,8 +9,6 @@ import SigninPage from "./pages/signin";
 import SignupPage from "./pages/signup";
 import AccountPage from "./pages/account";
 import MarketPage from "./pages/market";
-import AdminAddMarketPage from "./pages/admin_add_market";
-import AdminResolveMarketPage from "./pages/admin_resolve_market";
 import PlainTextPage from "./pages/plain_text";
 import NotFoundPage from "./pages/not_found";
 
@@ -39,12 +37,6 @@ const AppRouter: FC = () => (
         path="/market/:id"
         exact
         render={({ match }) => <MarketPage marketId={match.params.id} />}
-      />
-      <Route path="/admin/add_market" exact component={AdminAddMarketPage} />
-      <Route
-        path="/admin/resolve_market"
-        exact
-        component={AdminResolveMarketPage}
       />
       <Route
         path="/privacy_policy"
