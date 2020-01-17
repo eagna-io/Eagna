@@ -12,7 +12,7 @@ pub trait PostgresUserInfra {
     fn update_user_coin(&self, user_id: &Uuid, coin: u32) -> anyhow::Result<()>;
 
     /// point += point_delta
-    fn update_assign_user_point(&self, user_id: &Uuid, point_delta: i32) -> anyhow::Result<()>;
+    fn add_assign_user_point(&self, user_id: &Uuid, point_delta: i32) -> anyhow::Result<()>;
 }
 
 #[derive(Insertable)]
@@ -91,7 +91,7 @@ impl PostgresUserInfra for Postgres {
         Ok(())
     }
 
-    fn update_assign_user_point(&self, user_id: &Uuid, point_delta: i32) -> anyhow::Result<()> {
+    fn add_assign_user_point(&self, user_id: &Uuid, point_delta: i32) -> anyhow::Result<()> {
         diesel::update(users::table.filter(users::id.eq(user_id)))
             .set(users::coin.eq(users::coin + point_delta))
             .execute(&self.conn)?;
