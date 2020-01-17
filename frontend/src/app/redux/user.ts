@@ -14,12 +14,14 @@ export const INITIAL_STATE = {
 
 enum ActionType {
   SetUser = "USER_SET_USER",
-  ClearUser = "USER_CLEAR_USER"
+  ClearUser = "USER_CLEAR_USER",
+  UpdateUserCoin = "UPDATE_USER_COIN"
 }
 
 export type Action =
   | AppAction<ActionType.SetUser, { user: User }>
-  | AppAction<ActionType.ClearUser>;
+  | AppAction<ActionType.ClearUser>
+  | AppAction<ActionType.UpdateUserCoin, { newCoin: number }>;
 
 export function setUser(user: User): Action {
   return {
@@ -31,6 +33,13 @@ export function setUser(user: User): Action {
 export function clearUser(): Action {
   return {
     type: ActionType.ClearUser
+  };
+}
+
+export function updateUserCoin(user: User, newCoin: number): Action {
+  return {
+    type: ActionType.UpdateUserCoin,
+    newCoin
   };
 }
 
@@ -58,6 +67,14 @@ export function reducer(
       return {
         user: null
       };
+    case ActionType.UpdateUserCoin:
+      if (!state.user) {
+        return state;
+      } else {
+        return {
+          user: state.user.updateCoin(action.newCoin)
+        };
+      }
     default:
       return state;
   }

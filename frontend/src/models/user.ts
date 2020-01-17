@@ -1,7 +1,4 @@
-import {
-  EagnaUserApi,
-  User as InfraUser,
-} from "infra/eagna/user";
+import { EagnaUserApi, User as InfraUser } from "infra/eagna/user";
 import { Storage } from "infra/storage";
 
 // 現在ログインしているユーザー
@@ -21,6 +18,18 @@ export class User {
   // 場合などが想定されるため、専用関数でラップしている
   async getAccessToken(): Promise<string> {
     return this.accessToken;
+  }
+
+  updateCoin(newCoin: number): User {
+    return new User(
+      this.id,
+      this.name,
+      this.email,
+      this.isAdmin,
+      newCoin,
+      this.point,
+      this.accessToken
+    );
   }
 
   static fromInfra(user: InfraUser, token: string): User {
