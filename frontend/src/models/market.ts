@@ -6,7 +6,6 @@ import {
   MarketAttrs as InfraMarketAttrs,
   MarketStatus as InfraMarketStatus,
   MarketToken as InfraMarketToken,
-  MarketPrize as InfraMarketPrize
 } from "infra/eagna/market";
 import { User } from "models/user";
 import { LMSR } from "models/lmsr";
@@ -35,26 +34,22 @@ export class Market {
 export class MarketAttrs {
   constructor(
     readonly title: string,
-    readonly organizerId: string,
     readonly description: string,
     readonly open: Moment,
     readonly close: Moment,
     readonly lmsrB: number,
     readonly tokens: MarketToken[],
-    readonly prizes: MarketPrize[],
     readonly resolvedTokenName?: string
   ) {}
 
   static fromInfra(attrs: InfraMarketAttrs): MarketAttrs {
     return new MarketAttrs(
       attrs.title,
-      attrs.organizerId,
       attrs.description,
       attrs.open,
       attrs.close,
       attrs.lmsrB,
       attrs.tokens.map(MarketToken.fromInfra),
-      attrs.prizes.map(MarketPrize.fromInfra),
       attrs.resolvedTokenName
     );
   }
@@ -89,24 +84,6 @@ export class MarketToken {
 
   static fromInfra(token: InfraMarketToken): MarketToken {
     return new MarketToken(token.name, token.description, token.thumbnailUrl);
-  }
-}
-
-export class MarketPrize {
-  constructor(
-    readonly id: number,
-    readonly name: string,
-    readonly target: string,
-    readonly thumbnailUrl: string
-  ) {}
-
-  static fromInfra(prize: InfraMarketPrize): MarketPrize {
-    return new MarketPrize(
-      prize.id,
-      prize.name,
-      prize.target,
-      prize.thumbnailUrl
-    );
   }
 }
 

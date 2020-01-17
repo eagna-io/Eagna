@@ -14,9 +14,7 @@ import MessageComponent from "./components/message";
 import MarketHeader from "./components/header";
 import ParticipateComponent from "./components/participate";
 import TokenListComponent from "./components/tokens";
-import OrganizerComponent from "./components/organizer";
 import CoinsComponent from "./components/coins";
-import PrizeComponent from "./components/prize";
 import DescComponent from "./components/description";
 
 interface MarketPageProps {
@@ -60,10 +58,6 @@ const MarketPageInner: FC = () => {
         ) : null}
         <CoinsComponent />
         <TokenListComponent />
-        <HR />
-        <OrganizerComponent />
-        <HR />
-        <PrizeComponent />
         <HR />
         <DescComponent />
       </Contents>

@@ -1,11 +1,11 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
-import {User} from 'models/user';
-import {pc} from 'app/components/responsive';
-import * as table from 'app/components/table';
+import { User } from "models/user";
+import { pc } from "app/components/responsive";
+import * as table from "app/components/table";
 
-const ProfileComponent: React.FC<{user: User}> = ({user}) => {
+const ProfileComponent: React.FC<{ user: User }> = ({ user }) => {
   return (
     <Container>
       <table.Table>
@@ -29,6 +29,28 @@ const ProfileComponent: React.FC<{user: User}> = ({user}) => {
             </table.Cell3>
             <table.Cell7>
               <RightItem>{user.email}</RightItem>
+            </table.Cell7>
+          </table.Row>
+          <table.Row>
+            <table.Cell3>
+              <LeftItem>チップ</LeftItem>
+            </table.Cell3>
+            <table.Cell7>
+              <RightItem>
+                <Strong>{user.coin}</Strong>
+                <Weak>枚</Weak>
+              </RightItem>
+            </table.Cell7>
+          </table.Row>
+          <table.Row>
+            <table.Cell3>
+              <LeftItem>ポイント</LeftItem>
+            </table.Cell3>
+            <table.Cell7>
+              <RightItem>
+                <Strong>{user.point}</Strong>
+                <Weak>ポイント</Weak>
+              </RightItem>
             </table.Cell7>
           </table.Row>
         </table.Body>
@@ -64,4 +86,15 @@ const RightItem = styled.div`
   text-align: right;
   font-size: 14px;
   font-weight: bold;
+`;
+
+const Strong = styled.strong`
+  margin-left: 5px;
+  margin-right: 5px;
+  font-size: 16px;
+`;
+
+const Weak = styled.span`
+  font-size: 12px;
+  font-weight: normal;
 `;

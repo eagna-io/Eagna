@@ -74,14 +74,12 @@ export interface Market {
 
 export interface MarketAttrs {
   title: string;
-  organizerId: string;
   description: string;
   open: Moment;
   close: Moment;
   lmsrB: number;
   resolvedTokenName?: string;
   tokens: MarketToken[];
-  prizes: MarketPrize[];
 }
 
 export enum MarketStatus {
@@ -97,17 +95,9 @@ export interface MarketToken {
   thumbnailUrl: string;
 }
 
-export interface MarketPrize {
-  id: number;
-  name: string;
-  target: string;
-  thumbnailUrl: string;
-}
-
 const marketDecoder: D.Decoder<Market> = D.object({
   id: D.string(),
   title: D.string(),
-  organizerId: D.string(),
   description: D.string(),
   open: D.string().map(s => moment(s)),
   close: D.string().map(s => moment(s)),
@@ -122,19 +112,10 @@ const marketDecoder: D.Decoder<Market> = D.object({
       thumbnailUrl: D.string()
     })
   ),
-  prizes: D.array(
-    D.object({
-      id: D.number(),
-      name: D.string(),
-      target: D.string(),
-      thumbnailUrl: D.string()
-    })
-  )
 }).map(
   ({
     id,
     title,
-    organizerId,
     description,
     open,
     close,
@@ -143,18 +124,15 @@ const marketDecoder: D.Decoder<Market> = D.object({
     resolvedTokenName,
     tokenDistribution,
     tokens,
-    prizes
   }) => ({
     id,
     attrs: {
       title,
-      organizerId,
       description,
       open,
       close,
       lmsrB,
       tokens,
-      prizes,
       resolvedTokenName
     },
     status,
