@@ -31,23 +31,6 @@ export class EagnaOrderApi {
     return res.orders;
   }
 
-  static createInitialSupplyOrder(
-    marketId: string,
-    accessToken: string
-  ): Promise<Order> {
-    return EagnaBackendApi.post({
-      path: `/markets/${marketId}/orders/`,
-      accessToken: accessToken,
-      body: {
-        amountToken: 0, // Dont care
-        amountCoin: 10000, // Dont care
-        time: moment(), // Dont care
-        type: "CoinSupply"
-      },
-      decoder: orderDecoder
-    });
-  }
-
   static create(
     marketId: string,
     accessToken: string,
@@ -67,13 +50,6 @@ export interface Order {
   amountToken: number;
   amountCoin: number;
   time: Moment;
-  type: OrderType;
-}
-
-export enum OrderType {
-  CoinSupply = "CoinSupply",
-  Normal = "Normal",
-  Reward = "Reward"
 }
 
 const orderDecoder: D.Decoder<Order> = D.object({
@@ -81,18 +57,4 @@ const orderDecoder: D.Decoder<Order> = D.object({
   amountToken: D.number(),
   amountCoin: D.number(),
   time: D.string().map(s => moment(s)),
-  type: D.string().map(str2orderType)
 });
-
-function str2orderType(s: string): OrderType {
-  switch (s) {
-    case "Normal":
-      return OrderType.Normal;
-    case "CoinSupply":
-      return OrderType.CoinSupply;
-    case "Reward":
-      return OrderType.Reward;
-    default:
-      throw new Error(`Invalid order type : ${s}`);
-  }
-}

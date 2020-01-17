@@ -9,10 +9,9 @@ import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
 import NotFoundPage from "app/pages/not_found";
 
-import MarketDataProvider, { useMarket } from "./components/data_provider";
+import MarketDataProvider from "./components/data_provider";
 import MessageComponent from "./components/message";
 import MarketHeader from "./components/header";
-import ParticipateComponent from "./components/participate";
 import TokenListComponent from "./components/tokens";
 import CoinsComponent from "./components/coins";
 import DescComponent from "./components/description";
@@ -43,19 +42,12 @@ const MarketPage: FC<MarketPageProps> = ({ marketId }) => {
 export default MarketPage;
 
 const MarketPageInner: FC = () => {
-  const { myHistory } = useMarket();
   return (
     <>
       <Header />
       <MessageComponent />
       <MarketHeader />
       <Contents>
-        {!myHistory ? (
-          <>
-            <ParticipateComponent />
-            <HR />
-          </>
-        ) : null}
         <CoinsComponent />
         <TokenListComponent />
         <HR />

@@ -1,18 +1,8 @@
 import moment, { Moment } from "moment";
-import {
-  EagnaOrderApi,
-  Order as InfraOrder,
-  OrderType as InfraOrderType
-} from "infra/eagna/order";
+import { EagnaOrderApi, Order as InfraOrder } from "infra/eagna/order";
 import { Market, TokenDistribution } from "models/market";
 import { LMSR } from "models/lmsr";
 import { User } from "models/user";
-
-export enum OrderType {
-  CoinSupply = "CoinSupply",
-  Normal = "Normal",
-  Reward = "Reward"
-}
 
 export class Order {
   readonly uniqueString: string;
@@ -21,15 +11,10 @@ export class Order {
     readonly amountToken: number,
     readonly amountCoin: number,
     readonly time: Moment,
-    readonly type: OrderType,
     readonly tokenName?: string
   ) {
     const randomNum = Math.floor(Math.random() * 100000);
     this.uniqueString = `${time.unix()}-${randomNum}`;
-  }
-
-  static coinSupply(): Order {
-    return new Order(0, 10000, moment(), OrderType.CoinSupply);
   }
 
   static normal(order: {
@@ -41,7 +26,6 @@ export class Order {
       order.amountToken,
       order.amountCoin,
       moment(),
-      OrderType.Normal,
       order.tokenName
     );
   }
@@ -51,31 +35,8 @@ export class Order {
       order.amountToken,
       order.amountCoin,
       order.time,
-      fromInfraOrderType(order.type),
       order.tokenName
     );
-  }
-}
-
-function fromInfraOrderType(type: InfraOrderType): OrderType {
-  switch (type) {
-    case InfraOrderType.CoinSupply:
-      return OrderType.CoinSupply;
-    case InfraOrderType.Normal:
-      return OrderType.Normal;
-    case InfraOrderType.Reward:
-      return OrderType.Reward;
-  }
-}
-
-function toInfraOrderType(type: OrderType): InfraOrderType {
-  switch (type) {
-    case OrderType.CoinSupply:
-      return InfraOrderType.CoinSupply;
-    case OrderType.Normal:
-      return InfraOrderType.Normal;
-    case OrderType.Reward:
-      return InfraOrderType.Reward;
   }
 }
 
@@ -162,29 +123,24 @@ export class MyAssets {
       name: string;
       amount: number;
     }[],
-    readonly myCoins: number
   ) {}
 
   static fromMyOrders(myOrders: Order[]): MyAssets {
-    const myCoins = myOrders.reduce((acc, order) => acc + order.amountCoin, 0);
-
     const myTokens: { name: string; amount: number }[] = [];
     myOrders.forEach(order => {
-      if (order.type === OrderType.Normal) {
-        const tokenName = order.tokenName as string;
-        const myToken = myTokens.find(({ name }) => name === tokenName);
-        if (myToken) {
-          myToken.amount += order.amountToken;
-        } else {
-          myTokens.push({
-            name: tokenName,
-            amount: order.amountToken
-          });
-        }
+      const tokenName = order.tokenName as string;
+      const myToken = myTokens.find(({ name }) => name === tokenName);
+      if (myToken) {
+        myToken.amount += order.amountToken;
+      } else {
+        myTokens.push({
+          name: tokenName,
+          amount: order.amountToken
+        });
       }
     });
 
-    return new MyAssets(myTokens, myCoins);
+    return new MyAssets(myTokens);
   }
 
   getToken(tokenName: string): number {
@@ -194,10 +150,6 @@ export class MyAssets {
     } else {
       return 0;
     }
-  }
-
-  getCoin(): number {
-    return this.myCoins;
   }
 }
 
@@ -229,7 +181,6 @@ export class OrderRepository {
       amountToken: order.amountToken,
       amountCoin: order.amountCoin,
       time: order.time,
-      type: toInfraOrderType(order.type)
     };
     const newOrder = await EagnaOrderApi.create(
       market.id,

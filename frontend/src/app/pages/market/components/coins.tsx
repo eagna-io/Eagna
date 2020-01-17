@@ -1,21 +1,22 @@
 import React from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 import { pc } from "app/components/responsive";
+import { RootState } from "app/redux";
 
-import { useMarket } from "./data_provider";
 import Section from "./section_skelton";
 
 const CoinsComponent: React.FC = () => {
-  const { myHistory } = useMarket();
+  const user = useSelector((state: RootState) => state.user.user);
 
   return (
-    <Section title="所持コイン">
+    <Section title="所持チップ">
       <AssetContainer>
         <CoinIcon src="/img/market/coins.svg" />
         <Volume>
-          {myHistory ? myHistory.assets.getCoin() : "-"}
-          <VolumeUnit>&nbsp;coins</VolumeUnit>
+          {user ? user.coin : "-"}
+          <VolumeUnit>&nbsp;枚</VolumeUnit>
         </Volume>
       </AssetContainer>
     </Section>

@@ -1,8 +1,10 @@
 import React from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
-import {MarketToken} from 'models/market';
+import { MarketToken } from "models/market";
 import { pc } from "app/components/responsive";
+import { RootState } from "app/redux";
 
 import { useMarket } from "../data_provider";
 
@@ -13,6 +15,7 @@ interface Props {
 const AssetComponent: React.FC<Props> = ({ token }) => {
   const { myHistory } = useMarket();
   const myAssets = myHistory ? myHistory.assets : undefined;
+  const user = useSelector((state: RootState) => state.user.user);
 
   return (
     <Container>
@@ -25,11 +28,11 @@ const AssetComponent: React.FC<Props> = ({ token }) => {
         </Amount>
       </AssetContainer>
       <AssetContainer>
-        <Label>所持コイン</Label>
+        <Label>所持チップ</Label>
         <Amount>
           <Icon src="/img/market/coins.svg" />
-          {myAssets ? myAssets.getCoin() : "-"}&nbsp;
-          <AmountUnit>coin</AmountUnit>
+          {user ? user.coin : "-"}&nbsp;
+          <AmountUnit>枚</AmountUnit>
         </Amount>
       </AssetContainer>
     </Container>

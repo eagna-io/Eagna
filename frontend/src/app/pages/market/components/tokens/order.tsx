@@ -80,7 +80,7 @@ export default ({ token }: OrderComponentProps) => {
           />
         );
       } else {
-        const buyable = myHistory.assets.getCoin() >= buyPrice;
+        const buyable = user.coin >= buyPrice;
         const sellable = myHistory.assets.getToken(token.name) >= 1;
         const requestOrder = async (
           amountToken: number,
