@@ -10,6 +10,9 @@ pub trait PostgresUserInfra {
     fn query_user_credentials(&self, email: &str) -> anyhow::Result<Option<QueryUserCredentials>>;
 
     fn update_user_coin(&self, user_id: &Uuid, coin: u32) -> anyhow::Result<()>;
+
+    /// point += point_delta
+    fn add_assign_user_point(&self, user_id: &Uuid, point_delta: i32) -> anyhow::Result<()>;
 }
 
 #[derive(Insertable)]
@@ -84,6 +87,13 @@ impl PostgresUserInfra for Postgres {
     fn update_user_coin(&self, user_id: &Uuid, coin: u32) -> anyhow::Result<()> {
         diesel::update(users::table.filter(users::id.eq(user_id)))
             .set(users::coin.eq(coin as i32))
+            .execute(&self.conn)?;
+        Ok(())
+    }
+
+    fn add_assign_user_point(&self, user_id: &Uuid, point_delta: i32) -> anyhow::Result<()> {
+        diesel::update(users::table.filter(users::id.eq(user_id)))
+            .set(users::coin.eq(users::coin + point_delta))
             .execute(&self.conn)?;
         Ok(())
     }

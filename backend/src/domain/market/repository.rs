@@ -5,7 +5,9 @@ use super::{
     },
     num::{AmountCoin, AmountToken},
     order::{MarketOrders, Order, OrderId},
-    services::manager::{NewClosedMarket, NewMarket, NewOpenMarket, OpenMarketOrderAdded},
+    services::manager::{
+        NewClosedMarket, NewMarket, NewOpenMarket, NewResolvedMarket, OpenMarketOrderAdded,
+    },
 };
 use crate::domain::lmsr;
 use crate::domain::user::models::UserId;
@@ -393,5 +395,11 @@ impl<M: Market> UpdatableMarket for OpenMarketOrderAdded<M> {
 impl<M: Market> UpdatableMarket for NewClosedMarket<M> {
     fn update(&self, pg: &dyn PostgresInfra) -> anyhow::Result<()> {
         pg.update_market_status(self.id().as_uuid(), &InfraMarketStatus::Closed)
+    }
+}
+
+impl<M: Market> UpdatableMarket for NewResolvedMarket<M> {
+    fn update(&self, pg: &dyn PostgresInfra) -> anyhow::Result<()> {
+        pg.resolve_market(self.id().as_uuid(), self.resolved_token_name().as_str())
     }
 }
