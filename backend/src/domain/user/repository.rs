@@ -1,6 +1,6 @@
 pub mod access_token;
 
-use crate::domain::market::num::AmountCoin;
+use crate::domain::market::{num::AmountCoin, services::manager::UserPointIncreased};
 use crate::domain::point::Point;
 use crate::domain::user::*;
 use crate::infra::postgres::{user::NewUser as NewUserInfra, PostgresInfra};
@@ -105,5 +105,11 @@ where
 {
     fn update_user(&self, pg: &dyn PostgresInfra) -> anyhow::Result<()> {
         pg.update_user_coin(self.id().as_uuid(), self.coin().as_i32() as u32)
+    }
+}
+
+impl UpdatableUser for UserPointIncreased {
+    fn update_user(&self, pg: &dyn PostgresInfra) -> anyhow::Result<()> {
+        pg.add_assign_user_point(self.id().as_uuid(), self.point_increased().as_i32())
     }
 }
