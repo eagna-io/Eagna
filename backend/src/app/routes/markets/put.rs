@@ -1,6 +1,9 @@
 use super::ApiMarketStatus;
 use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::{market::services::resolver::resolve_market_uncheck, market::*, user::*};
+use crate::domain::market::{
+    models::MarketId, repository::MarketRepository, services::manager::MarketManager,
+};
+use crate::domain::user::{models::UserId, repository::UserRepository};
 use crate::infra::postgres::transaction;
 use crate::primitive::NonEmptyString;
 
@@ -17,7 +20,7 @@ pub fn put(
     let postgres = infra.get_postgres()?;
     transaction(postgres, || {
         let user_repo = UserRepository::from(postgres);
-        authorize(user_repo, &access_token.user_id)?;
+        authorize(&user_repo, &access_token.user_id)?;
 
         let req_data = json_input::<ReqPutMarket>(req).map_err(|e| {
             log::warn!("Invalid payload : {:?}", e);
@@ -39,21 +42,26 @@ pub fn put(
         market_repo.lock_market(&MarketId::from(market_id))?;
 
         let closed_market = match market_repo.query_market(&MarketId::from(market_id))? {
-            Some(Market::Closed(m)) => m,
-            Some(_) => {
-                log::warn!("specified market is not closed.");
-                return Err(FailureResponse::ResourceNotFound);
-            }
             None => return Err(FailureResponse::ResourceNotFound),
+            Some(m) => match m.into_closed_market() {
+                Some(closed_market) => closed_market,
+                None => {
+                    log::warn!("specified market is not closed.");
+                    return Err(FailureResponse::ResourceNotFound);
+                }
+            },
         };
 
-        if !closed_market.attrs().is_valid_token(&resolved_token_name) {
-            log::warn!("invalid resolved token : {:?}", resolved_token_name);
-            return Err(FailureResponse::InvalidPayload);
-        }
-        let resolved_market = resolve_market_uncheck(closed_market, resolved_token_name);
+        let (resolved_market, updated_users) =
+            MarketManager::resolve(closed_market, resolved_token_name).map_err(|e| {
+                log::warn!("{:?}", e);
+                FailureResponse::InvalidPayload
+            })?;
 
-        market_repo.save_market(&Market::from(resolved_market))?;
+        market_repo.update_market(&resolved_market)?;
+        for updated_user in updated_users {
+            user_repo.update_user(&updated_user)?;
+        }
 
         Ok(())
     })?;
@@ -62,7 +70,7 @@ pub fn put(
 }
 
 // マーケットを作成する権限があるかチェック
-fn authorize(user_repo: UserRepository, user_id: &UserId) -> Result<(), FailureResponse> {
+fn authorize(user_repo: &UserRepository, user_id: &UserId) -> Result<(), FailureResponse> {
     match user_repo.query_user(user_id)? {
         Some(user) => {
             if user.is_admin() {

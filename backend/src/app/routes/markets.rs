@@ -1,10 +1,10 @@
 mod get;
 pub mod orders;
 mod post;
-// mod put;
+mod put;
 pub use get::{get, get_list};
 pub use post::post;
-// pub use put::put;
+pub use put::put;
 
 use crate::domain::market::models::MarketStatus;
 
