@@ -5,6 +5,7 @@ on:
     branches:
       - master
     paths:
+      - '.github/workflows/rust.yml'
       - 'backend/Cargo.toml'
       - 'backend/Cargo.lock'
       - 'backend/src/**.rs'
@@ -12,25 +13,20 @@ on:
     branches:
       - master
     paths:
+      - '.github/workflows/rust.yml'
       - 'backend/Cargo.toml'
       - 'backend/Cargo.lock'
       - 'backend/src/**.rs'
 
 jobs:
-  test:
-
+  check:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v1
     - name: Check
       run: cd backend && cargo check
-    - name: Build
-      run: cd backend && cargo build --verbose
-    - name: Cache cargo build
+    - name: Cache cargo check
       uses: actions/cache@v1
       with:
         path: backend/target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('backend/Cargo.lock') }}
-    - name: Run tests
-      run: cd backend && cargo test --verbose
