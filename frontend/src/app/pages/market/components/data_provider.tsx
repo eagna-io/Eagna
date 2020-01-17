@@ -20,7 +20,7 @@ interface MarketData {
     distribution: DistributionHistory;
     price: PriceHistory;
   };
-  myHistory?: {
+  myHistory: {
     orders: Order[];
     assets: MyAssets;
   };
@@ -116,7 +116,7 @@ class MarketDataSource {
     readonly market: Market,
     readonly distribution: TokenDistribution,
     readonly publicOrders: Order[],
-    readonly myOrders?: Order[]
+    readonly myOrders: Order[] = []
   ) {}
 
   static async queryPublic(
@@ -161,13 +161,10 @@ class MarketDataSource {
         distribution: distributionHistory,
         price: priceHistory
       },
-      myHistory:
-        this.myOrders && this.myOrders.length > 0
-          ? {
-              orders: this.myOrders,
-              assets: MyAssets.fromMyOrders(this.myOrders)
-            }
-          : undefined
+      myHistory: {
+        orders: this.myOrders,
+        assets: MyAssets.fromMyOrders(this.myOrders)
+      }
     };
   }
 }
