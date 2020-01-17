@@ -63,7 +63,7 @@ const DataProvider: React.FC<ComponentProps> = ({
   React.useEffect(() => {
     if (
       dataSource instanceof MarketDataSource &&
-      !dataSource.myOrders &&
+      dataSource.myOrders === [] &&
       user instanceof User
     ) {
       dataSource.queryPrivate(user).then(setDataSource);
