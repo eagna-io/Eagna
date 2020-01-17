@@ -141,14 +141,14 @@ const marketDecoder: D.Decoder<Market> = D.object({
 );
 
 function str2status(s: string): MarketStatus {
-  switch (s) {
-    case "Upcoming":
+  switch (s.toUpperCase()) {
+    case "UPCOMING":
       return MarketStatus.Upcoming;
-    case "Open":
+    case "OPEN":
       return MarketStatus.Open;
-    case "Closed":
+    case "CLOSED":
       return MarketStatus.Closed;
-    case "Resolved":
+    case "RESOLVED":
       return MarketStatus.Resolved;
     default:
       throw new Error(`Invalid market status : ${s}`);
