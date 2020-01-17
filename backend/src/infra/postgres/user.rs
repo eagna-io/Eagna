@@ -93,7 +93,7 @@ impl PostgresUserInfra for Postgres {
 
     fn add_assign_user_point(&self, user_id: &Uuid, point_delta: i32) -> anyhow::Result<()> {
         diesel::update(users::table.filter(users::id.eq(user_id)))
-            .set(users::coin.eq(users::coin + point_delta))
+            .set(users::point.eq(users::point + point_delta))
             .execute(&self.conn)?;
         Ok(())
     }
