@@ -1,8 +1,6 @@
 import {
   EagnaUserApi,
   User as InfraUser,
-  MarketRewardRecord as InfraMarketRewardRecord,
-  PrizeTradeRecord as InfraPrizeTradeRecord
 } from "infra/eagna/user";
 import { Storage } from "infra/storage";
 
@@ -35,9 +33,6 @@ export class User {
     );
   }
 }
-
-export type PrizeTradeRecord = InfraPrizeTradeRecord;
-export type MarketRewardRecord = InfraMarketRewardRecord;
 
 export class UserRepository {
   static async queryMe(): Promise<User | null> {
