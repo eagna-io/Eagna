@@ -316,10 +316,14 @@ impl MarketManager {
     pub fn resolve<M>(
         market: M,
         resolved_token_name: NonEmptyString,
-    ) -> (NewResolvedMarket<M>, Vec<UserPointIncreased>)
+    ) -> anyhow::Result<(NewResolvedMarket<M>, Vec<UserPointIncreased>)>
     where
         M: ClosedMarket,
     {
+        if !market.is_valid_token(&resolved_token_name) {
+            return Err(anyhow::anyhow!("Invalid resolved token"));
+        }
+
         let updated_users = market
             .orders()
             .iter()
@@ -346,7 +350,7 @@ impl MarketManager {
             resolved_token_name,
         };
 
-        (updated_market, updated_users)
+        Ok((updated_market, updated_users))
     }
 }
 
