@@ -386,3 +386,9 @@ impl User for UserPointIncreased {
         &self.id
     }
 }
+
+impl UserPointIncreased {
+    pub fn point_increased(&self) -> Point {
+        self.point_increased
+    }
+}
