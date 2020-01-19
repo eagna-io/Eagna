@@ -2,7 +2,6 @@ import React, { FC } from "react";
 import styled from "styled-components";
 import { Moment } from "moment";
 
-import { Eagna } from "models/organizer";
 import { pc, MinPcWidth } from "app/components/responsive";
 import StatusBadge from "app/components/status_badge";
 
@@ -16,10 +15,6 @@ const MarketHeader: FC = () => {
       <StyledStatusBadge status={market.status} />
       <MarketPeriod open={market.attrs.open} close={market.attrs.close} />
       <MarketTitle>{market.attrs.title}</MarketTitle>
-      <MarketCreator>
-        マーケット作成者
-        <MarketCreatorName>{Eagna.name}</MarketCreatorName>
-      </MarketCreator>
     </Container>
   );
 };
@@ -106,31 +101,5 @@ const MarketTitle = styled.h3`
     width: ${MinPcWidth - 220}px;
     margin-top: 0px;
     font-size: 28px;
-  `)}
-`;
-
-const MarketCreator = styled.div`
-  width: 100%;
-  margin-top: 20px;
-  font-size: 10px;
-  text-align: right;
-
-  ${pc(`
-    position: absolute;
-    bottom: 15px;
-    right: calc((100% - ${MinPcWidth}px) / 2);
-    width: 250px;
-    margin-top: 0px;
-    font-size: 14px;
-  `)}
-`;
-
-const MarketCreatorName = styled.strong`
-  font-size: 16px;
-  font-weight: bold;
-  margin-left: 15px;
-
-  ${pc(`
-    font-size: 18px;
   `)}
 `;
