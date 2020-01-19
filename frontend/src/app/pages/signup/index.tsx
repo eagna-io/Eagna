@@ -114,9 +114,17 @@ export default () => {
           }
           label={
             <Terms>
-              <a href="/terms">CROPサービス利用規約</a>、
-              <a href="/privacy">プライバシーポリシー</a>、
-              <a href="/terms-point">CROPサービスポイント規約</a>
+              <a href="/terms.pdf" target="_blank">
+                CROPサービス利用規約
+              </a>
+              、
+              <a href="/privacy_policy.pdf" target="_blank">
+                プライバシーポリシー
+              </a>
+              、
+              <a href="/point-terms.pdf" target="_blank">
+                CROPサービスポイント規約
+              </a>
               を読んだ上で内容に同意します。
             </Terms>
           }
