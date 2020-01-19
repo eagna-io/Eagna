@@ -9,7 +9,6 @@ import SigninPage from "./pages/signin";
 import SignupPage from "./pages/signup";
 import AccountPage from "./pages/account";
 import MarketPage from "./pages/market";
-import PlainTextPage from "./pages/plain_text";
 import NotFoundPage from "./pages/not_found";
 
 const App: FC<{ store: Store }> = ({ store }) => {
@@ -37,16 +36,6 @@ const AppRouter: FC = () => (
         path="/market/:id"
         exact
         render={({ match }) => <MarketPage marketId={match.params.id} />}
-      />
-      <Route
-        path="/privacy_policy"
-        exact
-        render={() => <PlainTextPage textUrl="/txt/privacy_policy.txt" />}
-      />
-      <Route
-        path="/terms"
-        exact
-        render={() => <PlainTextPage textUrl="/txt/terms.txt" />}
       />
       <Route render={() => <NotFoundPage />} />
     </Switch>
