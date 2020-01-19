@@ -6,7 +6,7 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - REPOSITORY_URI=088281206004.dkr.ecr.ap-northeast-1.amazonaws.com/crop/crop
+      - REPOSITORY_URI=088281206004.dkr.ecr.ap-northeast-1.amazonaws.com/crop/private-market
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
