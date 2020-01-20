@@ -6,8 +6,8 @@
 if [ "${BUILD_MODE}" = "release" ]
 then
   echo "Building with release mode"
-  cargo build --release
+  cargo build --color never --release
 else
   echo "Building with debug mode"
-  cargo build
+  cargo build --color never
 fi
