@@ -1,7 +1,7 @@
 FROM rust:1.40.0 as builder
 ENV USER=root 
 # MODE *MUST* be one of "debug" or "release"
-ARG BUILD_MODE
+ARG BUILD_MODE="debug"
 ENV BUILD_MODE ${BUILD_MODE}
 WORKDIR /usr/src
 RUN cargo new eagna
