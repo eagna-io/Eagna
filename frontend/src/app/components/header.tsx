@@ -19,12 +19,31 @@ const Header: FC<HeaderProps> = ({ history }) => {
   const user = useSelector((state: RootState) => state.user.user);
   return (
     <Container>
-      <Link to="/">
-        <Logo src="/img/logo.png" />
-      </Link>
-      <ProfileDropdownContainer>
-        <ProfileDropdown history={history} user={user} />
-      </ProfileDropdownContainer>
+      <div>
+        <Link to="/">
+          <Logo src="/img/logo.png" />
+        </Link>
+      </div>
+      <div>
+        <LinkItem href="https://www.crop-predictionmarket.com/" target="_blank">
+          会社概要
+        </LinkItem>
+        <LinkItem
+          href="https://note.com/rohan_market/n/nc2616660d33a"
+          target="_blank"
+        >
+          操作説明
+        </LinkItem>
+        <LinkItem
+          href="https://note.com/rohan_market/n/nacb0f6d2df6d"
+          target="_blank"
+        >
+          予測市場とは?
+        </LinkItem>
+        <ProfileDropdownContainer>
+          <ProfileDropdown history={history} user={user} />
+        </ProfileDropdownContainer>
+      </div>
     </Container>
   );
 };
@@ -32,24 +51,43 @@ const Header: FC<HeaderProps> = ({ history }) => {
 export default withRouter(Header);
 
 const Container = styled.div`
+  display: flex;
   width: 100vw;
   height: 60px;
   padding: 0 30px;
   background-color: #1c384e;
+  justify-content: space-between;
 `;
 
 const Logo = styled.img`
-  display: inline-block;
-  position: absolute;
+  display: block;
   height: 50px;
-  top: 5px;
-  left: 30px;
+  margin-top: 5px;
+`;
+
+const LinkItem = styled.a`
+  display: none;
+
+  ${pc(`
+    display: inline-block;
+    height: 60px;
+    vertical-align: top;
+    margin: 0 30px;
+    line-height: 60px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+
+    &:visited {
+      color: white;
+    }
+  `)}
 `;
 
 const ProfileDropdownContainer = styled.div`
-  position: absolute;
-  top: 15px;
-  right: 30px;
+  display: inline-block;
+  margin-top: 15px;
+  margin-left: 20px;
 `;
 
 interface ProfileDropdownProps {
@@ -84,11 +122,44 @@ const ProfileDropdown: FC<ProfileDropdownProps> = ({ history, user }) => {
         {user instanceof User ? (
           <>
             <MenuItem>
-              <MenuItemLink to="/account">{user.name}</MenuItemLink>
+              <MenuItemLink to="/account">ホーム</MenuItemLink>
             </MenuItem>
             <Line />
             <MenuItem>
-              <Signout onClick={() => {/*TODO*/}}>Sign out</Signout>
+              <MenuItemExternalLink
+                href="https://note.com/rohan_market/n/nc2616660d33a"
+                target="_blank"
+              >
+                操作説明
+              </MenuItemExternalLink>
+            </MenuItem>
+            <Line />
+            <MenuItem>
+              <MenuItemExternalLink
+                href="https://note.com/rohan_market/n/nacb0f6d2df6d"
+                target="_blank"
+              >
+                予測市場とは
+              </MenuItemExternalLink>
+            </MenuItem>
+            <Line />
+            <MenuItem>
+              <MenuItemExternalLink
+                href="https://www.crop-predictionmarket.com/"
+                target="_blank"
+              >
+                会社概要
+              </MenuItemExternalLink>
+            </MenuItem>
+            <Line />
+            <MenuItem>
+              <Signout
+                onClick={() => {
+                  /*TODO*/
+                }}
+              >
+                Sign out
+              </Signout>
             </MenuItem>
           </>
         ) : (
@@ -121,7 +192,7 @@ const DropdownCaret = styled.span`
 const ProfileMenu = styled("div")<{ show: boolean }>`
   position: absolute;
   display: ${props => (props.show ? "block" : "none")};
-  width: 100px;
+  width: 120px;
   top: 50px;
   right: 10px;
   z-index: 1000;
@@ -153,6 +224,13 @@ const MenuItem = styled.div`
 `;
 
 const MenuItemLink = styled(Link)`
+  text-decoration: none;
+  &:visited {
+    color: #586069;
+  }
+`;
+
+const MenuItemExternalLink = styled.a`
   text-decoration: none;
   &:visited {
     color: #586069;
