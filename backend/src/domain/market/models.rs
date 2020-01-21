@@ -19,11 +19,6 @@ pub trait Market {
     fn status(&self) -> MarketStatus;
     fn orders(&self) -> &MarketOrders;
 
-    /// ResolvedMarket はこれを上書きする
-    fn maybe_resolved_token_name(&self) -> Option<&NonEmptyString> {
-        None
-    }
-
     fn is_valid_token(&self, token_name: &NonEmptyString) -> bool {
         self.attrs()
             .tokens()
@@ -124,10 +119,6 @@ pub trait ClosedMarket: Market {}
  */
 pub trait ResolvedMarket: Market {
     fn resolved_token_name(&self) -> &NonEmptyString;
-
-    fn maybe_resolved_token_name(&self) -> Option<&NonEmptyString> {
-        Some(self.resolved_token_name())
-    }
 }
 
 /*

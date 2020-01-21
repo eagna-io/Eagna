@@ -2,7 +2,7 @@ use super::ApiMarketStatus;
 use crate::app::{get_params, FailureResponse, InfraManager};
 use crate::domain::market::{
     models::{Market, MarketId, MarketStatus, MarketToken},
-    repository::MarketRepository,
+    repository::{MarketRepository, QueryMarket},
 };
 use arrayvec::ArrayVec;
 use chrono::{DateTime, Utc};
@@ -91,8 +91,8 @@ struct ResMarketToken<'a> {
     thumbnail_url: &'a str,
 }
 
-impl<'a, M: Market> From<&'a M> for ResMarket<'a> {
-    fn from(market: &'a M) -> ResMarket<'a> {
+impl<'a> From<&'a QueryMarket> for ResMarket<'a> {
+    fn from(market: &'a QueryMarket) -> ResMarket<'a> {
         ResMarket {
             id: *market.id().as_uuid(),
             title: market.attrs().title().as_str(),
@@ -112,7 +112,7 @@ impl<'a, M: Market> From<&'a M> for ResMarket<'a> {
                 .iter()
                 .map(|(name, amount)| (name.as_str(), amount.as_i32() as u32))
                 .collect(),
-            resolved_token_name: market.maybe_resolved_token_name().map(|s| s.as_str()),
+            resolved_token_name: market.resolved_token_name().as_ref().map(|s| s.as_str()),
         }
     }
 }

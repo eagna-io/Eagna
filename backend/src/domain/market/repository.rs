@@ -21,6 +21,7 @@ use crate::infra::postgres::{
     PostgresInfra,
 };
 use crate::primitive::{NonEmptyString, NonEmptyVec};
+use getset::Getters;
 
 #[derive(From)]
 /// `MarketRepository` の生成には `MarketRepository::from` を使う.
@@ -119,11 +120,13 @@ impl<'a> MarketRepository<'a> {
  * QueriedMarket
  * ===============
  */
+#[derive(Debug, Getters)]
 pub struct QueryMarket {
     id: MarketId,
     attrs: MarketAttrs,
     status: MarketStatus,
     orders: MarketOrders,
+    #[get = "pub"]
     resolved_token_name: Option<NonEmptyString>,
 }
 
