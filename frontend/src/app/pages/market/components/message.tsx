@@ -31,7 +31,7 @@ export default () => {
       if (user === null) {
         return (
           <Container bgcolor={OpenMarketColor}>
-            取引を行うためには<Link to="/login">ログイン</Link>
+            取引を行うためには<Link to="/signin">ログイン</Link>
             する必要があります。
           </Container>
         );
