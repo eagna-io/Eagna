@@ -132,7 +132,7 @@ const BaseOrderComponent: FC<BaseOrderComponentProps> = ({
             onClick={() => requestOrder(1, -buyPrice)}
           >
             {buyPrice}
-            <OrderButtonTextUnit>coin</OrderButtonTextUnit>
+            <OrderButtonTextUnit>枚</OrderButtonTextUnit>
           </BuyButton>
           <OrderButtonDesc>で購入する</OrderButtonDesc>
           {buyable ? (
@@ -149,7 +149,7 @@ const BaseOrderComponent: FC<BaseOrderComponentProps> = ({
             onClick={() => requestOrder(-1, sellPrice || 0)}
           >
             {sellPrice || "-"}
-            <OrderButtonTextUnit>coin</OrderButtonTextUnit>
+            <OrderButtonTextUnit>枚</OrderButtonTextUnit>
           </SellButton>
           <OrderButtonDesc>で売却する</OrderButtonDesc>
           {sellable && sellPrice ? (
