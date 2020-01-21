@@ -7,6 +7,7 @@ import { User } from "models/user";
 import { RootState } from "app/redux";
 import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
+import Footer from "app/components/footer";
 import NotFoundPage from "app/pages/not_found";
 
 import MarketDataProvider from "./components/data_provider";
@@ -53,6 +54,7 @@ const MarketPageInner: FC = () => {
         <HR />
         <DescComponent />
       </Contents>
+      <Footer />
     </>
   );
 };

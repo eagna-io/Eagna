@@ -10,6 +10,7 @@ import { User } from "models/user";
 import { RootState } from "app/redux";
 import { MinPcWidth } from "app/components/responsive";
 import Header from "app/components/header";
+import Footer from "app/components/footer";
 
 import ProfileComponent from "./components/profile";
 import MarketsComponent from "./components/markets";
@@ -71,6 +72,7 @@ const AccountPage: FC<{ user: User }> = ({ user }) => {
         <MarketsComponent title="注目のマーケット" markets={featuredMarkets} />
         <NewsComponent />
       </Container>
+      <Footer />
     </>
   );
 };
