@@ -1,5 +1,5 @@
 use super::{
-    schema::{market_tokens, markets},
+    schema::{market_tokens, markets, orders},
     types::MarketStatus,
     Postgres,
 };
@@ -41,6 +41,8 @@ pub trait PostgresMarketInfra {
     ) -> anyhow::Result<Option<(QueryMarket, Vec<QueryToken>)>>;
 
     fn query_market_ids_by_status(&self, status: &[MarketStatus]) -> anyhow::Result<Vec<Uuid>>;
+
+    fn query_market_ids_user_participated(&self, user_id: &Uuid) -> anyhow::Result<Vec<Uuid>>;
 
     fn query_market_ids_ready_to_open(&self) -> anyhow::Result<Vec<Uuid>>;
 
@@ -170,6 +172,14 @@ impl PostgresMarketInfra for Postgres {
         Ok(markets::table
             .filter(markets::columns::status.eq(any(status)))
             .select(markets::columns::id)
+            .load::<Uuid>(&self.conn)?)
+    }
+
+    fn query_market_ids_user_participated(&self, user_id: &Uuid) -> anyhow::Result<Vec<Uuid>> {
+        Ok(orders::table
+            .filter(orders::columns::user_id.eq(user_id))
+            .distinct_on(orders::columns::market_id)
+            .select(orders::columns::market_id)
             .load::<Uuid>(&self.conn)?)
     }
 
