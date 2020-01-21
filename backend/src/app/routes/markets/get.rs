@@ -1,5 +1,5 @@
 use super::ApiMarketStatus;
-use crate::app::{get_params, FailureResponse, InfraManager};
+use crate::app::{get_param, get_params, validate_bearer_header, FailureResponse, InfraManager};
 use crate::domain::market::{
     models::{Market, MarketId, MarketStatus, MarketToken},
     repository::{MarketRepository, QueryMarket},
@@ -28,7 +28,12 @@ pub fn get(
 
 pub fn get_list(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     let repo = MarketRepository::from(infra.get_postgres()?);
-    let markets = query_market_ids(infra, req)?
+    let market_ids = if get_param(req, "participated").is_some() {
+        query_market_ids_by_user_id(infra, req)?
+    } else {
+        query_market_ids_by_status(infra, req)?
+    };
+    let markets = market_ids
         .iter()
         .map(|id| Ok(repo.query_market(id)?.unwrap()))
         .collect::<Result<Vec<_>, FailureResponse>>()?;
@@ -37,7 +42,19 @@ pub fn get_list(infra: &InfraManager, req: &Request) -> Result<Response, Failure
     Ok(Response::json(&res_data))
 }
 
-fn query_market_ids(infra: &InfraManager, req: &Request) -> Result<Vec<MarketId>, FailureResponse> {
+fn query_market_ids_by_user_id(
+    infra: &InfraManager,
+    req: &Request,
+) -> Result<Vec<MarketId>, FailureResponse> {
+    let access_token = validate_bearer_header(infra, req)?;
+    Ok(MarketRepository::from(infra.get_postgres()?)
+        .query_market_ids_user_participated(&access_token.user_id)?)
+}
+
+fn query_market_ids_by_status(
+    infra: &InfraManager,
+    req: &Request,
+) -> Result<Vec<MarketId>, FailureResponse> {
     let mut statuses = ArrayVec::<[MarketStatus; 4]>::new();
     get_params(req, "status").for_each(|s| match s {
         "upcoming" => {
