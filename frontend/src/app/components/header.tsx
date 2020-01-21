@@ -20,7 +20,7 @@ const Header: FC<HeaderProps> = ({ history }) => {
   return (
     <Container>
       <div>
-        <Link to="/">
+        <Link to="/account">
           <Logo src="/img/logo.png" />
         </Link>
       </div>
