@@ -96,6 +96,18 @@ impl<'a> MarketRepository<'a> {
             .collect())
     }
 
+    pub fn query_market_ids_user_participated(
+        &self,
+        user_id: &UserId,
+    ) -> anyhow::Result<Vec<MarketId>> {
+        Ok(self
+            .postgres
+            .query_market_ids_user_participated(user_id.as_uuid())?
+            .into_iter()
+            .map(MarketId::from)
+            .collect())
+    }
+
     pub fn query_market_ids_ready_to_open(&self) -> anyhow::Result<Vec<MarketId>> {
         Ok(self
             .postgres
