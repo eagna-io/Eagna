@@ -63,7 +63,7 @@ const DataProvider: React.FC<ComponentProps> = ({
   React.useEffect(() => {
     if (
       dataSource instanceof MarketDataSource &&
-      dataSource.myOrders === [] &&
+      dataSource.myOrders === 'Uninitialized' &&
       user instanceof User
     ) {
       dataSource.queryPrivate(user).then(setDataSource);
@@ -116,7 +116,7 @@ class MarketDataSource {
     readonly market: Market,
     readonly distribution: TokenDistribution,
     readonly publicOrders: Order[],
-    readonly myOrders: Order[] = []
+    readonly myOrders: Order[] | 'Uninitialized' = 'Uninitialized'
   ) {}
 
   static async queryPublic(
@@ -152,6 +152,7 @@ class MarketDataSource {
       distributionHistory,
       this.market.attrs.lmsrB
     );
+    const myOrders = this.myOrders === 'Uninitialized' ? [] : this.myOrders;
     return {
       market: this.market,
       distribution: this.distribution,
@@ -162,8 +163,8 @@ class MarketDataSource {
         price: priceHistory
       },
       myHistory: {
-        orders: this.myOrders,
-        assets: MyAssets.fromMyOrders(this.myOrders)
+        orders: myOrders,
+        assets: MyAssets.fromMyOrders(myOrders)
       }
     };
   }
