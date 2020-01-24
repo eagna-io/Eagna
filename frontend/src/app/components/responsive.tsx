@@ -12,7 +12,7 @@ export function pc(css: string): string {
 }
 
 export function tablet(css: string): string {
-  return `@media (min-width: ${MinTabletWidth}px) and (max-width: ${MaxTabletWidth}) {
+  return `@media (min-width: ${MinTabletWidth}px) and (max-width: ${MaxTabletWidth}px) {
     ${css}
   }`;
 }
