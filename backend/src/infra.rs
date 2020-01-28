@@ -1,3 +1,4 @@
+pub mod jwt;
 pub mod mailgun;
 pub mod postgres;
 pub mod redis;
