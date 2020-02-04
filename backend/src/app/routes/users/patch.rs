@@ -12,7 +12,7 @@ pub fn handler(
     req: &Request,
     user_id: Uuid,
 ) -> Result<Response, FailureResponse> {
-    let access_token = validate_bearer_header(infra, req)?;
+    let access_token = validate_bearer_header(req)?;
 
     let ReqData { provided_coin } = json_input(req).map_err(|_| FailureResponse::InvalidPayload)?;
 

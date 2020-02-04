@@ -46,7 +46,7 @@ fn query_market_ids_by_user_id(
     infra: &InfraManager,
     req: &Request,
 ) -> Result<Vec<MarketId>, FailureResponse> {
-    let access_token = validate_bearer_header(infra, req)?;
+    let access_token = validate_bearer_header(req)?;
     Ok(MarketRepository::from(infra.get_postgres()?)
         .query_market_ids_user_participated(&access_token.user_id)?)
 }

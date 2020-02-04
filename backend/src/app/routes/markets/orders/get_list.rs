@@ -21,7 +21,7 @@ pub fn get_list(
     };
 
     if let Some("true") = get_params(req, "mine").next() {
-        let access_token = validate_bearer_header(infra, req)?;
+        let access_token = validate_bearer_header(req)?;
         let my_orders = market
             .orders()
             .iter_related_to_user(&access_token.user_id)

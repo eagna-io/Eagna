@@ -27,7 +27,7 @@ pub fn post(
 
     validate_req_order(&req_data)?;
 
-    let user_id = validate_bearer_header(infra, req)?.user_id;
+    let user_id = validate_bearer_header(req)?.user_id;
     let postgres = infra.get_postgres()?;
     let user = UserRepository::from(postgres)
         .query_user(&user_id)?

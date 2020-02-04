@@ -15,7 +15,7 @@ pub fn put(
     req: &Request,
     market_id: Uuid,
 ) -> Result<Response, FailureResponse> {
-    let access_token = validate_bearer_header(infra, req)?;
+    let access_token = validate_bearer_header(req)?;
 
     let postgres = infra.get_postgres()?;
     transaction(postgres, || {

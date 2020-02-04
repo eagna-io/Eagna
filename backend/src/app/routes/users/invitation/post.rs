@@ -4,7 +4,7 @@ use crate::infra::mailgun::{send_mail, Mail};
 use rouille::{input::json_input, Request, Response};
 
 pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
-    let access_token = validate_bearer_header(infra, req)?;
+    let access_token = validate_bearer_header(req)?;
 
     let user = UserRepository::from(infra.get_postgres()?)
         .query_user(&access_token.user_id)?
