@@ -1,5 +1,3 @@
-pub mod access_token;
-
 use self::access_token::AccessToken;
 use crate::domain::{market::num::AmountCoin, point::Point, user::services::auth::Credentials};
 use crate::primitive::NonEmptyString;

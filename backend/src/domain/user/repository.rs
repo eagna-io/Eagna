@@ -1,5 +1,3 @@
-pub mod access_token;
-
 use crate::domain::market::{num::AmountCoin, services::manager::UserPointIncreased};
 use crate::domain::point::Point;
 use crate::domain::user::*;
