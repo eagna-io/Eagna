@@ -1,5 +1,5 @@
 use libeagna::app::{ApiServer, InfraManagerFactory};
-use libeagna::infra::{PostgresFactory, RedisFactory};
+use libeagna::infra::PostgresFactory;
 use log::info;
 
 fn main() {
@@ -9,11 +9,7 @@ fn main() {
     let pg_url = get_env_var_or_panic("PG_URL");
     let postgres_factory = PostgresFactory::new(pg_url);
 
-    // Redisのセットアップ
-    let redis_url = get_env_var_or_panic("REDIS_URL");
-    let redis_factory = RedisFactory::new(redis_url);
-
-    let infra_manager_factory = InfraManagerFactory::new(redis_factory, postgres_factory);
+    let infra_manager_factory = InfraManagerFactory::new(postgres_factory);
 
     let port = get_env_var_u16_or_panic("PORT");
     let access_allow_hosts = get_env_var_or_panic("ACCESS_ALLOW_HOSTS");

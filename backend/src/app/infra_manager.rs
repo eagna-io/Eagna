@@ -1,44 +1,34 @@
-use crate::infra::{InfraFactory, PostgresInfra, RedisInfra};
+use crate::infra::{InfraFactory, PostgresInfra};
 use lazycell::LazyCell;
 use std::sync::Arc;
 
 pub struct InfraManager {
-    redis: LazyInfra<Box<dyn RedisInfra>>,
     postgres: LazyInfra<Box<dyn PostgresInfra>>,
 }
 
 impl InfraManager {
-    pub fn get_redis(&self) -> anyhow::Result<&dyn RedisInfra> {
-        self.redis.get().map(|i| i.as_ref())
-    }
-
     pub fn get_postgres(&self) -> anyhow::Result<&dyn PostgresInfra> {
         self.postgres.get().map(|i| i.as_ref())
     }
 }
 
 pub struct InfraManagerFactory {
-    redis_factory: Arc<dyn InfraFactory<Box<dyn RedisInfra>>>,
     postgres_factory: Arc<dyn InfraFactory<Box<dyn PostgresInfra>>>,
 }
 
 impl InfraManagerFactory {
-    pub fn new<RDF, RD, PGF, PG>(redis_factory: RDF, postgres_factory: PGF) -> InfraManagerFactory
+    pub fn new<PGF, PG>(postgres_factory: PGF) -> InfraManagerFactory
     where
-        RDF: InfraFactory<RD>,
-        RD: RedisInfra,
         PGF: InfraFactory<PG>,
         PG: PostgresInfra,
     {
         InfraManagerFactory {
-            redis_factory: Arc::new(BoxingInfraFactory::new(redis_factory)),
             postgres_factory: Arc::new(BoxingInfraFactory::new(postgres_factory)),
         }
     }
 
     pub fn create(&self) -> InfraManager {
         InfraManager {
-            redis: LazyInfra::new(self.redis_factory.clone()),
             postgres: LazyInfra::new(self.postgres_factory.clone()),
         }
     }
@@ -91,16 +81,6 @@ where
     I: PostgresInfra,
 {
     fn create(&self) -> anyhow::Result<Box<dyn PostgresInfra>> {
-        Ok(Box::new(self.factory.create()?))
-    }
-}
-
-impl<F, I> InfraFactory<Box<dyn RedisInfra>> for BoxingInfraFactory<F, I>
-where
-    F: InfraFactory<I>,
-    I: RedisInfra,
-{
-    fn create(&self) -> anyhow::Result<Box<dyn RedisInfra>> {
         Ok(Box::new(self.factory.create()?))
     }
 }
