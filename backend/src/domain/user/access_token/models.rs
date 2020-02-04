@@ -1,44 +1,20 @@
-use super::UserId;
-use arrayvec::ArrayString;
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use crate::domain::user::models::UserId;
+use chrono::Utc;
 
-/// 1週間Tokenをcacheする
-pub const ACCESS_TOKEN_EXPIRE_SEC: usize = 60 * 60 * 24 * 7;
+/// トークンは30日有効
+pub const ACCESS_TOKEN_EXPIRE_SEC: usize = 60 * 60 * 24 * 30;
 
 #[derive(Debug, Clone, PartialEq, Eq, From)]
 pub struct AccessToken {
-    pub id: AccessTokenId,
     pub user_id: UserId,
+    pub exp: usize, // JWTの仕様のためusize
 }
 
 impl AccessToken {
     pub fn new(user_id: &UserId) -> AccessToken {
         AccessToken {
-            id: AccessTokenId::new(),
             user_id: *user_id,
+            exp: Utc::now().timestamp() as usize + ACCESS_TOKEN_EXPIRE_SEC,
         }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, From)]
-pub struct AccessTokenId(ArrayString<[u8; 64]>);
-
-impl AccessTokenId {
-    fn new() -> AccessTokenId {
-        let random_str = thread_rng()
-            .sample_iter(Alphanumeric)
-            .take(64)
-            .collect::<String>();
-        AccessTokenId(ArrayString::from(&random_str).unwrap())
-    }
-
-    pub fn try_from_str(s: &str) -> anyhow::Result<AccessTokenId> {
-        ArrayString::from(s)
-            .map_err(|e| anyhow::Error::from(e.simplify()))
-            .map(|inner| AccessTokenId(inner))
-    }
-
-    pub fn as_str(&self) -> &str {
-        self.0.as_str()
     }
 }
