@@ -1,30 +1,26 @@
 use crate::app::{FailureResponse, InfraManager};
-use crate::domain::user::{
-    models::access_token::{AccessToken, AccessTokenId},
-    repository::access_token::AccessTokenRepository,
-};
+use crate::domain::user::access_token::{models::AccessToken, services::AccessTokenManager};
 use regex::Regex;
 use rouille::Request;
 
-pub fn validate_bearer_header(
-    infra: &InfraManager,
-    req: &Request,
-) -> Result<AccessToken, FailureResponse> {
+pub fn validate_bearer_header(req: &Request) -> Result<AccessToken, FailureResponse> {
     let header_val = req
         .header("Authorization")
         .ok_or(FailureResponse::Unauthorized)?;
 
-    let token_id = extract_token(header_val)?;
+    let raw_token = extract_token(header_val)?;
 
-    let repo = AccessTokenRepository::from(infra.get_redis()?);
-
-    match repo.query(&token_id)? {
-        Some(token) => Ok(token),
-        None => Err(FailureResponse::Unauthorized),
+    match AccessTokenManager::decode(raw_token) {
+        Ok(token) => Ok(token),
+        Err(e) => {
+            log::warn!("Failed to decode access_token");
+            log::warn!("     {:?}", e);
+            Err(FailureResponse::Unauthorized)
+        }
     }
 }
 
-fn extract_token(header_val: &str) -> Result<AccessTokenId, FailureResponse> {
+fn extract_token<'a>(header_val: &'a str) -> Result<&'a str, FailureResponse> {
     lazy_static::lazy_static! {
         static ref BEARER_TOKEN_REGEX: Regex = Regex::new(r"^Bearer (.+)$").unwrap();
     }
@@ -32,5 +28,5 @@ fn extract_token(header_val: &str) -> Result<AccessTokenId, FailureResponse> {
         .captures(header_val)
         .and_then(|cap| cap.get(1))
         .ok_or(FailureResponse::Unauthorized)
-        .and_then(|mat| AccessTokenId::try_from_str(mat.as_str()).map_err(FailureResponse::from))
+        .map(|mat| mat.as_str())
 }

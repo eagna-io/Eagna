@@ -1,7 +1,6 @@
 use crate::app::{FailureResponse, InfraManager};
-use crate::domain::user::{
-    models::User, repository::access_token::AccessTokenRepository, services::auth::UserAuthService,
-};
+use crate::domain::user::access_token::services::AccessTokenManager;
+use crate::domain::user::{models::User, services::auth::UserAuthService};
 use rouille::{input::json_input, Request, Response};
 
 pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
@@ -14,11 +13,10 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
         .authenticate(email.as_str(), password.as_str())
         .map_err(|_| FailureResponse::Unauthorized)?;
     let access_token = user.new_access_token();
-
-    AccessTokenRepository::from(infra.get_redis()?).save(&access_token)?;
+    let encoded_token = AccessTokenManager::encode(&access_token);
 
     Ok(Response::json(&ResData {
-        token: access_token.id.as_str(),
+        token: encoded_token.as_str(),
     })
     .with_status_code(201))
 }

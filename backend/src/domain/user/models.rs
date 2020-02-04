@@ -1,4 +1,4 @@
-use self::access_token::AccessToken;
+use super::access_token::models::AccessToken;
 use crate::domain::{market::num::AmountCoin, point::Point, user::services::auth::Credentials};
 use crate::primitive::NonEmptyString;
 use getset::Getters;

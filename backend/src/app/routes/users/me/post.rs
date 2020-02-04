@@ -1,7 +1,8 @@
 use crate::app::{FailureResponse, InfraManager};
+use crate::domain::user::access_token::services::AccessTokenManager;
 use crate::domain::user::{
     models::{NewUser, User as _, UserEmail, UserName},
-    repository::{access_token::AccessTokenRepository, UserRepository},
+    repository::UserRepository,
     services::{
         auth::UserAuthService,
         invitation::{Invitation, InvitationToken, UserInviteService},
@@ -37,7 +38,7 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
 
     // アクセストークンの発行
     let access_token = new_user.new_access_token();
-    AccessTokenRepository::from(infra.get_redis()?).save(&access_token)?;
+    let encoded_token = AccessTokenManager::encode(&access_token);
 
     if !req_data.without_email {
         // 登録成功メールの送信
@@ -51,7 +52,7 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
     }
 
     Ok(Response::json(&ResData {
-        token: access_token.id.as_str(),
+        token: encoded_token.as_str(),
     })
     .with_status_code(200))
 }
