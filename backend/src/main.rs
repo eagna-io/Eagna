@@ -1,4 +1,5 @@
 use libeagna::app::{ApiServer, InfraManagerFactory};
+use libeagna::infra::jwt::Jwt;
 use libeagna::infra::PostgresFactory;
 use log::info;
 
@@ -10,6 +11,10 @@ fn main() {
     let postgres_factory = PostgresFactory::new(pg_url);
 
     let infra_manager_factory = InfraManagerFactory::new(postgres_factory);
+
+    // JWTのセットアップ
+    // TODO
+    Jwt::init("HOGEHOGE".as_bytes());
 
     let port = get_env_var_u16_or_panic("PORT");
     let access_allow_hosts = get_env_var_or_panic("ACCESS_ALLOW_HOSTS");
