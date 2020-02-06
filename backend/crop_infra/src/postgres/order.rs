@@ -1,6 +1,6 @@
 use super::{schema::orders, Postgres};
 use chrono::{DateTime, Utc};
-use diesel::prelude::*;
+use diesel::{prelude::*, Insertable, Queryable};
 use uuid::Uuid;
 
 /*

@@ -1,5 +1,6 @@
 use hyper::{client::HttpConnector, Body, Client, Request, StatusCode};
 use hyper_tls::HttpsConnector;
+use serde::Serialize;
 use std::borrow::Cow;
 
 lazy_static::lazy_static! {

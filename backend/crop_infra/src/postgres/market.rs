@@ -4,7 +4,7 @@ use super::{
     Postgres,
 };
 use chrono::{DateTime, Utc};
-use diesel::{dsl::now, pg::expression::dsl::any, prelude::*};
+use diesel::{dsl::now, pg::expression::dsl::any, prelude::*, Insertable, Queryable};
 use uuid::Uuid;
 
 /*

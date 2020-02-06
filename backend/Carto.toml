@@ -1,0 +1,7 @@
+[workspace]
+members = [
+  "crop",
+  "crop_app",
+  "crop_domain",
+  "crop_infra",
+]

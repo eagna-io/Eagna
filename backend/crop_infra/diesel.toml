@@ -2,4 +2,4 @@
 # see diesel.rs/guides/configuring-diesel-cli
 
 [print_schema]
-import_types = ["diesel::sql_types::*", "crate::infra::postgres::types::*"]
+import_types = ["diesel::sql_types::*", "crate::postgres::types::*"]

@@ -1,6 +1,6 @@
 table! {
     use diesel::sql_types::*;
-    use crate::infra::postgres::types::*;
+    use crate::postgres::types::*;
 
     markets (id) {
         id -> Uuid,
@@ -17,7 +17,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::infra::postgres::types::*;
+    use crate::postgres::types::*;
 
     market_tokens (unused_id) {
         unused_id -> Int4,
@@ -31,7 +31,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::infra::postgres::types::*;
+    use crate::postgres::types::*;
 
     orders (id) {
         id -> Uuid,
@@ -46,7 +46,7 @@ table! {
 
 table! {
     use diesel::sql_types::*;
-    use crate::infra::postgres::types::*;
+    use crate::postgres::types::*;
 
     users (id) {
         id -> Uuid,

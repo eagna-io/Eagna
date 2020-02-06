@@ -1,5 +1,5 @@
 use super::{schema::users, Postgres};
-use diesel::{prelude::*, result::Error as PgError};
+use diesel::{prelude::*, result::Error as PgError, Insertable, Queryable};
 use uuid::Uuid;
 
 pub trait PostgresUserInfra {
