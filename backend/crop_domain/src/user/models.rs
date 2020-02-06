@@ -1,6 +1,6 @@
 use super::access_token::models::AccessToken;
-use crate::domain::{market::num::AmountCoin, point::Point, user::services::auth::Credentials};
-use crate::primitive::NonEmptyString;
+use crate::{market::num::AmountCoin, point::Point, user::services::auth::Credentials};
+use crop_primitive::NonEmptyString;
 use getset::Getters;
 use uuid::Uuid;
 

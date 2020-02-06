@@ -1,7 +1,7 @@
-use crate::domain::market::{num::AmountCoin, services::manager::UserPointIncreased};
-use crate::domain::point::Point;
-use crate::domain::user::*;
-use crate::infra::postgres::{user::NewUser as NewUserInfra, PostgresInfra};
+use crate::market::{num::AmountCoin, services::manager::UserPointIncreased};
+use crate::point::Point;
+use crate::user::*;
+use crop_infra::postgres::{user::NewUser as NewUserInfra, PostgresInfra};
 use getset::{CopyGetters, Getters};
 
 #[derive(From)]

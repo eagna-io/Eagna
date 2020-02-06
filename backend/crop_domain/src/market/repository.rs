@@ -9,9 +9,9 @@ use super::{
         NewClosedMarket, NewMarket, NewOpenMarket, NewResolvedMarket, OpenMarketOrderAdded,
     },
 };
-use crate::domain::lmsr;
-use crate::domain::user::models::UserId;
-use crate::infra::postgres::{
+use crate::lmsr;
+use crate::user::models::UserId;
+use crop_infra::postgres::{
     market::{
         NewMarket as InfraNewMarket, NewToken as InfraNewToken, QueryMarket as InfraQueryMarket,
         QueryToken as InfraQueryToken,
@@ -20,7 +20,7 @@ use crate::infra::postgres::{
     types::MarketStatus as InfraMarketStatus,
     PostgresInfra,
 };
-use crate::primitive::{NonEmptyString, NonEmptyVec};
+use crop_primitive::{NonEmptyString, NonEmptyVec};
 use getset::Getters;
 
 #[derive(From)]

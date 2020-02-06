@@ -1,5 +1,5 @@
-use crate::domain::lmsr;
-use crate::domain::market::{
+use crate::lmsr;
+use crate::market::{
     models::{
         ClosedMarket, Market, MarketAttrs, MarketId, MarketStatus, MarketToken, OpenMarket,
         ResolvedMarket, UpcomingMarket,
@@ -7,11 +7,11 @@ use crate::domain::market::{
     num::{AmountCoin, AmountToken},
     order::{MarketOrders, Order},
 };
-use crate::domain::num::point::Point;
-use crate::domain::user::models::{User, UserCoinUpdated, UserId, UserWithAttrs};
-use crate::primitive::{NonEmptyString, NonEmptyVec};
+use crate::num::point::Point;
+use crate::user::models::{User, UserCoinUpdated, UserId, UserWithAttrs};
 use anyhow::anyhow;
 use chrono::{DateTime, Utc};
+use crop_primitive::{NonEmptyString, NonEmptyVec};
 use std::collections::HashMap;
 use thiserror::Error;
 

@@ -1,4 +1,4 @@
-use crate::domain::user::models::UserId;
+use crate::user::models::UserId;
 use chrono::{DateTime, Duration, Utc};
 
 /// トークンは30日有効

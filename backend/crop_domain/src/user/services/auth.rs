@@ -1,6 +1,6 @@
-use crate::domain::user::models::{User, UserId};
-use crate::infra::postgres::{user::QueryUserCredentials, PostgresInfra};
+use crate::user::models::{User, UserId};
 use arrayvec::ArrayString;
+use crop_infra::postgres::{user::QueryUserCredentials, PostgresInfra};
 use data_encoding::HEXUPPER;
 use getset::Getters;
 use rand::{thread_rng, Rng};

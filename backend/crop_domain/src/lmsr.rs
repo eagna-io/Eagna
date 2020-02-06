@@ -1,4 +1,4 @@
-use crate::domain::market::num::{AmountCoin, AmountToken};
+use crate::market::num::{AmountCoin, AmountToken};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Serialize, Deserialize, From)]

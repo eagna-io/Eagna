@@ -1,7 +1,7 @@
-use crate::domain::market::num::{AmountCoin, AmountToken};
-use crate::domain::user::UserId;
-use crate::primitive::NonEmptyString;
+use crate::market::num::{AmountCoin, AmountToken};
+use crate::user::UserId;
 use chrono::{DateTime, Utc};
+use crop_primitive::NonEmptyString;
 use getset::Getters;
 use uuid::Uuid;
 

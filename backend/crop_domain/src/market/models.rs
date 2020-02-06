@@ -1,9 +1,9 @@
-use crate::domain::lmsr;
-use crate::domain::market::num::{AmountCoin, AmountToken};
-use crate::domain::market::order::MarketOrders;
-use crate::domain::user::models::UserId;
-use crate::primitive::{NonEmptyString, NonEmptyVec};
+use crate::lmsr;
+use crate::market::num::{AmountCoin, AmountToken};
+use crate::market::order::MarketOrders;
+use crate::user::models::UserId;
 use chrono::{DateTime, Utc};
+use crop_primitive::{NonEmptyString, NonEmptyVec};
 use getset::Getters;
 use std::{collections::HashMap, str::FromStr};
 use uuid::Uuid;

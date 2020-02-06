@@ -1,7 +1,7 @@
 use super::models::AccessToken;
-use crate::domain::user::models::UserId;
-use crate::infra::jwt::Jwt;
+use crate::user::models::UserId;
 use chrono::{DateTime, NaiveDateTime, Utc};
+use crop_infra::jwt::Jwt;
 use jsonwebtoken::errors::Error as JwtError;
 use uuid::Uuid;
 
