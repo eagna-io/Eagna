@@ -6,17 +6,13 @@ on:
       - master
     paths:
       - '.github/workflows/rust.yml'
-      - 'backend/Cargo.toml'
-      - 'backend/Cargo.lock'
-      - 'backend/src/**.rs'
+      - 'backend/**'
   pull_request:
     branches:
       - master
     paths:
       - '.github/workflows/rust.yml'
-      - 'backend/Cargo.toml'
-      - 'backend/Cargo.lock'
-      - 'backend/src/**.rs'
+      - 'backend/**'
 
 jobs:
   check:
