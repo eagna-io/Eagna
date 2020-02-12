@@ -26,5 +26,7 @@ jobs:
       with:
         path: backend/target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('backend/Cargo.lock') }}
-    - name: Lint
+    - name: Check lint
       run: cd backend && cargo-clippy
+    - name: Check format
+      run: cd backend && cargo fmt -- --check
