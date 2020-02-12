@@ -21,6 +21,13 @@ pub struct ApiServer {
 }
 
 impl ApiServer {
+    pub fn new(infra_factory: InfraManagerFactory, access_allow_hosts: String) -> ApiServer {
+        ApiServer {
+            infra_factory,
+            access_allow_hosts,
+        }
+    }
+
     pub fn run<A>(self, addr: A)
     where
         A: std::net::ToSocketAddrs,
