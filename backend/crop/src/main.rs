@@ -1,6 +1,6 @@
-use libeagna::app::{ApiServer, InfraManagerFactory};
-use libeagna::infra::jwt::Jwt;
-use libeagna::infra::PostgresFactory;
+use crop_app::{ApiServer, InfraManagerFactory};
+use crop_infra::jwt::Jwt;
+use crop_infra::PostgresFactory;
 use log::info;
 
 fn main() {
