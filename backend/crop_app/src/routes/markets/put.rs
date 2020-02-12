@@ -1,11 +1,11 @@
 use super::ApiMarketStatus;
-use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::market::{
+use crate::{validate_bearer_header, FailureResponse, InfraManager};
+use crop_domain::market::{
     models::MarketId, repository::MarketRepository, services::manager::MarketManager,
 };
-use crate::domain::user::{models::UserId, repository::UserRepository};
-use crate::infra::postgres::transaction;
-use crate::primitive::NonEmptyString;
+use crop_domain::user::{models::UserId, repository::UserRepository};
+use crop_infra::postgres::transaction;
+use crop_primitive::NonEmptyString;
 
 use rouille::{input::json::json_input, Request, Response};
 use uuid::Uuid;

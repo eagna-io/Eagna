@@ -1,5 +1,5 @@
-use crate::app::FailureResponse;
-use crate::domain::user::access_token::{models::AccessToken, services::AccessTokenManager};
+use crate::FailureResponse;
+use crop_domain::user::access_token::{models::AccessToken, services::AccessTokenManager};
 use regex::Regex;
 use rouille::Request;
 

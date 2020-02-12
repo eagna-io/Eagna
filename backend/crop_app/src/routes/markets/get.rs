@@ -1,6 +1,6 @@
 use super::ApiMarketStatus;
-use crate::app::{get_param, get_params, validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::market::{
+use crate::{get_param, get_params, validate_bearer_header, FailureResponse, InfraManager};
+use crop_domain::market::{
     models::{Market, MarketId, MarketStatus, MarketToken},
     repository::{MarketRepository, QueryMarket},
 };

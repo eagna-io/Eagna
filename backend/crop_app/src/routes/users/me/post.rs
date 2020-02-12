@@ -1,6 +1,6 @@
-use crate::app::{FailureResponse, InfraManager};
-use crate::domain::user::access_token::services::AccessTokenManager;
-use crate::domain::user::{
+use crate::{FailureResponse, InfraManager};
+use crop_domain::user::access_token::services::AccessTokenManager;
+use crop_domain::user::{
     models::{NewUser, User as _, UserEmail, UserName},
     repository::UserRepository,
     services::{
@@ -8,8 +8,8 @@ use crate::domain::user::{
         invitation::{Invitation, InvitationToken, UserInviteService},
     },
 };
-use crate::infra::mailgun::{send_mail, Mail};
-use crate::primitive::NonEmptyString;
+use crop_infra::mailgun::{send_mail, Mail};
+use crop_primitive::NonEmptyString;
 use rouille::{input::json_input, Request, Response};
 
 pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {

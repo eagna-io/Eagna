@@ -6,7 +6,7 @@ pub use get::{get, get_list};
 pub use post::post;
 pub use put::put;
 
-use crate::domain::market::models::MarketStatus;
+use crop_domain::market::models::MarketStatus;
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

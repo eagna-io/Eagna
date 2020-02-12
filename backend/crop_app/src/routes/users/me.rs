@@ -1,8 +1,8 @@
 pub mod access_token;
 pub mod post;
 
-use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::user::*;
+use crate::{validate_bearer_header, FailureResponse, InfraManager};
+use crop_domain::user::{models::UserWithAttrs, repository::UserRepository};
 use rouille::{Request, Response};
 use serde::Serialize;
 use uuid::Uuid;

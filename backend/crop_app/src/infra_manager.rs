@@ -1,4 +1,4 @@
-use crate::infra::{InfraFactory, PostgresInfra};
+use crop_infra::{InfraFactory, PostgresInfra};
 use lazycell::LazyCell;
 use std::sync::Arc;
 

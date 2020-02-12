@@ -3,7 +3,7 @@ mod post;
 pub use get::get_list;
 pub use post::post;
 
-use crate::domain::prize::Prize;
+use crop_domain::prize::Prize;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 

@@ -1,6 +1,6 @@
-use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::user::{repository::UserRepository, services::invitation::UserInviteService};
-use crate::infra::mailgun::{send_mail, Mail};
+use crate::{validate_bearer_header, FailureResponse, InfraManager};
+use crop_domain::user::{repository::UserRepository, services::invitation::UserInviteService};
+use crop_infra::mailgun::{send_mail, Mail};
 use rouille::{input::json_input, Request, Response};
 
 pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {

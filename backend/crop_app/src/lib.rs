@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate serde;
+
 mod auth;
 mod failure_response;
 mod infra_manager;
@@ -12,10 +15,9 @@ pub use self::req::{get_param, get_params};
 use rouille::{Request, Response};
 use std::time::Duration;
 
-#[derive(Constructor)]
 pub struct ApiServer {
-    infra_factory: InfraManagerFactory,
-    access_allow_hosts: String, // comma separated host names
+    pub infra_factory: InfraManagerFactory,
+    pub access_allow_hosts: String, // comma separated host names
 }
 
 impl ApiServer {

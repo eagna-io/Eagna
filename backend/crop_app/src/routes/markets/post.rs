@@ -1,13 +1,13 @@
-use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::lmsr;
-use crate::domain::market::{
+use crate::{validate_bearer_header, FailureResponse, InfraManager};
+use crop_domain::lmsr;
+use crop_domain::market::{
     models::{Market as _, MarketToken},
     repository::MarketRepository,
     services::manager::{MarketManager, NewMarket},
 };
-use crate::domain::user::*;
-use crate::infra::postgres::transaction;
-use crate::primitive::{NonEmptyString, NonEmptyVec};
+use crop_domain::user::*;
+use crop_infra::postgres::transaction;
+use crop_primitive::{NonEmptyString, NonEmptyVec};
 use chrono::{DateTime, Utc};
 use rouille::{input::json::json_input, Request, Response};
 use uuid::Uuid;

@@ -1,6 +1,6 @@
-use crate::app::{FailureResponse, InfraManager};
-use crate::domain::market::{repository::MarketRepository, services::manager::MarketManager};
-use crate::infra::postgres::transaction;
+use crate::{FailureResponse, InfraManager};
+use crop_domain::market::{repository::MarketRepository, services::manager::MarketManager};
+use crop_infra::postgres::transaction;
 
 use rouille::{Request, Response};
 use uuid::Uuid;

@@ -1,16 +1,16 @@
 use super::{ReqOrder, ResOrder};
-use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::market::{
+use crate::{validate_bearer_header, FailureResponse, InfraManager};
+use crop_domain::market::{
     models::{MarketId, OpenMarket},
     num::{AmountCoin, AmountToken},
     repository::MarketRepository,
     services::manager::{MarketManager, OpenMarketOrderAdded},
 };
-use crate::domain::user::{
+use crop_domain::user::{
     models::{UserCoinUpdated, UserWithAttrs},
     repository::UserRepository,
 };
-use crate::infra::postgres::transaction;
+use crop_infra::postgres::transaction;
 
 use rouille::{input::json::json_input, Request, Response};
 use uuid::Uuid;

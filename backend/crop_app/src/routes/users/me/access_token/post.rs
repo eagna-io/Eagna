@@ -1,6 +1,6 @@
-use crate::app::{FailureResponse, InfraManager};
-use crate::domain::user::access_token::services::AccessTokenManager;
-use crate::domain::user::{models::User, services::auth::UserAuthService};
+use crate::{FailureResponse, InfraManager};
+use crop_domain::user::access_token::services::AccessTokenManager;
+use crop_domain::user::{models::User, services::auth::UserAuthService};
 use rouille::{input::json_input, Request, Response};
 
 pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {

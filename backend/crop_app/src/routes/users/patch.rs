@@ -1,6 +1,6 @@
-use crate::app::{validate_bearer_header, FailureResponse, InfraManager};
-use crate::domain::market::num::AmountCoin;
-use crate::domain::user::{
+use crate::{validate_bearer_header, FailureResponse, InfraManager};
+use crop_domain::market::num::AmountCoin;
+use crop_domain::user::{
     models::{UserId, UserWithAttrs as _},
     repository::UserRepository,
 };
