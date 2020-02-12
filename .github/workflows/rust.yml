@@ -22,7 +22,7 @@ jobs:
     - name: Check
       run: cd backend && cargo check
     - name: Lint
-      run: cd backend && cargo clippy
+      run: cd backend && clippy
     - name: Cache cargo check
       uses: actions/cache@v1
       with:
