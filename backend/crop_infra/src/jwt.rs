@@ -6,22 +6,22 @@ pub struct Jwt {
     inner: AtomicLazyCell<JwtInner<'static>>,
 }
 
-impl Jwt {
-    pub const GLOBAL: Self = Jwt {
-        inner: AtomicLazyCell::NONE,
-    };
+pub static GLOBAL_JWT: Jwt = Jwt {
+    inner: AtomicLazyCell::NONE,
+};
 
+impl Jwt {
     pub fn init(secret: &'static [u8]) {
         let jwt = JwtInner::new(secret);
-        Jwt::GLOBAL.inner.fill(jwt).unwrap()
+        GLOBAL_JWT.inner.fill(jwt).unwrap()
     }
 
     pub fn encode<T: Serialize>(claim: &T) -> Result<String, JwtError> {
-        Jwt::GLOBAL.inner.borrow().unwrap().encode(claim)
+        GLOBAL_JWT.inner.borrow().unwrap().encode(claim)
     }
 
     pub fn decode<T: DeserializeOwned>(token: &str) -> Result<T, JwtError> {
-        Jwt::GLOBAL.inner.borrow().unwrap().decode(token)
+        GLOBAL_JWT.inner.borrow().unwrap().decode(token)
     }
 }
 
