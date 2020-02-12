@@ -1,11 +1,11 @@
 use super::ApiMarketStatus;
 use crate::{get_param, get_params, validate_bearer_header, FailureResponse, InfraManager};
+use arrayvec::ArrayVec;
+use chrono::{DateTime, Utc};
 use crop_domain::market::{
     models::{Market, MarketId, MarketStatus, MarketToken},
     repository::{MarketRepository, QueryMarket},
 };
-use arrayvec::ArrayVec;
-use chrono::{DateTime, Utc};
 use rouille::{Request, Response};
 use std::collections::HashMap;
 use uuid::Uuid;

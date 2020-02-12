@@ -65,9 +65,4 @@ joinable!(market_tokens -> markets (market_id));
 joinable!(orders -> markets (market_id));
 joinable!(orders -> users (user_id));
 
-allow_tables_to_appear_in_same_query!(
-    markets,
-    market_tokens,
-    orders,
-    users,
-);
+allow_tables_to_appear_in_same_query!(markets, market_tokens, orders, users,);

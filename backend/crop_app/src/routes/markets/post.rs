@@ -1,4 +1,5 @@
 use crate::{validate_bearer_header, FailureResponse, InfraManager};
+use chrono::{DateTime, Utc};
 use crop_domain::lmsr;
 use crop_domain::market::{
     models::{Market as _, MarketToken},
@@ -8,7 +9,6 @@ use crop_domain::market::{
 use crop_domain::user::*;
 use crop_infra::postgres::transaction;
 use crop_primitive::{NonEmptyString, NonEmptyVec};
-use chrono::{DateTime, Utc};
 use rouille::{input::json::json_input, Request, Response};
 use uuid::Uuid;
 
