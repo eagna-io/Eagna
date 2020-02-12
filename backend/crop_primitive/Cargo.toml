@@ -1,0 +1,10 @@
+[package]
+name = "crop_primitive"
+version = "0.1.0"
+authors = ["AtsukiTak <takatomgoo@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+anyhow = "1.0"
+derive_more = "0.99"
+serde = { version = "~1.0", features = ["derive", "rc"] }

@@ -1,42 +1,8 @@
-[package]
-name = "eagna"
-version = "0.1.0"
-authors = ["AtsukiTak <takatomgoo@gmail.com>"]
-edition = "2018"
-
-[lib]
-name = "libeagna"
-path = "src/lib.rs"
-
-[[bin]]
-name = "eagna"
-path = "src/main.rs"
-
-[dependencies]
-anyhow = "1.0"
-arrayvec = { version = "~0.5", features = ["serde"] }
-base64 = "~0.11"
-chrono = { version = "~0.4", features = ["serde"] }
-env_logger = "~0.7"
-data-encoding = "~2.1"
-derive_more = "~0.99"
-diesel = { version = "~1.4", features = ["postgres", "chrono", "uuid", "uuidv07"] }
-diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
-getset = "~0.0.8"
-hyper = "~0.13"
-hyper-tls = "~0.4"
-jsonwebtoken = "7.0.0-beta.1"
-lazy_static = "1.4"
-lazycell = "~1.2"
-log = "~0.4"
-num-rational = "~0.2"
-rand = "~0.7"
-regex = "~1.3"
-ring = "~0.16"
-rouille = "~3.0"
-serde = { version = "~1.0", features = ["derive", "rc"] }
-serde_urlencoded = "~0.6"
-sha2 = "~0.8"
-thiserror = "1.0"
-tokio = { version = "~0.2", features = ["macros", "rt-threaded"] }
-uuid = { version = "~0.7", features = ["v4", "serde"] }
+[workspace]
+members = [
+  "crop",
+  "crop_app",
+  "crop_domain",
+  "crop_infra",
+  "tools",
+]
