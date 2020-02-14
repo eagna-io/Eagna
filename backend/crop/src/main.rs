@@ -14,7 +14,7 @@ fn main() {
 
     // JWTのセットアップ
     // TODO
-    Jwt::init("HOGEHOGE".as_bytes());
+    Jwt::init(b"HOGEHOGE");
 
     let port = get_env_var_u16_or_panic("PORT");
     let access_allow_hosts = get_env_var_or_panic("ACCESS_ALLOW_HOSTS");
@@ -25,7 +25,7 @@ fn main() {
 }
 
 fn get_env_var_or_panic(key: &'static str) -> String {
-    std::env::var(key).expect(format!("{} is not specified", key).as_str())
+    std::env::var(key).unwrap_or_else(|_| panic!(format!("{} is not specified", key)))
 }
 
 fn get_env_var_u16_or_panic(key: &'static str) -> u16 {

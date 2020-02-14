@@ -10,7 +10,7 @@ impl Point {
         Point(0)
     }
 
-    pub fn as_i32(&self) -> i32 {
+    pub fn as_i32(self) -> i32 {
         self.0
     }
 }

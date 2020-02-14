@@ -12,7 +12,7 @@ impl NonEmptyString {
         self.0
     }
 
-    pub fn from_str(s: String) -> anyhow::Result<NonEmptyString> {
+    pub fn from_string(s: String) -> anyhow::Result<NonEmptyString> {
         if s.is_empty() {
             Err(anyhow::anyhow!("EmptyStringError"))
         } else {

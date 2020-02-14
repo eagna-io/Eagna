@@ -26,6 +26,7 @@ impl MarketOrders {
 
     /// Order を履歴に追加する。
     /// それが適切なものかどうかはチェックしない
+    #[allow(clippy::should_implement_trait)]
     pub fn add(mut self, order: Order) -> MarketOrders {
         self.orders.push(order);
         self

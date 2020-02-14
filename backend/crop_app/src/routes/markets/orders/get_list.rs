@@ -25,13 +25,13 @@ pub fn get_list(
         let my_orders = market
             .orders()
             .iter_related_to_user(&access_token.user_id)
-            .map(|o| ResOrder::from(o))
+            .map(ResOrder::from)
             .collect();
         Ok(Response::json(&RespBody { orders: my_orders }))
     } else {
-        let orders = market.orders().iter().map(|o| ResOrder::from(o)).collect();
+        let orders = market.orders().iter().map(ResOrder::from).collect();
 
-        Ok(Response::json(&RespBody { orders: orders }))
+        Ok(Response::json(&RespBody { orders }))
     }
 }
 

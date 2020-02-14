@@ -20,11 +20,7 @@ pub trait Market {
     fn orders(&self) -> &MarketOrders;
 
     fn is_valid_token(&self, token_name: &NonEmptyString) -> bool {
-        self.attrs()
-            .tokens()
-            .iter()
-            .find(|t| &t.name == token_name)
-            .is_some()
+        self.attrs().tokens().iter().any(|t| &t.name == token_name)
     }
 
     fn compute_token_distribution(&self) -> TokenDistribution {
@@ -131,6 +127,7 @@ pub trait ResolvedMarket: Market {
 pub struct MarketId(Uuid);
 
 impl MarketId {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> MarketId {
         MarketId(Uuid::new_v4())
     }
@@ -219,9 +216,8 @@ impl<'a> TokenDistribution<'a> {
     }
 
     pub fn update_add(&mut self, token_name: &NonEmptyString, amount_token: AmountToken) {
-        match self.0.get_mut(token_name) {
-            Some(current_v) => *current_v += amount_token,
-            None => {}
+        if let Some(current_v) = self.0.get_mut(token_name) {
+            *current_v += amount_token;
         }
     }
 

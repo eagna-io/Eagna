@@ -112,8 +112,8 @@ impl MarketManager {
         market: M,
         user: U,
         token_name: &NonEmptyString,
-        amount_token: &AmountToken,
-        price_expected: &AmountCoin,
+        amount_token: AmountToken,
+        price_expected: AmountCoin,
     ) -> Result<(OpenMarketOrderAdded<M>, UserCoinUpdated<U>), AddOrderError<U, M>>
     where
         M: OpenMarket,
@@ -128,19 +128,19 @@ impl MarketManager {
         if !market.is_valid_token(token_name) {
             return err!(AddOrderErrorType::InvalidToken);
         }
-        if *amount_token <= AmountToken::zero() {
+        if amount_token <= AmountToken::zero() {
             return err!(AddOrderErrorType::InvalidAmountToken);
         }
 
         // 購入に必要なコイン量の取得
-        let price = market.compute_price_of_buy(token_name, *amount_token);
+        let price = market.compute_price_of_buy(token_name, amount_token);
         if user.coin() < price {
             return err!(AddOrderErrorType::InsufficientCoinBalance);
         }
         if !price.is_around(price_expected, MAX_SLIP_RATE) {
             return err!(AddOrderErrorType::PriceSlip {
                 price,
-                expected: *price_expected
+                expected: price_expected
             });
         }
 
@@ -149,12 +149,7 @@ impl MarketManager {
         let updated_user = user.update_coin(new_coin);
 
         // Marketの更新
-        let new_order = Order::new(
-            *updated_user.id(),
-            token_name.clone(),
-            *amount_token,
-            -price,
-        );
+        let new_order = Order::new(*updated_user.id(), token_name.clone(), amount_token, -price);
         let new_orders = market.orders().clone().add(new_order);
         let updated_market = OpenMarketOrderAdded {
             inner: market,
@@ -168,8 +163,8 @@ impl MarketManager {
         market: M,
         user: U,
         token_name: &NonEmptyString,
-        amount_token: &AmountToken, // > 0
-        gain_expected: &AmountCoin,
+        amount_token: AmountToken, // > 0
+        gain_expected: AmountCoin,
     ) -> Result<(OpenMarketOrderAdded<M>, UserCoinUpdated<U>), AddOrderError<U, M>>
     where
         M: OpenMarket,
@@ -184,29 +179,29 @@ impl MarketManager {
         if !market.is_valid_token(token_name) {
             return err!(AddOrderErrorType::InvalidToken);
         }
-        if *amount_token <= AmountToken::zero() {
+        if amount_token <= AmountToken::zero() {
             return err!(AddOrderErrorType::InvalidAmountToken);
         }
 
         // トークンの残高をチェックする
         let user_token = market.compute_balance_of_user_token(user.id(), token_name);
-        if user_token < *amount_token {
+        if user_token < amount_token {
             return err!(AddOrderErrorType::InsufficientTokenBalance);
         }
 
         // 売却によって得られるコイン量
-        let gain = market.compute_gain_of_sell(token_name, *amount_token);
+        let gain = market.compute_gain_of_sell(token_name, amount_token);
         if !gain.is_around(gain_expected, MAX_SLIP_RATE) {
             return err!(AddOrderErrorType::PriceSlip {
                 price: gain,
-                expected: *gain_expected
+                expected: gain_expected
             });
         }
 
         let new_user_coin = user.coin() + gain;
         let updated_user = user.update_coin(new_user_coin);
 
-        let new_order = Order::new(*updated_user.id(), token_name.clone(), -*amount_token, gain);
+        let new_order = Order::new(*updated_user.id(), token_name.clone(), -amount_token, gain);
         let new_orders = market.orders().clone().add(new_order);
         let updated_market = OpenMarketOrderAdded {
             inner: market,
@@ -333,7 +328,7 @@ impl MarketManager {
                 |mut user_token, order| {
                     let amount_token = user_token
                         .entry(*order.user_id())
-                        .or_insert(AmountToken::zero());
+                        .or_insert_with(AmountToken::zero);
                     *amount_token += *order.amount_token();
                     user_token
                 },

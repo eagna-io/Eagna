@@ -80,7 +80,7 @@ pub struct PostgresFactory {
 
 impl PostgresFactory {
     pub fn new(url: String) -> PostgresFactory {
-        PostgresFactory { url: url }
+        PostgresFactory { url }
     }
 }
 

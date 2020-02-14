@@ -27,8 +27,8 @@ impl<'a> UserRepository<'a> {
         };
         Ok(Some(QueryUser {
             id: *user_id,
-            name: UserName::from_str(user.name)?,
-            email: UserEmail::from_str(user.email)?,
+            name: UserName::from_string(user.name)?,
+            email: UserEmail::from_string(user.email)?,
             coin: AmountCoin::from(user.coin),
             point: Point::from(user.point as u32),
             is_admin: user.is_admin,

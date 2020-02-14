@@ -12,7 +12,7 @@ impl Point {
         Point(1)
     }
 
-    pub fn as_u32(&self) -> u32 {
+    pub fn as_u32(self) -> u32 {
         self.0
     }
 }
@@ -22,7 +22,7 @@ impl Sum<Point> for Point {
     where
         I: Iterator<Item = Point>,
     {
-        return iter.fold(Point::zero(), Point::add);
+        iter.fold(Point::zero(), Point::add)
     }
 }
 
@@ -31,6 +31,6 @@ impl<'a> Sum<&'a Point> for Point {
     where
         I: Iterator<Item = &'a Point>,
     {
-        return iter.fold(Point::zero(), |a, b| a + *b);
+        iter.fold(Point::zero(), |a, b| a + *b)
     }
 }

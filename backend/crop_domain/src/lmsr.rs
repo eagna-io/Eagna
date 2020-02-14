@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct B(u32);
 
 impl B {
-    pub fn as_u32(&self) -> u32 {
+    pub fn as_u32(self) -> u32 {
         self.0
     }
 }

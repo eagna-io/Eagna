@@ -30,7 +30,7 @@ impl<'a> UserAuthService<'a> {
         let QueryUserCredentials { id, cred, salt } = self
             .db
             .query_user_credentials(email)?
-            .ok_or(anyhow::anyhow!("Authentication failed"))?;
+            .ok_or_else(|| anyhow::anyhow!("Authentication failed"))?;
 
         Self::verify_credentials(salt.as_slice(), cred.as_slice(), attempted_pass)?;
 
@@ -50,10 +50,7 @@ impl<'a> UserAuthService<'a> {
         let mut cred = [0u8; CRED_LEN];
         pbkdf2::derive(ALGO, N_ITER, &salt, raw_pass.as_bytes(), &mut cred);
 
-        Credentials {
-            salt: salt,
-            cred: cred,
-        }
+        Credentials { salt, cred }
     }
 }
 

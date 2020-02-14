@@ -166,6 +166,7 @@ impl<U: User> User for Admin<U> {
 pub struct UserId(Uuid);
 
 impl UserId {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> UserId {
         UserId(Uuid::new_v4())
     }
@@ -183,8 +184,8 @@ impl UserName {
         self.0.as_str()
     }
 
-    pub fn from_str(s: String) -> anyhow::Result<Self> {
-        Ok(UserName(NonEmptyString::from_str(s)?))
+    pub fn from_string(s: String) -> anyhow::Result<Self> {
+        Ok(UserName(NonEmptyString::from_string(s)?))
     }
 }
 
@@ -200,7 +201,7 @@ impl UserEmail {
         self.0.into_string()
     }
 
-    pub fn from_str(s: String) -> anyhow::Result<Self> {
-        Ok(UserEmail(NonEmptyString::from_str(s)?))
+    pub fn from_string(s: String) -> anyhow::Result<Self> {
+        Ok(UserEmail(NonEmptyString::from_string(s)?))
     }
 }

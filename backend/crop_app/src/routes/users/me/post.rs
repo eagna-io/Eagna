@@ -24,7 +24,7 @@ pub fn handler(infra: &InfraManager, req: &Request) -> Result<Response, FailureR
     let cred = UserAuthService::derive_credentials(req_data.password.as_str());
     let new_user = NewUser::new(
         UserName::from(req_data.name),
-        UserEmail::from_str(email)?,
+        UserEmail::from_string(email)?,
         cred,
     );
     UserRepository::from(infra.get_postgres()?)
@@ -73,12 +73,11 @@ struct ResData<'a> {
 }
 
 fn signup_mail_html() -> String {
-    format!(
-        r#"
+    r#"
         Cropへのご登録ありがとうございます! <br />
         <a href="https://crop-pm.com/account/">マイページへ</a><br />
         <br />
         Crop運営
         "#
-    )
+    .to_string()
 }

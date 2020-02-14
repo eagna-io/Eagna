@@ -9,8 +9,8 @@ use rouille::Request;
 /// "%2C"は","のパーセントエンコーディング (","はUTF-8で0x2C)
 pub fn get_params<'a>(req: &'a Request, key: &str) -> impl Iterator<Item = &'a str> {
     req.raw_query_string()
-        .split("&")
-        .map(|q| q.split("="))
+        .split('&')
+        .map(|q| q.split('='))
         .find_map(|mut q| {
             if q.next()? == key {
                 Some(q.next()?)

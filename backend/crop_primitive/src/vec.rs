@@ -16,16 +16,21 @@ impl<T> NonEmptyVec<T> {
         self.0.iter()
     }
 
-    pub fn into_iter(self) -> impl Iterator<Item = T> {
-        self.0.into_iter()
-    }
-
     pub fn from_vec(vec: Vec<T>) -> anyhow::Result<Self> {
         if vec.is_empty() {
             Err(anyhow::anyhow!("EmptyVecError"))
         } else {
             Ok(NonEmptyVec(vec))
         }
+    }
+}
+
+impl<T> IntoIterator for NonEmptyVec<T> {
+    type Item = T;
+    type IntoIter = std::vec::IntoIter<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 

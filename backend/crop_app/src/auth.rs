@@ -20,7 +20,7 @@ pub fn validate_bearer_header(req: &Request) -> Result<AccessToken, FailureRespo
     }
 }
 
-fn extract_token<'a>(header_val: &'a str) -> Result<&'a str, FailureResponse> {
+fn extract_token(header_val: &str) -> Result<&str, FailureResponse> {
     lazy_static::lazy_static! {
         static ref BEARER_TOKEN_REGEX: Regex = Regex::new(r"^Bearer (.+)$").unwrap();
     }

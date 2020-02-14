@@ -79,7 +79,7 @@ impl<'a> MarketRepository<'a> {
         &self,
         status_arr: &[MarketStatus],
     ) -> anyhow::Result<Vec<MarketId>> {
-        fn map_status(status: &MarketStatus) -> InfraMarketStatus {
+        fn map_status(status: MarketStatus) -> InfraMarketStatus {
             match status {
                 MarketStatus::Upcoming => InfraMarketStatus::Upcoming,
                 MarketStatus::Open => InfraMarketStatus::Open,
@@ -87,7 +87,11 @@ impl<'a> MarketRepository<'a> {
                 MarketStatus::Resolved => InfraMarketStatus::Resolved,
             }
         }
-        let infra_status_arr = status_arr.iter().map(map_status).collect::<Vec<_>>();
+        let infra_status_arr = status_arr
+            .iter()
+            .copied()
+            .map(map_status)
+            .collect::<Vec<_>>();
         Ok(self
             .postgres
             .query_market_ids_by_status(infra_status_arr.as_ref())?
@@ -154,7 +158,7 @@ impl QueryMarket {
             .into_iter()
             .map(|token| {
                 MarketToken::from((
-                    NonEmptyString::from_str(token.name).unwrap(),
+                    NonEmptyString::from_string(token.name).unwrap(),
                     token.description,
                     token.thumbnail_url,
                 ))
@@ -162,7 +166,7 @@ impl QueryMarket {
             .collect();
 
         let attrs = MarketAttrs::from((
-            NonEmptyString::from_str(market.title).unwrap(),
+            NonEmptyString::from_string(market.title).unwrap(),
             market.description,
             lmsr::B::from(market.lmsr_b as u32),
             market.open,
@@ -172,7 +176,7 @@ impl QueryMarket {
 
         let resolved_token_name = market
             .resolved_token_name
-            .map(|s| NonEmptyString::from_str(s).unwrap());
+            .map(|s| NonEmptyString::from_string(s).unwrap());
 
         let status = match market.status {
             InfraMarketStatus::Upcoming => MarketStatus::Upcoming,
@@ -187,7 +191,7 @@ impl QueryMarket {
                 Order::from((
                     OrderId::from(order.id),
                     UserId::from(order.user_id),
-                    NonEmptyString::from_str(order.token_name).unwrap(),
+                    NonEmptyString::from_string(order.token_name).unwrap(),
                     AmountToken::from(order.amount_token),
                     AmountCoin::from(order.amount_coin),
                     order.time,

@@ -87,8 +87,8 @@ where
             market,
             user,
             &req.token_name,
-            &AmountToken::from(req.amount_token),
-            &AmountCoin::from(-req.amount_coin),
+            AmountToken::from(req.amount_token),
+            AmountCoin::from(-req.amount_coin),
         )
         .map_err(|e| {
             log::info!("User failed to buy because of {}", e.source);
@@ -100,8 +100,8 @@ where
             market,
             user,
             &req.token_name,
-            &AmountToken::from(-req.amount_token),
-            &AmountCoin::from(req.amount_coin),
+            AmountToken::from(-req.amount_token),
+            AmountCoin::from(req.amount_coin),
         )
         .map_err(|e| {
             log::info!("User failed to sell because of {}", e.source);

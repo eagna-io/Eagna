@@ -8,7 +8,7 @@ impl AmountToken {
         AmountToken(0)
     }
 
-    pub fn as_i32(&self) -> i32 {
+    pub fn as_i32(self) -> i32 {
         self.0
     }
 }
@@ -45,12 +45,12 @@ impl AmountCoin {
         AmountCoin(0)
     }
 
-    pub fn as_i32(&self) -> i32 {
+    pub fn as_i32(self) -> i32 {
         self.0
     }
 
     /// self が target の誤差 err_percent 以内に収まっているかを判断する
-    pub fn is_around(&self, target: &AmountCoin, err_percent: f64) -> bool {
+    pub fn is_around(self, target: AmountCoin, err_percent: f64) -> bool {
         // 符号が一致するかチェック
         if self.0.signum() != target.0.signum() {
             return false;
@@ -60,11 +60,7 @@ impl AmountCoin {
         let self_abs = self.0.abs() as f64;
         let target_min_abs = target.0.abs() as f64 * (1_f64 - err_percent);
         let target_max_abs = target.0.abs() as f64 * (1_f64 + err_percent);
-        if target_min_abs < self_abs && self_abs < target_max_abs {
-            true
-        } else {
-            false
-        }
+        target_min_abs < self_abs && self_abs < target_max_abs
     }
 }
 

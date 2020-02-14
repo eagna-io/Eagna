@@ -17,6 +17,7 @@ use super::{FailureResponse, InfraManager};
 use rouille::{router, Request, Response};
 use uuid::Uuid;
 
+#[allow(clippy::cognitive_complexity)]
 pub fn routing(infra: &InfraManager, req: &Request) -> Result<Response, FailureResponse> {
     router!(req,
         (POST) (/users/invitation/) => {

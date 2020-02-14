@@ -21,7 +21,7 @@ pub trait PostgresMarketInfra {
     fn insert_market<'a>(
         &self,
         market: &NewMarket<'a>,
-        tokens: &Vec<NewToken<'a>>,
+        tokens: &[NewToken<'a>],
     ) -> anyhow::Result<()>;
 
     fn update_market_status(
@@ -110,7 +110,7 @@ impl PostgresMarketInfra for Postgres {
     fn insert_market<'a>(
         &self,
         market: &NewMarket<'a>,
-        tokens: &Vec<NewToken<'a>>,
+        tokens: &[NewToken<'a>],
     ) -> anyhow::Result<()> {
         // Insert market
         diesel::insert_into(markets::table)
