@@ -14,10 +14,15 @@ pub struct Market {
     share_distri: HashMap<OutcomeId, ShareNum>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct MarketId(Uuid);
-
 impl Market {
+    pub fn new() -> Market {
+        Market {
+            id: MarketId::new(),
+            orders: Vec::new(),
+            share_distri: HashMap::new(),
+        }
+    }
+
     /// 対象のOutcomeを1つ購入する
     pub fn new_order(&mut self, outcome: OutcomeId, account: AccountId) -> Order {
         let tip_cost = self.compute_cost(outcome);
@@ -36,6 +41,15 @@ impl Market {
     /// 対象のOutcomeのShareを1つ追加する
     fn increment_share(&mut self, outcome: OutcomeId) {
         *self.share_distri.get_mut(&outcome).unwrap() += ShareNum::ONE;
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct MarketId(Uuid);
+
+impl MarketId {
+    pub fn new() -> MarketId {
+        MarketId(Uuid::new_v4())
     }
 }
 
