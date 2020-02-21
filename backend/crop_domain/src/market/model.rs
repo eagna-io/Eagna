@@ -1,7 +1,9 @@
+pub mod computer;
 pub mod num;
 
 use crate::account::model::AccountId;
-use crate::market::{order::model::Order, service::PriceComputer};
+use crate::market::model::computer::PriceComputer;
+use crate::market::order::model::Order;
 use std::collections::HashMap;
 use uuid::Uuid;
 
