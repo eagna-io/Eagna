@@ -13,6 +13,7 @@ impl TipNum {
 pub struct ShareNum(pub(in crate::market) i32);
 
 impl ShareNum {
+    pub const ZERO: ShareNum = ShareNum(0);
     pub const ONE: ShareNum = ShareNum(1);
 
     pub fn as_i32(&self) -> i32 {

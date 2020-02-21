@@ -79,3 +79,24 @@ impl Default for LMSR {
         LMSR::new(30f64)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lmsr() {
+        let lmsr = LMSR::new(30.0);
+
+        let mut distri = HashMap::new();
+        let outcome1 = OutcomeId::new();
+        let outcome2 = OutcomeId::new();
+        distri.insert(outcome1, ShareNum::ZERO);
+        distri.insert(outcome2, ShareNum::ZERO);
+
+        // outcome1をひとつ買うときの価格
+        let price = lmsr.compute_price(&distri, outcome1);
+
+        assert_eq!(price, TipNum(504));
+    }
+}

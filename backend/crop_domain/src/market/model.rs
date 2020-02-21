@@ -61,3 +61,9 @@ pub struct Outcome {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct OutcomeId(Uuid);
+
+impl OutcomeId {
+    pub fn new() -> OutcomeId {
+        OutcomeId(Uuid::new_v4())
+    }
+}
