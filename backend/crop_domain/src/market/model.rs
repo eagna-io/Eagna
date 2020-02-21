@@ -29,7 +29,7 @@ impl Market {
     }
 
     /// 対象のOutcomeを1つ購入する
-    pub fn new_order(&mut self, outcome: OutcomeId, account: AccountId) -> Order {
+    pub fn new_order(&mut self, account: AccountId, outcome: OutcomeId) -> Order {
         let tip_cost = self
             .price_computer
             .compute_price(&self.share_distri, outcome);
