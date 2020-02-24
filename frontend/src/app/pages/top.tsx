@@ -3,35 +3,80 @@ import styled from "styled-components";
 import Chart from "react-apexcharts";
 import moment from "moment";
 
-import { Series, Tick } from "model/chart";
+
+type Data = readonly [Date, number];
+type Series = { name: string; data: Data[] }[];
 
 const Page: React.FC = () => {
-  return <Chart options={options} series={series.apexchart} />;
+  const [series, setSeries] = React.useState<Series>([
+    { name: "win", data: [] },
+    { name: "lose", data: [] }
+  ]);
+
+  React.useEffect(() => {
+    let handler = setInterval(() => {
+      setSeries(nextSeries);
+    }, 200);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, []);
+
+  return (
+    <Background>
+      <ChartContainer>
+        <Chart options={options} series={series} />
+      </ChartContainer>
+    </Background>
+  );
 };
 
 export default Page;
 
-const series = (() => {
-  const series = new Series();
-  series.push(new Tick(moment().subtract(1, "day"), 42));
-  series.push(new Tick(moment(), 42));
-  return series;
-})();
+const nextSeries = (series: Series): Series => {
+  const [win, lose] = series;
+  const lastWinData =
+    win.data.length === 0 ? undefined : win.data[win.data.length - 1];
+
+  const nextWinData = computeNextWinData(lastWinData);
+  const nextLoseData = [nextWinData[0], 1000 - nextWinData[1]] as const;
+
+  const nextWin = { name: "win", data: [ ...win.data, nextWinData] };
+  const nextLose = { name: "lose", data: [ ...lose.data, nextLoseData] };
+
+  return [nextWin, nextLose];
+};
+
+const computeNextWinData = (last?: Data): Data => {
+  if (!last) {
+    return [moment().toDate(), 700];
+  } else {
+    const delta = Math.random() * 10 - 5;
+    const nextVal = Math.max(Math.min(last[1] + delta, 998), 2);
+    return [moment().toDate(), nextVal];
+  }
+};
+
+const Background = styled.div`
+  widt: 100vw;
+  height: 100vh;
+  padding: 30px;
+  background-color: #121212;
+`;
+
+const ChartContainer = styled.div`
+  background-color: #242423;
+`;
 
 const options = {
+  colors: ["#bfe8ff", "#ffc0cb"],
   chart: {
+    type: "line",
+    foreColor: "#ffffff",
     stacked: false,
-    zoom: {
-      type: "x",
-      enabled: true
-    },
     toolbar: {
       show: false
-    }
-  },
-  plotOptions: {
-    line: {
-      curve: "smooth"
     }
   },
   dataLabels: {
@@ -44,24 +89,40 @@ const options = {
   title: {
     show: false
   },
+  stroke: {
+    width: 2,
+    colors: ["#bfe8ff", "#ffc0cb"],
+  },
   fill: {
     type: "gradient",
     gradient: {
       shadeIntensity: 1,
       inverseColors: false,
-      opacityFrom: 0.5,
-      opacityTo: 0,
-      stops: [0, 90, 100]
+      opacityFrom: 0.7,
+      opacityTo: 0.9,
+      stops: [100, 90, 0]
     }
   },
   grid: {
-    show: false
+    show: true,
+    borderColor: "#555"
   },
   yaxis: {
-    show: false
+    min: 0,
+    max: 1000,
+    tickAmount: 10,
+    labels: {
+      formatter: (val: number) => Math.floor(val)
+    }
   },
   xaxis: {
-    type: "datetime"
+    type: "datetime",
+    labels: {
+      formatter: (val: string, timestamp: number) => {
+        return moment(timestamp).format("M/D H:m");
+      }
+    },
+    range: 1000 * 60 * 5
   },
   tooltip: {
     shared: false
