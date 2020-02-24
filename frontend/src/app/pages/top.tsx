@@ -2,9 +2,9 @@ import React from "react";
 import styled from "styled-components";
 import Chart from "react-apexcharts";
 import moment from "moment";
+import produce from "immer";
 
-
-type Data = readonly [Date, number];
+type Data = [Date, number];
 type Series = { name: string; data: Data[] }[];
 
 const Page: React.FC = () => {
@@ -15,7 +15,7 @@ const Page: React.FC = () => {
 
   React.useEffect(() => {
     let handler = setInterval(() => {
-      setSeries(nextSeries);
+      setSeries(computeNextSeries);
     }, 200);
 
     return () => {
@@ -34,16 +34,20 @@ const Page: React.FC = () => {
 
 export default Page;
 
-const nextSeries = (series: Series): Series => {
+const computeNextSeries = (series: Series): Series => {
   const [win, lose] = series;
   const lastWinData =
     win.data.length === 0 ? undefined : win.data[win.data.length - 1];
 
   const nextWinData = computeNextWinData(lastWinData);
-  const nextLoseData = [nextWinData[0], 1000 - nextWinData[1]] as const;
+  const nextLoseData = [nextWinData[0], 1000 - nextWinData[1]] as Data;
 
-  const nextWin = { name: "win", data: [ ...win.data, nextWinData] };
-  const nextLose = { name: "lose", data: [ ...lose.data, nextLoseData] };
+  const nextWin = produce(win, last => {
+    last.data.push(nextWinData);
+  });
+  const nextLose = produce(lose, last => {
+    last.data.push(nextLoseData);
+  });
 
   return [nextWin, nextLose];
 };
@@ -91,7 +95,7 @@ const options = {
   },
   stroke: {
     width: 2,
-    colors: ["#bfe8ff", "#ffc0cb"],
+    colors: ["#bfe8ff", "#ffc0cb"]
   },
   fill: {
     type: "gradient",
