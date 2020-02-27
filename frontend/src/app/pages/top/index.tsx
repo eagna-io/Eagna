@@ -4,63 +4,49 @@ import styled from "styled-components";
 import Chart from "react-apexcharts";
 import ApexCharts from "apexcharts";
 import moment from "moment";
-import { List } from "immutable";
 
 import { RootState } from "app/redux";
 import { actions } from "app/redux/chart";
-import { Record } from "model/chart";
+import { Record, lmsrPrice } from "model/chart";
+import { DateTime, now } from "model/time";
+import { Array, empty, normalizeSubtract } from "model/array";
 
-type Data = [number, number];
+type Data = [DateTime, number];
 type Series = { name: string; data: Data[] }[];
 
 const Page: React.FC = () => {
-  const history = useSelector((state: RootState) => state.chart.history);
+  const snapshot = useSelector((state: RootState) => state.chart.snapshot);
   const dispatch = useDispatch();
-  const chartRef = React.useRef<List<Record>>(List());
 
   React.useEffect(() => {
     let handler = setInterval(() => {
-      /*
       if (Math.random() > 0.5) {
-        dispatch(actions.vote({ outcome: "win", time: moment() }));
+        dispatch(actions.vote({ outcome: "win", time: now() }));
       } else {
-        dispatch(actions.vote({ outcome: "lose", time: moment() }));
+        dispatch(actions.vote({ outcome: "lose", time: now() }));
       }
-       */
-
-      const price = Math.random() * 100 + 500;
-      const now = Date.now();
-      ApexCharts.exec("the-chart", "appendData", [
-        { data: [[now, price]] },
-        { data: [[now, 1000 - price]] }
-      ]);
-    }, 100);
+    }, 1000);
 
     return () => {
       clearInterval(handler);
     };
   }, [dispatch]);
 
-  /*
   React.useEffect(() => {
-    const prev = chartRef.current;
-    const next = history;
-    const updated = next.skip(prev.size);
+    const newWin = [
+      snapshot.time,
+      lmsrPrice(snapshot.distribution, "win")
+    ] as Data;
+    const newLose = [
+      snapshot.time,
+      lmsrPrice(snapshot.distribution, "Lose")
+    ] as Data;
 
-    const updatedWin = updated
-      .map(record => recordToData(record, "win"))
-      .toArray();
-    const updatedLose = updated
-      .map(record => recordToData(record, "lose"))
-      .toArray();
-
-    chartRef.current = next;
     ApexCharts.exec("the-chart", "appendData", [
-      { data: updatedWin },
-      { data: updatedLose }
+      { data: [newWin] },
+      { data: [newLose] }
     ]);
-  }, [history]);
-   */
+  }, [snapshot]);
 
   return (
     <Background>
@@ -75,13 +61,6 @@ const Page: React.FC = () => {
       </ChartContainer>
     </Background>
   );
-};
-
-const recordToData = (record: Record, outcome: string): Data => {
-  return [
-    record.time.valueOf(),
-    record.nextDistribution.lmsrPrice(outcome)
-  ] as Data;
 };
 
 export default Page;
@@ -148,10 +127,10 @@ const options = {
     type: "datetime",
     labels: {
       formatter: (val: string, timestamp: number) => {
-        return moment(timestamp).format("M/D H:m");
+        return moment(val).format("M/D H:m");
       }
     },
-    range: 1000 * 30
+    range: 1000 * 60
   },
   tooltip: {
     shared: false

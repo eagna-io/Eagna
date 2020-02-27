@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction, CaseReducer } from "@reduxjs/toolkit";
-import { List, Map } from "immutable";
-import { Moment } from "moment";
 
-import { Distribution, Record } from "model/chart";
+import { Distribution, Record, create, increment } from "model/chart";
+import { Array, push, empty } from "model/array";
+import { DateTime, now } from "model/time";
 
 /*
  * =========
@@ -10,8 +10,11 @@ import { Distribution, Record } from "model/chart";
  * =========
  */
 type State = {
-  distribution: Distribution;
-  history: List<Record>;
+  snapshot: {
+    distribution: Distribution;
+    time: DateTime;
+  };
+  history: Record[];
 };
 
 /*
@@ -21,7 +24,7 @@ type State = {
  */
 type VotePayload = {
   outcome: string;
-  time: Moment;
+  time: DateTime;
 };
 
 const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
@@ -31,21 +34,20 @@ const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
   const { outcome, time } = action.payload;
 
   // アウトカムの新しい分布
-  const nextDistribution = state.distribution.increment(outcome);
+  const nextDistribution = increment(state.snapshot.distribution, outcome);
 
   // 今回のオーダーを表すレコード
   const record = {
     outcome,
-    price: nextDistribution.lmsrCost - state.distribution.lmsrCost,
-    time,
-    prevDistribution: state.distribution as Distribution,
-    nextDistribution
+    price: nextDistribution.lmsrCost - state.snapshot.distribution.lmsrCost,
+    time
   };
 
-  return {
+  state.snapshot = {
     distribution: nextDistribution,
-    history: state.history.push(record)
+    time
   };
+  state.history.push(record);
 };
 
 /*
@@ -56,8 +58,11 @@ const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
 export const { actions, reducer } = createSlice({
   name: "chart",
   initialState: {
-    distribution: Distribution.initialize(List(["win", "lose"])),
-    history: List()
+    snapshot: {
+      distribution: create({ win: 0, lose: 0 }),
+      time: now()
+    },
+    history: []
   } as State,
   reducers: {
     vote

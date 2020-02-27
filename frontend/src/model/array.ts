@@ -12,3 +12,28 @@ export const push = <T>(array: Array<T>, item: T): Array<T> => {
     size: array.size + 1
   };
 };
+
+export const empty = <T>(): Array<T> => {
+  return {
+    inner: [],
+    size: 0
+  };
+};
+
+export const newArray = <T>(inner: T[]): Array<T> => {
+  return {
+    inner,
+    size: inner.length
+  };
+};
+
+export const normalizeSubtract = <T>(
+  minuend: Array<T>,
+  subtrahend: Array<T>
+): T[] => {
+  const newArr = [];
+  for (let i = subtrahend.size; i < minuend.size; i++) {
+    newArr.push(minuend.inner[i]);
+  }
+  return newArr;
+};

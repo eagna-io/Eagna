@@ -5,8 +5,6 @@ export type Record = {
   outcome: string;
   price: number;
   time: DateTime;
-  prevDistribution: Distribution;
-  nextDistribution: Distribution;
 };
 
 /*
