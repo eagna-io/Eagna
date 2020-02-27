@@ -7,9 +7,8 @@ import moment from "moment";
 
 import { RootState } from "app/redux";
 import { actions } from "app/redux/chart";
-import { Record, lmsrPrice } from "model/chart";
+import { lmsrPrice } from "model/chart";
 import { DateTime, now } from "model/time";
-import { Array, empty, normalizeSubtract } from "model/array";
 
 type Data = [DateTime, number];
 type Series = { name: string; data: Data[] }[];
@@ -17,6 +16,8 @@ type Series = { name: string; data: Data[] }[];
 const Page: React.FC = () => {
   const snapshot = useSelector((state: RootState) => state.chart.snapshot);
   const dispatch = useDispatch();
+  const chartRef = React.useRef<ApexCharts | undefined>();
+  const domRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     let handler = setInterval(() => {
@@ -25,7 +26,7 @@ const Page: React.FC = () => {
       } else {
         dispatch(actions.vote({ outcome: "lose", time: now() }));
       }
-    }, 1000);
+    }, 100);
 
     return () => {
       clearInterval(handler);
@@ -33,31 +34,23 @@ const Page: React.FC = () => {
   }, [dispatch]);
 
   React.useEffect(() => {
-    const newWin = [
-      snapshot.time,
-      lmsrPrice(snapshot.distribution, "win")
-    ] as Data;
-    const newLose = [
-      snapshot.time,
-      lmsrPrice(snapshot.distribution, "Lose")
-    ] as Data;
+    if (chartRef.current === undefined) {
+      chartRef.current = new ApexCharts(domRef.current, options);
+      chartRef.current.render();
+    }
+  }, [chartRef]);
 
+  React.useEffect(() => {
     ApexCharts.exec("the-chart", "appendData", [
-      { data: [newWin] },
-      { data: [newLose] }
+      { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "win")]] },
+      { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "lose")]] }
     ]);
   }, [snapshot]);
 
   return (
     <Background>
       <ChartContainer>
-        <Chart
-          options={options}
-          series={[
-            { name: "win", data: [] },
-            { name: "lose", data: [] }
-          ]}
-        />
+        <div ref={domRef} />
       </ChartContainer>
     </Background>
   );
@@ -78,6 +71,13 @@ const ChartContainer = styled.div`
 
 const options = {
   colors: ["#bfe8ff", "#ffc0cb"],
+  series: [{
+    name: "win",
+    data: []
+  },{
+    name: "lose",
+    data: []
+  }],
   chart: {
     id: "the-chart",
     type: "line",
