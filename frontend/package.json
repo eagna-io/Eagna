@@ -22,8 +22,9 @@
     "@types/react-router-hash-link": "^1.2.1",
     "@types/redux-logger": "^3.0.7",
     "@types/styled-components": "^4.1.15",
-    "apexcharts": "^3.8.4",
+    "apexcharts": "^3.15.6",
     "immer": "^5.3.6",
+    "immutable": "^4.0.0-rc.12",
     "jwt-decode": "^2.2.0",
     "moment": "^2.24.0",
     "react": "^16.8.6",
@@ -62,5 +63,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "devDependencies": {}
 }

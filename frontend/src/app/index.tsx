@@ -1,4 +1,5 @@
 import React, { FC } from "react";
+import { Provider as ReduxProvider } from "react-redux";
 import {
   BrowserRouter as Router,
   Route,
@@ -7,13 +8,16 @@ import {
 } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 
+import { store } from "./redux";
 import TopPage from "./pages/top";
 
 const App: FC = () => {
   return (
     <>
       <GlobalStyle />
-      <AppRouter />
+      <ReduxProvider store={store}>
+        <AppRouter />
+      </ReduxProvider>
     </>
   );
 };

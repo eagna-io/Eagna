@@ -1,64 +1,54 @@
+import { Map, List, Seq } from "immutable";
 import { Moment } from "moment";
-import produce from "immer";
 
-export class BinaryChart {
-  private winRecords: Record[];
-  private loseRecords: Record[];
-  private apexWinRecords: ApexRecord[];
-  private apexLoseRecords: ApexRecord[];
+export type Record = {
+  outcome: string;
+  price: number;
+  time: Moment;
+  prevDistribution: Distribution;
+  nextDistribution: Distribution;
+};
 
-  constructor() {
-    this.winRecords = [];
-    this.loseRecords = [];
-    this.apexWinRecords = [];
-    this.apexLoseRecords = [];
+/*
+ * ============
+ * Distribution
+ * ============
+ */
+export class Distribution {
+  readonly lmsrCost: number;
+  readonly lmsrPriceDenom: number;
+
+  constructor(private readonly inner: Map<string, number>) {
+    this.lmsrCost = computeLmsrCost(inner);
+    this.lmsrPriceDenom = computeLmsrPriceDenom(inner);
   }
 
-  addWin(winRecord: Record): BinaryChart {
-    const loseRecord = new Record(winRecord.time, 1000 - winRecord.price);
-    return this.addRecord(winRecord, loseRecord);
+  static initialize(outcomes: List<string>): Distribution {
+    const distribution = Map(outcomes.map(o => [o, 0] as [string, number]));
+    return new Distribution(distribution);
   }
 
-  addLose(loseRecord: Record): BinaryChart {
-    const winRecord = new Record(loseRecord.time, 1000 - loseRecord.price);
-    return this.addRecord(winRecord, loseRecord);
+  increment(outcome: string): Distribution {
+    return new Distribution(this.inner.update(outcome, prev => prev + 1));
   }
 
-  private addRecord(winRecord: Record, loseRecord: Record): BinaryChart {
-    const nextWinRecords = produce(this.winRecords, records => {
-      records.push(winRecord);
-    });
-    const nextLoseRecords = produce(this.loseRecords, records => {
-      records.push(loseRecord);
-    });
-    const nextApexWinRecords = produce(this.apexWinRecords, records => {
-      records.push(winRecord.toApexRecord());
-    });
-    const nextApexLoseRecords = produce(this.apexLoseRecords, records => {
-      records.push(loseRecord.toApexRecord());
-    });
-    const newChart = new BinaryChart();
-    newChart.winRecords = nextWinRecords;
-    newChart.loseRecords = nextLoseRecords;
-    newChart.apexWinRecords = nextApexWinRecords;
-    newChart.apexLoseRecords = nextApexLoseRecords;
-    return newChart;
+  lmsrPrice(outcome: string): number {
+    const numer = Math.exp((this.inner.get(outcome) || 0) / 30);
+    return (numer / this.lmsrPriceDenom) * 1000;
   }
 
-  getApexRecords(): { name: string; data: ApexRecord[] }[] {
-    return [
-      { name: "win", data: this.apexWinRecords },
-      { name: "lose", data: this.apexLoseRecords }
-    ];
+  outcomes(): Seq.Indexed<string> {
+    return this.inner.keySeq();
   }
 }
 
-export type ApexRecord = [Date, number];
+const computeLmsrCost = (distribution: Map<string, number>): number => {
+  const sum = distribution
+    .map(n => Math.exp(n / 30))
+    .reduce((acc, n) => acc + n, 0);
+  return Math.log(sum) * 30 * 1000;
+};
 
-export class Record {
-  constructor(readonly time: Moment, readonly price: number) {}
-
-  toApexRecord(): ApexRecord {
-    return [this.time.toDate(), this.price] as ApexRecord;
-  }
-}
+const computeLmsrPriceDenom = (distribution: Map<string, number>): number => {
+  return distribution.map(n => Math.exp(n / 30)).reduce((acc, n) => acc + n, 0);
+};
