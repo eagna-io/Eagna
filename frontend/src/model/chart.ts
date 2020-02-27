@@ -1,10 +1,10 @@
-import { Map, List, Seq } from "immutable";
-import { Moment } from "moment";
+import { Map, values, keys, update } from "model/map";
+import { DateTime } from "model/time";
 
 export type Record = {
   outcome: string;
   price: number;
-  time: Moment;
+  time: DateTime;
   prevDistribution: Distribution;
   nextDistribution: Distribution;
 };
@@ -14,41 +14,50 @@ export type Record = {
  * Distribution
  * ============
  */
-export class Distribution {
-  readonly lmsrCost: number;
-  readonly lmsrPriceDenom: number;
+export type Distribution = {
+  inner: Map<number>;
 
-  constructor(private readonly inner: Map<string, number>) {
-    this.lmsrCost = computeLmsrCost(inner);
-    this.lmsrPriceDenom = computeLmsrPriceDenom(inner);
-  }
+  // Computation Cache
+  lmsrCost: number;
+  lmsrPriceDenom: number;
+};
 
-  static initialize(outcomes: List<string>): Distribution {
-    const distribution = Map(outcomes.map(o => [o, 0] as [string, number]));
-    return new Distribution(distribution);
-  }
+export const create = (inner: Map<number>): Distribution => {
+  return {
+    inner,
+    lmsrCost: computeLmsrCost(inner),
+    lmsrPriceDenom: computeLmsrPriceDenom(inner)
+  };
+};
 
-  increment(outcome: string): Distribution {
-    return new Distribution(this.inner.update(outcome, prev => prev + 1));
-  }
+export const increment = (
+  distribution: Distribution,
+  outcome: string
+): Distribution => {
+  return create(update(distribution.inner, outcome, n => n + 1));
+};
 
-  lmsrPrice(outcome: string): number {
-    const numer = Math.exp((this.inner.get(outcome) || 0) / 30);
-    return (numer / this.lmsrPriceDenom) * 1000;
-  }
+export const lmsrPrice = (
+  distribution: Distribution,
+  outcome: string
+): number => {
+  const numer = Math.exp((distribution.inner[outcome] || 0) / 30);
+  return (numer / distribution.lmsrPriceDenom) * 1000;
+};
 
-  outcomes(): Seq.Indexed<string> {
-    return this.inner.keySeq();
-  }
-}
+export const outcomes = (distribution: Distribution): string[] => {
+  return keys(distribution.inner);
+};
 
-const computeLmsrCost = (distribution: Map<string, number>): number => {
-  const sum = distribution
+const computeLmsrCost = (distribution: Map<number>): number => {
+  const sum = values(distribution)
     .map(n => Math.exp(n / 30))
     .reduce((acc, n) => acc + n, 0);
   return Math.log(sum) * 30 * 1000;
 };
 
-const computeLmsrPriceDenom = (distribution: Map<string, number>): number => {
-  return distribution.map(n => Math.exp(n / 30)).reduce((acc, n) => acc + n, 0);
+const computeLmsrPriceDenom = (distribution: Map<number>): number => {
+  return values(distribution)
+    .map(n => Math.exp(n / 30))
+    .reduce((acc, n) => acc + n, 0);
 };
