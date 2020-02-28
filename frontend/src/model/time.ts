@@ -1,7 +1,6 @@
 import moment from "moment";
 
-export type DateTime = string;
+// Milli seconds Timestamp
+export type DateTime = number;
 
-export const now = (): DateTime => moment().toISOString();
-
-export const parse = (s: string): DateTime => moment(s).toISOString();
+export const now = (): DateTime => moment().valueOf();

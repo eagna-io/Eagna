@@ -29,7 +29,7 @@ const Page: React.FC = () => {
   return (
     <Background>
       <ChartContainer>
-        <Chart height={300} renderInterval={199} />
+        <Chart height={300} />
       </ChartContainer>
     </Background>
   );

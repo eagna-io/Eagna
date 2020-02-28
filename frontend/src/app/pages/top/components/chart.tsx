@@ -1,22 +1,22 @@
 import React from "react";
-import { useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 import ApexCharts from "apexcharts";
 import moment from "moment";
 
 import { RootState } from "app/redux";
-import { ChartSnapshot } from "app/redux/chart";
-import { lmsrPrice } from "model/chart";
+import { Data } from "app/redux/chart";
+import { Map } from "model/map";
 
 interface Props {
   height: number;
-  renderInterval: number;
+  renderInterval?: number;
 }
 
-const Chart: React.FC<Props> = ({ height, renderInterval }) => {
-  const snapshot = useSelector((state: RootState) => state.chart.snapshot);
+const Chart: React.FC<Props> = ({ height, renderInterval = 100 }) => {
+  const datasets = useSelector((state: RootState) => state.chart.datasets);
   const chartRef = React.useRef<ApexCharts | undefined>();
   const domRef = React.useRef<HTMLDivElement | null>(null);
-  const snapshotRef = React.useRef<ChartSnapshot>(snapshot);
+  const datasetsRef = React.useRef<Map<Data[]>>(datasets);
 
   React.useEffect(() => {
     chartRef.current = new ApexCharts(domRef.current, createOptions(height));
@@ -25,11 +25,11 @@ const Chart: React.FC<Props> = ({ height, renderInterval }) => {
 
   React.useEffect(() => {
     const handler = setInterval(() => {
-      const snapshot = snapshotRef.current;
-      ApexCharts.exec("the-chart", "appendData", [
-        { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "win")]] },
-        { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "lose")]] }
-      ]);
+      const datasets = datasetsRef.current;
+      chartRef.current!.updateSeries(
+        [{ data: datasets.win }, { data: datasets.lose }],
+        true
+      );
     }, renderInterval);
 
     return () => {
@@ -38,8 +38,8 @@ const Chart: React.FC<Props> = ({ height, renderInterval }) => {
   }, [renderInterval]);
 
   React.useEffect(() => {
-    snapshotRef.current = snapshot;
-  }, [snapshot]);
+    datasetsRef.current = datasets;
+  }, [datasets]);
 
   return <div ref={domRef} />;
 };
@@ -64,6 +64,11 @@ const createOptions = (height: number) => ({
     height: height,
     foreColor: "#ffffff",
     stacked: false,
+    animations: {
+      dynamicAnimation: {
+        enabled: false
+      }
+    },
     toolbar: {
       show: false
     }

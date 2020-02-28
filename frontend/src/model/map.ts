@@ -3,11 +3,11 @@ export type Map<V> = {
 };
 
 export const values = <V>(map: Map<V>): V[] => {
-  return Array.from(Object.values(map));
+  return Object.values(map);
 };
 
 export const keys = <V>(map: Map<V>): string[] => {
-  return Array.from(Object.keys(map));
+  return Object.keys(map);
 };
 
 export const update = <V>(map: Map<V>, key: string, f: (v: V) => V): Map<V> => {
@@ -15,4 +15,8 @@ export const update = <V>(map: Map<V>, key: string, f: (v: V) => V): Map<V> => {
     ...map,
     [key]: f(map[key])
   };
+};
+
+export const forEach = <V>(map: Map<V>, f: (k: string, v: V) => void): void => {
+  Object.entries(map).forEach(([k, v]) => f(k, v));
 };

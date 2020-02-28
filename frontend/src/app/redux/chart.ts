@@ -1,8 +1,15 @@
 import { createSlice, PayloadAction, CaseReducer } from "@reduxjs/toolkit";
+import moment from "moment";
 
-import { Distribution, Record, create, increment } from "model/chart";
-import { Array, push, empty } from "model/array";
+import {
+  Distribution,
+  Record,
+  create,
+  increment,
+  lmsrPrice
+} from "model/chart";
 import { DateTime, now } from "model/time";
+import { Map, forEach } from "model/map";
 
 /*
  * =========
@@ -12,6 +19,7 @@ import { DateTime, now } from "model/time";
 type State = {
   snapshot: ChartSnapshot;
   recentHistory: Record[];
+  datasets: Map<Data[]>;
 };
 
 export type ChartSnapshot = {
@@ -19,7 +27,10 @@ export type ChartSnapshot = {
   time: DateTime;
 };
 
+export type Data = [DateTime, number];
+
 const MAX_HISTORY_RECORDS: number = 100;
+const MAX_HISTORY_DURATION: number = 60;
 
 /*
  * =============
@@ -43,6 +54,22 @@ const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
     distribution: nextDistribution,
     time
   };
+
+  // datasetの更新
+  forEach(state.datasets, (outcome, datas) => {
+    const newData = [time, lmsrPrice(nextDistribution, outcome)] as Data;
+    datas.push(newData);
+
+    // 最大保存件数を超えているか
+    if (datas.length > MAX_HISTORY_RECORDS) {
+      const oldestDate = moment(datas[0][0]).unix();
+      const now = moment(time).unix();
+      // 最大保存期間を過ぎているか
+      if (oldestDate < now - MAX_HISTORY_DURATION) {
+        datas.shift();
+      }
+    }
+  });
 
   // オーダー履歴の更新
   const record = {
@@ -68,6 +95,7 @@ export const { actions, reducer } = createSlice({
       distribution: create({ win: 0, lose: 0 }),
       time: now()
     },
+    datasets: { win: [], lose: [] },
     recentHistory: []
   } as State,
   reducers: {
