@@ -18,7 +18,7 @@ import { Map, forEach } from "model/map";
  */
 export type State = {
   snapshot: ChartSnapshot;
-  recentHistory: Record[];
+  records: Record[];
   datasets: Map<Data[]>;
 };
 
@@ -29,7 +29,7 @@ export type ChartSnapshot = {
 
 export type Data = [DateTime, number];
 
-const MAX_HISTORY_RECORDS: number = 100;
+const MAX_HISTORY_RECORDS: number = 20;
 const MAX_HISTORY_DURATION: number = 60;
 
 /*
@@ -79,9 +79,9 @@ const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
     time,
     user
   };
-  state.recentHistory.push(record);
-  if (state.recentHistory.length > MAX_HISTORY_RECORDS) {
-    state.recentHistory.shift();
+  state.records.push(record);
+  if (state.records.length > MAX_HISTORY_RECORDS) {
+    state.records.shift();
   }
 };
 
@@ -98,7 +98,7 @@ export const { actions, reducer } = createSlice({
       time: now()
     },
     datasets: { win: [], lose: [] },
-    recentHistory: []
+    records: []
   } as State,
   reducers: {
     vote

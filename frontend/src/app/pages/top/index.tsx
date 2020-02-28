@@ -6,9 +6,13 @@ import { RootState } from "app/redux";
 import { actions, Data } from "app/redux/chart";
 import { DateTime, now } from "model/time";
 import Chart from "./components/chart";
+import Feed from "./components/feed";
 
 const Page: React.FC = () => {
-  const datasets = useSelector((state: RootState) => state.chart.datasets);
+  const [datasets, records] = useSelector((state: RootState) => [
+    state.chart.datasets,
+    state.chart.records
+  ]);
   const dispatch = useDispatch();
 
   React.useEffect(() => {
@@ -17,7 +21,7 @@ const Page: React.FC = () => {
       const time = now();
       const outcome = Math.random() >= 0.5 ? "win" : "lose";
       dispatch(actions.vote({ outcome, time, user }));
-    }, 100);
+    }, 500);
 
     return () => {
       clearInterval(handler);
@@ -40,6 +44,7 @@ const Page: React.FC = () => {
         </PublicPrediction>
         <Chart height={300} datasets={datasets} />
       </ChartContainer>
+      <Feed records={records} />
     </Background>
   );
 };
