@@ -7,6 +7,7 @@ import { actions, Data } from "app/redux/chart";
 import { DateTime, now } from "model/time";
 import Chart from "./components/chart";
 import Feed from "./components/feed";
+import Buttons from "./components/button";
 
 const Page: React.FC = () => {
   const [datasets, records] = useSelector((state: RootState) => [
@@ -17,7 +18,7 @@ const Page: React.FC = () => {
 
   React.useEffect(() => {
     let handler = setInterval(() => {
-      const user = botNames[Math.floor(Math.random() * 1000) % 3];
+      const user = botNames[Math.floor(Math.random() * 1000) % botNames.length];
       const time = now();
       const outcome = Math.random() >= 0.5 ? "win" : "lose";
       dispatch(actions.vote({ outcome, time, user }));
@@ -45,6 +46,13 @@ const Page: React.FC = () => {
         <Chart height={300} datasets={datasets} />
       </ChartContainer>
       <Feed records={records} />
+      <Buttons
+        onVote={outcome =>
+          dispatch(
+            actions.vote({ outcome, time: now(), user: "たかはしあつき" })
+          )
+        }
+      />
     </Background>
   );
 };
@@ -59,7 +67,7 @@ const getPublicPrediction = (data: Data[]): string => {
   }
 };
 
-const botNames = ["たかはしあつき", "ふなはしこうき", "ドナルドトランプ"];
+const botNames = ["ふるさわゆうや", "ふなはしこうき", "ドナルドトランプ", "きしべろはん"];
 
 const Background = styled.div`
   width: 100vw;
@@ -72,7 +80,7 @@ const ChartContainer = styled.div`
   position: relative;
   height: 380px;
   padding-top: 70px;
-  margin-top: 120px;
+  margin-top: 80px;
   margin-bottom: 15px;
   background-color: #242423;
 `;
