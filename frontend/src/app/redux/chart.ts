@@ -14,8 +14,10 @@ type State = {
     distribution: Distribution;
     time: DateTime;
   };
-  history: Record[];
+  recentHistory: Record[];
 };
+
+const MAX_HISTORY_RECORDS: number = 100;
 
 /*
  * =============
@@ -33,21 +35,23 @@ const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
 ) => {
   const { outcome, time } = action.payload;
 
-  // アウトカムの新しい分布
+  // Chart snapshotの更新
   const nextDistribution = increment(state.snapshot.distribution, outcome);
+  state.snapshot = {
+    distribution: nextDistribution,
+    time
+  };
 
-  // 今回のオーダーを表すレコード
+  // オーダー履歴の更新
   const record = {
     outcome,
     price: nextDistribution.lmsrCost - state.snapshot.distribution.lmsrCost,
     time
   };
-
-  state.snapshot = {
-    distribution: nextDistribution,
-    time
-  };
-  state.history.push(record);
+  state.recentHistory.push(record);
+  if (state.recentHistory.length > MAX_HISTORY_RECORDS) {
+    state.recentHistory.shift();
+  }
 };
 
 /*
@@ -62,7 +66,7 @@ export const { actions, reducer } = createSlice({
       distribution: create({ win: 0, lose: 0 }),
       time: now()
     },
-    history: []
+    recentHistory: []
   } as State,
   reducers: {
     vote
