@@ -47,7 +47,7 @@ const Page: React.FC = () => {
         { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "win")]] },
         { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "lose")]] }
       ]);
-    }, 300);
+    }, 211);
 
     return () => {
       clearInterval(handler);
@@ -72,11 +72,13 @@ export default Page;
 const Background = styled.div`
   width: 100vw;
   height: 100vh;
-  padding: 30px;
+  padding: 20px;
   background-color: #121212;
 `;
 
 const ChartContainer = styled.div`
+  height: 400px;
+  padding-top: 90px;
   background-color: #242423;
 `;
 
@@ -95,6 +97,7 @@ const options = {
   chart: {
     id: "the-chart",
     type: "line",
+    height: "300",
     foreColor: "#ffffff",
     stacked: false,
     toolbar: {
@@ -108,6 +111,16 @@ const options = {
     size: 0,
     style: "full"
   },
+  legend: {
+    show: true,
+    position: "top",
+    fontSize: "10px",
+    offsetY: 10,
+    markers: {
+      width: 8,
+      height: 8
+    }
+  },
   title: {
     show: false
   },
@@ -120,19 +133,30 @@ const options = {
     borderColor: "#555"
   },
   yaxis: {
-    min: 0,
-    max: 1000,
-    tickAmount: 10,
+    tickAmount: 5,
     labels: {
+      style: {
+        fontSize: "8px"
+      },
       formatter: (val: number) => Math.floor(val)
     }
   },
   xaxis: {
     type: "datetime",
     labels: {
+      rotate: 0,
+      style: {
+        fontSize: "8px"
+      },
       formatter: (val: string, timestamp: number) => {
-        return moment(val).format("M/D H:m");
+        return moment(val).format("HH:mm");
       }
+    },
+    axisBorder: {
+      color: "#555"
+    },
+    axisTicks: {
+      color: "#555"
     },
     range: 1000 * 60
   },
