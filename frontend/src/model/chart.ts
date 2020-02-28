@@ -41,7 +41,7 @@ export const lmsrPrice = (
   outcome: string
 ): number => {
   const numer = Math.exp((distribution.inner[outcome] || 0) / 30);
-  return (numer / distribution.lmsrPriceDenom) * 1000;
+  return Math.floor((numer / distribution.lmsrPriceDenom) * 1000);
 };
 
 export const outcomes = (distribution: Distribution): string[] => {
@@ -52,7 +52,7 @@ const computeLmsrCost = (distribution: Map<number>): number => {
   const sum = values(distribution)
     .map(n => Math.exp(n / 30))
     .reduce((acc, n) => acc + n, 0);
-  return Math.log(sum) * 30 * 1000;
+  return Math.floor(Math.log(sum) * 30 * 1000);
 };
 
 const computeLmsrPriceDenom = (distribution: Map<number>): number => {

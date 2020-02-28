@@ -43,7 +43,7 @@ const ButtonContainer = styled.div<{ color: string }>`
   line-height: 126px;
   font-size: 36px;
   text-align: center;
-  transition: transform ease-in 0.1s, box-shadow ease-in 0.25s;
+  transition: transform 0.1s ease;
 
   &:active {
     transform: scale(0.95);

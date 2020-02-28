@@ -9,7 +9,7 @@ import {
   lmsrPrice
 } from "model/chart";
 import { DateTime, now } from "model/time";
-import { Map, forEach } from "model/map";
+import { Map, forEach, entries } from "model/map";
 
 /*
  * =========
@@ -20,6 +20,9 @@ export type State = {
   snapshot: ChartSnapshot;
   records: Record[];
   datasets: Map<Data[]>;
+  userPaid: number;
+  userAsset: Map<number>;
+  userScore: number;
 };
 
 export type ChartSnapshot = {
@@ -50,7 +53,21 @@ const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
   const { outcome, time, user } = action.payload;
 
   // Chart snapshotの更新
+  // 次の分布の計算
   const nextDistribution = increment(state.snapshot.distribution, outcome);
+
+  // 新しい取引履歴の作成
+  const record = {
+    outcome,
+    price: nextDistribution.lmsrCost - state.snapshot.distribution.lmsrCost,
+    time,
+    user
+  };
+
+  /*
+   * stateの更新
+   */
+  // snapshotの更新
   state.snapshot = {
     distribution: nextDistribution,
     time
@@ -73,15 +90,25 @@ const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
   });
 
   // オーダー履歴の更新
-  const record = {
-    outcome,
-    price: nextDistribution.lmsrCost - state.snapshot.distribution.lmsrCost,
-    time,
-    user
-  };
   state.records.push(record);
   if (state.records.length > MAX_HISTORY_RECORDS) {
     state.records.shift();
+  }
+
+  // userの更新
+  if (user === "たかはしあつき") {
+    state.userPaid += record.price;
+    state.userAsset[outcome] += 1;
+  }
+
+  // userScoreの更新
+  if (state.userPaid > 0) {
+    const marketCap = entries(state.userAsset).reduce((acc, [outcome, q]) => {
+      const datas = state.datasets[outcome];
+      const price = datas.length === 0 ? 0 : datas[datas.length - 1][1];
+      return acc + q * price;
+    }, 0);
+    state.userScore = marketCap / state.userPaid;
   }
 };
 
@@ -98,7 +125,10 @@ export const { actions, reducer } = createSlice({
       time: now()
     },
     datasets: { win: [], lose: [] },
-    records: []
+    records: [],
+    userPaid: 0,
+    userAsset: { win: 0, lose: 0 },
+    userScore: 0
   } as State,
   reducers: {
     vote

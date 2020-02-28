@@ -4,15 +4,16 @@ import styled from "styled-components";
 
 import { RootState } from "app/redux";
 import { actions, Data } from "app/redux/chart";
-import { DateTime, now } from "model/time";
+import { now } from "model/time";
 import Chart from "./components/chart";
 import Feed from "./components/feed";
 import Buttons from "./components/button";
 
 const Page: React.FC = () => {
-  const [datasets, records] = useSelector((state: RootState) => [
+  const [datasets, records, userScore] = useSelector((state: RootState) => [
     state.chart.datasets,
-    state.chart.records
+    state.chart.records,
+    state.chart.userScore
   ]);
   const dispatch = useDispatch();
 
@@ -30,10 +31,15 @@ const Page: React.FC = () => {
   }, [dispatch]);
 
   const publicPred = getPublicPrediction(datasets.win);
+  const userScoreStr = `${userScore}`.slice(0, 4);
 
   return (
     <Background>
       <ChartContainer>
+        <MyScore>
+          <PredictionTitle>あなたのスコア</PredictionTitle>
+          <PredictionValue>{userScoreStr}</PredictionValue>
+        </MyScore>
         <PublicPrediction>
           <PredictionTitle>みんなの予想した優勝確率</PredictionTitle>
           <PredictionValue>
@@ -67,7 +73,12 @@ const getPublicPrediction = (data: Data[]): string => {
   }
 };
 
-const botNames = ["ふるさわゆうや", "ふなはしこうき", "ドナルドトランプ", "きしべろはん"];
+const botNames = [
+  "ふるさわゆうや",
+  "ふなはしこうき",
+  "ドナルドトランプ",
+  "きしべろはん"
+];
 
 const Background = styled.div`
   width: 100vw;
@@ -85,9 +96,15 @@ const ChartContainer = styled.div`
   background-color: #242423;
 `;
 
+const MyScore = styled.div`
+  position: absolute;
+  width: fit-content;
+  top: 10px;
+  left: 10px;
+`;
+
 const PublicPrediction = styled.div`
   position: absolute;
-  display: inline-block;
   width: fit-content;
   top: 10px;
   right: 10px;
@@ -108,10 +125,6 @@ const PredictionValue = styled.div`
 
 const AlignRight = styled.div`
   text-align: right;
-`;
-
-const AlignLeft = styled.div`
-  text-align: left;
 `;
 
 const Small = styled.span`

@@ -10,6 +10,10 @@ export const keys = <V>(map: Map<V>): string[] => {
   return Object.keys(map);
 };
 
+export const entries = <V>(map: Map<V>): [string, V][] => {
+  return Object.entries(map);
+};
+
 export const update = <V>(map: Map<V>, key: string, f: (v: V) => V): Map<V> => {
   return {
     ...map,
