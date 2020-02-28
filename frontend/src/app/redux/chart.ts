@@ -10,11 +10,13 @@ import { DateTime, now } from "model/time";
  * =========
  */
 type State = {
-  snapshot: {
-    distribution: Distribution;
-    time: DateTime;
-  };
+  snapshot: ChartSnapshot;
   recentHistory: Record[];
+};
+
+export type ChartSnapshot = {
+  distribution: Distribution;
+  time: DateTime;
 };
 
 const MAX_HISTORY_RECORDS: number = 100;

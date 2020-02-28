@@ -6,7 +6,7 @@ import ApexCharts from "apexcharts";
 import moment from "moment";
 
 import { RootState } from "app/redux";
-import { actions } from "app/redux/chart";
+import { actions, ChartSnapshot } from "app/redux/chart";
 import { lmsrPrice } from "model/chart";
 import { DateTime, now } from "model/time";
 
@@ -18,6 +18,7 @@ const Page: React.FC = () => {
   const dispatch = useDispatch();
   const chartRef = React.useRef<ApexCharts | undefined>();
   const domRef = React.useRef<HTMLDivElement | null>(null);
+  const snapshotRef = React.useRef<ChartSnapshot>(snapshot);
 
   React.useEffect(() => {
     let handler = setInterval(() => {
@@ -41,10 +42,21 @@ const Page: React.FC = () => {
   }, [chartRef]);
 
   React.useEffect(() => {
-    ApexCharts.exec("the-chart", "appendData", [
-      { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "win")]] },
-      { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "lose")]] }
-    ]);
+    const handler = setInterval(() => {
+      const snapshot = snapshotRef.current;
+      ApexCharts.exec("the-chart", "appendData", [
+        { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "win")]] },
+        { data: [[snapshot.time, lmsrPrice(snapshot.distribution, "lose")]] }
+      ]);
+    }, 300);
+
+    return () => {
+      clearInterval(handler);
+    };
+  }, [snapshotRef]);
+
+  React.useEffect(() => {
+    snapshotRef.current = snapshot;
   }, [snapshot]);
 
   return (
@@ -71,13 +83,16 @@ const ChartContainer = styled.div`
 
 const options = {
   colors: ["#bfe8ff", "#ffc0cb"],
-  series: [{
-    name: "win",
-    data: []
-  },{
-    name: "lose",
-    data: []
-  }],
+  series: [
+    {
+      name: "win",
+      data: []
+    },
+    {
+      name: "lose",
+      data: []
+    }
+  ],
   chart: {
     id: "the-chart",
     type: "line",
@@ -100,16 +115,6 @@ const options = {
   stroke: {
     width: 2,
     colors: ["#bfe8ff", "#ffc0cb"]
-  },
-  fill: {
-    type: "gradient",
-    gradient: {
-      shadeIntensity: 1,
-      inverseColors: false,
-      opacityFrom: 0.7,
-      opacityTo: 0.9,
-      stops: [100, 90, 0]
-    }
   },
   grid: {
     show: true,
