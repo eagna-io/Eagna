@@ -70,9 +70,10 @@ const Background = styled.div`
 
 const ChartContainer = styled.div`
   position: relative;
-  height: 400px;
-  padding-top: 90px;
+  height: 380px;
+  padding-top: 70px;
   margin-top: 120px;
+  margin-bottom: 15px;
   background-color: #242423;
 `;
 
