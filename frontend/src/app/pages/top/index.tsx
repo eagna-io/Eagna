@@ -13,11 +13,10 @@ const Page: React.FC = () => {
 
   React.useEffect(() => {
     let handler = setInterval(() => {
-      if (Math.random() > 0.5) {
-        dispatch(actions.vote({ outcome: "win", time: now() }));
-      } else {
-        dispatch(actions.vote({ outcome: "lose", time: now() }));
-      }
+      const user = botNames[Math.floor(Math.random() * 1000) % 3];
+      const time = now();
+      const outcome = Math.random() >= 0.5 ? "win" : "lose";
+      dispatch(actions.vote({ outcome, time, user }));
     }, 100);
 
     return () => {
@@ -54,6 +53,8 @@ const getPublicPrediction = (data: Data[]): string => {
     return Math.floor(data[data.length - 1][1] / 10).toString();
   }
 };
+
+const botNames = ["たかはしあつき", "ふなはしこうき", "ドナルドトランプ"];
 
 const Background = styled.div`
   width: 100vw;

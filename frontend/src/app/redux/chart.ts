@@ -40,13 +40,14 @@ const MAX_HISTORY_DURATION: number = 60;
 type VotePayload = {
   outcome: string;
   time: DateTime;
+  user: string;
 };
 
 const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
   state,
   action
 ) => {
-  const { outcome, time } = action.payload;
+  const { outcome, time, user } = action.payload;
 
   // Chart snapshotの更新
   const nextDistribution = increment(state.snapshot.distribution, outcome);
@@ -75,7 +76,8 @@ const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
   const record = {
     outcome,
     price: nextDistribution.lmsrCost - state.snapshot.distribution.lmsrCost,
-    time
+    time,
+    user
   };
   state.recentHistory.push(record);
   if (state.recentHistory.length > MAX_HISTORY_RECORDS) {

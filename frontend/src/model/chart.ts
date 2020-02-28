@@ -5,6 +5,7 @@ export type Record = {
   outcome: string;
   price: number;
   time: DateTime;
+  user: string;
 };
 
 /*
