@@ -24,7 +24,6 @@
     "@types/styled-components": "^4.1.15",
     "apexcharts": "^3.15.6",
     "immer": "^5.3.6",
-    "immutable": "^4.0.0-rc.12",
     "jwt-decode": "^2.2.0",
     "moment": "^2.24.0",
     "react": "^16.8.6",
