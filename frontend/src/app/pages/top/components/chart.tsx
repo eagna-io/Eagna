@@ -1,28 +1,31 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import ApexCharts from "apexcharts";
 import moment from "moment";
 
-import { RootState } from "app/redux";
 import { Data } from "app/redux/chart";
 import { Map } from "model/map";
 
 interface Props {
   height: number;
   renderInterval?: number;
+  datasets: Map<Data[]>;
 }
 
-const Chart: React.FC<Props> = ({ height, renderInterval = 100 }) => {
-  const datasets = useSelector((state: RootState) => state.chart.datasets);
+const Chart: React.FC<Props> = ({ height, renderInterval = 100, datasets }) => {
   const chartRef = React.useRef<ApexCharts | undefined>();
   const domRef = React.useRef<HTMLDivElement | null>(null);
   const datasetsRef = React.useRef<Map<Data[]>>(datasets);
 
+  // datasetsを直接描画するのではなく、refに入れて定期的に描画する
+  datasetsRef.current = datasets;
+
+  // DOMの描画が終わった後に呼ばれるので、domRef.currentに値が入っている
   React.useEffect(() => {
     chartRef.current = new ApexCharts(domRef.current, createOptions(height));
     chartRef.current.render();
   }, [height]);
 
+  // 定期的に描画
   React.useEffect(() => {
     const handler = setInterval(() => {
       const datasets = datasetsRef.current;
@@ -36,10 +39,6 @@ const Chart: React.FC<Props> = ({ height, renderInterval = 100 }) => {
       clearInterval(handler);
     };
   }, [renderInterval]);
-
-  React.useEffect(() => {
-    datasetsRef.current = datasets;
-  }, [datasets]);
 
   return <div ref={domRef} />;
 };

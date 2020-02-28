@@ -16,7 +16,7 @@ import { Map, forEach } from "model/map";
  * State
  * =========
  */
-type State = {
+export type State = {
   snapshot: ChartSnapshot;
   recentHistory: Record[];
   datasets: Map<Data[]>;
