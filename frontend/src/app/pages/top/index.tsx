@@ -23,7 +23,7 @@ const Page: React.FC = () => {
       const time = now();
       const outcome = Math.random() >= 0.5 ? "win" : "lose";
       dispatch(actions.vote({ outcome, time, user }));
-    }, 500);
+    }, 200);
 
     return () => {
       clearInterval(handler);
