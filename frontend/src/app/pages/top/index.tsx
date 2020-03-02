@@ -32,9 +32,15 @@ const Page: React.FC = () => {
 
   const publicPred = getPublicPrediction(datasets.win);
   const userScoreStr = `${userScore}`.slice(0, 4);
+  const predTargetTitle = 'RAGE Shadowverse 2020 Spring\nGRAND FINALS Shimon/REVが優勝するか？'
 
   return (
     <Background>
+      <TitleContainer>
+        <PredTargetTitle style={{whiteSpace: 'pre-line'}}>
+          {predTargetTitle}
+        </PredTargetTitle>
+      </TitleContainer>
       <ChartContainer>
         <MyScore>
           <PredictionTitle>あなたのスコア</PredictionTitle>
@@ -87,11 +93,16 @@ const Background = styled.div`
   background-color: #121212;
 `;
 
+const TitleContainer = styled.div`
+  position: relative;
+  background-color: #242423;
+  margin-bottom: 15px;
+`;
+
 const ChartContainer = styled.div`
   position: relative;
   height: 380px;
   padding-top: 70px;
-  margin-top: 80px;
   margin-bottom: 15px;
   background-color: #242423;
 `;
@@ -108,6 +119,12 @@ const PublicPrediction = styled.div`
   width: fit-content;
   top: 10px;
   right: 10px;
+`;
+
+const PredTargetTitle = styled.div`
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
 `;
 
 const PredictionTitle = styled.div`
