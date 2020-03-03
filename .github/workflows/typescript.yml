@@ -1,0 +1,31 @@
+name: Typescript
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/typescript.yml'
+      - 'frontend/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '.github/workflows/typescript.yml'
+      - 'frontend/**'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Get yarn cache dir
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - name: Cache node modules
+      uses: actions/cache@v1
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('frontend/yarn.lock') }}
+    - name: Check
+      run: cd frontend && yarn tsc
