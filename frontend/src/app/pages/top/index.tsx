@@ -90,13 +90,13 @@ const botNames = [
 
 const Container = styled.div`
   width: 100%;
+  height: 100vh;
   overflow: scroll;
   background-color: #242423;
 `;
 
 const Contents = styled.div`
   width: 100vw;
-  height: 100vh;
   padding: 20px;
   background-color: #121212;
 `;
