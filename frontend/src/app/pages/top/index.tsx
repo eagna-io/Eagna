@@ -34,32 +34,37 @@ const Page: React.FC = () => {
   const userScoreStr = `${userScore}`.slice(0, 4);
 
   return (
-    <Background>
-      <ChartContainer>
-        <MyScore>
-          <PredictionTitle>あなたのスコア</PredictionTitle>
-          <PredictionValue>{userScoreStr}</PredictionValue>
-        </MyScore>
-        <PublicPrediction>
-          <PredictionTitle>みんなの予想した優勝確率</PredictionTitle>
-          <PredictionValue>
-            <AlignRight>
-              {publicPred}
-              <Small>%</Small>
-            </AlignRight>
-          </PredictionValue>
-        </PublicPrediction>
-        <Chart height={300} datasets={datasets} />
-      </ChartContainer>
-      <Feed records={records} />
-      <Buttons
-        onVote={outcome =>
-          dispatch(
-            actions.vote({ outcome, time: now(), user: "たかはしあつき" })
-          )
-        }
-      />
-    </Background>
+    <Container>
+      <Title>
+        <ThemeTitle>{themeTitle}</ThemeTitle>
+      </Title>
+      <Contents>
+        <ChartContainer>
+          <MyScore>
+            <PredictionTitle>あなたのスコア</PredictionTitle>
+            <PredictionValue>{userScoreStr}</PredictionValue>
+          </MyScore>
+          <PublicPrediction>
+            <PredictionTitle>みんなの予想した優勝確率</PredictionTitle>
+            <PredictionValue>
+              <AlignRight>
+                {publicPred}
+                <Small>%</Small>
+              </AlignRight>
+            </PredictionValue>
+          </PublicPrediction>
+          <Chart height={300} datasets={datasets} />
+        </ChartContainer>
+        <Feed records={records} />
+        <Buttons
+          onVote={outcome =>
+            dispatch(
+              actions.vote({ outcome, time: now(), user: "たかはしあつき" })
+            )
+          }
+        />
+      </Contents>
+    </Container>
   );
 };
 
@@ -73,6 +78,8 @@ const getPublicPrediction = (data: Data[]): string => {
   }
 };
 
+const themeTitle = 'RAGE Shadowverse 2020 Spring\nGRAND FINALS Shimon/REVが優勝するか？'
+
 const botNames = [
   "ふるさわゆうや",
   "ふなはしこうき",
@@ -80,17 +87,26 @@ const botNames = [
   "きしべろはん"
 ];
 
-const Background = styled.div`
+const Container = styled.div`
+  width: 100vw;
+`;
+
+const Contents = styled.div`
   width: 100vw;
   padding: 20px;
   background-color: #121212;
+`;
+
+const Title = styled.div`
+  position: relative;
+  background-color: #242423;
+  padding: 20px;
 `;
 
 const ChartContainer = styled.div`
   position: relative;
   height: 380px;
   padding-top: 70px;
-  margin-top: 80px;
   margin-bottom: 15px;
   background-color: #242423;
   user-select: none;
@@ -108,6 +124,13 @@ const PublicPrediction = styled.div`
   width: fit-content;
   top: 10px;
   right: 10px;
+`;
+
+const ThemeTitle = styled.div`
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  whiteSpace: 'pre-line'
 `;
 
 const PredictionTitle = styled.div`
