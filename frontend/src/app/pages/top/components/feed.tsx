@@ -11,7 +11,7 @@ const Feed: React.FC<Props> = ({ records }) => {
   return (
     <Container>
       {[...records].reverse().map(record => (
-        <Item record={record} />
+        <Item key={record.time} record={record} />
       ))}
     </Container>
   );
