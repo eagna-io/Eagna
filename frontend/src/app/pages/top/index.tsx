@@ -35,37 +35,39 @@ const Page: React.FC = () => {
   const predTargetTitle = 'RAGE Shadowverse 2020 Spring\nGRAND FINALS Shimon/REVが優勝するか？'
 
   return (
-    <Background>
+    <Container>
       <TitleContainer>
-        <PredTargetTitle style={{whiteSpace: 'pre-line'}}>
+        <ThemeTitle style={{whiteSpace: 'pre-line'}}>
           {predTargetTitle}
-        </PredTargetTitle>
+        </ThemeTitle>
       </TitleContainer>
-      <ChartContainer>
-        <MyScore>
-          <PredictionTitle>あなたのスコア</PredictionTitle>
-          <PredictionValue>{userScoreStr}</PredictionValue>
-        </MyScore>
-        <PublicPrediction>
-          <PredictionTitle>みんなの予想した優勝確率</PredictionTitle>
-          <PredictionValue>
-            <AlignRight>
-              {publicPred}
-              <Small>%</Small>
-            </AlignRight>
-          </PredictionValue>
-        </PublicPrediction>
-        <Chart height={300} datasets={datasets} />
-      </ChartContainer>
-      <Feed records={records} />
-      <Buttons
-        onVote={outcome =>
-          dispatch(
-            actions.vote({ outcome, time: now(), user: "たかはしあつき" })
-          )
-        }
-      />
-    </Background>
+      <Contents>
+        <ChartContainer>
+          <MyScore>
+            <PredictionTitle>あなたのスコア</PredictionTitle>
+            <PredictionValue>{userScoreStr}</PredictionValue>
+          </MyScore>
+          <PublicPrediction>
+            <PredictionTitle>みんなの予想した優勝確率</PredictionTitle>
+            <PredictionValue>
+              <AlignRight>
+                {publicPred}
+                <Small>%</Small>
+              </AlignRight>
+            </PredictionValue>
+          </PublicPrediction>
+          <Chart height={300} datasets={datasets} />
+        </ChartContainer>
+        <Feed records={records} />
+        <Buttons
+          onVote={outcome =>
+            dispatch(
+              actions.vote({ outcome, time: now(), user: "たかはしあつき" })
+            )
+          }
+        />
+      </Contents>
+    </Container>
   );
 };
 
@@ -86,7 +88,13 @@ const botNames = [
   "きしべろはん"
 ];
 
-const Background = styled.div`
+const Container = styled.div`
+  width: 100%;
+  overflow: scroll;
+  background-color: #242423;
+`;
+
+const Contents = styled.div`
   width: 100vw;
   height: 100vh;
   padding: 20px;
@@ -96,7 +104,7 @@ const Background = styled.div`
 const TitleContainer = styled.div`
   position: relative;
   background-color: #242423;
-  margin-bottom: 15px;
+  padding: 20px;
 `;
 
 const ChartContainer = styled.div`
@@ -121,7 +129,7 @@ const PublicPrediction = styled.div`
   right: 10px;
 `;
 
-const PredTargetTitle = styled.div`
+const ThemeTitle = styled.div`
   color: white;
   font-size: 14px;
   font-weight: 500;
