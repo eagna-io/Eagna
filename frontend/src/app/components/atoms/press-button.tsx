@@ -13,7 +13,7 @@ export const PressButton: React.FC<Props> = ({
   className,
   children
 }) => {
-  const [timer, setTimer] = React.useState();
+  const [timer, setTimer] = React.useState<number | undefined>();
   const [isActive, setIsActive] = React.useState(false);
 
   return (
