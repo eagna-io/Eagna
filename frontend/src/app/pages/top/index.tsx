@@ -82,7 +82,6 @@ const botNames = [
 
 const Background = styled.div`
   width: 100vw;
-  height: 100vh;
   padding: 20px;
   background-color: #121212;
 `;
