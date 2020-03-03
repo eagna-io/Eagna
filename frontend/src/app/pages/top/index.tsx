@@ -32,14 +32,11 @@ const Page: React.FC = () => {
 
   const publicPred = getPublicPrediction(datasets.win);
   const userScoreStr = `${userScore}`.slice(0, 4);
-  const themeTitle = 'RAGE Shadowverse 2020 Spring\nGRAND FINALS Shimon/REVが優勝するか？'
 
   return (
     <Container>
       <Title>
-        <ThemeTitle style={{whiteSpace: 'pre-line'}}>
-          {themeTitle}
-        </ThemeTitle>
+        <ThemeTitle>{themeTitle}</ThemeTitle>
       </Title>
       <Contents>
         <ChartContainer>
@@ -81,6 +78,8 @@ const getPublicPrediction = (data: Data[]): string => {
   }
 };
 
+const themeTitle = 'RAGE Shadowverse 2020 Spring\nGRAND FINALS Shimon/REVが優勝するか？'
+
 const botNames = [
   "ふるさわゆうや",
   "ふなはしこうき",
@@ -89,10 +88,8 @@ const botNames = [
 ];
 
 const Container = styled.div`
-  width: 100%;
+  width: 100vw;
   height: 100vh;
-  overflow: scroll;
-  background-color: #242423;
 `;
 
 const Contents = styled.div`
@@ -133,6 +130,7 @@ const ThemeTitle = styled.div`
   color: white;
   font-size: 14px;
   font-weight: 500;
+  whiteSpace: 'pre-line'
 `;
 
 const PredictionTitle = styled.div`
