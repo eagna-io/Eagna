@@ -36,11 +36,11 @@ const Page: React.FC = () => {
 
   return (
     <Container>
-      <TitleContainer>
+      <Title>
         <ThemeTitle style={{whiteSpace: 'pre-line'}}>
           {themeTitle}
         </ThemeTitle>
-      </TitleContainer>
+      </Title>
       <Contents>
         <ChartContainer>
           <MyScore>
@@ -101,7 +101,7 @@ const Contents = styled.div`
   background-color: #121212;
 `;
 
-const TitleContainer = styled.div`
+const Title = styled.div`
   position: relative;
   background-color: #242423;
   padding: 20px;
