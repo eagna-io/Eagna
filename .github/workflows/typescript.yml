@@ -28,6 +28,6 @@ jobs:
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
         key: ${{ runner.os }}-yarn-${{ hashFiles('frontend/yarn.lock') }}
     - name: Install
-      run: cd frontend && yarn install
+      run: cd frontend && yarn install --production=false --frozen-lockfile
     - name: Check
       run: cd frontend && yarn tsc
