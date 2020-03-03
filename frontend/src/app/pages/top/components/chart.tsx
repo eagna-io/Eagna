@@ -30,7 +30,7 @@ const Chart: React.FC<Props> = ({ height, renderInterval = 100, datasets }) => {
     const handler = setInterval(() => {
       const datasets = datasetsRef.current;
       chartRef.current!.updateSeries(
-        [{ data: datasets.win }, { data: datasets.lose }],
+        [{ data: datasets.win }],
         true
       );
     }, renderInterval);
@@ -49,11 +49,7 @@ const createOptions = (height: number) => ({
   colors: ["#bfe8ff", "#ffc0cb"],
   series: [
     {
-      name: "win",
-      data: []
-    },
-    {
-      name: "lose",
+      name: "勝利する",
       data: []
     }
   ],
@@ -94,7 +90,7 @@ const createOptions = (height: number) => ({
   },
   stroke: {
     width: 2,
-    colors: ["#bfe8ff", "#ffc0cb"]
+    colors: ["#bfe8ff"]
   },
   grid: {
     show: true,

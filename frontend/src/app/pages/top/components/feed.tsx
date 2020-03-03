@@ -11,7 +11,7 @@ const Feed: React.FC<Props> = ({ records }) => {
   return (
     <Container>
       {[...records].reverse().map(record => (
-        <Item record={record} />
+        <Item key={record.time} record={record} />
       ))}
     </Container>
   );
@@ -24,7 +24,7 @@ const Item: React.FC<{ record: Record }> = ({ record }) => {
   const color = record.outcome === "win" ? "#39CCBE" : "#F74C61";
 
   return (
-    <ItemContainer>
+    <ItemContainer unselectable="on">
       <Name mine={mine}>{record.user}</Name>さんが
       <Outcome color={color}>{record.outcome}</Outcome>
       と予想しました
@@ -48,6 +48,7 @@ const ItemContainer = styled.div`
   font-size: 12px;
   font-weight: 200;
   color: white;
+  user-select: none;
 `;
 
 const Name = styled.span<{ mine: boolean }>`

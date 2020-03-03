@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
+import { PressButton } from "app/components/atoms/press-button";
+
 interface Props {
   onVote: (outcome: string) => void;
 }
@@ -30,13 +32,13 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({ color, onClick, text }) => {
   return (
-    <ButtonContainer color={color} onClick={onClick}>
+    <StyledPressButton color={color} onPress={onClick} threshold={1000}>
       {text}
-    </ButtonContainer>
+    </StyledPressButton>
   );
 };
 
-const ButtonContainer = styled.div<{ color: string }>`
+const StyledPressButton = styled(PressButton)<{ color: string }>`
   width: calc(50% - 8px);
   height: 126px;
   background-color: ${props => props.color};
