@@ -93,6 +93,7 @@ const ChartContainer = styled.div`
   margin-top: 80px;
   margin-bottom: 15px;
   background-color: #242423;
+  user-select: none;
 `;
 
 const MyScore = styled.div`

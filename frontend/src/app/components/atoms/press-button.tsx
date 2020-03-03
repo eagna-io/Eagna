@@ -21,7 +21,6 @@ export const PressButton: React.FC<Props> = ({
       className={className}
       unselectable="on"
       onTouchStart={(e) => {
-        e.preventDefault();
         e.stopPropagation();
         const timer = setTimeout(() => {
           setIsActive(true);
@@ -29,7 +28,6 @@ export const PressButton: React.FC<Props> = ({
         setTimer(timer);
       }}
       onTouchEnd={(e) => {
-        e.preventDefault();
         e.stopPropagation();
         clearTimeout(timer);
         if (isActive) {
@@ -45,5 +43,4 @@ export const PressButton: React.FC<Props> = ({
 
 const StyledButton = styled.button`
   user-select: none;
-  -webkit-touch-callout: none;
 `;
