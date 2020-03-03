@@ -23,7 +23,7 @@ const Page: React.FC = () => {
       const time = now();
       const outcome = Math.random() >= 0.5 ? "win" : "lose";
       dispatch(actions.vote({ outcome, time, user }));
-    }, 500);
+    }, 200);
 
     return () => {
       clearInterval(handler);
@@ -82,7 +82,6 @@ const botNames = [
 
 const Background = styled.div`
   width: 100vw;
-  height: 100vh;
   padding: 20px;
   background-color: #121212;
 `;
@@ -94,6 +93,7 @@ const ChartContainer = styled.div`
   margin-top: 80px;
   margin-bottom: 15px;
   background-color: #242423;
+  user-select: none;
 `;
 
 const MyScore = styled.div`
