@@ -32,13 +32,13 @@ const Page: React.FC = () => {
 
   const publicPred = getPublicPrediction(datasets.win);
   const userScoreStr = `${userScore}`.slice(0, 4);
-  const predTargetTitle = 'RAGE Shadowverse 2020 Spring\nGRAND FINALS Shimon/REVが優勝するか？'
+  const themeTitle = 'RAGE Shadowverse 2020 Spring\nGRAND FINALS Shimon/REVが優勝するか？'
 
   return (
     <Container>
       <TitleContainer>
         <ThemeTitle style={{whiteSpace: 'pre-line'}}>
-          {predTargetTitle}
+          {themeTitle}
         </ThemeTitle>
       </TitleContainer>
       <Contents>
