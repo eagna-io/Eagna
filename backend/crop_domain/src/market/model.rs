@@ -62,7 +62,7 @@ pub struct Outcome {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct OutcomeId(Uuid);
+pub struct OutcomeId(pub Uuid);
 
 impl OutcomeId {
     pub fn new() -> OutcomeId {
