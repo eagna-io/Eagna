@@ -8,4 +8,9 @@ edition = "2018"
 
 [dependencies]
 futures = "0.3"
+tokio = { version = "0.2", features = ["macros", "rt-threaded"] }
 tokio-tungstenite = "0.10"
+
+[[bin]]
+name = "client-cli"
+path = "src/bin/main.rs"
