@@ -40,3 +40,11 @@ impl State {
         self.markets.lock().unwrap().get(&market_id).cloned()
     }
 }
+
+pub fn add_new_market(market: Market) {
+    GLOBAL_STATE.add_new_market(market)
+}
+
+pub fn with_market<T>(market_id: MarketId, f: impl FnOnce(&mut Market) -> T) -> Option<T> {
+    GLOBAL_STATE.with_market(market_id, f)
+}
