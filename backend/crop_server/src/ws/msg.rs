@@ -69,7 +69,8 @@ impl<'a> Into<Message> for &'a OutgoingMsg {
 #[serde(rename_all = "camelCase")]
 pub struct FeedMsg {
     outcome_id: Uuid,
-    account_name: String,
+    account_id: Uuid,
     /// Unixタイムスタンプのms表現
-    timestamp: u32,
+    /// https://docs.rs/chrono/0.4.10/chrono/struct.DateTime.html#method.timestamp_millis
+    timestamp: i64,
 }
