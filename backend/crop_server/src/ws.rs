@@ -1,3 +1,5 @@
+pub mod msg;
+
 use futures::{future, stream::StreamExt as _};
 use uuid::Uuid;
 use warp::{filters, reject::Rejection, reply::Reply, Filter};
