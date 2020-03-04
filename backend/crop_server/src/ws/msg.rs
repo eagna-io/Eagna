@@ -68,9 +68,9 @@ impl<'a> Into<Message> for &'a OutgoingMsg {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FeedMsg {
-    outcome_id: Uuid,
-    account_id: Uuid,
+    pub outcome_id: Uuid,
+    pub account_id: Uuid,
     /// Unixタイムスタンプのms表現
     /// https://docs.rs/chrono/0.4.10/chrono/struct.DateTime.html#method.timestamp_millis
-    timestamp: i64,
+    pub timestamp: i64,
 }
