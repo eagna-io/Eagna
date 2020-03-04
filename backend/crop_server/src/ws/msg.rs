@@ -35,7 +35,7 @@ impl<'a> TryFrom<&'a Message> for IncomingMsg {
 #[serde(rename_all = "camelCase")]
 pub struct VoteMsg {
     pub outcome_id: Uuid,
-    pub account_name: String,
+    pub account_id: Uuid,
 }
 
 /*
