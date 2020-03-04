@@ -10,6 +10,7 @@ import { createGlobalStyle } from "styled-components";
 
 import { store } from "./redux";
 import TopPage from "./pages/top";
+import Market from "./pages/market";
 
 const App: FC = () => {
   return (
@@ -28,7 +29,8 @@ const AppRouter: FC = () => (
   <Router>
     <Switch>
       <Route path="/" exact component={TopPage} />
-      <Redirect to="/" />
+      <Route path="/market" exact component={Market} />
+      <Redirect to="/market" />
     </Switch>
   </Router>
 );
