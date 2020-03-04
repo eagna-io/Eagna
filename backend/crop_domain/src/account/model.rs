@@ -20,7 +20,7 @@ impl Account {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct AccountId(Uuid);
+pub struct AccountId(pub Uuid);
 
 impl AccountId {
     pub fn new() -> AccountId {

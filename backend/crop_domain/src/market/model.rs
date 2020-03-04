@@ -47,7 +47,7 @@ impl Market {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct MarketId(Uuid);
+pub struct MarketId(pub Uuid);
 
 impl MarketId {
     pub fn new() -> MarketId {
