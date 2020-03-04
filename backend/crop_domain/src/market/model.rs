@@ -13,26 +13,26 @@ pub struct Market {
     pub id: MarketId,
     pub orders: Vec<Order>,
 
-    share_distri: HashMap<OutcomeId, ShareNum>,
+    // 各アウトカムどれくらいのShareが流通しているか
+    shares: HashMap<OutcomeId, ShareNum>,
     price_computer: PriceComputer,
 }
 
 impl Market {
     /// 新しくMarketを作成する
-    pub fn new() -> Market {
+    pub fn new(outcomes: &[OutcomeId]) -> Market {
+        let shares = outcomes.iter().map(|id| (*id, ShareNum::ZERO)).collect();
         Market {
             id: MarketId::new(),
             orders: Vec::new(),
-            share_distri: HashMap::new(),
+            shares,
             price_computer: PriceComputer::default(),
         }
     }
 
     /// 対象のOutcomeを1つ購入する
     pub fn new_order(&mut self, account: AccountId, outcome: OutcomeId) -> Order {
-        let tip_cost = self
-            .price_computer
-            .compute_price(&self.share_distri, outcome);
+        let tip_cost = self.price_computer.compute_price(&self.shares, outcome);
         let order = Order::new(outcome, account, tip_cost);
         // Orderを記録する
         self.orders.push(order);
@@ -42,7 +42,7 @@ impl Market {
 
     /// 対象のOutcomeのShareを1つ追加する
     fn increment_share(&mut self, outcome: OutcomeId) {
-        *self.share_distri.get_mut(&outcome).unwrap() += ShareNum::ONE;
+        *self.shares.get_mut(&outcome).unwrap() += ShareNum::ONE;
     }
 }
 
