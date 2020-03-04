@@ -1,10 +1,10 @@
 use crate::ws;
+use std::net::SocketAddr;
 
 pub struct Server {}
 
 impl Server {
-    #[tokio::main]
-    pub async fn serve() {
-        warp::serve(ws::filter()).bind(([127, 0, 0, 1], 3030)).await
+    pub async fn bind(socket: impl Into<SocketAddr> + 'static) {
+        warp::serve(ws::filter()).bind(socket).await
     }
 }

@@ -5,10 +5,8 @@ authors = ["AtsukiTak <takatomgoo@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-crop_primitive = { path = "../crop_primitive" }
-crop_infra = { path = "../crop_infra" }
-crop_domain = { path = "../crop_domain" }
 crop_app = { path = "../crop_app" }
 
 env_logger = "0.7"
 log = "~0.4"
+tokio = { version = "0.2", features = ["macros", "rt-threaded"] }
