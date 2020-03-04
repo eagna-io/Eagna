@@ -8,7 +8,7 @@ use warp::filters::ws::Message;
  * IncomingMsg
  * ============
  */
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 #[serde(tag = "type")]
 pub enum IncomingMsg {
     Vote(VoteMsg),
@@ -31,7 +31,7 @@ impl<'a> TryFrom<&'a Message> for IncomingMsg {
 ///     "accountName": "Atsuking"
 /// }
 /// ```
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct VoteMsg {
     pub outcome_id: Uuid,
@@ -43,15 +43,15 @@ pub struct VoteMsg {
  * OutgoingMsg
  * ============
  */
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 #[serde(tag = "type")]
 pub enum OutgoingMsg {
     Feed(FeedMsg),
 }
 
-impl<'a> Into<Message> for &'a OutgoingMsg {
+impl Into<Message> for OutgoingMsg {
     fn into(self) -> Message {
-        Message::text(serde_json::to_string(self).unwrap())
+        Message::text(serde_json::to_string(&self).unwrap())
     }
 }
 
@@ -65,7 +65,7 @@ impl<'a> Into<Message> for &'a OutgoingMsg {
 ///     "timestamp": 1583316553000
 /// }
 /// ```
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct FeedMsg {
     pub outcome_id: Uuid,
@@ -73,4 +73,10 @@ pub struct FeedMsg {
     /// Unixタイムスタンプのms表現
     /// https://docs.rs/chrono/0.4.10/chrono/struct.DateTime.html#method.timestamp_millis
     pub timestamp: i64,
+}
+
+impl Into<Message> for FeedMsg {
+    fn into(self) -> Message {
+        OutgoingMsg::Feed(self).into()
+    }
 }
