@@ -32,7 +32,7 @@ impl State {
 
     pub async fn vote(&self, account_id: AccountId, outcome_id: OutcomeId) {
         let mut lock = self.market.lock().await;
-        let order = lock.new_order(account_id, outcome_id);
+        let order = lock.vote(account_id, outcome_id);
 
         let msg = FeedMsg {
             outcome_id: outcome_id.0,
