@@ -1,4 +1,4 @@
-use crop_app::server::Server;
+use crop_server::server::Server;
 
 #[tokio::main]
 async fn main() {
