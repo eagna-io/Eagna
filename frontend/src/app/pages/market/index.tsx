@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
+import { Color, BackgroundMainColor, PurpleColor, TextBaseColor, RankingColor } from "app/components/color";
 
 import { RootState } from "app/redux";
 import { actions } from "app/redux/chart";
@@ -29,15 +30,15 @@ const Page: React.FC = () => {
   }, [dispatch]);
 
   return (
-    <Container>
+    <Container bgcolor={BackgroundMainColor}>
       <ChartContainer />
-      <SubContainer>
+      <SubContainer bgcolor={BackgroundMainColor}>
         <Header userName="Yuya_F" />
-        <MarketTitle>{marketTitle}</MarketTitle>
-        <Ranking>
+        <MarketTitle purpleText={PurpleColor}>{marketTitle}</MarketTitle>
+        <Ranking textBaseColor={TextBaseColor}>
           予測ランキング
           <RankingValue>
-            <RankNum>{ranking}</RankNum>位｜{paticipantsNum}人中
+            <RankNum rankingColor={RankingColor}>{ranking}</RankNum>位｜{paticipantsNum}人中
           </RankingValue>
         </Ranking>
         <Feed records={records} />
@@ -60,28 +61,28 @@ const botNames = [
 ];
 
 
-const Container = styled.div`
+const Container = styled("div")<{ bgcolor: Color }>`
   width: 100vw;
   height: 100vh;
-  background-color: rgba(36, 36, 35);
+  background-color:  ${props => props.bgcolor.hex};
 `;
 
-const SubContainer = styled.div`
+const SubContainer = styled("div")<{ bgcolor: Color }>`
   position: relative;
   width: 100vw;
-  background-color: rgba(36, 36, 35, 0.5);
+  background-color: rgba(${props => props.bgcolor.hex}, 0.5);
   padding: 20px;
 `;
 
-const MarketTitle = styled.div`
+const MarketTitle = styled("div")<{ purpleText: Color }>`
   font-size: 18px;
-  color: #BB86FC;
+  color: ${props => props.purpleText.hex};
   font-weight: 300;
 `;
 
-const Ranking = styled.div`
+const Ranking = styled("div")<{ textBaseColor: Color }>`
   margin-top: 8px;
-  color: #AEAEAE;
+  color: ${props => props.textBaseColor.hex};
   font-size: 14px;
   font-weight: 600;
 `;
@@ -91,9 +92,9 @@ const RankingValue = styled.div`
   letter-spacing: 1px;
 `;
 
-const RankNum = styled.span`
+const RankNum = styled("span")<{ rankingColor: Color }>`
   font-size: 24px;
-  color: #FAD160;
+  color: ${props => props.rankingColor.hex};
   font-weight: 800;
   margin-right: 4px;
 `;

@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { Color, BackgroundMainColor} from "app/components/color";
 
 import { Record } from "model/chart";
 
@@ -9,7 +10,7 @@ interface Props {
 
 const Feed: React.FC<Props> = ({ records }) => {
   return (
-    <Container>
+    <Container bgcolor={BackgroundMainColor}>
       {[...records].reverse().map(record => (
         <Item key={record.time} record={record} />
       ))}
@@ -32,24 +33,24 @@ const Item: React.FC<{ record: Record }> = ({ record }) => {
   );
 };
 
-const Container = styled.div`
+const Container = styled("div")<{ bgcolor: Color }>`
   width: 100%;
   height: 172px;
   overflow: scroll;
   padding: 10px;
   margin-top: 70px;
-  background-color: rgba(36, 36, 35, 0);
+  background-color: rgba(${props => props.bgcolor.hex}, 0);
 `;
 
 const ItemContainer = styled.div`
   width: 50%;
   padding: 2px 14px;
   border-radius: 9px;
-  background-color: rgba(70, 70, 70, 0.5);
+  background-color: rgba(83, 81, 81, 0.5);
   margin-bottom: 5px;
   font-size: 12px;
   font-weight: 200;
-  color: white;
+  color: #AEAEAE;
   user-select: none;
 `;
 
