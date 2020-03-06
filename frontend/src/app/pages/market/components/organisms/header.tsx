@@ -21,7 +21,7 @@ const liveIcon = 'LIVE'
 const Container = styled.div`
   position: relative;
   background-color: #242423;
-  padding: 20px;
+  padding: 20px 20px 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
