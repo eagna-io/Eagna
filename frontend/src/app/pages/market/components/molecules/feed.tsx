@@ -37,7 +37,7 @@ const Container = styled.div`
   height: 155px;
   overflow: scroll;
   padding: 10px;
-  background-color: #242423;
+  background-color: rgba(36, 36, 35, 0.55);
 `;
 
 const ItemContainer = styled.div`

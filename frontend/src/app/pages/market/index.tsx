@@ -3,17 +3,21 @@ import styled from "styled-components";
 
 import Header from "./components/organisms/header";
 import Contents from "./components/organisms/contents";
+import ChartContainer from "./components/organisms/chartContainer";
 
 const Page: React.FC = () => {
 
   return (
     <Container>
-      <Header userName="Yuya_F" />
-      <Contents
-        marketTitle={marketTitle}
-        ranking={ranking}
-        paticipantsNum={paticipantsNum}
-      />
+      <ChartContainer />
+      <SubContainer>
+        <Header userName="Yuya_F" />
+        <Contents
+          marketTitle={marketTitle}
+          ranking={ranking}
+          paticipantsNum={paticipantsNum}
+        />
+      </SubContainer>
     </Container>
   );
 };
@@ -26,5 +30,9 @@ const paticipantsNum = 358
 
 const Container = styled.div`
   width: 100vw;
-  background-color: #242423;
+`;
+
+const SubContainer = styled.div`
+  width: 100vw;
+  background-color: rgba(36, 36, 35, 0.55);
 `;
