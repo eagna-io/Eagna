@@ -22,9 +22,5 @@ export default ChartContainer;
 const Container = styled.div`
   position: absolute;
   width: 100vw;
-  top: 40%;
-  left: 50%;
-  transform: translateY(-50%) translateX(-50%);
-  -webkit- transform: translateY(-50%) translateX(-50%);
   background-color: rgba(36, 36, 35);
 `;
