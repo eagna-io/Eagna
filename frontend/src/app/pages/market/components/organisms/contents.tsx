@@ -57,7 +57,7 @@ const botNames = [
 
 const Container = styled.div`
   position: relative;
-  background-color: rgba(36, 36, 35);
+  background-color: rgba(36, 36, 35, 0);
   padding: 0 20px 20px;
 `;
 

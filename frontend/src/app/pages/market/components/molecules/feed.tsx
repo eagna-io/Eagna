@@ -25,7 +25,7 @@ const Item: React.FC<{ record: Record }> = ({ record }) => {
 
   return (
     <ItemContainer unselectable="on">
-      <Name mine={mine}>{record.user}</Name>さんが
+      <Name mine={mine}>{record.user}</Name>
       <Outcome color={color}>{record.outcome}</Outcome>
       と予想しました
     </ItemContainer>
@@ -34,27 +34,31 @@ const Item: React.FC<{ record: Record }> = ({ record }) => {
 
 const Container = styled.div`
   width: 100%;
-  height: 155px;
+  height: 180px;
   overflow: scroll;
   padding: 10px;
-  background-color: rgba(36, 36, 35, 0.55);
+  margin-top: 70px;
+  background-color: rgba(36, 36, 35, 0);
 `;
 
 const ItemContainer = styled.div`
-  width: 100%;
-  padding: 9px 14px;
+  width: 50%;
+  padding: 2px 14px;
+  border-radius: 9px;
+  background-color: rgba(70, 70, 70, 0.5);
   margin-bottom: 5px;
-  background-color: #333333;
   font-size: 12px;
   font-weight: 200;
   color: white;
   user-select: none;
 `;
 
-const Name = styled.span<{ mine: boolean }>`
-  color: ${props => (props.mine ? "#F8E71C" : "#BB86FC")};
+const Name = styled.div<{ mine: boolean }>`
+  color: ${props => (props.mine ? "#F8E71C" : "#ffffff")};
+  font-size: 8px;
 `;
 
 const Outcome = styled.span<{ color: string }>`
   color: ${props => props.color};
+  font-size: 12px;
 `;

@@ -30,9 +30,11 @@ const paticipantsNum = 358
 
 const Container = styled.div`
   width: 100vw;
+  height: 100vh;
+  background-color: rgba(36, 36, 35);
 `;
 
 const SubContainer = styled.div`
   width: 100vw;
-  background-color: rgba(36, 36, 35, 0.55);
+  background-color: rgba(36, 36, 35, 0.5);
 `;
