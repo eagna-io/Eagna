@@ -9,7 +9,7 @@ const Page: React.FC = () => {
   return (
     <Container>
       <Header userName="Yuya_F" />
-			<Contents />
+      <Contents />
     </Container>
   );
 };
