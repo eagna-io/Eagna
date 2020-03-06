@@ -55,7 +55,7 @@ const ItemContainer = styled.div`
 
 const Name = styled.div<{ mine: boolean }>`
   color: ${props => (props.mine ? "#F8E71C" : "#ffffff")};
-  font-size: 8px;
+  font-size: 6px;
 `;
 
 const Outcome = styled.span<{ color: string }>`
