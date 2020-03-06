@@ -23,4 +23,5 @@ const Container = styled.div`
   position: absolute;
   width: 100vw;
   background-color: rgba(36, 36, 35);
+  margin-top: 30px;
 `;
