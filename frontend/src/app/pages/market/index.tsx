@@ -9,7 +9,11 @@ const Page: React.FC = () => {
   return (
     <Container>
       <Header userName="Yuya_F" />
-      <Contents marketTitle={marketTitle} />
+      <Contents
+        marketTitle={marketTitle}
+        ranking={ranking}
+        paticipantsNum={paticipantsNum}
+      />
     </Container>
   );
 };
@@ -17,6 +21,8 @@ const Page: React.FC = () => {
 export default Page;
 
 const marketTitle = 'RAGE Shadowverse 2020 Spring'
+const ranking = 2
+const paticipantsNum = 358
 
 const Container = styled.div`
   width: 100vw;
