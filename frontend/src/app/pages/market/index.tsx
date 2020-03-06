@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
-import Header from "./components/header";
-import Contents from "./components/contents";
+import Header from "./components/organisms/header";
+import Contents from "./components/organisms/contents";
 
 const Page: React.FC = () => {
 
