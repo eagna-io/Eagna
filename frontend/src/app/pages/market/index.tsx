@@ -7,7 +7,7 @@ const Page: React.FC = () => {
 
   return (
     <Container>
-      <Header userName="Yuya_F"></Header>
+      <Header userName="Yuya_F" />
     </Container>
   );
 };
