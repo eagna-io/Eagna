@@ -1,8 +1,5 @@
-mod routes;
-mod server;
-mod state;
-
 use crop_domain::market::model::{Market, OutcomeId};
+use crop_server::{server, state};
 use uuid::Uuid;
 
 #[tokio::main]
