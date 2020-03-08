@@ -1,5 +1,8 @@
 use crate::state;
-use crop_domain::market::model::MarketId;
+use crop_domain::{
+    account::model::AccountId,
+    market::model::{MarketId, OutcomeId},
+};
 use futures::future::FutureExt as _;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -12,6 +15,8 @@ use warp_json_rpc::{
 #[derive(Debug, Deserialize)]
 struct Params {
     market_id: Uuid,
+    account_id: Uuid,
+    outcome_id: Uuid,
 }
 
 #[derive(Debug, Serialize)]
@@ -32,7 +37,11 @@ pub fn filter() -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Cop
 async fn handler(params: Params) -> Result<Success, Error> {
     let market_id = MarketId(params.market_id);
     if let Some(market) = state::get_market_state(market_id).await {
-        todo!()
+        // 現在はこのorderを特に使っていない
+        let account_id = AccountId(params.account_id);
+        let outcome_id = OutcomeId(params.outcome_id);
+        let _order = market.vote_and_broadcast(account_id, outcome_id).await;
+        Ok(Success())
     } else {
         todo!()
     }
