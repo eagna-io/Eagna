@@ -7,7 +7,7 @@ use crop_domain::market::model::MarketId;
 use uuid::Uuid;
 use warp::{filters, reject::Rejection, reply::Reply, Filter};
 
-pub fn filter() -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
+pub fn filter() -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Copy {
     filters::path::path("stream")
         .and(filters::path::param::<Uuid>())
         .and(filters::path::end())
