@@ -13,17 +13,17 @@ use warp_json_rpc::{
 };
 
 #[derive(Debug, Deserialize)]
-struct Params {
+pub struct Params {
     market_id: Uuid,
     account_id: Uuid,
     outcome_id: Uuid,
 }
 
 #[derive(Debug, Serialize)]
-struct Success();
+pub struct Success();
 
 #[derive(Debug, Serialize)]
-struct Failure();
+pub struct Failure();
 
 pub fn filter() -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Copy {
     json_rpc()

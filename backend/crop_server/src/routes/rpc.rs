@@ -1,4 +1,4 @@
-mod vote;
+pub mod vote;
 
 use warp::{filters::path, reject::Rejection, reply::Reply, Filter};
 
