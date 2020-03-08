@@ -1,43 +1,9 @@
 use crop_domain::market::order::model::Order;
-use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
+use serde::Serialize;
 use uuid::Uuid;
 use warp::filters::ws::Message;
 
-/*
- * ============
- * IncomingMsg
- * ============
- */
-#[derive(Deserialize, Clone)]
-#[serde(tag = "type")]
-pub enum IncomingMsg {
-    Vote(VoteMsg),
-}
-
-impl<'a> TryFrom<&'a Message> for IncomingMsg {
-    type Error = serde_json::error::Error;
-
-    fn try_from(msg: &'a Message) -> Result<Self, Self::Error> {
-        serde_json::from_slice(msg.as_bytes())
-    }
-}
-
-/// ## Message format
-///
-/// ```json
-/// {
-///     "type": "vote",
-///     "outcomeId": "4ef1a321-61bd-4c56-84c1-ddb327d38b91",
-///     "accountName": "Atsuking"
-/// }
-/// ```
-#[derive(Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct VoteMsg {
-    pub outcome_id: Uuid,
-    pub account_id: Uuid,
-}
+// Currently, there are no `IncomingMsg`.
 
 /*
  * ============

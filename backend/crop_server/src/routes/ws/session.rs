@@ -1,14 +1,10 @@
-use crate::routes::ws::msg::{FeedMsg, IncomingMsg};
+use crate::routes::ws::msg::FeedMsg;
 use crate::state::market::MarketManager;
-use crop_domain::{
-    account::model::AccountId, market::model::OutcomeId, market::order::model::Order,
-};
+use crop_domain::market::order::model::Order;
 use futures::{
-    future,
     sink::{Sink, SinkExt as _},
-    stream::{Stream, StreamExt as _, TryStreamExt as _},
+    stream::TryStreamExt as _,
 };
-use std::convert::TryFrom as _;
 use tokio::sync::broadcast::Receiver;
 use warp::filters::ws::{Message, WebSocket};
 
@@ -26,37 +22,8 @@ impl Session {
         let Session { market, ws } = self;
         let subscriber = market.subscribe();
 
-        let (sink, stream) = ws.split();
-        let fut1 = handle_incoming(stream, market);
-        let fut2 = handle_outgoing(sink, subscriber);
-        future::join(fut1, fut2).await;
+        handle_outgoing(ws, subscriber).await;
     }
-}
-
-async fn handle_incoming(
-    stream: impl Stream<Item = Result<Message, warp::Error>>,
-    market: MarketManager,
-) {
-    stream
-        .err_into::<anyhow::Error>()
-        .and_then(|msg| future::ready(IncomingMsg::try_from(&msg).map_err(anyhow::Error::from)))
-        .try_for_each(move |msg| {
-            let cloned_market = market.clone();
-            async move {
-                match msg {
-                    IncomingMsg::Vote(vote) => {
-                        let account_id = AccountId(vote.account_id);
-                        let outcome_id = OutcomeId(vote.outcome_id);
-                        cloned_market
-                            .vote_and_broadcast(account_id, outcome_id)
-                            .await;
-                        Ok(())
-                    }
-                }
-            }
-        })
-        .await
-        .unwrap_or_else(|e| log::debug!("{:?}", e))
 }
 
 async fn handle_outgoing(
