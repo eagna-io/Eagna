@@ -1,6 +1,11 @@
 use serde::Serialize;
 use uuid::Uuid;
 
+#[cfg(feature = "server")]
+use crop_domain::market::order::model::Order;
+#[cfg(feature = "server")]
+use warp::filters::ws::Message;
+
 // Currently, there are no `IncomingMsg`.
 
 /*
@@ -12,6 +17,13 @@ use uuid::Uuid;
 #[serde(tag = "type")]
 pub enum OutgoingMsg {
     Feed(FeedMsg),
+}
+
+#[cfg(feature = "server")]
+impl Into<Message> for OutgoingMsg {
+    fn into(self) -> Message {
+        Message::text(serde_json::to_string(&self).unwrap())
+    }
 }
 
 /// ## Message format
@@ -32,4 +44,22 @@ pub struct FeedMsg {
     /// Unixタイムスタンプのms表現
     /// https://docs.rs/chrono/0.4.10/chrono/struct.DateTime.html#method.timestamp_millis
     pub timestamp: i64,
+}
+
+#[cfg(feature = "server")]
+impl Into<Message> for FeedMsg {
+    fn into(self) -> Message {
+        OutgoingMsg::Feed(self).into()
+    }
+}
+
+#[cfg(feature = "server")]
+impl From<Order> for FeedMsg {
+    fn from(order: Order) -> FeedMsg {
+        FeedMsg {
+            outcome_id: order.outcome_id.0,
+            account_id: order.account_id.0,
+            timestamp: order.time.timestamp_millis(),
+        }
+    }
 }
