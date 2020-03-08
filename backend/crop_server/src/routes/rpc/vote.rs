@@ -43,6 +43,6 @@ async fn handler(params: Params) -> Result<Success, Error> {
         let _order = market.vote_and_broadcast(account_id, outcome_id).await;
         Ok(Success())
     } else {
-        todo!()
+        Err(Error::custom(1, "Market not found"))
     }
 }
