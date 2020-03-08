@@ -1,7 +1,7 @@
 [workspace]
 members = [
-  "crop_client",
   "crop_server",
+  "crop_server/api",
   "crop_domain",
   "crop_infra",
 ]
