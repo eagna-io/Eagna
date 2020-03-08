@@ -1,4 +1,4 @@
-use crate::state::market::State as MarketState;
+use crate::state::market::MarketManager;
 use crate::ws::msg::{FeedMsg, IncomingMsg};
 use crop_domain::{account::model::AccountId, market::model::OutcomeId};
 use futures::{
@@ -11,12 +11,12 @@ use tokio::sync::broadcast::Receiver;
 use warp::filters::ws::{Message, WebSocket};
 
 pub struct Session {
-    market: MarketState,
+    market: MarketManager,
     ws: WebSocket,
 }
 
 impl Session {
-    pub fn new(market: MarketState, ws: WebSocket) -> Session {
+    pub fn new(market: MarketManager, ws: WebSocket) -> Session {
         Session { market, ws }
     }
 
@@ -33,7 +33,7 @@ impl Session {
 
 async fn handle_incoming(
     stream: impl Stream<Item = Result<Message, warp::Error>>,
-    market: MarketState,
+    market: MarketManager,
 ) {
     stream
         .err_into::<anyhow::Error>()

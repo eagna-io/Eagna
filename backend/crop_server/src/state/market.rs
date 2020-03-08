@@ -11,16 +11,17 @@ use tokio::sync::{
 
 const MSG_CAPACITY: usize = 100;
 
+/// 特定の1つのマーケットを管理する
 #[derive(Clone)]
-pub struct State {
+pub struct MarketManager {
     market: Arc<Mutex<Market>>,
     feed_sink: Sender<FeedMsg>,
 }
 
-impl State {
-    pub fn new(market: Market) -> State {
+impl MarketManager {
+    pub fn new(market: Market) -> MarketManager {
         let (sender, _) = channel(MSG_CAPACITY);
-        State {
+        MarketManager {
             market: Arc::new(Mutex::new(market)),
             feed_sink: sender,
         }
