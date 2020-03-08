@@ -1,7 +1,7 @@
-use crate::routes::ws::msg::FeedMsg;
 use crop_domain::{
     account::model::AccountId,
     market::model::{Market, OutcomeId},
+    market::order::model::Order,
 };
 use std::sync::Arc;
 use tokio::sync::{
@@ -15,7 +15,7 @@ const MSG_CAPACITY: usize = 100;
 #[derive(Clone)]
 pub struct MarketManager {
     market: Arc<Mutex<Market>>,
-    feed_sink: Sender<FeedMsg>,
+    feed_sink: Sender<Order>,
 }
 
 impl MarketManager {
@@ -27,7 +27,7 @@ impl MarketManager {
         }
     }
 
-    pub fn subscribe(&self) -> Receiver<FeedMsg> {
+    pub fn subscribe(&self) -> Receiver<Order> {
         self.feed_sink.subscribe()
     }
 
@@ -35,15 +35,9 @@ impl MarketManager {
         let mut lock = self.market.lock().await;
         let order = lock.vote(account_id, outcome_id);
 
-        let msg = FeedMsg {
-            outcome_id: outcome_id.0,
-            account_id: account_id.0,
-            timestamp: order.time.timestamp_millis(),
-        };
-
         // FeedMsgをbroadcastする。
         // receiverがいなくてもエラーにしない。
-        let _ = self.feed_sink.send(msg);
+        let _ = self.feed_sink.send(order);
 
         // channelに送信する順序を担保するため、
         // 送信が終わってからlockを解放する

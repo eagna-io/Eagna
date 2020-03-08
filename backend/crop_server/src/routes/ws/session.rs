@@ -1,6 +1,8 @@
 use crate::routes::ws::msg::{FeedMsg, IncomingMsg};
 use crate::state::market::MarketManager;
-use crop_domain::{account::model::AccountId, market::model::OutcomeId};
+use crop_domain::{
+    account::model::AccountId, market::model::OutcomeId, market::order::model::Order,
+};
 use futures::{
     future,
     sink::{Sink, SinkExt as _},
@@ -57,11 +59,11 @@ async fn handle_incoming(
 
 async fn handle_outgoing(
     sink: impl Sink<Message, Error = warp::Error> + Unpin,
-    subscriber: Receiver<FeedMsg>,
+    subscriber: Receiver<Order>,
 ) {
     let mut msg_stream = subscriber
         .err_into::<anyhow::Error>()
-        .map_ok(|msg| msg.into());
+        .map_ok(|order| FeedMsg::from(order).into());
     sink.sink_err_into::<anyhow::Error>()
         .send_all(&mut msg_stream)
         .await

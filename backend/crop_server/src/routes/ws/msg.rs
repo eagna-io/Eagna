@@ -1,3 +1,4 @@
+use crop_domain::market::order::model::Order;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 use uuid::Uuid;
@@ -78,5 +79,15 @@ pub struct FeedMsg {
 impl Into<Message> for FeedMsg {
     fn into(self) -> Message {
         OutgoingMsg::Feed(self).into()
+    }
+}
+
+impl From<Order> for FeedMsg {
+    fn from(order: Order) -> FeedMsg {
+        FeedMsg {
+            outcome_id: order.outcome_id.0,
+            account_id: order.account_id.0,
+            timestamp: order.time.timestamp_millis(),
+        }
     }
 }

@@ -1,5 +1,5 @@
-pub mod rpc;
-pub mod ws;
+mod rpc;
+mod ws;
 
 use warp::{reject::Rejection, reply::Reply, Filter};
 
