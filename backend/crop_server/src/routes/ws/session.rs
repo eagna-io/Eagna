@@ -47,7 +47,9 @@ async fn handle_incoming(
                     IncomingMsg::Vote(vote) => {
                         let account_id = AccountId(vote.account_id);
                         let outcome_id = OutcomeId(vote.outcome_id);
-                        cloned_market.vote(account_id, outcome_id).await;
+                        cloned_market
+                            .vote_and_broadcast(account_id, outcome_id)
+                            .await;
                         Ok(())
                     }
                 }
