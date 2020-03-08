@@ -1,4 +1,4 @@
-use crate::ws::msg::FeedMsg;
+use crate::routes::ws::msg::FeedMsg;
 use crop_domain::{
     account::model::AccountId,
     market::model::{Market, OutcomeId},
