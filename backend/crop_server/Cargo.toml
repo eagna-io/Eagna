@@ -25,4 +25,4 @@ warp-json-rpc = "0.1"
 
 [[bin]]
 name = "api-server"
-path = "src/bin/main.rs"
+path = "src/main.rs"
