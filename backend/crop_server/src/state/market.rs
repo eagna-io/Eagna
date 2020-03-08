@@ -31,7 +31,7 @@ impl MarketManager {
         self.feed_sink.subscribe()
     }
 
-    pub async fn vote(&self, account_id: AccountId, outcome_id: OutcomeId) {
+    pub async fn vote(&self, account_id: AccountId, outcome_id: OutcomeId) -> Order {
         let mut lock = self.market.lock().await;
         let order = lock.vote(account_id, outcome_id);
 
@@ -42,5 +42,7 @@ impl MarketManager {
         // channelに送信する順序を担保するため、
         // 送信が終わってからlockを解放する
         drop(lock);
+
+        order
     }
 }
