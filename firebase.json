@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "realtime",
     "public": "frontend/build",
     "predeploy": [
       "cd frontend && yarn build"

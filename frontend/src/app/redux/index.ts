@@ -1,13 +1,13 @@
-import { combineReducers, Store as ReduxStore } from "redux";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
-import * as user from "./user";
+import { reducer as chartReducer } from "./chart";
 
-export type RootState = { user: user.State };
-
-export type RootAction = user.Action;
-
-export const rootReducer = combineReducers<RootState, RootAction>({
-  user: user.reducer
+const reducer = combineReducers({
+  chart: chartReducer
 });
 
-export type Store = ReduxStore<RootState, RootAction>;
+export type RootState = ReturnType<typeof reducer>;
+
+export const store = configureStore({
+  reducer
+});
