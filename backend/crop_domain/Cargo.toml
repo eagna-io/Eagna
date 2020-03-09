@@ -14,8 +14,6 @@ base64 = "~0.11"
 chrono = { version = "~0.4", features = ["serde"] }
 data-encoding = "~2.1"
 derive_more = "~0.99"
-diesel = { version = "~1.4", features = ["postgres", "chrono", "uuid", "uuidv07"] }
-diesel-derive-enum = { version = "~0.4", features = ["postgres"] }
 getset = "~0.0.8"
 hyper = "~0.13"
 hyper-tls = "~0.4"
@@ -30,4 +28,4 @@ serde = { version = "~1.0", features = ["derive", "rc"] }
 serde_urlencoded = "~0.6"
 thiserror = "1.0"
 tokio = { version = "~0.2", features = ["macros", "rt-threaded"] }
-uuid = { version = "~0.7", features = ["v4", "serde"] }
+uuid = { version = "~0.8", features = ["v4", "serde"] }
