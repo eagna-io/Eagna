@@ -1,4 +1,4 @@
-mod vote;
+pub mod vote;
 
 use crate::context::Context;
 use warp::{filters::path, reject::Rejection, reply::Reply, Filter};
