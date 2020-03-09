@@ -38,7 +38,7 @@ const Button: React.FC<ButtonProps> = ({ color, onClick, kind }) => {
     <StyledPressButton color={color} onPress={onClick} threshold={1000}>
       <ButtonContainer>
         {kind === "less" ? <StyledDownVoteIcon /> : <StyledUpVoteIcon />}
-        <PredictionValue color={color}>83%{kind === "less" ? "以上" : "未満"}</PredictionValue>
+        <PredictionValue color={color}>83%{kind === "less" ? "未満" : "以上"}</PredictionValue>
       </ButtonContainer>
     </StyledPressButton>
   );
