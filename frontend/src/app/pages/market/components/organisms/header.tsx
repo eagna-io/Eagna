@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { WhiteBaseColor, BackgroundMainColor, PurpleColor} from "app/components/color";
 
 interface Props {
     userName: string;
@@ -20,7 +21,7 @@ const liveIcon = 'LIVE'
 
 const Container = styled.div`
   position: relative;
-  background-color: #242423;
+  background-color: ${BackgroundMainColor.hex};
   margin-bottom: 8px;
   display: flex;
   justify-content: space-between;
@@ -28,14 +29,14 @@ const Container = styled.div`
 `;
 
 const Account = styled.div`
-  color: white;
+  color: ${WhiteBaseColor.hex};
   font-size: 14px;
   font-weight: 500;
 `;
 
 const LiveIcon = styled.div`
-  color: white;
-  background-color: #BB86FC;
+  color: ${WhiteBaseColor.hex};
+  background-color: ${PurpleColor.hex};
   border-radius: 4px;
   padding: 2px 4px;
   font-size: 14px;

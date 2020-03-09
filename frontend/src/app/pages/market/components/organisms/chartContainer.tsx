@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { BackgroundMainColor} from "app/components/color";
 
 import { RootState } from "app/redux";
 
@@ -22,6 +23,6 @@ export default ChartContainer;
 const Container = styled.div`
   position: absolute;
   width: 100vw;
-  background-color: rgba(36, 36, 35);
+  background-color:  ${BackgroundMainColor.hex};
   margin-top: 30px;
 `;

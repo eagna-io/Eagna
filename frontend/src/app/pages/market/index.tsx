@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
+import { BackgroundMainColor, PurpleColor, TextBaseColor, RankingColor } from "app/components/color";
 
 import { RootState } from "app/redux";
 import { actions } from "app/redux/chart";
@@ -63,25 +64,25 @@ const botNames = [
 const Container = styled.div`
   width: 100vw;
   height: 100vh;
-  background-color: rgba(36, 36, 35);
+  background-color: ${BackgroundMainColor.hex};
 `;
 
 const SubContainer = styled.div`
   position: relative;
   width: 100vw;
-  background-color: rgba(36, 36, 35, 0.5);
+  background-color: ${BackgroundMainColor.hexWithOpacity(0.5)};
   padding: 20px;
 `;
 
 const MarketTitle = styled.div`
   font-size: 18px;
-  color: #BB86FC;
+  color: ${PurpleColor.hex};
   font-weight: 300;
 `;
 
 const Ranking = styled.div`
   margin-top: 8px;
-  color: #AEAEAE;
+  color: ${TextBaseColor.hex};
   font-size: 14px;
   font-weight: 600;
 `;
@@ -93,7 +94,7 @@ const RankingValue = styled.div`
 
 const RankNum = styled.span`
   font-size: 24px;
-  color: #FAD160;
+  color: ${RankingColor.hex};
   font-weight: 800;
   margin-right: 4px;
 `;
