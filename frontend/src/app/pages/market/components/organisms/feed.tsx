@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 import { 
-  Color,
   WhiteBaseColor,
   RankingColor,
   GreenAgreeColor,
@@ -29,13 +28,12 @@ export default Feed;
 
 const Item: React.FC<{ record: Record }> = ({ record }) => {
   const mine = record.user === "たかはしあつき";
-  const myColor = mine ? RankingColor.hex : WhiteBaseColor.hex;
-  const color = record.outcome === "win" ? GreenAgreeColor.hex : RedDisagreeColor.hex;
+  const win = record.outcome === "win";
 
   return (
-    <ItemContainer unselectable="on" itemContainerBgColor={ItemContainerBgColor}>
-      <Name mine={mine} myColor={myColor}>{record.user}</Name>
-      <Outcome color={color}>{record.outcome}</Outcome>
+    <ItemContainer unselectable="on">
+      <Name mine={mine}>{record.user}</Name>
+      <Outcome win={win}>{record.outcome}</Outcome>
       と予想しました
     </ItemContainer>
   );
@@ -49,11 +47,11 @@ const Container = styled.div`
   margin-top: 70px;
 `;
 
-const ItemContainer = styled("div")<{ itemContainerBgColor: Color }>`
+const ItemContainer = styled.div`
   width: 50%;
   padding: 2px 14px;
   border-radius: 9px;
-  background-color: ${props => props.itemContainerBgColor.hexWithOpacity(0.5)};
+  background-color: ${ItemContainerBgColor.hexWithOpacity(0.5)};
   margin-bottom: 5px;
   font-size: 12px;
   font-weight: 200;
@@ -61,12 +59,12 @@ const ItemContainer = styled("div")<{ itemContainerBgColor: Color }>`
   user-select: none;
 `;
 
-const Name = styled("div")<{ mine: boolean,  myColor: string }>`
-  color: ${props => props.myColor};
+const Name = styled.div<{ mine: boolean }>`
+  color: ${props => props.mine ? RankingColor.hex : WhiteBaseColor.hex};
   font-size: 6px;
 `;
 
-const Outcome = styled.span<{ color: string }>`
-  color: ${props => props.color};
+const Outcome = styled.span<{ win: boolean }>`
+  color: ${props => props.win ? GreenAgreeColor.hex : RedDisagreeColor.hex};
   font-size: 12px;
 `;

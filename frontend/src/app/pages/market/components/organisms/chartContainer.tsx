@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import { Color, BackgroundMainColor} from "app/components/color";
+import { BackgroundMainColor} from "app/components/color";
 
 import { RootState } from "app/redux";
 
@@ -12,7 +12,7 @@ const ChartContainer: React.FC = () => {
   const datasets = useSelector((state: RootState) =>state.chart.datasets);
 
   return (
-    <Container bgcolor={BackgroundMainColor}>
+    <Container>
       <Chart height={400} datasets={datasets} />
     </Container>
   );
@@ -20,9 +20,9 @@ const ChartContainer: React.FC = () => {
 
 export default ChartContainer;
 
-const Container = styled("div")<{ bgcolor: Color }>`
+const Container = styled.div`
   position: absolute;
   width: 100vw;
-  background-color:  ${props => props.bgcolor.hex};
+  background-color:  ${BackgroundMainColor.hex};
   margin-top: 30px;
 `;
