@@ -40,6 +40,3 @@ export const RedDisagreeColor = Color.fromHex("#F74C61");
 export const GreenAgreeColor = Color.fromHex("#39CCBE");
 export const MarketPredictionValueColor = Color.fromHex("#9B9A9A");
 export const ItemContainerBgColor = Color.fromHex("#3d3d3d");
-export const MineColor = Color.fromHex("#F8E71C");
-
-export const EagnaColor = Color.fromHex("#5BB192");
