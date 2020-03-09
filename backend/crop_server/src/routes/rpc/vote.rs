@@ -4,6 +4,7 @@ use crop_domain::{
     market::model::{MarketId, OutcomeId},
 };
 use futures::future::FutureExt as _;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use warp::{reject::Rejection, reply::Reply, Filter};
@@ -12,18 +13,19 @@ use warp_json_rpc::{
     Builder, Error,
 };
 
-#[derive(Debug, Deserialize)]
-struct Params {
+#[derive(Debug, Deserialize, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct Params {
     market_id: Uuid,
     account_id: Uuid,
     outcome_id: Uuid,
 }
 
-#[derive(Debug, Serialize)]
-struct Success();
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct Success();
 
-#[derive(Debug, Serialize)]
-struct Failure();
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct Failure();
 
 pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     json_rpc()

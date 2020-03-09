@@ -1,4 +1,5 @@
 use crop_domain::market::order::model::Order;
+use schemars::JsonSchema;
 use serde::Serialize;
 use uuid::Uuid;
 use warp::filters::ws::Message;
@@ -10,7 +11,7 @@ use warp::filters::ws::Message;
  * OutgoingMsg
  * ============
  */
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, JsonSchema)]
 #[serde(tag = "type")]
 pub enum OutgoingMsg {
     Feed(FeedMsg),
@@ -22,8 +23,6 @@ impl Into<Message> for OutgoingMsg {
     }
 }
 
-/// ## Message format
-///
 /// ```json
 /// {
 ///     "type": "feed",
@@ -32,7 +31,7 @@ impl Into<Message> for OutgoingMsg {
 ///     "timestamp": 1583316553000
 /// }
 /// ```
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct FeedMsg {
     pub outcome_id: Uuid,
