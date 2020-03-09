@@ -1,4 +1,4 @@
-use crate::state;
+use crate::context;
 use crop_domain::{
     account::model::AccountId,
     market::model::{MarketId, OutcomeId},
@@ -36,7 +36,7 @@ pub fn filter() -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Cop
 
 async fn handler(params: Params) -> Result<Success, Error> {
     let market_id = MarketId(params.market_id);
-    if let Some(market) = state::get_market_state(market_id).await {
+    if let Some(market) = context::get_market_state(market_id).await {
         // 現在はこのorderを特に使っていない
         let account_id = AccountId(params.account_id);
         let outcome_id = OutcomeId(params.outcome_id);

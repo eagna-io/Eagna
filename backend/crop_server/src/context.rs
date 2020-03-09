@@ -6,16 +6,16 @@ use std::collections::HashMap;
 use tokio::sync::Mutex;
 
 lazy_static::lazy_static! {
-    pub static ref GLOBAL_STATE: State = State {
+    pub static ref GLOBAL_STATE: Context = Context {
         markets: Mutex::new(HashMap::new())
     };
 }
 
-pub struct State {
+pub struct Context {
     markets: Mutex<HashMap<MarketId, MarketManager>>,
 }
 
-impl State {
+impl Context {
     pub async fn add_new_market(&self, market: Market) {
         self.markets
             .lock()
