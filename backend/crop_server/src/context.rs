@@ -2,20 +2,21 @@ pub mod market;
 
 use self::market::MarketManager;
 use crop_domain::market::model::{Market, MarketId};
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 use tokio::sync::Mutex;
 
-lazy_static::lazy_static! {
-    pub static ref GLOBAL_STATE: Context = Context {
-        markets: Mutex::new(HashMap::new())
-    };
-}
-
+#[derive(Clone)]
 pub struct Context {
-    markets: Mutex<HashMap<MarketId, MarketManager>>,
+    markets: Arc<Mutex<HashMap<MarketId, MarketManager>>>,
 }
 
 impl Context {
+    pub fn new() -> Context {
+        Context {
+            markets: Arc::new(Mutex::new(HashMap::new())),
+        }
+    }
+
     pub async fn add_new_market(&self, market: Market) {
         self.markets
             .lock()
@@ -26,12 +27,4 @@ impl Context {
     pub async fn get_market_state(&self, market_id: MarketId) -> Option<MarketManager> {
         self.markets.lock().await.get(&market_id).cloned()
     }
-}
-
-pub async fn add_new_market(market: Market) {
-    GLOBAL_STATE.add_new_market(market).await
-}
-
-pub async fn get_market_state(market_id: MarketId) -> Option<MarketManager> {
-    GLOBAL_STATE.get_market_state(market_id).await
 }
