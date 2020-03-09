@@ -70,7 +70,7 @@ const Container = styled("div")<{ bgcolor: Color }>`
 const SubContainer = styled("div")<{ bgcolor: Color }>`
   position: relative;
   width: 100vw;
-  background-color: rgba(${props => props.bgcolor.hex}, 0.5);
+  background-color: ${props => props.bgcolor.hexWithOpacity(0.5)};
   padding: 20px;
 `;
 
