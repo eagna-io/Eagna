@@ -11,6 +11,7 @@ use warp_json_rpc::{
     filters::{json_rpc, method, params},
     Builder, Error,
 };
+use wasm_bindgen::prelude::*;
 
 #[derive(Debug, Deserialize)]
 pub struct Params {
@@ -19,6 +20,7 @@ pub struct Params {
     outcome_id: Uuid,
 }
 
+#[wasm_bindgen]
 #[derive(Debug, Serialize)]
 pub struct Success();
 

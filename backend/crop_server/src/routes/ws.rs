@@ -1,4 +1,3 @@
-pub mod msg;
 pub mod session;
 
 use self::session::Session;

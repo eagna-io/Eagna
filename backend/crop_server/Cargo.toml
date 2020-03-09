@@ -8,6 +8,7 @@ edition = "2018"
 crop_primitive = { path = "../crop_primitive" }
 crop_infra = { path = "../crop_infra" }
 crop_domain = { path = "../crop_domain" }
+api = { path = "./api" }
 
 anyhow = "1.0"
 chrono = { version = "~0.4", features = ["serde"] }

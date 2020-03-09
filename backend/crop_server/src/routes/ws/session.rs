@@ -1,5 +1,6 @@
 use crate::routes::ws::msg::FeedMsg;
 use crate::state::market::MarketManager;
+use api::ws::out::FeedMsg;
 use crop_domain::market::order::model::Order;
 use futures::{
     sink::{Sink, SinkExt as _},
@@ -32,9 +33,17 @@ async fn handle_outgoing(
 ) {
     let mut msg_stream = subscriber
         .err_into::<anyhow::Error>()
-        .map_ok(|order| FeedMsg::from(order).into());
+        .map_ok(|order| order_to_feedmsg(order).into());
     sink.sink_err_into::<anyhow::Error>()
         .send_all(&mut msg_stream)
         .await
         .unwrap_or_else(|e| log::debug!("{:?}", e))
+}
+
+fn order_to_feedmsg(order: Order) -> FeedMsg {
+    FeedMsg {
+        outcome_id: order.outcome_id.0,
+        account_id: order.account_id.0,
+        timestamp: order.time.timestamp_millis(),
+    }
 }
