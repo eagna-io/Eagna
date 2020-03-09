@@ -94,6 +94,7 @@ const Container = styled.div`
   width: 100vw;
   height: 100vh;
   background-color: ${BackgroundMainColor.hex};
+  user-select: none;
 `;
 
 const SubContainer = styled.div`
@@ -101,6 +102,7 @@ const SubContainer = styled.div`
   width: 100vw;
   background-color: ${BackgroundMainColor.hexWithOpacity(0.5)};
   padding: 20px;
+  height: 70vh;
 `;
 
 const MarketTitle = styled.div`

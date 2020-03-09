@@ -12,7 +12,7 @@ const ChartContainer: React.FC = () => {
 
   return (
     <Container>
-      <Chart height={350} datasets={datasets} />
+      <Chart height={"100%"} datasets={datasets} />
     </Container>
   );
 };
@@ -23,4 +23,5 @@ const Container = styled.div`
   position: absolute;
   width: 100vw;
   margin-top: 30px;
+  height: 70vh;
 `;

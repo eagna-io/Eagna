@@ -44,7 +44,7 @@ const Container = styled.div`
   height: 172px;
   overflow: scroll;
   padding: 10px;
-  margin-top: 70px;
+  margin-top: 30px;
 `;
 
 const ItemContainer = styled.div`

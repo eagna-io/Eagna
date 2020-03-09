@@ -6,7 +6,7 @@ import { Data } from "app/redux/chart";
 import { Map } from "model/map";
 
 interface Props {
-  height: number;
+  height: string;
   renderInterval?: number;
   datasets: Map<Data[]>;
 }
@@ -45,7 +45,7 @@ const Chart: React.FC<Props> = ({ height, renderInterval = 100, datasets }) => {
 
 export default Chart;
 
-const createOptions = (height: number) => ({
+const createOptions = (height: string) => ({
   colors: ["#bfe8ff", "#ffc0cb"],
   series: [
     {
