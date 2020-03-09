@@ -1,5 +1,5 @@
-mod rpc;
-mod ws;
+pub mod rpc;
+pub mod ws;
 
 use crate::context::Context;
 use warp::{reject::Rejection, reply::Reply, Filter};
