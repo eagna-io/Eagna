@@ -1,7 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import { BackgroundMainColor} from "app/components/color";
 
 import { RootState } from "app/redux";
 
