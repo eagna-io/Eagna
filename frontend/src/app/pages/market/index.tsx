@@ -10,6 +10,7 @@ import { now } from "model/time";
 import Header from "./components/organisms/header";
 import ChartContainer from "./components/organisms/chartContainer";
 import Feed from "./components/organisms/feed";
+import { VoteButtons } from "./components/organisms/voteButton";
 
 const Page: React.FC = () => {
 
@@ -54,7 +55,14 @@ const Page: React.FC = () => {
           みんなの予想
           <PredictionValue>{publicPred}<Sm>%</Sm></PredictionValue>
         </PublicPrediction>
-        </Guide>
+      </Guide>
+      <VoteButtons
+        onVote={outcome =>
+          dispatch(
+            actions.vote({ outcome, time: now(), user: "たかはしあつき" })
+          )
+        }
+      />
     </Container>
   );
 };
@@ -152,3 +160,4 @@ const Sm = styled.span`
   font-size: 20px;
   font-weight: 800;
 `;
+
