@@ -10,7 +10,7 @@ import { now } from "model/time";
 import Header from "./components/organisms/header";
 import ChartContainer from "./components/organisms/chartContainer";
 import Feed from "./components/organisms/feed";
-import VoteButton from "./components/organisms/voteButton";
+import { VoteButtons } from "./components/organisms/voteButton";
 
 const Page: React.FC = () => {
 
@@ -56,7 +56,7 @@ const Page: React.FC = () => {
           <PredictionValue>{publicPred}<Sm>%</Sm></PredictionValue>
         </PublicPrediction>
       </Guide>
-      <VoteButton
+      <VoteButtons
         onVote={outcome =>
           dispatch(
             actions.vote({ outcome, time: now(), user: "たかはしあつき" })

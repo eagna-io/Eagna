@@ -4,23 +4,22 @@ import { RedDisagreeColor, GreenAgreeColor} from "app/components/color";
 
 import { PressButton } from "app/components/atoms/press-button";
 
-import UpVote from "../atoms/images/vote-up.svg";
-import DownVote from "../atoms/images/vote-down.svg";
+import { ReactComponent as UpVoteIcon } from "../atoms/images/vote-up.svg";
+import { ReactComponent as DownVoteIcon } from "../atoms/images/vote-down.svg";
+
 
 interface Props {
   onVote: (outcome: string) => void;
 }
 
-const Buttons: React.FC<Props> = ({ onVote }) => {
+export const VoteButtons: React.FC<Props> = ({ onVote }) => {
   return (
     <Container>
-      <Button color={RedDisagreeColor.hex} onClick={() => onVote("lose")} chkVote={false} /> 
-      <Button color={GreenAgreeColor.hex} onClick={() => onVote("win")} chkVote={true} />
+      <Button color={RedDisagreeColor.hex} onClick={() => onVote("lose")} kind="less" /> 
+      <Button color={GreenAgreeColor.hex} onClick={() => onVote("win")} kind="more" />
     </Container>
   );
 };
-
-export default Buttons;
 
 const Container = styled.div`
   display: flex;
@@ -31,15 +30,15 @@ const Container = styled.div`
 interface ButtonProps {
   color: string;
   onClick: () => void;
-  chkVote: boolean;
+  kind: "less" | "more";
 }
 
-const Button: React.FC<ButtonProps> = ({ color, onClick, chkVote }) => {
+const Button: React.FC<ButtonProps> = ({ color, onClick, kind }) => {
   return (
     <StyledPressButton color={color} onPress={onClick} threshold={1000}>
       <ButtonContainer>
-        {chkVote ? <Img src={UpVote} alt="UpVote"/> : <Img src={DownVote} alt="DownVote"/>}
-        <PredictionValue color={color}>83%{chkVote ? "以上" : "未満"}</PredictionValue>
+        {kind === "less" ? <StyledDownVoteIcon /> : <StyledUpVoteIcon />}
+        <PredictionValue color={color}>83%{kind === "less" ? "以上" : "未満"}</PredictionValue>
       </ButtonContainer>
     </StyledPressButton>
   );
@@ -60,8 +59,14 @@ const StyledPressButton = styled(PressButton)<{ color: string }>`
   }
 `;
 
-const Img = styled.img`
+const StyledUpVoteIcon = styled(UpVoteIcon)`
   width: 32px;
+  height: 42px;
+`;
+
+const StyledDownVoteIcon = styled(DownVoteIcon)`
+  width: 32px;
+  height: 42px;
 `;
 
 const ButtonContainer = styled.div`
@@ -80,3 +85,4 @@ const PredictionValue = styled.div<{ color: string }>`
   font-size: 12px;
   color: ${props => props.color};
 `;
+
