@@ -24,6 +24,16 @@ where
     }
 }
 
+impl<'a, A, T> From<T> for GenericString<A>
+where
+    A: Array<Item = u8>,
+    &'a str: From<T>,
+{
+    fn from(t: T) -> Self {
+        Self::from_str(t.into())
+    }
+}
+
 impl<A> std::fmt::Debug for GenericString<A>
 where
     A: Array<Item = u8>,
@@ -78,15 +88,6 @@ mod ser_de_with {
         Ok(SmallVec::from_slice(
             <&str as Deserialize<'de>>::deserialize(deserializer)?.as_bytes(),
         ))
-    }
-}
-
-impl<'a, A> From<&'a str> for GenericString<A>
-where
-    A: Array<Item = u8>,
-{
-    fn from(s: &'a str) -> GenericString<A> {
-        Self::from_str(s)
     }
 }
 
