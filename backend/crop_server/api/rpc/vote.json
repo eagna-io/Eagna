@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Params",
+  "type": "object",
+  "required": [
+    "accountId",
+    "marketId",
+    "outcomeId"
+  ],
+  "properties": {
+    "accountId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "marketId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "outcomeId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

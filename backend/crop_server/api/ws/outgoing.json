@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OutgoingMsg",
+  "anyOf": [
+    {
+      "description": "```json { \"type\": \"feed\", \"outcomeId\": \"4ef1a321-61bd-4c56-84c1-ddb327d38b91\", \"accountName\": \"Atsuking\", \"timestamp\": 1583316553000 } ```",
+      "type": "object",
+      "required": [
+        "accountId",
+        "outcomeId",
+        "timestamp",
+        "type"
+      ],
+      "properties": {
+        "accountId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "outcomeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "timestamp": {
+          "description": "Unixタイムスタンプのms表現 https://docs.rs/chrono/0.4.10/chrono/struct.DateTime.html#method.timestamp_millis",
+          "type": "integer",
+          "format": "int64"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Feed"
+          ]
+        }
+      }
+    }
+  ]
+}

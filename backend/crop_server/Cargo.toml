@@ -1,0 +1,33 @@
+[package]
+name = "crop_server"
+version = "0.1.0"
+authors = ["AtsukiTak <takatomgoo@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+crop_primitive = { path = "../crop_primitive" }
+crop_infra = { path = "../crop_infra" }
+crop_domain = { path = "../crop_domain" }
+
+anyhow = "1.0"
+chrono = { version = "~0.4", features = ["serde"] }
+futures = "0.3"
+hyper = "~0.13"
+hyper-tls = "~0.4"
+lazy_static = "1.4"
+log = "~0.4"
+schemars = { version = "0.6", features = ["uuid", "chrono"] }
+serde = { version = "~1.0", features = ["derive", "rc"] }
+serde_json = "1.0"
+tokio = { version = "~0.2", features = ["macros", "rt-threaded", "sync"] }
+uuid = { version = "~0.8", features = ["v4", "serde"] }
+warp = "0.2"
+warp-json-rpc = "0.1"
+
+[[bin]]
+name = "api-server"
+path = "src/bin/main.rs"
+
+[[bin]]
+name = "schema-gen"
+path = "src/bin/schema-gen.rs"

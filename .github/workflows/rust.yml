@@ -37,6 +37,6 @@ jobs:
     - name: Check
       run: cd backend && cargo check
     - name: Check lint
-      run: cd backend && cargo-clippy
+      run: cd backend && cargo-clippy --all -- -D warnings
     - name: Check format
       run: cd backend && cargo fmt -- --check
