@@ -41,10 +41,10 @@ const Item: React.FC<{ record: Record }> = ({ record }) => {
 
 const Container = styled.div`
   width: 100%;
-  height: 172px;
+  height: 24vh;
   overflow: scroll;
   padding: 10px;
-  margin-top: 70px;
+  margin-top: 20px;
 `;
 
 const ItemContainer = styled.div`

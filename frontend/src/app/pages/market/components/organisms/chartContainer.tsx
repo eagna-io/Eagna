@@ -1,6 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { BackgroundMainColor } from "app/components/color";
 
 import { RootState } from "app/redux";
 
@@ -12,7 +13,7 @@ const ChartContainer: React.FC = () => {
 
   return (
     <Container>
-      <Chart height={350} datasets={datasets} />
+      <Chart height={"100%"} datasets={datasets} />
     </Container>
   );
 };
@@ -23,4 +24,6 @@ const Container = styled.div`
   position: absolute;
   width: 100vw;
   margin-top: 30px;
+  height: 55vh;
+  background-color: ${BackgroundMainColor.hexWithOpacity(0.5)};
 `;
