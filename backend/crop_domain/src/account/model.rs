@@ -18,4 +18,8 @@ impl AccountName {
     pub fn from(s: &str) -> Result<Self, CapacityError<&str>> {
         Ok(AccountName(ArrayString::from(s)?))
     }
+
+    pub fn to_string(&self) -> String {
+        self.0.to_string()
+    }
 }
