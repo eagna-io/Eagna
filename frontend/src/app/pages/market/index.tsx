@@ -17,7 +17,7 @@ import ChartContainer from "./components/organisms/chartContainer";
 import Feed from "./components/organisms/feed";
 import { VoteButtons } from "./components/organisms/voteButton";
 
-const Page: React.FC = () => {
+export const MarketPage: React.FC = () => {
   const [datasets, records] = useSelector((state: RootState) => [
     state.chart.datasets,
     state.chart.records
@@ -73,8 +73,6 @@ const Page: React.FC = () => {
     </Container>
   );
 };
-
-export default Page;
 
 const getPublicPrediction = (data: Data[]): string => {
   if (data.length === 0) {
