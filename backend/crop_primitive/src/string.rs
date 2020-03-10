@@ -5,6 +5,9 @@ use smallvec::{Array, SmallVec};
 #[serde(transparent)]
 pub struct GenericString<A: Array<Item = u8>>(#[serde(with = "ser_de_with")] SmallVec<A>);
 
+/// Cropサービス内で主に利用する文字列型
+pub type String = GenericString<[u8; 16]>;
+
 impl<A> GenericString<A>
 where
     A: Array<Item = u8>,
@@ -71,9 +74,6 @@ where
         Self::from_str(s)
     }
 }
-
-/// Cropサービス内で主に利用する文字列型
-pub type String = GenericString<[u8; 16]>;
 
 #[cfg(test)]
 mod tests {
