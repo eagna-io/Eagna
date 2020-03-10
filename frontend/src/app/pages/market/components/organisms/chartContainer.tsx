@@ -23,8 +23,8 @@ export default ChartContainer;
 const Container = styled.div`
   position: absolute;
   width: 100vw;
-  margin-top: 30px;
-  height: 55vh;
+  margin-top: 20vh;
+  height: 40vh;
   padding-left: 20px;
   background-color: ${BackgroundMainColor.hexWithOpacity(0.5)};
 `;
