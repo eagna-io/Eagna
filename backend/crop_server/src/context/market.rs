@@ -35,22 +35,16 @@ impl MarketManager {
         &self,
         account_name: AccountName,
         outcome_id: OutcomeId,
-    ) -> Option<&Order> {
+    ) -> Option<Order> {
         let mut lock = self.market.lock().await;
-        let order = if let Some(order) = lock.vote(account_name, outcome_id) {
+        if let Some(order) = lock.vote(account_name, outcome_id) {
             // FeedMsgをbroadcastする。
             // receiverがいなくてもエラーにしない。
             let _ = self.feed_sink.send(order.clone());
 
-            Some(order)
+            Some(order.clone())
         } else {
             None
-        };
-
-        // channelに送信する順序を担保するため、
-        // 送信が終わってからlockを解放する
-        drop(lock);
-
-        order
+        }
     }
 }
