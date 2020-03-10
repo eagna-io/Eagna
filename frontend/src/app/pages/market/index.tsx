@@ -1,7 +1,12 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
-import { BackgroundMainColor, PurpleColor, TextBaseColor, RankingColor } from "app/components/color";
+import {
+  BackgroundMainColor,
+  PurpleColor,
+  TextBaseColor,
+  RankingColor
+} from "app/components/color";
 
 import { RootState } from "app/redux";
 import { actions, Data } from "app/redux/chart";
@@ -13,7 +18,6 @@ import Feed from "./components/organisms/feed";
 import { VoteButtons } from "./components/organisms/voteButton";
 
 const Page: React.FC = () => {
-
   const [datasets, records] = useSelector((state: RootState) => [
     state.chart.datasets,
     state.chart.records
@@ -53,7 +57,10 @@ const Page: React.FC = () => {
         <PredictionTheme>{predictionTheme}</PredictionTheme>
         <PublicPrediction>
           みんなの予想
-          <PredictionValue>{publicPred}<Sm>%</Sm></PredictionValue>
+          <PredictionValue>
+            {publicPred}
+            <Sm>%</Sm>
+          </PredictionValue>
         </PublicPrediction>
       </Guide>
       <VoteButtons
@@ -77,10 +84,10 @@ const getPublicPrediction = (data: Data[]): string => {
   }
 };
 
-const marketTitle = 'RAGE Shadowverse 2020 Spring'
-const ranking = 2
-const paticipantsNum = 358
-const predictionTheme = 'GRAND FINALS Shimon/REVが優勝する確率を予想せよ'
+const marketTitle = "RAGE Shadowverse 2020 Spring";
+const ranking = 2;
+const paticipantsNum = 358;
+const predictionTheme = "GRAND FINALS Shimon/REVが優勝する確率を予想せよ";
 
 const botNames = [
   "ふるさわゆうや",
@@ -88,7 +95,6 @@ const botNames = [
   "ドナルドトランプ",
   "きしべろはん"
 ];
-
 
 const Container = styled.div`
   width: 100vw;
@@ -161,4 +167,3 @@ const Sm = styled.span`
   font-size: 20px;
   font-weight: 800;
 `;
-
