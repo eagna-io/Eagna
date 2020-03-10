@@ -3,7 +3,7 @@ use crop_domain::{
     account::model::AccountName,
     market::model::{MarketId, OutcomeId},
 };
-use crop_primitive::string::String;
+use crop_primitive::String as MyString;
 use futures::future::FutureExt as _;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -18,7 +18,7 @@ use warp_json_rpc::{
 #[serde(rename_all = "camelCase")]
 pub struct Params {
     market_id: Uuid,
-    account_name: String,
+    account_name: MyString,
     outcome_id: Uuid,
 }
 
