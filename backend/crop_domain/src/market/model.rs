@@ -11,9 +11,21 @@ use uuid::Uuid;
 use num::ShareNum;
 
 pub struct Market {
+    /*
+     * ==========
+     * Immutable
+     * ==========
+     */
     pub id: MarketId,
-    pub orders: Vec<Order>,
+    pub outcomes: HashMap<OutcomeId, Outcome>,
 
+    /*
+     * ===========
+     * Mutable
+     * ===========
+     */
+    // これ保存しておく必要ある？
+    orders: Vec<Order>,
     // 各アウトカムどれくらいのShareが流通しているか
     shares: HashMap<OutcomeId, ShareNum>,
     price_computer: PriceComputer,
@@ -21,10 +33,16 @@ pub struct Market {
 
 impl Market {
     /// 新しくMarketを作成する
-    pub fn new(outcomes: &[OutcomeId]) -> Market {
-        let shares = outcomes.iter().map(|id| (*id, ShareNum::ZERO)).collect();
+    pub fn new(outcome_names: &[String]) -> Market {
+        let outcomes: HashMap<OutcomeId, Outcome> = outcome_names
+            .iter()
+            .map(|name| Outcome::new(name.clone()))
+            .map(|outcome| (outcome.id, outcome))
+            .collect();
+        let shares = outcomes.keys().map(|id| (*id, ShareNum::ZERO)).collect();
         Market {
             id: MarketId::new(),
+            outcomes,
             orders: Vec::new(),
             shares,
             price_computer: PriceComputer::default(),
@@ -60,6 +78,15 @@ impl MarketId {
 pub struct Outcome {
     pub id: OutcomeId,
     pub name: String,
+}
+
+impl Outcome {
+    pub fn new(name: String) -> Outcome {
+        Outcome {
+            id: OutcomeId::new(),
+            name,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
