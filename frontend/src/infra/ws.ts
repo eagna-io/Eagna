@@ -8,7 +8,7 @@ export interface Params {
 export const open = ({ marketId, onFeedMsg }: Params) => {
   const ws = new WebSocket(`${WS_URL}/${marketId}`);
   ws.onmessage = event => {
-    const data = event.data;
+    const data = JSON.parse(event.data);
     console.log(event);
 
     // TODO
