@@ -1,5 +1,5 @@
 use crop_domain::{
-    account::model::AccountId,
+    account::model::AccountName,
     market::model::{Market, OutcomeId},
     market::order::model::Order,
 };
@@ -31,9 +31,13 @@ impl MarketManager {
         self.feed_sink.subscribe()
     }
 
-    pub async fn vote_and_broadcast(&self, account_id: AccountId, outcome_id: OutcomeId) -> Order {
+    pub async fn vote_and_broadcast(
+        &self,
+        account_name: AccountName,
+        outcome_id: OutcomeId,
+    ) -> Order {
         let mut lock = self.market.lock().await;
-        let order = lock.vote(account_id, outcome_id);
+        let order = lock.vote(account_name, outcome_id);
 
         // FeedMsgをbroadcastする。
         // receiverがいなくてもエラーにしない。

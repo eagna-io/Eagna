@@ -1,6 +1,6 @@
 use crate::context::Context;
 use crop_domain::{
-    account::model::AccountId,
+    account::model::AccountName,
     market::model::{MarketId, OutcomeId},
 };
 use futures::future::FutureExt as _;
@@ -17,7 +17,7 @@ use warp_json_rpc::{
 #[serde(rename_all = "camelCase")]
 pub struct Params {
     market_id: Uuid,
-    account_id: Uuid,
+    account_name: String,
     outcome_id: Uuid,
 }
 
@@ -39,10 +39,11 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
 async fn handler(params: Params, ctx: Context) -> Result<Success, Error> {
     let market_id = MarketId(params.market_id);
     if let Some(market) = ctx.get_market_state(market_id).await {
-        // 現在はこのorderを特に使っていない
-        let account_id = AccountId(params.account_id);
+        let account_name = AccountName::from(params.account_name.as_str())
+            .map_err(|_| Error::custom(2, "account name is too long"))?;
         let outcome_id = OutcomeId(params.outcome_id);
-        let _order = market.vote_and_broadcast(account_id, outcome_id).await;
+        // 現在はこのorderを特に使っていない
+        let _order = market.vote_and_broadcast(account_name, outcome_id).await;
         Ok(Success())
     } else {
         Err(Error::custom(1, "Market not found"))
