@@ -3,6 +3,7 @@ use crop_domain::{
     account::model::AccountName,
     market::model::{MarketId, OutcomeId},
 };
+use crop_primitive::string::String;
 use futures::future::FutureExt as _;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -39,8 +40,7 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
 async fn handler(params: Params, ctx: Context) -> Result<Success, Error> {
     let market_id = MarketId(params.market_id);
     if let Some(market) = ctx.get_market_state(market_id).await {
-        let account_name = AccountName::from(params.account_name.as_str())
-            .map_err(|_| Error::custom(2, "account name is too long"))?;
+        let account_name = AccountName(params.account_name);
         let outcome_id = OutcomeId(params.outcome_id);
         // 現在はこのorderを特に使っていない
         let _order = market.vote_and_broadcast(account_name, outcome_id).await;

@@ -1,4 +1,5 @@
 use crop_domain::market::order::model::Order;
+use crop_primitive::String;
 use schemars::JsonSchema;
 use serde::Serialize;
 use uuid::Uuid;
@@ -51,7 +52,7 @@ impl From<Order> for FeedMsg {
     fn from(order: Order) -> FeedMsg {
         FeedMsg {
             outcome_id: order.outcome_id.0,
-            account_name: order.account_name.to_string(),
+            account_name: order.account_name.0,
             timestamp: order.time.timestamp_millis(),
         }
     }
