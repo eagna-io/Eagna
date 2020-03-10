@@ -17,6 +17,7 @@ pub struct Market {
      * ==========
      */
     pub id: MarketId,
+    pub title: String,
     pub outcomes: HashMap<OutcomeId, Outcome>,
 
     /*
@@ -33,7 +34,7 @@ pub struct Market {
 
 impl Market {
     /// 新しくMarketを作成する
-    pub fn new(outcome_names: &[String]) -> Market {
+    pub fn new(title: String, outcome_names: &[String]) -> Market {
         let outcomes: HashMap<OutcomeId, Outcome> = outcome_names
             .iter()
             .map(|name| Outcome::new(name.clone()))
@@ -42,6 +43,7 @@ impl Market {
         let shares = outcomes.keys().map(|id| (*id, ShareNum::ZERO)).collect();
         Market {
             id: MarketId::new(),
+            title,
             outcomes,
             orders: Vec::new(),
             shares,
