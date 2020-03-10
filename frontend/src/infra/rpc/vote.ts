@@ -3,7 +3,7 @@ import { RPC_URL } from "../rpc";
 export interface Params {
   marketId: string,
   outcomeId: string,
-  accountId: string,
+  accountName: string,
 }
 
 export const vote = (params: Params): Promise<void> => {

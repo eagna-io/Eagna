@@ -18,6 +18,6 @@ export const open = ({ marketId, onFeedMsg }: Params) => {
 
 export interface FeedMsg {
   outcomeId: string;
-  accountId: string;
+  accountName: string;
   timestamp: number;
 }
