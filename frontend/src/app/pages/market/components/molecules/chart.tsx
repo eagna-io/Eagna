@@ -5,6 +5,8 @@ import moment from "moment";
 import { Data } from "app/redux/chart";
 import { Map } from "model/map";
 
+import { WhiteBaseColor, ChartBaseColor, ChartGraphPink, ChartGraphBlue } from "app/components/color";
+
 interface Props {
   height: string;
   renderInterval?: number;
@@ -46,7 +48,7 @@ const Chart: React.FC<Props> = ({ height, renderInterval = 100, datasets }) => {
 export default Chart;
 
 const createOptions = (height: string) => ({
-  colors: ["#bfe8ff", "#ffc0cb"],
+  colors: [ChartGraphBlue.hex, ChartGraphPink.hex],
   series: [
     {
       name: "勝利する",
@@ -57,7 +59,7 @@ const createOptions = (height: string) => ({
     id: "the-chart",
     type: "line",
     height: height,
-    foreColor: "#ffffff",
+    foreColor: WhiteBaseColor.hex,
     stacked: false,
     animations: {
       dynamicAnimation: {
@@ -90,37 +92,40 @@ const createOptions = (height: string) => ({
   },
   stroke: {
     width: 2,
-    colors: ["#bfe8ff"]
+    colors: [ChartGraphBlue.hex]
   },
   grid: {
     show: true,
-    borderColor: "#555"
+    borderColor: ChartBaseColor.hex
   },
   yaxis: {
+    opposite: true,
     tickAmount: 5,
     labels: {
       style: {
-        fontSize: "8px"
+        fontSize: "8px",
+        colors: ChartBaseColor.hex,
       },
       formatter: (val: number) => Math.floor(val)
-    }
+    },
   },
   xaxis: {
     type: "datetime",
     labels: {
       rotate: 0,
       style: {
-        fontSize: "8px"
+        fontSize: "8px",
+        colors: ChartBaseColor.hex,
       },
       formatter: (val: string, timestamp: number) => {
         return moment(val).format("HH:mm");
       }
     },
     axisBorder: {
-      color: "#555"
+      color: ChartBaseColor.hex
     },
     axisTicks: {
-      color: "#555"
+      color: ChartBaseColor.hex
     },
     range: 1000 * 60
   },

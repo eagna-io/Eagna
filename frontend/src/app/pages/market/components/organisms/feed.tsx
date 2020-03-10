@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import { 
-  WhiteBaseColor,
   RankingColor,
+  TextBaseColor,
   GreenAgreeColor,
   RedDisagreeColor,
   ItemContainerBgColor
@@ -31,7 +31,7 @@ const Item: React.FC<{ record: Record }> = ({ record }) => {
   const win = record.outcome === "win";
 
   return (
-    <ItemContainer unselectable="on">
+    <ItemContainer mine={mine} unselectable="on">
       <Name mine={mine}>{record.user}</Name>
       <Outcome win={win}>{record.outcome}</Outcome>
       と予想しました
@@ -47,20 +47,20 @@ const Container = styled.div`
   margin-top: 20px;
 `;
 
-const ItemContainer = styled.div`
+const ItemContainer = styled.div<{ mine: boolean }>`
   width: 50%;
   padding: 2px 14px;
   border-radius: 9px;
-  background-color: ${ItemContainerBgColor.hexWithOpacity(0.5)};
+  background-color: ${props => props.mine ? RankingColor.hexWithOpacity(0.5) : ItemContainerBgColor.hexWithOpacity(0.5)}};
   margin-bottom: 5px;
   font-size: 12px;
   font-weight: 200;
-  color: #AEAEAE;
+  color: ${TextBaseColor.hex};
   user-select: none;
 `;
 
 const Name = styled.div<{ mine: boolean }>`
-  color: ${props => props.mine ? RankingColor.hex : WhiteBaseColor.hex};
+  color: ${props => props.mine ? RankingColor.hex : TextBaseColor.hex};
   font-size: 6px;
 `;
 

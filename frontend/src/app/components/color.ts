@@ -35,8 +35,12 @@ export const WhiteBaseColor = Color.fromHex("#ffffff");
 
 export const PurpleColor = Color.fromHex("#BB86FC");
 export const RankingColor = Color.fromHex("#FAD160");
-export const TextBaseColor = Color.fromHex("#AEAEAE");
+export const TextBaseColor = Color.fromHex("#FDFDFD");
 export const RedDisagreeColor = Color.fromHex("#F74C61");
 export const GreenAgreeColor = Color.fromHex("#39CCBE");
 export const MarketPredictionValueColor = Color.fromHex("#9B9A9A");
 export const ItemContainerBgColor = Color.fromHex("#3d3d3d");
+
+export const ChartBaseColor = Color.fromHex("#555555");
+export const ChartGraphPink = Color.fromHex("#ffc0cb");
+export const ChartGraphBlue = Color.fromHex("#bfe8ff");
