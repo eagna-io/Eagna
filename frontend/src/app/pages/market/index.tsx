@@ -17,7 +17,11 @@ import ChartContainer from "./components/organisms/chartContainer";
 import Feed from "./components/organisms/feed";
 import { VoteButtons } from "./components/organisms/voteButton";
 
-export const MarketPage: React.FC = () => {
+interface Props {
+  marketId: string;
+}
+
+export const MarketPage: React.FC<Props> = ({ marketId }) => {
   const [datasets, records] = useSelector((state: RootState) => [
     state.chart.datasets,
     state.chart.records
