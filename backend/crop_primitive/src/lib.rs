@@ -5,5 +5,6 @@ extern crate derive_more;
 
 pub mod non_empty_string;
 pub mod non_empty_vec;
+pub mod string;
 pub use self::non_empty_string::NonEmptyString;
 pub use self::non_empty_vec::NonEmptyVec;
