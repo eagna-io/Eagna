@@ -97,20 +97,23 @@ const createOptions = (height: string) => ({
     borderColor: "#555"
   },
   yaxis: {
+    opposite: true,
     tickAmount: 5,
     labels: {
       style: {
-        fontSize: "8px"
+        fontSize: "8px",
+        colors: "#555",
       },
       formatter: (val: number) => Math.floor(val)
-    }
+    },
   },
   xaxis: {
     type: "datetime",
     labels: {
       rotate: 0,
       style: {
-        fontSize: "8px"
+        fontSize: "8px",
+        colors: "#555",
       },
       formatter: (val: string, timestamp: number) => {
         return moment(val).format("HH:mm");

@@ -25,5 +25,6 @@ const Container = styled.div`
   width: 100vw;
   margin-top: 30px;
   height: 55vh;
+  padding-left: 20px;
   background-color: ${BackgroundMainColor.hexWithOpacity(0.5)};
 `;
