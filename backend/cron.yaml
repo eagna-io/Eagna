@@ -1,4 +1,0 @@
-cron:
-- description: "check market status"
-  url: /cronjob/check_markets/
-  schedule: every 1 mins
