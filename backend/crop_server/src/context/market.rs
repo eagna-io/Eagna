@@ -3,7 +3,7 @@ use crop_domain::{
     market::model::{Market, OutcomeId},
     market::order::model::Order,
 };
-use std::sync::Arc;
+use std::{ops::DerefMut, sync::Arc};
 use tokio::sync::{
     broadcast::{channel, Receiver, Sender},
     Mutex,
@@ -25,6 +25,13 @@ impl MarketManager {
             market: Arc::new(Mutex::new(market)),
             feed_sink: sender,
         }
+    }
+
+    pub async fn with_market<F, T>(&self, f: F) -> T
+    where
+        F: FnOnce(&mut Market) -> T,
+    {
+        f(self.market.lock().await.deref_mut())
     }
 
     pub fn subscribe(&self) -> Receiver<Order> {
