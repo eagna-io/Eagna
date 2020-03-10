@@ -1,6 +1,7 @@
-use arrayvec::{ArrayString, CapacityError};
+use crop_primitive::string::String;
+use derive_more::Deref;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Account {
     pub name: AccountName,
 }
@@ -11,15 +12,5 @@ impl Account {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct AccountName(ArrayString<[u8; 64]>);
-
-impl AccountName {
-    pub fn from(s: &str) -> Result<Self, CapacityError<&str>> {
-        Ok(AccountName(ArrayString::from(s)?))
-    }
-
-    pub fn to_string(&self) -> String {
-        self.0.to_string()
-    }
-}
+#[derive(Debug, Clone, PartialEq, Eq, Deref)]
+pub struct AccountName(pub String);

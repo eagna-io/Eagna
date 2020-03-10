@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 /// 対象のOutcomeのShareを1つ買うOrderを表現するモデル
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Order {
     pub id: OrderId,
     pub time: DateTime<Utc>,

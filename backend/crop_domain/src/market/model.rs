@@ -31,13 +31,13 @@ impl Market {
     }
 
     /// 対象のOutcomeを1つ購入する
-    pub fn vote(&mut self, account: AccountName, outcome: OutcomeId) -> Order {
+    pub fn vote(&mut self, account: AccountName, outcome: OutcomeId) -> &Order {
         let tip_cost = self.price_computer.compute_price(&self.shares, outcome);
         let order = Order::new(outcome, account, tip_cost);
         // Orderを記録する
         self.orders.push(order);
         self.increment_share(outcome);
-        order
+        self.orders.last().unwrap()
     }
 
     /// 対象のOutcomeのShareを1つ追加する
