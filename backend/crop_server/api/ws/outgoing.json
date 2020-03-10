@@ -6,15 +6,14 @@
       "description": "```json { \"type\": \"feed\", \"outcomeId\": \"4ef1a321-61bd-4c56-84c1-ddb327d38b91\", \"accountName\": \"Atsuking\", \"timestamp\": 1583316553000 } ```",
       "type": "object",
       "required": [
-        "accountId",
+        "accountName",
         "outcomeId",
         "timestamp",
         "type"
       ],
       "properties": {
-        "accountId": {
-          "type": "string",
-          "format": "uuid"
+        "accountName": {
+          "type": "string"
         },
         "outcomeId": {
           "type": "string",

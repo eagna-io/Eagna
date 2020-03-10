@@ -5,6 +5,9 @@ authors = ["AtsukiTak <takatomgoo@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+crop_primitive = { path = "../crop_primitive" }
+
+arrayvec = "0.5"
 chrono = { version = "~0.4", features = ["serde"] }
 derive_more = "~0.99"
 rand = "~0.7"

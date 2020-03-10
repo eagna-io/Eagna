@@ -1,3 +1,4 @@
+pub mod get_market_info;
 pub mod vote;
 
 use crate::context::Context;
@@ -11,5 +12,5 @@ use warp::{filters::path, reject::Rejection, reply::Reply, Filter};
 pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
     path::path("rpc")
         .and(path::end())
-        .and(self::vote::filter(ctx))
+        .and(self::vote::filter(ctx.clone()).or(self::get_market_info::filter(ctx)))
 }

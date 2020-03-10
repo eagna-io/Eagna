@@ -14,7 +14,7 @@ impl PriceComputer {
         &self,
         share_distri: &HashMap<OutcomeId, ShareNum>,
         outcome: OutcomeId,
-    ) -> TipNum {
+    ) -> Option<TipNum> {
         match self {
             PriceComputer::LMSR(lmsr) => lmsr.compute_price(share_distri, outcome),
         }
@@ -36,6 +36,8 @@ impl LMSR {
         LMSR { b }
     }
 
+    // もしoutcomeが存在していなければNoneを返す
+    //
     // # NOTE
     // もっと最適化できる
     // テストを書きながら最適化する
@@ -43,7 +45,7 @@ impl LMSR {
         &self,
         cur_distri: &HashMap<OutcomeId, ShareNum>,
         outcome: OutcomeId,
-    ) -> TipNum {
+    ) -> Option<TipNum> {
         let cur_cost = self.compute_cost(cur_distri.values().copied());
 
         let new_distri = cur_distri.iter().map(|(o, n)| {
@@ -55,7 +57,11 @@ impl LMSR {
         });
         let new_cost = self.compute_cost(new_distri);
 
-        TipNum((new_cost - cur_cost) as i32)
+        if new_cost == cur_cost {
+            None
+        } else {
+            Some(TipNum((new_cost - cur_cost) as i32))
+        }
     }
 
     fn compute_cost<I>(&self, distribution: I) -> u32
@@ -97,6 +103,9 @@ mod tests {
         // outcome1をひとつ買うときの価格
         let price = lmsr.compute_price(&distri, outcome1);
 
-        assert_eq!(price, TipNum(504));
+        assert_eq!(price, Some(TipNum(504)));
+
+        // 存在しないoutcomeを指定した時はNoneを返す
+        assert_eq!(lmsr.compute_price(&distri, OutcomeId::new()), None);
     }
 }
