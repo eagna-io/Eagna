@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { WhiteBaseColor, PurpleColor } from "app/components/color";
+import { WhiteBaseColor, TextBaseColor, PurpleColor } from "app/components/color";
 
 interface Props {
     userName: string;
@@ -28,7 +28,7 @@ const Container = styled.div`
 `;
 
 const Account = styled.div`
-  color: ${WhiteBaseColor.hex};
+  color: ${TextBaseColor.hex};
   font-size: 14px;
   font-weight: 500;
 `;
