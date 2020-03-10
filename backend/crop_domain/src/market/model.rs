@@ -1,7 +1,7 @@
 pub mod computer;
 pub mod num;
 
-use crate::account::model::AccountId;
+use crate::account::model::AccountName;
 use crate::market::model::computer::PriceComputer;
 use crate::market::order::model::Order;
 use std::collections::HashMap;
@@ -31,7 +31,7 @@ impl Market {
     }
 
     /// 対象のOutcomeを1つ購入する
-    pub fn vote(&mut self, account: AccountId, outcome: OutcomeId) -> Order {
+    pub fn vote(&mut self, account: AccountName, outcome: OutcomeId) -> Order {
         let tip_cost = self.price_computer.compute_price(&self.shares, outcome);
         let order = Order::new(outcome, account, tip_cost);
         // Orderを記録する

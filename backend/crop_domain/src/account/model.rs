@@ -1,29 +1,21 @@
-use uuid::Uuid;
+use arrayvec::{ArrayString, CapacityError};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Account {
-    pub id: AccountId,
+    pub name: AccountName,
 }
 
 impl Account {
-    pub fn new() -> Account {
-        Account {
-            id: AccountId::new(),
-        }
-    }
-
-    pub fn from_uuid(uuid: Uuid) -> Account {
-        Account {
-            id: AccountId(uuid),
-        }
+    pub fn new(name: AccountName) -> Account {
+        Account { name }
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct AccountId(pub Uuid);
+pub struct AccountName(ArrayString<[u8; 64]>);
 
-impl AccountId {
-    pub fn new() -> AccountId {
-        AccountId(Uuid::new_v4())
+impl AccountName {
+    pub fn from(s: &str) -> Result<Self, CapacityError<&str>> {
+        Ok(AccountName(ArrayString::from(s)?))
     }
 }
