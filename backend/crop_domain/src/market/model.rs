@@ -4,6 +4,7 @@ pub mod num;
 use crate::account::model::AccountName;
 use crate::market::model::computer::PriceComputer;
 use crate::market::order::model::Order;
+use crop_primitive::string::String;
 use std::collections::HashMap;
 use uuid::Uuid;
 
