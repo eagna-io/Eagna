@@ -92,7 +92,7 @@ const botNames = [
 
 const Container = styled.div`
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - 75px);
   background-color: ${BackgroundMainColor.hex};
   user-select: none;
 `;
@@ -100,9 +100,8 @@ const Container = styled.div`
 const SubContainer = styled.div`
   position: relative;
   width: 100vw;
-  background-color: ${BackgroundMainColor.hexWithOpacity(0.5)};
   padding: 20px;
-  height: 70vh;
+  height: 60vh;
 `;
 
 const MarketTitle = styled.div`

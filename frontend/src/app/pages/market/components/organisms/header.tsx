@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { WhiteBaseColor, BackgroundMainColor, PurpleColor} from "app/components/color";
+import { WhiteBaseColor, PurpleColor } from "app/components/color";
 
 interface Props {
     userName: string;
@@ -21,7 +21,6 @@ const liveIcon = 'LIVE'
 
 const Container = styled.div`
   position: relative;
-  background-color: ${BackgroundMainColor.hex};
   margin-bottom: 8px;
   display: flex;
   justify-content: space-between;
