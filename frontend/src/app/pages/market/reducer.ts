@@ -10,7 +10,7 @@ export type State = {
 export const initialState = {
   title: "",
   outcomes: [],
-  feeds: [],
+  feeds: []
 };
 
 export interface Outcome {
@@ -28,6 +28,9 @@ export interface FeedItem {
  */
 export type Action =
   | {
+      type: "clear";
+    }
+  | {
       type: "setMarketInfo";
       title: string;
       outcomes: Outcome[];
@@ -43,6 +46,8 @@ export type Action =
  */
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case "clear":
+      return { ...initialState };
     case "setMarketInfo":
       return {
         ...state,
@@ -55,9 +60,7 @@ export const reducer = (state: State, action: Action): State => {
         return state;
       }
       const clonedFeeds =
-        state.feeds.length > 20
-          ? state.feeds.slice(1)
-          : state.feeds.slice(0);
+        state.feeds.length > 20 ? state.feeds.slice(1) : state.feeds.slice(0);
       clonedFeeds.push({ outcomeName, userName });
       return { ...state, ...{ feeds: clonedFeeds } };
   }

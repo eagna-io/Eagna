@@ -15,7 +15,7 @@ export interface Response {
   }[];
 }
 
-export const getMarkeInfo = (params: Params): Promise<Response> =>
+export const getMarketInfo = (params: Params): Promise<Response> =>
   call("getmarketinfo", params, ResponseDecoder());
 
 const ResponseDecoder = (): D.Decoder<Response> =>

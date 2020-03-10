@@ -13,6 +13,8 @@ import { actions, Data } from "app/redux/chart";
 import { now } from "model/time";
 
 import * as ws from "infra/ws";
+import { getMarketInfo } from "infra/rpc/get_market_info";
+import { vote } from "infra/rpc/vote";
 
 import { reducer, initialState } from "./reducer";
 import Header from "./components/organisms/header";
@@ -34,16 +36,39 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
   // 対象のマーケットページを初めて開いた時にWebSocketコネクションを貼る
   // FeedMsgを受け取るたびにFeedに書き込む
   React.useEffect(() => {
-    ws.open({
-      marketId,
-      onFeedMsg: msg => {
-        dispatch({
-          type: "addFeedItem",
-          outcomeId: msg.outcomeId,
-          userName: msg.accountName
-        });
+    let unmounted = false;
+
+    dispatch({ type: "clear" });
+
+    (async () => {
+      // まずマーケットの情報を取得
+      const { title, outcomes } = await getMarketInfo({ marketId });
+      if (unmounted) {
+        return;
       }
-    });
+      dispatch({
+        type: "setMarketInfo",
+        title,
+        outcomes
+      });
+
+      // WebSocketコネクションの確立
+      // TODO: close処理
+      ws.open({
+        marketId,
+        onFeedMsg: msg => {
+          dispatch({
+            type: "addFeedItem",
+            outcomeId: msg.outcomeId,
+            userName: msg.accountName
+          });
+        }
+      });
+    })();
+
+    return () => {
+      unmounted = true;
+    };
   }, [marketId]);
 
   const publicPred = getPublicPrediction(datasets.win);
