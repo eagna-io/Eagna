@@ -3,14 +3,13 @@
   "title": "Params",
   "type": "object",
   "required": [
-    "accountId",
+    "accountName",
     "marketId",
     "outcomeId"
   ],
   "properties": {
-    "accountId": {
-      "type": "string",
-      "format": "uuid"
+    "accountName": {
+      "type": "string"
     },
     "marketId": {
       "type": "string",
