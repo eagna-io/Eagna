@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use smallvec::{Array, SmallVec};
 
-#[derive(PartialEq, Eq, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct GenericString<A: Array<Item = u8>>(#[serde(with = "ser_de_with")] SmallVec<A>);
 
@@ -16,6 +16,25 @@ where
 
     pub fn as_str(&self) -> &str {
         std::str::from_utf8(self.0.as_slice()).unwrap()
+    }
+}
+
+impl<A> std::fmt::Debug for GenericString<A>
+where
+    A: Array<Item = u8>,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl<S, A> PartialEq<S> for GenericString<A>
+where
+    A: Array<Item = u8>,
+    str: PartialEq<S>,
+{
+    fn eq(&self, other: &S) -> bool {
+        self.as_str().eq(other)
     }
 }
 
