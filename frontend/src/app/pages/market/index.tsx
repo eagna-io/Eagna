@@ -12,6 +12,9 @@ import { RootState } from "app/redux";
 import { actions, Data } from "app/redux/chart";
 import { now } from "model/time";
 
+import * as ws from "infra/ws";
+
+import { reducer, initialState } from "./reducer";
 import Header from "./components/organisms/header";
 import ChartContainer from "./components/organisms/chartContainer";
 import Feed from "./components/organisms/feed";
@@ -26,20 +29,22 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
     state.chart.datasets,
     state.chart.records
   ]);
-  const dispatch = useDispatch();
+  const [state, dispatch] = React.useReducer(reducer, initialState);
 
+  // 対象のマーケットページを初めて開いた時にWebSocketコネクションを貼る
+  // FeedMsgを受け取るたびにFeedに書き込む
   React.useEffect(() => {
-    let handler = setInterval(() => {
-      const user = botNames[Math.floor(Math.random() * 1000) % botNames.length];
-      const time = now();
-      const outcome = Math.random() >= 0.5 ? "win" : "lose";
-      dispatch(actions.vote({ outcome, time, user }));
-    }, 200);
-
-    return () => {
-      clearInterval(handler);
-    };
-  }, [dispatch]);
+    ws.open({
+      marketId,
+      onFeedMsg: msg => {
+        dispatch({
+          type: "addFeedItem",
+          outcomeId: msg.outcomeId,
+          userName: msg.accountName
+        });
+      }
+    });
+  }, [marketId]);
 
   const publicPred = getPublicPrediction(datasets.win);
 
@@ -69,9 +74,8 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
       </Guide>
       <VoteButtons
         onVote={outcome =>
-          dispatch(
-            actions.vote({ outcome, time: now(), user: "たかはしあつき" })
-          )
+          // TODO
+          undefined
         }
       />
     </Container>
