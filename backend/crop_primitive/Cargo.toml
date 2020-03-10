@@ -7,6 +7,7 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0"
 derive_more = "0.99"
+schemars = "0.6"
 serde = { version = "~1.0", features = ["derive", "rc"] }
 smallvec = "1.2"
 

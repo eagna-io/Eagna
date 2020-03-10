@@ -1,5 +1,7 @@
+use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
 use serde::{Deserialize, Serialize};
 use smallvec::{Array, SmallVec};
+use std::string::String as StdString;
 
 #[derive(PartialEq, Eq, Clone, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -38,6 +40,19 @@ where
 {
     fn eq(&self, other: &S) -> bool {
         self.as_str().eq(other)
+    }
+}
+
+impl<A> JsonSchema for GenericString<A>
+where
+    A: Array<Item = u8>,
+{
+    fn schema_name() -> StdString {
+        StdString::schema_name()
+    }
+
+    fn json_schema(gen: &mut SchemaGenerator) -> Schema {
+        StdString::json_schema(gen)
     }
 }
 
