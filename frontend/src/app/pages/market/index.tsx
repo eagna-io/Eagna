@@ -7,15 +7,13 @@ import {
   RankingColor
 } from "app/components/color";
 
-import { RootState } from "app/redux";
-import { actions, Data } from "app/redux/chart";
 import { now } from "model/time";
 
 import * as ws from "infra/ws";
 import { getMarketInfo } from "infra/rpc/get_market_info";
 import { vote } from "infra/rpc/vote";
 
-import { reducer, initialState, Outcome } from "./reducer";
+import { reducer, initialState, Outcome, Data } from "./reducer";
 import Header from "./components/organisms/header";
 import ChartContainer from "./components/organisms/chartContainer";
 import Feed from "./components/organisms/feed";
@@ -78,7 +76,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
 
   return (
     <Container>
-      <ChartContainer />
+      <ChartContainer dataset={dataset} />
       <SubContainer>
         <Header userName={accountName} />
         <MarketTitle>{marketTitle}</MarketTitle>

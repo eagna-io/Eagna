@@ -2,24 +2,24 @@ import React from "react";
 import ApexCharts from "apexcharts";
 import moment from "moment";
 
-import { Data } from "app/redux/chart";
 import { Map } from "model/map";
-
 import { WhiteBaseColor, ChartBaseColor, ChartGraphPink, ChartGraphBlue } from "app/components/color";
+
+import { Data } from "../../reducer";
 
 interface Props {
   height: string;
   renderInterval?: number;
-  datasets: Map<Data[]>;
+  dataset: Data[];
 }
 
-const Chart: React.FC<Props> = ({ height, renderInterval = 100, datasets }) => {
+const Chart: React.FC<Props> = ({ height, renderInterval = 100, dataset }) => {
   const chartRef = React.useRef<ApexCharts | undefined>();
   const domRef = React.useRef<HTMLDivElement | null>(null);
-  const datasetsRef = React.useRef<Map<Data[]>>(datasets);
+  const datasetsRef = React.useRef<Data[]>(dataset);
 
-  // datasetsを直接描画するのではなく、refに入れて定期的に描画する
-  datasetsRef.current = datasets;
+  // datasetを直接描画するのではなく、refに入れて定期的に描画する
+  datasetsRef.current = dataset;
 
   // DOMの描画が終わった後に呼ばれるので、domRef.currentに値が入っている
   React.useEffect(() => {
@@ -30,9 +30,9 @@ const Chart: React.FC<Props> = ({ height, renderInterval = 100, datasets }) => {
   // 定期的に描画
   React.useEffect(() => {
     const handler = setInterval(() => {
-      const datasets = datasetsRef.current;
+      const dataset = datasetsRef.current;
       chartRef.current!.updateSeries(
-        [{ data: datasets.win }],
+        [{ data: dataset }],
         true
       );
     }, renderInterval);
