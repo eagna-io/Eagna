@@ -8,17 +8,17 @@ import {
   ItemContainerBgColor
 } from "app/components/color";
 
-import { Record } from "model/chart";
+import { FeedItem, Outcome } from "../../reducer";
 
 interface Props {
-  records: Record[];
+  records: FeedItem[];
 }
 
 const Feed: React.FC<Props> = ({ records }) => {
   return (
     <Container>
       {[...records].reverse().map(record => (
-        <Item key={record.time} record={record} />
+        <Item key={record.id} record={record} />
       ))}
     </Container>
   );
@@ -26,14 +26,14 @@ const Feed: React.FC<Props> = ({ records }) => {
 
 export default Feed;
 
-const Item: React.FC<{ record: Record }> = ({ record }) => {
-  const mine = record.user === "たかはしあつき";
-  const win = record.outcome === "win";
+const Item: React.FC<{ record: FeedItem }> = ({ record }) => {
+  const mine = record.accountName === "たかはしあつき";
+  const displayOutcome = record.outcome === "realize" ? "実現する" : "実現しない";
 
   return (
     <ItemContainer mine={mine} unselectable="on">
-      <Name mine={mine}>{record.user}</Name>
-      <Outcome win={win}>{record.outcome}</Outcome>
+      <Name mine={mine}>{record.accountName}</Name>
+      <OutcomeComponent outcome={record.outcome}>{displayOutcome}</OutcomeComponent>
       と予想しました
     </ItemContainer>
   );
@@ -64,7 +64,7 @@ const Name = styled.div<{ mine: boolean }>`
   font-size: 6px;
 `;
 
-const Outcome = styled.span<{ win: boolean }>`
-  color: ${props => props.win ? GreenAgreeColor.hex : RedDisagreeColor.hex};
+const OutcomeComponent = styled.span<{ outcome: Outcome }>`
+  color: ${props => props.outcome === "realize" ? GreenAgreeColor.hex : RedDisagreeColor.hex};
   font-size: 12px;
 `;

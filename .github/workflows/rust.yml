@@ -40,3 +40,5 @@ jobs:
       run: cd backend && cargo-clippy --all -- -D warnings
     - name: Check format
       run: cd backend && cargo fmt -- --check
+    - name: Test
+      run: cd backend && cargo test --all

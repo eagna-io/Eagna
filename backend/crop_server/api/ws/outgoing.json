@@ -3,30 +3,42 @@
   "title": "OutgoingMsg",
   "anyOf": [
     {
-      "description": "```json { \"type\": \"feed\", \"outcomeId\": \"4ef1a321-61bd-4c56-84c1-ddb327d38b91\", \"accountName\": \"Atsuking\", \"timestamp\": 1583316553000 } ```",
+      "description": "対象のOutcomeのShareを1つ買うOrderを表現するモデル",
       "type": "object",
       "required": [
         "accountName",
+        "id",
         "outcome",
-        "timestamp",
+        "time",
+        "tipCost",
         "type"
       ],
       "properties": {
         "accountName": {
           "$ref": "#/definitions/AccountName"
         },
+        "id": {
+          "$ref": "#/definitions/OrderId"
+        },
         "outcome": {
           "$ref": "#/definitions/Outcome"
         },
-        "timestamp": {
-          "description": "Unixタイムスタンプのms表現 https://docs.rs/chrono/0.4.10/chrono/struct.DateTime.html#method.timestamp_millis",
-          "type": "integer",
-          "format": "int64"
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "tipCost": {
+          "description": "このOrderに必要なTipの量( >0 )",
+          "allOf": [
+            {
+              "$ref": "#/definitions/TipNum"
+            }
+          ]
         },
         "type": {
           "type": "string",
           "enum": [
-            "Feed"
+            "order"
           ]
         }
       }
@@ -36,6 +48,10 @@
     "AccountName": {
       "$ref": "#/definitions/String"
     },
+    "OrderId": {
+      "type": "string",
+      "format": "uuid"
+    },
     "Outcome": {
       "enum": [
         "realize",
@@ -44,6 +60,10 @@
     },
     "String": {
       "type": "string"
+    },
+    "TipNum": {
+      "type": "integer",
+      "format": "int32"
     }
   }
 }
