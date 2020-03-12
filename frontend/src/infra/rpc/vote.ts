@@ -4,7 +4,7 @@ import { call } from "../rpc";
 
 export interface Params {
   marketId: string;
-  outcomeId: string;
+  outcome: "realize" | "unrealize";
   accountName: string;
 }
 
