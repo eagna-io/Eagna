@@ -5,6 +5,7 @@ use crate::account::model::AccountName;
 use crate::market::model::computer::PriceComputer;
 use crate::market::order::model::Order;
 use crop_primitive::string::String;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
@@ -65,7 +66,8 @@ impl Market {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct MarketId(pub Uuid);
 
 impl MarketId {
@@ -74,8 +76,10 @@ impl MarketId {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Outcome {
+    #[serde(rename = "realize")]
     Realize,
+    #[serde(rename = "unrealize")]
     Unrealize,
 }
