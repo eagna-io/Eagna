@@ -3,23 +3,18 @@
  */
 export type State = {
   title: string;
-  outcomes: Outcome[];
   feeds: FeedItem[];
 };
 
 export const initialState = {
   title: "",
-  outcomes: [],
   feeds: []
 };
 
-export interface Outcome {
-  id: string;
-  name: string;
-}
+export type Outcome = "realize" | "unrealize";
 
 export interface FeedItem {
-  outcomeName: string;
+  outcome: Outcome;
   userName: string;
 }
 
@@ -33,11 +28,10 @@ export type Action =
   | {
       type: "setMarketInfo";
       title: string;
-      outcomes: Outcome[];
     }
   | {
       type: "addFeedItem";
-      outcomeId: string;
+      outcome: Outcome;
       userName: string;
     };
 
@@ -51,17 +45,13 @@ export const reducer = (state: State, action: Action): State => {
     case "setMarketInfo":
       return {
         ...state,
-        ...{ title: action.title, outcomes: action.outcomes }
+        ...{ title: action.title }
       };
     case "addFeedItem":
-      const { outcomeId, userName } = action;
-      const outcomeName = state.outcomes.find(o => o.id === outcomeId)?.name;
-      if (!outcomeName) {
-        return state;
-      }
+      const { outcome, userName } = action;
       const clonedFeeds =
         state.feeds.length > 20 ? state.feeds.slice(1) : state.feeds.slice(0);
-      clonedFeeds.push({ outcomeName, userName });
+      clonedFeeds.push({ outcome, userName });
       return { ...state, ...{ feeds: clonedFeeds } };
   }
 };

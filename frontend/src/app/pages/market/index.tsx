@@ -48,8 +48,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
       }
       dispatch({
         type: "setMarketInfo",
-        title,
-        outcomes
+        title
       });
 
       // WebSocketコネクションの確立
@@ -59,7 +58,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
         onFeedMsg: msg => {
           dispatch({
             type: "addFeedItem",
-            outcomeId: msg.outcomeId,
+            outcome: msg.outcome, // TODO
             userName: msg.accountName
           });
         }
