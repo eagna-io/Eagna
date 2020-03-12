@@ -47,7 +47,7 @@ export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     // MarketのidでStateを初期化する。
     case "initialize":
-      return { ...initialState, ...{ marketId: action.marketId } };
+      return { ...initialState, id: action.marketId };
 
     // Marketの基本的な情報を更新する(getmarketinfo RPCで取得した情報)
     // 非同期処理の性質上、古いMarketに関する情報更新アクションが
@@ -58,7 +58,7 @@ export const reducer = (state: State, action: Action): State => {
       } else {
         return {
           ...state,
-          ...{ title: action.title }
+          title: action.title
         };
       }
 
@@ -73,7 +73,7 @@ export const reducer = (state: State, action: Action): State => {
         const clonedFeeds =
           state.feeds.length > 20 ? state.feeds.slice(1) : state.feeds.slice(0);
         clonedFeeds.push({ outcome, accountName });
-        return { ...state, ...{ feeds: clonedFeeds } };
+        return { ...state, feeds: clonedFeeds };
       }
   }
 };
