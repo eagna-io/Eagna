@@ -1,22 +1,30 @@
 import React from "react";
 import styled from "styled-components";
-import { RedDisagreeColor, GreenAgreeColor} from "app/components/color";
+import { RedDisagreeColor, GreenAgreeColor } from "app/components/color";
 
 import { PressButton } from "app/components/atoms/press-button";
 
+import { Outcome } from "../../reducer";
 import { ReactComponent as UpVoteIcon } from "../atoms/images/vote-up.svg";
 import { ReactComponent as DownVoteIcon } from "../atoms/images/vote-down.svg";
 
-
 interface Props {
-  onVote: (outcome: string) => void;
+  onVote: (outcome: Outcome) => void;
 }
 
 export const VoteButtons: React.FC<Props> = ({ onVote }) => {
   return (
     <Container>
-      <Button color={RedDisagreeColor.hex} onClick={() => onVote("lose")} kind="less" /> 
-      <Button color={GreenAgreeColor.hex} onClick={() => onVote("win")} kind="more" />
+      <Button
+        color={RedDisagreeColor.hex}
+        onClick={() => onVote("unrealize")}
+        outcome="unrealize"
+      />
+      <Button
+        color={GreenAgreeColor.hex}
+        onClick={() => onVote("realize")}
+        outcome="realize"
+      />
     </Container>
   );
 };
@@ -30,15 +38,21 @@ const Container = styled.div`
 interface ButtonProps {
   color: string;
   onClick: () => void;
-  kind: "less" | "more";
+  outcome: Outcome;
 }
 
-const Button: React.FC<ButtonProps> = ({ color, onClick, kind }) => {
+const Button: React.FC<ButtonProps> = ({ color, onClick, outcome }) => {
   return (
     <StyledPressButton color={color} onPress={onClick} threshold={1000}>
       <ButtonContainer>
-        {kind === "less" ? <StyledDownVoteIcon /> : <StyledUpVoteIcon />}
-        <PredictionValue color={color}>83%{kind === "less" ? "未満" : "以上"}</PredictionValue>
+        {outcome === "unrealize" ? (
+          <StyledDownVoteIcon />
+        ) : (
+          <StyledUpVoteIcon />
+        )}
+        <PredictionValue color={color}>
+          83%{outcome === "unrealize" ? "未満" : "以上"}
+        </PredictionValue>
       </ButtonContainer>
     </StyledPressButton>
   );
@@ -85,4 +99,3 @@ const PredictionValue = styled.div<{ color: string }>`
   font-size: 12px;
   color: ${props => props.color};
 `;
-
