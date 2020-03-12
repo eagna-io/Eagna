@@ -3,44 +3,19 @@ use chrono::{DateTime, Utc};
 use std::collections::{linked_list::Iter, LinkedList};
 
 pub struct PriceHistory {
-    // 直近の1秒刻みの価格の推移履歴
-    in_sec: LinkedList<PriceHistoryItem>,
-    // 1秒刻みの価格レコードの最大保持数
-    max_item_in_sec: usize,
+    in_sec: Series,
     // 将来的に1分刻みの価格なども保存する
 }
 
 impl PriceHistory {
     fn new(max_item_in_sec: usize) -> PriceHistory {
         PriceHistory {
-            in_sec: LinkedList::new(),
-            max_item_in_sec,
+            in_sec: Series::second_step(max_item_in_sec),
         }
     }
 
     pub fn push_item(&mut self, time: &DateTime<Utc>, price: TipNum) {
-        self.push_item_to_in_sec(time, price);
-    }
-
-    fn push_item_to_in_sec(&mut self, time: &DateTime<Utc>, price: TipNum) {
-        if self.is_need_push(time) {
-            self.in_sec.push_back(PriceHistoryItem::new(*time, price));
-            if self.in_sec.len() > self.max_item_in_sec {
-                self.in_sec.pop_front();
-            }
-        }
-    }
-
-    fn is_need_push(&self, time: &DateTime<Utc>) -> bool {
-        if let Some(last_item) = self.in_sec.back() {
-            seconds_of(&last_item.time) < seconds_of(time)
-        } else {
-            true
-        }
-    }
-
-    pub fn iter_in_sec(&self) -> Iter<PriceHistoryItem> {
-        self.in_sec.iter()
+        self.in_sec.push_item(time, price);
     }
 }
 
@@ -50,6 +25,45 @@ impl Default for PriceHistory {
         // 更新頻度が1秒より長くなった場合、履歴は
         // 1時間ぶんよりも長くなることがある。
         PriceHistory::new(60 * 60)
+    }
+}
+
+pub struct Series {
+    list: LinkedList<PriceHistoryItem>,
+    max_item: usize,
+    // DateTimeを秒や分の整数にroundする関数
+    step_time_of: for<'a> fn(&'a DateTime<Utc>) -> i64,
+}
+
+impl Series {
+    // 1秒刻みのデータシリーズ
+    fn second_step(max_item: usize) -> Series {
+        Series {
+            list: LinkedList::new(),
+            max_item,
+            step_time_of: |time| time.timestamp(),
+        }
+    }
+
+    fn push_item(&mut self, time: &DateTime<Utc>, price: TipNum) {
+        if self.is_need_push(time) {
+            self.list.push_back(PriceHistoryItem::new(*time, price));
+            if self.list.len() > self.max_item {
+                self.list.pop_front();
+            }
+        }
+    }
+
+    fn is_need_push(&self, time: &DateTime<Utc>) -> bool {
+        if let Some(last_item) = self.list.back() {
+            (self.step_time_of)(&last_item.time) < (self.step_time_of)(time)
+        } else {
+            true
+        }
+    }
+
+    pub fn iter(&self) -> Iter<PriceHistoryItem> {
+        self.list.iter()
     }
 }
 
@@ -65,10 +79,6 @@ impl PriceHistoryItem {
     }
 }
 
-fn seconds_of(time: &DateTime<Utc>) -> i64 {
-    time.timestamp()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -79,9 +89,9 @@ mod tests {
         let mut history = PriceHistory::new(1);
 
         history.push_item(&Utc::now(), TipNum(42));
-        assert_eq!(history.in_sec.len(), 1);
+        assert_eq!(history.in_sec.list.len(), 1);
 
         history.push_item(&Utc::now(), TipNum(42));
-        assert_eq!(history.in_sec.len(), 1);
+        assert_eq!(history.in_sec.list.len(), 1);
     }
 }
