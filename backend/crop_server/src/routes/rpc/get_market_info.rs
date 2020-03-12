@@ -4,7 +4,6 @@ use crop_primitive::String as MyString;
 use futures::future::FutureExt as _;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use warp::{reject::Rejection, reply::Reply, Filter};
 use warp_json_rpc::{
     filters::{json_rpc, method, params},
@@ -14,20 +13,13 @@ use warp_json_rpc::{
 #[derive(Debug, Deserialize, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Params {
-    market_id: Uuid,
+    market_id: MarketId,
 }
 
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct Success {
-    id: Uuid,
+    id: MarketId,
     title: MyString,
-    outcomes: Vec<Outcome>,
-}
-
-#[derive(Debug, Serialize, JsonSchema)]
-pub struct Outcome {
-    id: Uuid,
-    name: MyString,
 }
 
 #[derive(Debug, Serialize, JsonSchema)]
@@ -43,21 +35,12 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
 }
 
 async fn handler(params: Params, ctx: Context) -> Result<Success, Error> {
-    let market_id = MarketId(params.market_id);
-    if let Some(manager) = ctx.get_market_state(market_id).await {
+    if let Some(manager) = ctx.get_market_state(params.market_id).await {
         manager
             .with_market(|market| {
                 Ok(Success {
-                    id: market.id.0,
+                    id: market.id,
                     title: market.title.clone(),
-                    outcomes: market
-                        .outcomes
-                        .values()
-                        .map(|outcome| Outcome {
-                            id: outcome.id.0,
-                            name: outcome.name.clone(),
-                        })
-                        .collect(),
                 })
             })
             .await

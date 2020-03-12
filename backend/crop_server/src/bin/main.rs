@@ -4,7 +4,7 @@ use crop_server::{context::Context, server};
 #[tokio::main]
 async fn main() {
     let context = Context::new();
-    let market = Market::new("テストマーケット".into(), &["win".into(), "lose".into()]);
+    let market = Market::new("テストマーケット".into());
 
     println!("Market id : {}", market.id.0);
 
