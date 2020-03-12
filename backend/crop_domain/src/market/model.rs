@@ -3,7 +3,6 @@ pub mod num;
 pub mod price_history;
 
 use crate::account::model::AccountName;
-use crate::market::model::computer::PriceComputer;
 use crate::market::order::model::Order;
 use crop_primitive::string::String as MyString;
 use schemars::JsonSchema;
@@ -11,7 +10,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
+use computer::PriceComputer;
 use num::ShareNum;
+use price_history::PriceHistory;
 
 /// `Market` は1つの `Question` をもつ。(現在はtitleとして保存)
 /// 1つの `Question` には `realize` と `unrealize` 2つの `Outcome` がある。
@@ -32,7 +33,7 @@ pub struct Market {
     // これ保存しておく必要ある？
     orders: Vec<Order>,
     // 直近30minの1秒刻みの価格の推移履歴
-    // price_history: PriceHistory,
+    price_history: PriceHistory,
     // 各アウトカムどれくらいのShareが流通しているか
     shares: HashMap<Outcome, ShareNum>,
     price_computer: PriceComputer,
@@ -49,6 +50,7 @@ impl Market {
             id: MarketId::new(),
             title,
             orders: Vec::new(),
+            price_history: PriceHistory::default(),
             shares,
             price_computer: PriceComputer::default(),
         }
@@ -56,9 +58,12 @@ impl Market {
 
     /// 対象のOutcomeを1つ購入する
     pub fn vote(&mut self, account: AccountName, outcome: Outcome) -> &Order {
+        // Orderを作成する
         let tip_cost = self.price_computer.compute_price(&self.shares, outcome);
         let order = Order::new(outcome, account, tip_cost);
+
         // Orderを記録する
+        self.price_history.push_item(&order.time, order.tip_cost);
         self.orders.push(order);
         self.increment_share(outcome);
         self.orders.last().unwrap()
