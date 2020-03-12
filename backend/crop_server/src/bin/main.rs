@@ -10,5 +10,5 @@ async fn main() {
 
     context.add_new_market(market).await;
 
-    server::Server::bind(([127, 0, 0, 1], 3030), context).await;
+    server::Server::bind(([127, 0, 0, 1], 8080), context).await;
 }
