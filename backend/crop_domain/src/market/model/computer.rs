@@ -93,6 +93,6 @@ mod tests {
         // outcomeをひとつ買うときの価格
         let price = lmsr.compute_price(&distri, Outcome::Realize);
 
-        assert_eq!(price, Some(TipNum(504)));
+        assert_eq!(price, TipNum(504));
     }
 }
