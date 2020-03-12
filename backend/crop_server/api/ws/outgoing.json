@@ -7,17 +7,16 @@
       "type": "object",
       "required": [
         "accountName",
-        "outcomeId",
+        "outcome",
         "timestamp",
         "type"
       ],
       "properties": {
         "accountName": {
-          "type": "string"
+          "$ref": "#/definitions/AccountName"
         },
-        "outcomeId": {
-          "type": "string",
-          "format": "uuid"
+        "outcome": {
+          "$ref": "#/definitions/Outcome"
         },
         "timestamp": {
           "description": "Unixタイムスタンプのms表現 https://docs.rs/chrono/0.4.10/chrono/struct.DateTime.html#method.timestamp_millis",
@@ -32,5 +31,19 @@
         }
       }
     }
-  ]
+  ],
+  "definitions": {
+    "AccountName": {
+      "$ref": "#/definitions/String"
+    },
+    "Outcome": {
+      "enum": [
+        "realize",
+        "unrealize"
+      ]
+    },
+    "String": {
+      "type": "string"
+    }
+  }
 }
