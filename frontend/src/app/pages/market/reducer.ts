@@ -8,19 +8,20 @@ export type State = {
   id: string;
   title: string;
   feeds: FeedItem[];
-  chartDatas: Data[];
+  dataset: Data[];
 };
 
 export const initialState: State = {
   id: "",
   title: "",
   feeds: [],
-  chartDatas: []
+  dataset: []
 };
 
 export type Outcome = "realize" | "unrealize";
 
 export interface FeedItem {
+  id: string;
   outcome: Outcome;
   accountName: string;
 }
@@ -43,6 +44,7 @@ export type Action =
   | {
       type: "addOrder";
       marketId: string;
+      id: string;
       outcome: Outcome;
       accountName: string;
       time: Moment;
@@ -80,21 +82,21 @@ export const reducer = (state: State, action: Action): State => {
       if (action.marketId !== state.id) {
         return state;
       } else {
-        const { outcome, accountName, time, tipCost } = action;
+        const { id, outcome, accountName, time, tipCost } = action;
 
-        // chartDatasに追加
+        // datasetに追加
         const needRemoveOldest =
-          state.chartDatas[0][0] < time.valueOf() - MAX_CHART_DUR_MILLIS;
+          state.dataset[0][0] < time.valueOf() - MAX_CHART_DUR_MILLIS;
         const clonedChartDatas = needRemoveOldest
-          ? state.chartDatas.slice(1)
-          : state.chartDatas.slice(0);
+          ? state.dataset.slice(1)
+          : state.dataset.slice(0);
         clonedChartDatas.push([time.valueOf(), tipCost] as Data);
 
         // feedsに追加
         const clonedFeeds =
           state.feeds.length > 20 ? state.feeds.slice(1) : state.feeds.slice(0);
-        clonedFeeds.push({ outcome, accountName });
-        return { ...state, chartDatas: clonedChartDatas, feeds: clonedFeeds };
+        clonedFeeds.push({ id, outcome, accountName });
+        return { ...state, dataset: clonedChartDatas, feeds: clonedFeeds };
       }
   }
 };

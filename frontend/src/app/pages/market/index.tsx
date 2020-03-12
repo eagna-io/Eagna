@@ -1,5 +1,4 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import {
   BackgroundMainColor,
@@ -27,11 +26,8 @@ interface Props {
 }
 
 export const MarketPage: React.FC<Props> = ({ marketId }) => {
-  const [datasets, records] = useSelector((state: RootState) => [
-    state.chart.datasets,
-    state.chart.records
-  ]);
   const [state, dispatch] = React.useReducer(reducer, initialState);
+  const { dataset, feeds } = state;
 
   // 対象のマーケットページを初めて開いた時にWebSocketコネクションを貼る
   // FeedMsgを受け取るたびにFeedに書き込む
@@ -78,7 +74,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
     [marketId]
   );
 
-  const publicPred = getPublicPrediction(datasets.win);
+  const publicPred = getPublicPrediction(dataset);
 
   return (
     <Container>
@@ -92,7 +88,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
             <RankNum>{ranking}</RankNum>位｜{paticipantsNum}人中
           </RankingValue>
         </Ranking>
-        <Feed records={records} />
+        <Feed records={feeds} />
       </SubContainer>
       <Guide>
         <PredictionTheme>{predictionTheme}</PredictionTheme>

@@ -23,6 +23,7 @@ export const open = ({ marketId, onOrderMsg }: Params) => {
 
 export interface OrderMsg {
   type: "order";
+  id: string;
   outcome: "realize" | "unrealize";
   accountName: string;
   time: Moment;
@@ -31,6 +32,7 @@ export interface OrderMsg {
 
 const OrderMsgDecoder: D.Decoder<OrderMsg> = D.object({
   type: D.constant<"order">("order"),
+  id: D.string(),
   outcome: D.union(
     D.constant<"realize">("realize"),
     D.constant<"unrealize">("unrealize")
