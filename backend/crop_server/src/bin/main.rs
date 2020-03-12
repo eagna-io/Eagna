@@ -3,6 +3,8 @@ use crop_server::{context::Context, server};
 
 #[tokio::main]
 async fn main() {
+    pretty_env_logger::init();
+
     let context = Context::new();
     let market = Market::new("テストマーケット".into());
 
