@@ -34,7 +34,7 @@ export type Action =
       title: string;
     }
   | {
-      type: "addFeedItem";
+      type: "addOrder";
       id: string;
       outcome: Outcome;
       userName: string;
@@ -65,7 +65,7 @@ export const reducer = (state: State, action: Action): State => {
     // Feedにitemを追加する。
     // 非同期処理の性質上、古いMarketに関するアクションが
     // 飛んでくることもあるので、そのアクションは無視する。
-    case "addFeedItem":
+    case "addOrder":
       if (action.id !== state.id) {
         return state;
       } else {

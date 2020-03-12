@@ -54,7 +54,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
         marketId,
         onOrderMsg: msg => {
           dispatch({
-            type: "addFeedItem",
+            type: "addOrder",
             id: marketId,
             outcome: msg.outcome,
             userName: msg.accountName
