@@ -17,7 +17,7 @@ export type Outcome = "realize" | "unrealize";
 
 export interface FeedItem {
   outcome: Outcome;
-  userName: string;
+  accountName: string;
 }
 
 /*
@@ -26,18 +26,18 @@ export interface FeedItem {
 export type Action =
   | {
       type: "initialize";
-      id: string;
+      marketId: string;
     }
   | {
       type: "setMarketInfo";
-      id: string;
+      marketId: string;
       title: string;
     }
   | {
       type: "addOrder";
-      id: string;
+      marketId: string;
       outcome: Outcome;
-      userName: string;
+      accountName: string;
     };
 
 /*
@@ -47,13 +47,13 @@ export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     // MarketのidでStateを初期化する。
     case "initialize":
-      return { ...initialState, ...{ id: action.id } };
+      return { ...initialState, ...{ marketId: action.marketId } };
 
     // Marketの基本的な情報を更新する(getmarketinfo RPCで取得した情報)
     // 非同期処理の性質上、古いMarketに関する情報更新アクションが
     // 飛んでくることもあるので、そのアクションは無視する。
     case "setMarketInfo":
-      if (action.id !== state.id) {
+      if (action.marketId !== state.id) {
         return state;
       } else {
         return {
@@ -66,13 +66,13 @@ export const reducer = (state: State, action: Action): State => {
     // 非同期処理の性質上、古いMarketに関するアクションが
     // 飛んでくることもあるので、そのアクションは無視する。
     case "addOrder":
-      if (action.id !== state.id) {
+      if (action.marketId !== state.id) {
         return state;
       } else {
-        const { outcome, userName } = action;
+        const { outcome, accountName } = action;
         const clonedFeeds =
           state.feeds.length > 20 ? state.feeds.slice(1) : state.feeds.slice(0);
-        clonedFeeds.push({ outcome, userName });
+        clonedFeeds.push({ outcome, accountName });
         return { ...state, ...{ feeds: clonedFeeds } };
       }
   }
