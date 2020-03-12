@@ -1,5 +1,5 @@
 use crate::account::model::AccountName;
-use crate::market::model::{num::TipNum, OutcomeId};
+use crate::market::model::{num::TipNum, Outcome};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
@@ -8,7 +8,7 @@ use uuid::Uuid;
 pub struct Order {
     pub id: OrderId,
     pub time: DateTime<Utc>,
-    pub outcome_id: OutcomeId,
+    pub outcome: Outcome,
     pub account_name: AccountName,
 
     /// このOrderに必要なTipの量( >0 )
@@ -17,14 +17,14 @@ pub struct Order {
 
 impl Order {
     pub(in crate::market) fn new(
-        outcome: OutcomeId,
+        outcome: Outcome,
         account: AccountName,
         tip_cost: TipNum,
     ) -> Order {
         Order {
             id: OrderId::new(),
             time: Utc::now(),
-            outcome_id: outcome,
+            outcome,
             account_name: account,
             tip_cost,
         }
