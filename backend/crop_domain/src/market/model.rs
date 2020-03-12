@@ -1,5 +1,6 @@
 pub mod computer;
 pub mod num;
+pub mod price_history;
 
 use crate::account::model::AccountName;
 use crate::market::model::computer::PriceComputer;
@@ -30,6 +31,8 @@ pub struct Market {
      */
     // これ保存しておく必要ある？
     orders: Vec<Order>,
+    // 直近30minの1秒刻みの価格の推移履歴
+    // price_history: PriceHistory,
     // 各アウトカムどれくらいのShareが流通しているか
     shares: HashMap<Outcome, ShareNum>,
     price_computer: PriceComputer,
