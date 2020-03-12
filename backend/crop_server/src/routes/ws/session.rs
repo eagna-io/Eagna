@@ -1,5 +1,5 @@
 use crate::context::market::MarketManager;
-use crate::routes::ws::msg::FeedMsg;
+use crate::routes::ws::msg::OutgoingMsg;
 use crop_domain::market::order::model::Order;
 use futures::{
     sink::{Sink, SinkExt as _},
@@ -32,7 +32,7 @@ async fn handle_outgoing(
 ) {
     let mut msg_stream = subscriber
         .err_into::<anyhow::Error>()
-        .map_ok(|order| FeedMsg::from(order).into());
+        .map_ok(|order| OutgoingMsg::Order(order).into());
     sink.sink_err_into::<anyhow::Error>()
         .send_all(&mut msg_stream)
         .await
