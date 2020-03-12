@@ -43,7 +43,7 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({ color, onClick, outcome }) => {
   return (
-    <StyledPressButton color={color} onPress={onClick} threshold={1000}>
+    <StyledPressButton color={color} onPress={onClick} threshold={100}>
       <ButtonContainer>
         {outcome === "unrealize" ? (
           <StyledDownVoteIcon />
