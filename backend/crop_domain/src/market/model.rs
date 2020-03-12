@@ -4,7 +4,8 @@ pub mod num;
 use crate::account::model::AccountName;
 use crate::market::model::computer::PriceComputer;
 use crate::market::order::model::Order;
-use crop_primitive::string::String;
+use crop_primitive::string::String as MyString;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
@@ -20,7 +21,7 @@ pub struct Market {
      * ==========
      */
     pub id: MarketId,
-    pub title: String,
+    pub title: MyString,
 
     /*
      * ===========
@@ -36,7 +37,7 @@ pub struct Market {
 
 impl Market {
     /// 新しくMarketを作成する
-    pub fn new(title: String) -> Market {
+    pub fn new(title: MyString) -> Market {
         let shares = [Outcome::Realize, Outcome::Unrealize]
             .iter()
             .map(|o| (*o, ShareNum::ZERO))
@@ -66,7 +67,7 @@ impl Market {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct MarketId(pub Uuid);
 
@@ -76,7 +77,7 @@ impl MarketId {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 pub enum Outcome {
     #[serde(rename = "realize")]
     Realize,
