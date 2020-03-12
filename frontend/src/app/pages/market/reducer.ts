@@ -110,7 +110,8 @@ export const reducer = (state: State, action: Action): State => {
         newState.dataset = needRemoveOldest
           ? state.dataset.slice(1)
           : state.dataset.slice(0);
-        newState.dataset.push([time.valueOf(), tipCost] as Data);
+        const price = outcome === "realize" ? tipCost : 1000 - tipCost;
+        newState.dataset.push([time.valueOf(), price] as Data);
 
         // feedsに追加
         newState.feeds =
