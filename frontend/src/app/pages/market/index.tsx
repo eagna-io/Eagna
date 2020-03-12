@@ -52,7 +52,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
       // WebSocketコネクションの確立
       ws.open({
         marketId,
-        onFeedMsg: msg => {
+        onOrderMsg: msg => {
           dispatch({
             type: "addFeedItem",
             id: marketId,

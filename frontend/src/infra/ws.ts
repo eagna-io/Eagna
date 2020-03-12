@@ -1,36 +1,41 @@
 import * as D from "@mojotech/json-type-validation";
+import moment, { Moment } from "moment";
 
 export const WS_URL = process.env.REACT_APP_API_BASE + "/ws";
 
 export interface Params {
   marketId: string;
-  onFeedMsg: (msg: FeedMsg) => void;
+  onOrderMsg: (msg: OrderMsg) => void;
 }
 
-export const open = ({ marketId, onFeedMsg }: Params) => {
+export const open = ({ marketId, onOrderMsg }: Params) => {
   const ws = new WebSocket(`${WS_URL}/${marketId}`);
   ws.onmessage = event => {
     const data = JSON.parse(event.data);
-    const decoded = FeedMsgDecoder.run(data);
+    const decoded = OrderMsgDecoder.run(data);
     if (decoded.ok) {
-      onFeedMsg(decoded.result);
+      onOrderMsg(decoded.result);
     } else {
       console.error(decoded);
     }
   };
 };
 
-export interface FeedMsg {
+export interface OrderMsg {
+  type: "order";
   outcome: "realize" | "unrealize";
   accountName: string;
-  timestamp: number;
+  time: Moment;
+  tipCost: number;
 }
 
-const FeedMsgDecoder: D.Decoder<FeedMsg> = D.object({
+const OrderMsgDecoder: D.Decoder<OrderMsg> = D.object({
+  type: D.constant<"order">("order"),
   outcome: D.union(
     D.constant<"realize">("realize"),
     D.constant<"unrealize">("unrealize")
   ),
   accountName: D.string(),
-  timestamp: D.number()
+  time: D.string().map(s => moment(s)),
+  tipCost: D.number()
 });
