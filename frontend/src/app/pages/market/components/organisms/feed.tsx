@@ -33,7 +33,7 @@ const Item: React.FC<{ record: FeedItem }> = ({ record }) => {
   return (
     <ItemContainer mine={mine} unselectable="on">
       <Name mine={mine}>{record.accountName}</Name>
-      <OutcomeComponent outcome={record.outcome}>{record.outcome}</OutcomeComponent>
+      <OutcomeComponent outcome={record.outcome}>{displayOutcome}</OutcomeComponent>
       と予想しました
     </ItemContainer>
   );
