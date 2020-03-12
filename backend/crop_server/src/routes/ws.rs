@@ -8,7 +8,7 @@ use uuid::Uuid;
 use warp::{filters, reject::Rejection, reply::Reply, Filter};
 
 pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    filters::path::path("stream")
+    filters::path::path("ws")
         .and(filters::path::param::<Uuid>())
         .and(filters::path::end())
         .and(filters::ws::ws())
