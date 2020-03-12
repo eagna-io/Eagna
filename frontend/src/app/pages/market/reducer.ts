@@ -1,3 +1,6 @@
+import { DateTime } from "model/time";
+import { Moment } from "moment";
+
 /*
  * State
  */
@@ -5,12 +8,14 @@ export type State = {
   id: string;
   title: string;
   feeds: FeedItem[];
+  chartDatas: Data[];
 };
 
-export const initialState = {
+export const initialState: State = {
   id: "",
   title: "",
-  feeds: []
+  feeds: [],
+  chartDatas: []
 };
 
 export type Outcome = "realize" | "unrealize";
@@ -19,6 +24,8 @@ export interface FeedItem {
   outcome: Outcome;
   accountName: string;
 }
+
+export type Data = [DateTime, number];
 
 /*
  * Action
@@ -38,11 +45,15 @@ export type Action =
       marketId: string;
       outcome: Outcome;
       accountName: string;
+      time: Moment;
+      tipCost: number;
     };
 
 /*
  * Reducer
  */
+const MAX_CHART_DUR_MILLIS = 1000 * 60 * 60;
+
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     // MarketのidでStateを初期化する。
@@ -69,11 +80,21 @@ export const reducer = (state: State, action: Action): State => {
       if (action.marketId !== state.id) {
         return state;
       } else {
-        const { outcome, accountName } = action;
+        const { outcome, accountName, time, tipCost } = action;
+
+        // chartDatasに追加
+        const needRemoveOldest =
+          state.chartDatas[0][0] < time.valueOf() - MAX_CHART_DUR_MILLIS;
+        const clonedChartDatas = needRemoveOldest
+          ? state.chartDatas.slice(1)
+          : state.chartDatas.slice(0);
+        clonedChartDatas.push([time.valueOf(), tipCost] as Data);
+
+        // feedsに追加
         const clonedFeeds =
           state.feeds.length > 20 ? state.feeds.slice(1) : state.feeds.slice(0);
         clonedFeeds.push({ outcome, accountName });
-        return { ...state, feeds: clonedFeeds };
+        return { ...state, chartDatas: clonedChartDatas, feeds: clonedFeeds };
       }
   }
 };
