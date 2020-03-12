@@ -38,14 +38,14 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
   React.useEffect(() => {
     // Stateを新しいMarketで初期化する
     // 以降、古いMarketに関するActionが飛んでも何も起きない
-    dispatch({ type: "initialize", id: marketId });
+    dispatch({ type: "initialize", marketId });
 
     (async () => {
       // まずマーケットの情報を取得
       const { title } = await getMarketInfo({ marketId });
       dispatch({
         type: "setMarketInfo",
-        id: marketId,
+        marketId,
         title
       });
 
@@ -54,10 +54,9 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
         marketId,
         onOrderMsg: msg => {
           dispatch({
+            ...msg,
             type: "addOrder",
-            id: marketId,
-            outcome: msg.outcome,
-            userName: msg.accountName
+            marketId,
           });
         }
       });
