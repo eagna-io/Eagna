@@ -18,7 +18,6 @@ import { Map, forEach, entries } from "model/map";
  */
 export type State = {
   snapshot: ChartSnapshot;
-  records: Record[];
   datasets: Map<Data[]>;
   userPaid: number;
   userAsset: Map<number>;
@@ -89,12 +88,6 @@ const vote: CaseReducer<State, PayloadAction<VotePayload>> = (
     }
   });
 
-  // オーダー履歴の更新
-  state.records.push(record);
-  if (state.records.length > MAX_HISTORY_RECORDS) {
-    state.records.shift();
-  }
-
   // userの更新
   if (user === "たかはしあつき") {
     state.userPaid += record.price;
@@ -125,7 +118,6 @@ export const { actions, reducer } = createSlice({
       time: now()
     },
     datasets: { win: [], lose: [] },
-    records: [],
     userPaid: 0,
     userAsset: { win: 0, lose: 0 },
     userScore: 0

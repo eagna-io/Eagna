@@ -9,13 +9,31 @@ export type State = {
   title: string;
   feeds: FeedItem[];
   dataset: Data[];
+  account: {
+    name: string;
+    paied: number;
+    assets: {
+      realize: number;
+      unrealize: number;
+    };
+    score: number;
+  };
 };
 
 export const initialState: State = {
   id: "",
   title: "",
   feeds: [],
-  dataset: []
+  dataset: [],
+  account: {
+    name: "",
+    paied: 0,
+    assets: {
+      realize: 0,
+      unrealize: 0
+    },
+    score: 0
+  }
 };
 
 export type Outcome = "realize" | "unrealize";
@@ -83,20 +101,46 @@ export const reducer = (state: State, action: Action): State => {
         return state;
       } else {
         const { id, outcome, accountName, time, tipCost } = action;
+        const newState = { ...state };
 
         // datasetに追加
         const needRemoveOldest =
           state.dataset[0][0] < time.valueOf() - MAX_CHART_DUR_MILLIS;
-        const clonedChartDatas = needRemoveOldest
+        newState.dataset = needRemoveOldest
           ? state.dataset.slice(1)
           : state.dataset.slice(0);
-        clonedChartDatas.push([time.valueOf(), tipCost] as Data);
+        newState.dataset.push([time.valueOf(), tipCost] as Data);
 
         // feedsに追加
-        const clonedFeeds =
+        newState.feeds =
           state.feeds.length > 20 ? state.feeds.slice(1) : state.feeds.slice(0);
-        clonedFeeds.push({ id, outcome, accountName });
-        return { ...state, dataset: clonedChartDatas, feeds: clonedFeeds };
+        newState.feeds.push({ id, outcome, accountName });
+
+        // userデータの更新
+        if (accountName === state.account.name) {
+          newState.account = { ...newState.account };
+          newState.account.paied += tipCost;
+          newState.account.assets[outcome] += 1;
+        }
+
+        // userスコアの更新
+        if (state.account.paied > 0) {
+          const userCap = Object.entries(newState.account.assets).reduce(
+            (acc, [outcome, q]) => {
+              const realizePrice =
+                newState.dataset.length === 0
+                  ? 0
+                  : newState.dataset[newState.dataset.length - 1][1];
+              const price =
+                outcome === "realize" ? realizePrice : 1000 - realizePrice;
+              return acc + q * price;
+            },
+            0
+          );
+          state.account.score = userCap - newState.account.paied;
+        }
+
+        return newState;
       }
   }
 };
