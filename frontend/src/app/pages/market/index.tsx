@@ -1,5 +1,4 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import {
   BackgroundMainColor,
@@ -8,42 +7,78 @@ import {
   RankingColor
 } from "app/components/color";
 
-import { RootState } from "app/redux";
-import { actions, Data } from "app/redux/chart";
 import { now } from "model/time";
 
+import * as ws from "infra/ws";
+import { getMarketInfo } from "infra/rpc/get_market_info";
+import { vote } from "infra/rpc/vote";
+
+import { reducer, initialState, Outcome, Data } from "./reducer";
 import Header from "./components/organisms/header";
 import ChartContainer from "./components/organisms/chartContainer";
 import Feed from "./components/organisms/feed";
 import { VoteButtons } from "./components/organisms/voteButton";
 
-const Page: React.FC = () => {
-  const [datasets, records] = useSelector((state: RootState) => [
-    state.chart.datasets,
-    state.chart.records
-  ]);
-  const dispatch = useDispatch();
+interface Props {
+  marketId: string;
+}
 
+export const MarketPage: React.FC<Props> = ({ marketId }) => {
+  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const { dataset, feeds } = state;
+
+  // 対象のマーケットページを初めて開いた時にWebSocketコネクションを貼る
+  // FeedMsgを受け取るたびにFeedに書き込む
   React.useEffect(() => {
-    let handler = setInterval(() => {
-      const user = botNames[Math.floor(Math.random() * 1000) % botNames.length];
-      const time = now();
-      const outcome = Math.random() >= 0.5 ? "win" : "lose";
-      dispatch(actions.vote({ outcome, time, user }));
-    }, 200);
+    // Stateを新しいMarketで初期化する
+    // 以降、古いMarketに関するActionが飛んでも何も起きない
+    dispatch({ type: "initialize", marketId });
+
+    (async () => {
+      // まずマーケットの情報を取得
+      const { title } = await getMarketInfo({ marketId });
+      dispatch({
+        type: "setMarketInfo",
+        marketId,
+        title
+      });
+
+      // WebSocketコネクションの確立
+      ws.open({
+        marketId,
+        onOrderMsg: msg => {
+          dispatch({
+            ...msg,
+            type: "addOrder",
+            marketId,
+          });
+        }
+      });
+    })();
 
     return () => {
-      clearInterval(handler);
+      // TODO websocketのclose処理
     };
-  }, [dispatch]);
+  }, [marketId]);
 
-  const publicPred = getPublicPrediction(datasets.win);
+  const onVote = React.useCallback(
+    (outcome: Outcome) => {
+      vote({
+        marketId,
+        outcome,
+        accountName
+      });
+    },
+    [marketId]
+  );
+
+  const publicPred = getPublicPrediction(dataset);
 
   return (
     <Container>
-      <ChartContainer />
+      <ChartContainer dataset={dataset} />
       <SubContainer>
-        <Header userName="Yuya_F" />
+        <Header userName={accountName} />
         <MarketTitle>{marketTitle}</MarketTitle>
         <Ranking>
           予測ランキング
@@ -51,7 +86,7 @@ const Page: React.FC = () => {
             <RankNum>{ranking}</RankNum>位｜{paticipantsNum}人中
           </RankingValue>
         </Ranking>
-        <Feed records={records} />
+        <Feed records={feeds} />
       </SubContainer>
       <Guide>
         <PredictionTheme>{predictionTheme}</PredictionTheme>
@@ -63,18 +98,10 @@ const Page: React.FC = () => {
           </PredictionValue>
         </PublicPrediction>
       </Guide>
-      <VoteButtons
-        onVote={outcome =>
-          dispatch(
-            actions.vote({ outcome, time: now(), user: "たかはしあつき" })
-          )
-        }
-      />
+      <VoteButtons onVote={onVote} />
     </Container>
   );
 };
-
-export default Page;
 
 const getPublicPrediction = (data: Data[]): string => {
   if (data.length === 0) {
@@ -84,6 +111,7 @@ const getPublicPrediction = (data: Data[]): string => {
   }
 };
 
+const accountName = "Yuya_F";
 const marketTitle = "RAGE Shadowverse 2020 Spring";
 const ranking = 2;
 const paticipantsNum = 358;

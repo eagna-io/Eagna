@@ -1,6 +1,6 @@
 import * as D from "@mojotech/json-type-validation";
 
-export const RPC_URL = process.env.REACT_APP_API_BASE + "/rpc";
+export const RPC_URL = process.env.REACT_APP_RPC_API_BASE!;
 
 export const call = <T, S>(
   method: string,
@@ -24,6 +24,7 @@ export const call = <T, S>(
     .then(res => res.json())
     .then(json => ResponseDecoder(decoder).runPromise(json))
     .then(res => {
+      console.log(res);
       if (isSuccess(res)) {
         return res.result;
       } else {
@@ -33,7 +34,8 @@ export const call = <T, S>(
 };
 
 export const isSuccess = <S>(res: Response<S>): res is Success<S> => {
-  return "error" in res;
+  // "result"自体はundefinedのこともある
+  return !("error" in res);
 };
 
 export interface Request<T> {

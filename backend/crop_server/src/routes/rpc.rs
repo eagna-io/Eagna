@@ -2,7 +2,12 @@ pub mod get_market_info;
 pub mod vote;
 
 use crate::context::Context;
-use warp::{filters::path, reject::Rejection, reply::Reply, Filter};
+use warp::{
+    filters::{cors, path},
+    reject::Rejection,
+    reply::Reply,
+    Filter,
+};
 
 /// ## JSON RPC
 ///
@@ -10,7 +15,12 @@ use warp::{filters::path, reject::Rejection, reply::Reply, Filter};
 ///
 /// /rpc
 pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
+    let cors = cors::cors()
+        .allow_any_origin()
+        .allow_methods(vec!["POST", "OPTIONS"])
+        .allow_header("Content-Type");
     path::path("rpc")
         .and(path::end())
         .and(self::vote::filter(ctx.clone()).or(self::get_market_info::filter(ctx)))
+        .with(cors)
 }

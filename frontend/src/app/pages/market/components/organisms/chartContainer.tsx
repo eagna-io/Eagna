@@ -3,17 +3,17 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { BackgroundMainColor } from "app/components/color";
 
-import { RootState } from "app/redux";
-
 import Chart from "../molecules/chart";
+import { Data } from "../../reducer";
 
+interface Props {
+  dataset: Data[];
+}
 
-const ChartContainer: React.FC = () => {
-  const datasets = useSelector((state: RootState) =>state.chart.datasets);
-
+export const ChartContainer: React.FC<Props> = ({ dataset }) => {
   return (
     <Container>
-      <Chart height={"100%"} datasets={datasets} />
+      <Chart height={"100%"} dataset={dataset} />
     </Container>
   );
 };
