@@ -16,7 +16,7 @@ import * as ws from "infra/ws";
 import { getMarketInfo } from "infra/rpc/get_market_info";
 import { vote } from "infra/rpc/vote";
 
-import { reducer, initialState } from "./reducer";
+import { reducer, initialState, Outcome } from "./reducer";
 import Header from "./components/organisms/header";
 import ChartContainer from "./components/organisms/chartContainer";
 import Feed from "./components/organisms/feed";
@@ -42,7 +42,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
 
     (async () => {
       // まずマーケットの情報を取得
-      const { title, outcomes } = await getMarketInfo({ marketId });
+      const { title } = await getMarketInfo({ marketId });
       dispatch({
         type: "setMarketInfo",
         id: marketId,
@@ -56,7 +56,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
           dispatch({
             type: "addFeedItem",
             id: marketId,
-            outcome: msg.outcome, // TODO
+            outcome: msg.outcome,
             userName: msg.accountName
           });
         }
@@ -68,13 +68,24 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
     };
   }, [marketId]);
 
+  const onVote = React.useCallback(
+    (outcome: Outcome) => {
+      vote({
+        marketId,
+        outcome,
+        accountName
+      });
+    },
+    [marketId]
+  );
+
   const publicPred = getPublicPrediction(datasets.win);
 
   return (
     <Container>
       <ChartContainer />
       <SubContainer>
-        <Header userName="Yuya_F" />
+        <Header userName={accountName} />
         <MarketTitle>{marketTitle}</MarketTitle>
         <Ranking>
           予測ランキング
@@ -94,12 +105,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
           </PredictionValue>
         </PublicPrediction>
       </Guide>
-      <VoteButtons
-        onVote={outcome =>
-          // TODO
-          undefined
-        }
-      />
+      <VoteButtons onVote={onVote} />
     </Container>
   );
 };
@@ -112,6 +118,7 @@ const getPublicPrediction = (data: Data[]): string => {
   }
 };
 
+const accountName = "Yuya_F";
 const marketTitle = "RAGE Shadowverse 2020 Spring";
 const ranking = 2;
 const paticipantsNum = 358;
