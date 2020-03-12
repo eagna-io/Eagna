@@ -105,6 +105,7 @@ export const reducer = (state: State, action: Action): State => {
 
         // datasetに追加
         const needRemoveOldest =
+          state.dataset.length > 0 &&
           state.dataset[0][0] < time.valueOf() - MAX_CHART_DUR_MILLIS;
         newState.dataset = needRemoveOldest
           ? state.dataset.slice(1)
