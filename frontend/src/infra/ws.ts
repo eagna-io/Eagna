@@ -1,7 +1,7 @@
 import * as D from "@mojotech/json-type-validation";
 import moment, { Moment } from "moment";
 
-export const WS_URL = process.env.REACT_APP_API_BASE + "/ws";
+export const WS_URL = process.env.REACT_APP_WS_API_BASE;
 
 export interface Params {
   marketId: string;
