@@ -11,5 +11,6 @@ arrayvec = "0.5"
 chrono = { version = "~0.4", features = ["serde"] }
 derive_more = "~0.99"
 rand = "~0.7"
+schemars = { version = "0.6", features = ["uuid", "chrono"] }
 serde = { version = "~1.0", features = ["derive", "rc"] }
 uuid = { version = "~0.8", features = ["v4", "serde"] }

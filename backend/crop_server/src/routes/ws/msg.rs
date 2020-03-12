@@ -1,8 +1,9 @@
-use crop_domain::market::order::model::Order;
-use crop_primitive::String as MyString;
+use crop_domain::{
+    account::model::AccountName,
+    market::{model::Outcome, order::model::Order},
+};
 use schemars::JsonSchema;
 use serde::Serialize;
-use uuid::Uuid;
 use warp::filters::ws::Message;
 
 // Currently, there are no `IncomingMsg`.
@@ -35,8 +36,8 @@ impl Into<Message> for OutgoingMsg {
 #[derive(Serialize, Clone, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct FeedMsg {
-    pub outcome_id: Uuid,
-    pub account_name: MyString,
+    pub outcome: Outcome,
+    pub account_name: AccountName,
     /// Unixタイムスタンプのms表現
     /// https://docs.rs/chrono/0.4.10/chrono/struct.DateTime.html#method.timestamp_millis
     pub timestamp: i64,
@@ -51,8 +52,8 @@ impl Into<Message> for FeedMsg {
 impl From<Order> for FeedMsg {
     fn from(order: Order) -> FeedMsg {
         FeedMsg {
-            outcome_id: order.outcome_id.0,
-            account_name: order.account_name.0,
+            outcome: order.outcome,
+            account_name: order.account_name,
             timestamp: order.time.timestamp_millis(),
         }
     }

@@ -1,5 +1,7 @@
-use crop_primitive::string::String;
+use crop_primitive::string::String as MyString;
 use derive_more::Deref;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Account {
@@ -12,5 +14,6 @@ impl Account {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Deref)]
-pub struct AccountName(pub String);
+#[derive(Debug, Clone, PartialEq, Eq, Deref, Serialize, Deserialize, JsonSchema)]
+#[serde(transparent)]
+pub struct AccountName(pub MyString);

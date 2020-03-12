@@ -5,19 +5,35 @@
   "required": [
     "accountName",
     "marketId",
-    "outcomeId"
+    "outcome"
   ],
   "properties": {
     "accountName": {
-      "type": "string"
+      "$ref": "#/definitions/AccountName"
     },
     "marketId": {
+      "$ref": "#/definitions/MarketId"
+    },
+    "outcome": {
+      "$ref": "#/definitions/Outcome"
+    }
+  },
+  "definitions": {
+    "AccountName": {
+      "$ref": "#/definitions/String"
+    },
+    "MarketId": {
       "type": "string",
       "format": "uuid"
     },
-    "outcomeId": {
-      "type": "string",
-      "format": "uuid"
+    "Outcome": {
+      "enum": [
+        "realize",
+        "unrealize"
+      ]
+    },
+    "String": {
+      "type": "string"
     }
   }
 }

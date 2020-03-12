@@ -1,6 +1,6 @@
 use crop_domain::{
     account::model::AccountName,
-    market::model::{Market, OutcomeId},
+    market::model::{Market, Outcome},
     market::order::model::Order,
 };
 use std::{ops::DerefMut, sync::Arc};
@@ -38,20 +38,18 @@ impl MarketManager {
         self.feed_sink.subscribe()
     }
 
-    pub async fn vote_and_broadcast(
-        &self,
-        account_name: AccountName,
-        outcome_id: OutcomeId,
-    ) -> Option<Order> {
+    pub async fn vote_and_broadcast(&self, account_name: AccountName, outcome: Outcome) -> Order {
         let mut lock = self.market.lock().await;
-        if let Some(order) = lock.vote(account_name, outcome_id) {
-            // FeedMsgをbroadcastする。
-            // receiverがいなくてもエラーにしない。
-            let _ = self.feed_sink.send(order.clone());
+        let order = lock.vote(account_name, outcome);
+        // FeedMsgをbroadcastする。
+        // receiverがいなくてもエラーにしない。
+        let _ = self.feed_sink.send(order.clone());
 
-            Some(order.clone())
-        } else {
-            None
-        }
+        let ret = order.clone();
+
+        // 送信順序担保のため、sendが終わってからlockを解放する
+        drop(lock);
+
+        ret
     }
 }
