@@ -1,6 +1,6 @@
 use crate::market::model::num::TipNum;
 use chrono::{DateTime, Utc};
-use std::collections::LinkedList;
+use std::collections::{linked_list::Iter, LinkedList};
 
 pub struct PriceHistory {
     // 直近の1秒刻みの価格の推移履歴
@@ -37,6 +37,10 @@ impl PriceHistory {
         } else {
             true
         }
+    }
+
+    pub fn iter_in_sec(&self) -> Iter<PriceHistoryItem> {
+        self.in_sec.iter()
     }
 }
 
