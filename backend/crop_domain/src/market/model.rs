@@ -4,12 +4,16 @@ pub mod num;
 use crate::account::model::AccountName;
 use crate::market::model::computer::PriceComputer;
 use crate::market::order::model::Order;
-use crop_primitive::string::String;
+use crop_primitive::string::String as MyString;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
 use num::ShareNum;
 
+/// `Market` は1つの `Question` をもつ。(現在はtitleとして保存)
+/// 1つの `Question` には `realize` と `unrealize` 2つの `Outcome` がある。
 pub struct Market {
     /*
      * ==========
@@ -17,8 +21,7 @@ pub struct Market {
      * ==========
      */
     pub id: MarketId,
-    pub title: String,
-    pub outcomes: HashMap<OutcomeId, Outcome>,
+    pub title: MyString,
 
     /*
      * ===========
@@ -28,23 +31,20 @@ pub struct Market {
     // これ保存しておく必要ある？
     orders: Vec<Order>,
     // 各アウトカムどれくらいのShareが流通しているか
-    shares: HashMap<OutcomeId, ShareNum>,
+    shares: HashMap<Outcome, ShareNum>,
     price_computer: PriceComputer,
 }
 
 impl Market {
     /// 新しくMarketを作成する
-    pub fn new(title: String, outcome_names: &[String]) -> Market {
-        let outcomes: HashMap<OutcomeId, Outcome> = outcome_names
+    pub fn new(title: MyString) -> Market {
+        let shares = [Outcome::Realize, Outcome::Unrealize]
             .iter()
-            .map(|name| Outcome::new(name.clone()))
-            .map(|outcome| (outcome.id, outcome))
+            .map(|o| (*o, ShareNum::ZERO))
             .collect();
-        let shares = outcomes.keys().map(|id| (*id, ShareNum::ZERO)).collect();
         Market {
             id: MarketId::new(),
             title,
-            outcomes,
             orders: Vec::new(),
             shares,
             price_computer: PriceComputer::default(),
@@ -52,25 +52,23 @@ impl Market {
     }
 
     /// 対象のOutcomeを1つ購入する
-    pub fn vote(&mut self, account: AccountName, outcome: OutcomeId) -> Option<&Order> {
-        if let Some(tip_cost) = self.price_computer.compute_price(&self.shares, outcome) {
-            let order = Order::new(outcome, account, tip_cost);
-            // Orderを記録する
-            self.orders.push(order);
-            self.increment_share(outcome);
-            self.orders.last()
-        } else {
-            None
-        }
+    pub fn vote(&mut self, account: AccountName, outcome: Outcome) -> &Order {
+        let tip_cost = self.price_computer.compute_price(&self.shares, outcome);
+        let order = Order::new(outcome, account, tip_cost);
+        // Orderを記録する
+        self.orders.push(order);
+        self.increment_share(outcome);
+        self.orders.last().unwrap()
     }
 
     /// 対象のOutcomeのShareを1つ追加する
-    fn increment_share(&mut self, outcome: OutcomeId) {
+    fn increment_share(&mut self, outcome: Outcome) {
         *self.shares.get_mut(&outcome).unwrap() += ShareNum::ONE;
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(transparent)]
 pub struct MarketId(pub Uuid);
 
 impl MarketId {
@@ -79,26 +77,10 @@ impl MarketId {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Outcome {
-    pub id: OutcomeId,
-    pub name: String,
-}
-
-impl Outcome {
-    pub fn new(name: String) -> Outcome {
-        Outcome {
-            id: OutcomeId::new(),
-            name,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct OutcomeId(pub Uuid);
-
-impl OutcomeId {
-    pub fn new() -> OutcomeId {
-        OutcomeId(Uuid::new_v4())
-    }
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+pub enum Outcome {
+    #[serde(rename = "realize")]
+    Realize,
+    #[serde(rename = "unrealize")]
+    Unrealize,
 }

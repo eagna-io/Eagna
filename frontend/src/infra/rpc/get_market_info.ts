@@ -9,10 +9,6 @@ export interface Params {
 export interface Response {
   id: string;
   title: string;
-  outcomes: {
-    id: string;
-    name: string;
-  }[];
 }
 
 export const getMarkeInfo = (params: Params): Promise<Response> =>
@@ -21,11 +17,5 @@ export const getMarkeInfo = (params: Params): Promise<Response> =>
 const ResponseDecoder = (): D.Decoder<Response> =>
   D.object({
     id: D.string(),
-    title: D.string(),
-    outcomes: D.array(
-      D.object({
-        id: D.string(),
-        name: D.string()
-      })
-    )
+    title: D.string()
   });
