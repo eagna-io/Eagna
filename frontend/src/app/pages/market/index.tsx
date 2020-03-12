@@ -36,28 +36,26 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
   // 対象のマーケットページを初めて開いた時にWebSocketコネクションを貼る
   // FeedMsgを受け取るたびにFeedに書き込む
   React.useEffect(() => {
-    let unmounted = false;
-
-    dispatch({ type: "clear" });
+    // Stateを新しいMarketで初期化する
+    // 以降、古いMarketに関するActionが飛んでも何も起きない
+    dispatch({ type: "initialize", id: marketId });
 
     (async () => {
       // まずマーケットの情報を取得
       const { title, outcomes } = await getMarketInfo({ marketId });
-      if (unmounted) {
-        return;
-      }
       dispatch({
         type: "setMarketInfo",
+        id: marketId,
         title
       });
 
       // WebSocketコネクションの確立
-      // TODO: close処理
       ws.open({
         marketId,
         onFeedMsg: msg => {
           dispatch({
             type: "addFeedItem",
+            id: marketId,
             outcome: msg.outcome, // TODO
             userName: msg.accountName
           });
@@ -66,7 +64,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
     })();
 
     return () => {
-      unmounted = true;
+      // TODO websocketのclose処理
     };
   }, [marketId]);
 
