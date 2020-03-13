@@ -55,6 +55,10 @@ export type Action =
       marketId: string;
     }
   | {
+      type: "setAccountName";
+      accountName: string;
+    }
+  | {
       type: "setMarketInfo";
       marketId: string;
       title: string;
@@ -92,6 +96,15 @@ export const reducer = (state: State, action: Action): State => {
           title: action.title
         };
       }
+
+    case "setAccountName":
+      return {
+        ...state,
+        account: {
+          ...state.account,
+          name: action.accountName
+        }
+      };
 
     // Feedにitemを追加する。
     // 非同期処理の性質上、古いMarketに関するアクションが

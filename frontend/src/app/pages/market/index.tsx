@@ -25,7 +25,7 @@ interface Props {
 
 export const MarketPage: React.FC<Props> = ({ marketId }) => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const { dataset, feeds } = state;
+  const { account, dataset, feeds } = state;
 
   // 対象のマーケットページを初めて開いた時にWebSocketコネクションを貼る
   // FeedMsgを受け取るたびにFeedに書き込む
@@ -33,6 +33,11 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
     // Stateを新しいMarketで初期化する
     // 以降、古いMarketに関するActionが飛んでも何も起きない
     dispatch({ type: "initialize", marketId });
+
+    // Account名を入力
+    const accountName =
+      window.prompt("ユーザー名を入力してください") || "HOGEO";
+    dispatch({ type: "setAccountName", accountName });
 
     (async () => {
       // まずマーケットの情報を取得
@@ -50,7 +55,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
           dispatch({
             ...msg,
             type: "addOrder",
-            marketId,
+            marketId
           });
         }
       });
@@ -61,6 +66,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
     };
   }, [marketId]);
 
+  const accountName = account.name;
   const onVote = React.useCallback(
     (outcome: Outcome) => {
       vote({
@@ -69,7 +75,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
         accountName
       });
     },
-    [marketId]
+    [marketId, accountName]
   );
 
   const publicPred = getPublicPrediction(dataset);
@@ -78,7 +84,7 @@ export const MarketPage: React.FC<Props> = ({ marketId }) => {
     <Container>
       <ChartContainer dataset={dataset} />
       <SubContainer>
-        <Header userName={accountName} />
+        <Header userName={account.name} />
         <MarketTitle>{marketTitle}</MarketTitle>
         <Ranking>
           予測ランキング
@@ -111,7 +117,6 @@ const getPublicPrediction = (data: Data[]): string => {
   }
 };
 
-const accountName = "Yuya_F";
 const marketTitle = "RAGE Shadowverse 2020 Spring";
 const ranking = 2;
 const paticipantsNum = 358;
