@@ -2,7 +2,6 @@ import React from "react";
 import ApexCharts from "apexcharts";
 import moment from "moment";
 
-import { Map } from "model/map";
 import { WhiteBaseColor, ChartBaseColor, ChartGraphPink, ChartGraphBlue } from "app/components/color";
 
 import { Data } from "../../reducer";
