@@ -7,8 +7,6 @@ import {
   RankingColor
 } from "app/components/color";
 
-import { now } from "model/time";
-
 import * as ws from "infra/ws";
 import { getMarketInfo } from "infra/rpc/get_market_info";
 import { vote } from "infra/rpc/vote";
@@ -121,13 +119,6 @@ const marketTitle = "RAGE Shadowverse 2020 Spring";
 const ranking = 2;
 const paticipantsNum = 358;
 const predictionTheme = "GRAND FINALS Shimon/REVが優勝する確率を予想せよ";
-
-const botNames = [
-  "ふるさわゆうや",
-  "ふなはしこうき",
-  "ドナルドトランプ",
-  "きしべろはん"
-];
 
 const Container = styled.div`
   width: 100vw;
