@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use smallvec::{Array, SmallVec};
 use std::string::String as StdString;
 
-#[derive(PartialEq, Eq, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct GenericString<A: Array<Item = u8>>(#[serde(with = "ser_de_with")] SmallVec<A>);
 
