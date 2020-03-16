@@ -41,6 +41,7 @@ export const ChoiceYellow = Color.fromHex("#E4DC45");
 export const ChoicePink = Color.fromHex("#E445B3");
 
 export const ShadowGray = Color.fromHex("#616161");
+export const VoteRateBackGround = Color.fromHex("#C9C8C8");
 
 export const PurpleColor = Color.fromHex("#BB86FC");
 export const RankingColor = Color.fromHex("#FAD160");
