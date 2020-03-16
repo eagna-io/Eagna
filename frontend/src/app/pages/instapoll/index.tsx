@@ -7,7 +7,8 @@ import {
   WhiteBaseColor,
   ChoiceBlue,
   ChoiceRed,
-  TextBaseColor
+  TextBaseColor,
+  BlackColor
 } from "app/components/color";
 
 import { CommentCard } from "./components/organisms/commentCard";
@@ -80,6 +81,7 @@ const PollCard = styled.div`
   margin-top: 2vh;
   padding: 2vh 16px;
   background-color: ${WhiteBaseColor.hex};
+  box-shadow: 0 10px 20px ${BlackColor.rgba(0.19)}, 0 6px 6px ${BlackColor.rgba(0.23)};
 `;
 
 const Theme = styled.div`

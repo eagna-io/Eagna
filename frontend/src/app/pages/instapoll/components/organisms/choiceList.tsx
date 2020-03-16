@@ -8,9 +8,7 @@ import {
   VoteRateBackGround
 } from "app/components/color";
 
-interface Props {}
-
-export const ChoiceList: React.FC<Props> = () => {
+export const ChoiceList: React.FC = () => {
   return (
     <Container>
       <Choice choiceTitle="Lebron" choiceColor={ChoiceBlue.hex} selected={true} voteRate={69} />

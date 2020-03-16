@@ -3,7 +3,8 @@ import styled from "styled-components";
 
 import {
   WhiteBaseColor,
-  TextBaseColor
+  TextBaseColor,
+  BlackColor
 } from "app/components/color";
 
 interface Props {
@@ -31,6 +32,7 @@ const Container = styled.div`
   background-color: ${WhiteBaseColor.hex}
   display: flex;
   justify-content: space-between;
+  box-shadow: 0 10px 20px ${BlackColor.rgba(0.19)}, 0 6px 6px ${BlackColor.rgba(0.23)};
 `;
 
 const Contents = styled.div`
