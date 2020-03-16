@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 
-import { MarketPage } from "./pages/market";
+import { InstapollPage } from "./pages/instapoll";
 
 const App: FC = () => {
   return (
@@ -24,11 +24,11 @@ const AppRouter: FC = () => (
   <Router>
     <Switch>
       <Route
-        path="/market/:id"
+        path="/instapoll"
         exact
-        render={({ match }) => <MarketPage marketId={match.params.id} />}
+        render={() => <InstapollPage />}
       />
-      <Redirect to="/market" />
+      <Redirect to="/instapoll" />
     </Switch>
   </Router>
 );

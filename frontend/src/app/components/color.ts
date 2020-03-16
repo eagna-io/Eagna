@@ -30,8 +30,10 @@ function fromHex(hex: string): number {
   return parseInt(hex, 16);
 }
 
-export const BackgroundMainColor = Color.fromHex("#202123");
+export const BackgroundMainColor = Color.fromHex("#bb86fc");
 export const WhiteBaseColor = Color.fromHex("#ffffff");
+
+export const ShadowGray = Color.fromHex("#616161");
 
 export const PurpleColor = Color.fromHex("#BB86FC");
 export const RankingColor = Color.fromHex("#FAD160");
