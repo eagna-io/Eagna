@@ -36,7 +36,7 @@ const Choice: React.FC<ChoiceProps> = ({ choiceTitle, choiceColor, selected, vot
       <ChoiceButton choiceColor={choiceColor} selected={selected}></ChoiceButton>
       <VoteRate voteRate={voteRate}></VoteRate>
       <Choicetitle choiceColor={choiceColor} selected={selected}>{choiceTitle}</Choicetitle>
-  <RateValue choiceColor={choiceColor} selected={selected}>{voteRate}%</RateValue>
+      <RateValue choiceColor={choiceColor} selected={selected}>{voteRate}%</RateValue>
     </StyledChoiceButton>
   )
 }
