@@ -1,4 +1,3 @@
-use crop_server::routes::rpc::vote::Params;
 use crop_server::routes::ws::msg::OutgoingMsg;
 use schemars::schema_for;
 use std::fs::write;
@@ -12,5 +11,4 @@ macro_rules! write_json_schema {
 
 fn main() {
     write_json_schema!("api/ws/outgoing.json", OutgoingMsg);
-    write_json_schema!("api/rpc/vote.json", Params);
 }

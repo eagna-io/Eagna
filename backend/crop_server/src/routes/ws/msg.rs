@@ -1,4 +1,4 @@
-use crop_domain::market::order::model::Order;
+use crop_domain::poll::model::Comment;
 use schemars::JsonSchema;
 use serde::Serialize;
 use warp::filters::ws::Message;
@@ -13,8 +13,8 @@ use warp::filters::ws::Message;
 #[derive(Serialize, Clone, JsonSchema)]
 #[serde(tag = "type")]
 pub enum OutgoingMsg {
-    #[serde(rename = "order")]
-    Order(Order),
+    #[serde(rename = "comment")]
+    Comment(Comment),
 }
 
 impl Into<Message> for OutgoingMsg {

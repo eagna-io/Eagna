@@ -1,4 +1,6 @@
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
+use serde::Serialize;
 use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
 
@@ -40,14 +42,14 @@ impl Poll {
         self.user_choice.insert(account.name.clone(), choice);
     }
 
-    pub fn add_comment(&mut self, account: &Account, comment_str: String) -> &Comment {
+    pub fn add_comment(&mut self, account: AccountName, comment_str: String) -> &Comment {
         let color = self
             .user_choice
-            .get(&account.name)
+            .get(&account)
             .map(|choice| choice.color.clone())
             .unwrap_or_else(|| "#888888".into());
         let comment = Comment {
-            account: account.name.clone(),
+            account: account,
             comment: comment_str,
             color,
         };
@@ -76,7 +78,7 @@ impl Choice {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct Comment {
     pub account: AccountName,
     pub comment: String,

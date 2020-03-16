@@ -17,7 +17,7 @@ hyper-tls = "~0.4"
 lazy_static = "1.4"
 log = "~0.4"
 pretty_env_logger = "0.4"
-schemars = { version = "0.6", features = ["uuid", "chrono"] }
+schemars = { git = "https://github.com/AtsukiTak/schemars.git", features = ["uuid", "chrono"] }
 serde = { version = "~1.0", features = ["derive", "rc"] }
 serde_json = "1.0"
 tokio = { version = "~0.2", features = ["macros", "rt-threaded", "sync"] }
