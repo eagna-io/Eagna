@@ -10,6 +10,7 @@ import {
 } from "app/components/color";
 
 import { CommentCard } from "./components/organisms/commentCard";
+import { ChoiceList } from "./components/organisms/choiceList";
 
 export const InstapollPage: React.FC = () => {
   return (
@@ -23,9 +24,15 @@ export const InstapollPage: React.FC = () => {
         <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceRed.hex}/>
         <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
       </CommentFeed>
+      <PollCard>
+        <Theme>{themeTitle}</Theme>
+        <ChoiceList />
+      </PollCard>
     </Container>
   );
 }
+
+const themeTitle = "次にポイントを決めるのは誰？"
 
 const Container = styled.div`
   width: 100vw;
@@ -41,7 +48,7 @@ const TimerComponent = styled.div`
   margin 0px auto;
   border-radius: 50%;
   border: solid 3px ${ShadowGray.hex};
-  position: relative
+  position: relative;
 `;
 
 const Timer = styled.span`
@@ -58,4 +65,17 @@ const Timer = styled.span`
 const CommentFeed = styled.div`
   width: 100%;
   margin-top: 12px;
+`;
+
+const PollCard = styled.div`
+  width: 100%;
+  border-radius: 4px;
+  margin-top: 24px;
+  padding: 8px;
+  background-color: ${WhiteBaseColor.hex}
+`;
+
+const Theme = styled.div`
+  width: 100%;
+  font-size: 16px;
 `;
