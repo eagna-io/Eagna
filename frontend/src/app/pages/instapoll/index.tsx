@@ -6,11 +6,13 @@ import {
   ShadowGray,
   WhiteBaseColor,
   ChoiceBlue,
-  ChoiceRed
+  ChoiceRed,
+  TextBaseColor
 } from "app/components/color";
 
 import { CommentCard } from "./components/organisms/commentCard";
 import { ChoiceList } from "./components/organisms/choiceList";
+import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg";
 
 export const InstapollPage: React.FC = () => {
   return (
@@ -27,6 +29,10 @@ export const InstapollPage: React.FC = () => {
       <PollCard>
         <Theme>{themeTitle}</Theme>
         <ChoiceList />
+        <CommentContainer>
+          <CommentInput type="text" placeholder="コメントする"></CommentInput>
+          <Submit></Submit>
+        </CommentContainer>
       </PollCard>
     </Container>
   );
@@ -65,17 +71,39 @@ const Timer = styled.span`
 const CommentFeed = styled.div`
   width: 100%;
   margin-top: 12px;
+  height: 32vh;
 `;
 
 const PollCard = styled.div`
   width: 100%;
   border-radius: 4px;
-  margin-top: 24px;
-  padding: 8px;
+  margin-top: 2vh;
+  padding: 2vh 16px;
   background-color: ${WhiteBaseColor.hex}
 `;
 
 const Theme = styled.div`
   width: 100%;
   font-size: 16px;
+`;
+
+const CommentContainer = styled.div`
+  width: 100%;  
+  display: flex;
+`;
+
+const CommentInput = styled.input`
+  width: 86%;  
+  border-radius: 24px;
+  height: 32px;
+  border: solid 1px ${TextBaseColor.hex};
+  margin-right: 8px;
+  padding: 0px 16px;
+  font-size: 16px;
+  transform: scale(0.95);
+`;
+
+const Submit = styled(SubmitIcon)`
+  width: 32px;
+  height: 28px;
 `;
