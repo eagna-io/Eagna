@@ -13,6 +13,7 @@ export const InstapollPage: React.FC = () => {
       <TimerComponent>
         <Timer>2:57</Timer>
       </TimerComponent>
+      <CommentFeed>comment Here</CommentFeed>
     </Container>
   );
 }
@@ -43,4 +44,10 @@ const Timer = styled.span`
   font-size: 16px;
   font-weight: 800;
   color: ${WhiteBaseColor.hex}
+`;
+
+const CommentFeed = styled.div`
+  width: 100%;
+  margin-top: 12px;
+  background-color: ${WhiteBaseColor.hex}
 `;
