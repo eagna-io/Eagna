@@ -79,7 +79,7 @@ const PollCard = styled.div`
   border-radius: 4px;
   margin-top: 2vh;
   padding: 2vh 16px;
-  background-color: ${WhiteBaseColor.hex}
+  background-color: ${WhiteBaseColor.hex};
 `;
 
 const Theme = styled.div`
