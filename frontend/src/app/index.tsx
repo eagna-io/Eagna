@@ -24,11 +24,11 @@ const AppRouter: FC = () => (
   <Router>
     <Switch>
       <Route
-        path="/market/:id"
+        path="/instapoll/:id"
         exact
         render={({ match }) => <MarketPage marketId={match.params.id} />}
       />
-      <Redirect to="/market" />
+      <Redirect to="/instapoll" />
     </Switch>
   </Router>
 );
