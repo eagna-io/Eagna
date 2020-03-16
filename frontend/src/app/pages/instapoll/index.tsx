@@ -7,13 +7,20 @@ import {
   WhiteBaseColor
 } from "app/components/color";
 
+import { CommentCard } from "./components/organisms/commentCard";
+
 export const InstapollPage: React.FC = () => {
   return (
     <Container>
       <TimerComponent>
         <Timer>2:57</Timer>
       </TimerComponent>
-      <CommentFeed>comment Here</CommentFeed>
+      <CommentFeed>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね"/>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね"/>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね"/>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね"/>
+      </CommentFeed>
     </Container>
   );
 }
@@ -49,5 +56,4 @@ const Timer = styled.span`
 const CommentFeed = styled.div`
   width: 100%;
   margin-top: 12px;
-  background-color: ${WhiteBaseColor.hex}
 `;
