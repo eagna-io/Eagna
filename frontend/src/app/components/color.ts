@@ -20,6 +20,10 @@ export class Color {
   hexWithOpacity(opacity: number): string {
     return `${this.hex}${toHex(opacity * 256)}`;
   }
+
+  rgba(opacity: number): string {
+    return `rgba(${this.red}, ${this.green}, ${this.blue}, ${opacity})`;
+  }
 }
 
 function toHex(i: number): string {
@@ -32,6 +36,7 @@ function fromHex(hex: string): number {
 
 export const BackgroundMainColor = Color.fromHex("#bb86fc");
 export const WhiteBaseColor = Color.fromHex("#ffffff");
+export const BlackColor = Color.fromHex("#000000");
 export const TextBaseColor = Color.fromHex("#333333");
 
 export const ChoiceBlue = Color.fromHex("#4583E4");
@@ -41,6 +46,7 @@ export const ChoiceYellow = Color.fromHex("#E4DC45");
 export const ChoicePink = Color.fromHex("#E445B3");
 
 export const ShadowGray = Color.fromHex("#616161");
+export const VoteRateBackGround = Color.fromHex("#C9C8C8");
 
 export const PurpleColor = Color.fromHex("#BB86FC");
 export const RankingColor = Color.fromHex("#FAD160");
