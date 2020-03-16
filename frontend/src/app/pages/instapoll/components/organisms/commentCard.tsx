@@ -3,23 +3,23 @@ import styled from "styled-components";
 
 import {
   WhiteBaseColor,
-  TextBaseColor,
-  ChoiceBlue
+  TextBaseColor
 } from "app/components/color";
 
 interface Props {
   userName: string;
   comment: string;
+  flagColor: string;
 }
 
-export const CommentCard: React.FC<Props> = ({ userName, comment }) => {
+export const CommentCard: React.FC<Props> = ({ userName, comment, flagColor }) => {
   return (
     <Container>
       <Contents>
         <UserName>{userName}</UserName>
         <Comment>{comment}</Comment>
       </Contents>
-      <ChoiceFlag></ChoiceFlag>
+      <ChoiceFlag flagColor={flagColor}></ChoiceFlag>
     </Container>
   );
 }
@@ -47,8 +47,8 @@ const Comment = styled.div`
   font-weight: 500;
 `;
 
-const ChoiceFlag = styled.div`
+const ChoiceFlag = styled.div<{ flagColor: string }>`
   width: 20px;
   border-radius: 0px 4px 4px 0px;
-  background: linear-gradient(to bottom right, rgba(255,255,255,0) 50%, ${ChoiceBlue.hex} 50.5%) no-repeat top left/100% 100%;
+  background: linear-gradient(to bottom right, rgba(255,255,255,0) 50%, ${props => props.flagColor} 50.5%) no-repeat top left/100% 100%;
 `;

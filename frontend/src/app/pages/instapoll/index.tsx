@@ -4,7 +4,9 @@ import styled from "styled-components";
 import {
   BackgroundMainColor,
   ShadowGray,
-  WhiteBaseColor
+  WhiteBaseColor,
+  ChoiceBlue,
+  ChoiceRed
 } from "app/components/color";
 
 import { CommentCard } from "./components/organisms/commentCard";
@@ -16,10 +18,10 @@ export const InstapollPage: React.FC = () => {
         <Timer>2:57</Timer>
       </TimerComponent>
       <CommentFeed>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね"/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね"/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね"/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね"/>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceRed.hex}/>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceRed.hex}/>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
       </CommentFeed>
     </Container>
   );
