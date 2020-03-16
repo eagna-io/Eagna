@@ -60,10 +60,10 @@ const ChoiceButton = styled.button<{ choiceColor: string, selected: boolean }>`
 
 const VoteRate = styled.div<{ voteRate: number }>`
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 3px;
+  left: 3px;
   width: ${props => props.voteRate}%;
-  height: 32px;
+  height: 34px;
   border-radius: 24px;
   background-color: ${VoteRateBackGround.hexWithOpacity(0.5)};
 `;
