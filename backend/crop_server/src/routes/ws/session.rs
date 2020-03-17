@@ -5,37 +5,45 @@ use futures::{
     sink::{Sink, SinkExt as _},
     stream::{Stream, StreamExt as _, TryStreamExt as _},
 };
-use std::{convert::TryFrom, pin::Pin};
+use std::convert::TryFrom;
 use tokio::sync::broadcast::Receiver;
 use warp::filters::ws::WebSocket;
 
-pub struct Session {
+pub struct Session<ST, SI> {
     contest: ContestManager,
-    ws_stream: Pin<Box<dyn Stream<Item = anyhow::Result<IncomingMsg>> + Send + 'static>>,
-    ws_sink: Pin<Box<dyn Sink<OutgoingMsg, Error = anyhow::Error> + Send + 'static>>,
+    ws_stream: ST,
+    ws_sink: SI,
 }
 
-impl Session {
-    pub fn new(contest: ContestManager, ws: WebSocket) -> Session {
-        let (sink, stream) = ws.split();
+pub fn new(
+    contest: ContestManager,
+    ws: WebSocket,
+) -> Session<
+    impl Stream<Item = anyhow::Result<IncomingMsg>> + Send + Unpin + 'static,
+    impl Sink<OutgoingMsg, Error = anyhow::Error> + Send + Unpin + 'static,
+> {
+    let (sink, stream) = ws.split();
 
-        let ws_stream = stream
-            .err_into::<anyhow::Error>()
-            .and_then(|msg| future::ready(IncomingMsg::try_from(msg)))
-            .boxed();
+    let ws_stream = stream
+        .err_into::<anyhow::Error>()
+        .and_then(|msg| future::ready(IncomingMsg::try_from(msg)));
 
-        let ws_sink = Box::pin(
-            sink.sink_err_into::<anyhow::Error>()
-                .with(|msg: OutgoingMsg| future::ok(msg.into())),
-        );
+    let ws_sink = sink
+        .sink_err_into::<anyhow::Error>()
+        .with(|msg: OutgoingMsg| future::ok(msg.into()));
 
-        Session {
-            contest,
-            ws_stream,
-            ws_sink,
-        }
+    Session {
+        contest,
+        ws_stream,
+        ws_sink,
     }
+}
 
+impl<ST, SI> Session<ST, SI>
+where
+    ST: Stream<Item = anyhow::Result<IncomingMsg>> + Send + Unpin + 'static,
+    SI: Sink<OutgoingMsg, Error = anyhow::Error> + Send + Unpin + 'static,
+{
     pub async fn handle(self) {
         let Session {
             contest,

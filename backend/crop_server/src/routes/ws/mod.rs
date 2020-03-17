@@ -1,7 +1,6 @@
 pub mod msg;
 pub mod session;
 
-use self::session::Session;
 use crate::context::Context;
 use warp::{filters, reject::Rejection, reply::Reply, Filter};
 
@@ -14,5 +13,5 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
 
 async fn upgrade_ws(ws: filters::ws::Ws, ctx: Context) -> Result<impl Reply, Rejection> {
     let contest = ctx.contest_manager();
-    Ok(ws.on_upgrade(move |ws| Session::new(contest, ws).handle()))
+    Ok(ws.on_upgrade(move |ws| session::new(contest, ws).handle()))
 }
