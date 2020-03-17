@@ -1,6 +1,7 @@
+use chrono::{DateTime, Utc};
 use crop_domain::{
     account::model::AccountName,
-    poll::model::{ChoiceName, Comment, Poll},
+    poll::model::{ChoiceColor, ChoiceName, Comment, Poll},
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -18,12 +19,33 @@ use warp::filters::ws::Message;
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum OutgoingMsg {
     Comment(Comment),
-    Poll(Poll),
+    Poll(PollMsg),
 }
 
 impl Into<Message> for OutgoingMsg {
     fn into(self) -> Message {
         Message::text(serde_json::to_string(&self).unwrap())
+    }
+}
+
+#[derive(Serialize, Clone, JsonSchema)]
+pub struct PollMsg {
+    pub end_at: DateTime<Utc>,
+    pub choices: Vec<(ChoiceName, ChoiceColor)>,
+    pub resolved: Option<ChoiceName>,
+}
+
+impl<'a> From<&'a Poll> for PollMsg {
+    fn from(poll: &Poll) -> PollMsg {
+        PollMsg {
+            end_at: poll.end_at,
+            choices: poll
+                .choices
+                .iter()
+                .map(|(n, c)| (n.clone(), c.clone()))
+                .collect(),
+            resolved: poll.resolved.clone(),
+        }
     }
 }
 

@@ -1,11 +1,15 @@
-use crop_domain::{account::model::AccountName, contest::model::Contest, poll::model::Comment};
+use crop_domain::{
+    account::model::AccountName,
+    contest::model::Contest,
+    poll::model::{Comment, Poll},
+};
 use std::{ops::DerefMut, sync::Arc};
 use tokio::sync::{
     broadcast::{channel, Receiver, Sender},
     Mutex,
 };
 
-use crate::routes::ws::msg::OutgoingMsg;
+use crate::routes::ws::msg::{OutgoingMsg, PollMsg};
 
 const MSG_CAPACITY: usize = 100;
 
@@ -34,6 +38,18 @@ impl ContestManager {
 
     pub fn subscribe(&self) -> Receiver<OutgoingMsg> {
         self.msg_sink.subscribe()
+    }
+
+    pub async fn add_poll_and_broadcast(&self, poll: Poll) {
+        let mut lock = self.contest.lock().await;
+
+        let poll = lock.add_poll(poll);
+
+        let msg = PollMsg::from(poll);
+        let _ = self.msg_sink.send(OutgoingMsg::Poll(msg.clone()));
+
+        // 送信順序担保のため、sendが終わってからlockを解放する
+        drop(lock)
     }
 
     pub async fn comment_and_broadcast(
