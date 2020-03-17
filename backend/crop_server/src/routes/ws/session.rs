@@ -1,6 +1,5 @@
 use crate::context::contest::ContestManager;
 use crate::routes::ws::msg::{IncomingMsg, OutgoingMsg};
-use crop_domain::poll::model::Comment;
 use futures::{
     future,
     sink::{Sink, SinkExt as _},
@@ -53,11 +52,9 @@ impl Session {
 
 async fn handle_outgoing(
     mut sink: impl Sink<OutgoingMsg, Error = anyhow::Error> + Unpin,
-    subscriber: Receiver<Comment>,
+    subscriber: Receiver<OutgoingMsg>,
 ) {
-    let mut msg_stream = subscriber
-        .err_into::<anyhow::Error>()
-        .map_ok(|comment| OutgoingMsg::Comment(comment));
+    let mut msg_stream = subscriber.err_into::<anyhow::Error>();
     sink.send_all(&mut msg_stream)
         .await
         .unwrap_or_else(|e| log::debug!("{:?}", e))

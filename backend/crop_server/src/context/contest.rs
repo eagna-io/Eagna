@@ -5,13 +5,15 @@ use tokio::sync::{
     Mutex,
 };
 
+use crate::routes::ws::msg::OutgoingMsg;
+
 const MSG_CAPACITY: usize = 100;
 
 /// 特定の1つのコンテストを管理する
 #[derive(Clone)]
 pub struct ContestManager {
     contest: Arc<Mutex<Contest>>,
-    comment_sink: Sender<Comment>,
+    msg_sink: Sender<OutgoingMsg>,
 }
 
 impl ContestManager {
@@ -19,7 +21,7 @@ impl ContestManager {
         let (sender, _) = channel(MSG_CAPACITY);
         ContestManager {
             contest: Arc::new(Mutex::new(contest)),
-            comment_sink: sender,
+            msg_sink: sender,
         }
     }
 
@@ -30,8 +32,8 @@ impl ContestManager {
         f(self.contest.lock().await.deref_mut())
     }
 
-    pub fn subscribe(&self) -> Receiver<Comment> {
-        self.comment_sink.subscribe()
+    pub fn subscribe(&self) -> Receiver<OutgoingMsg> {
+        self.msg_sink.subscribe()
     }
 
     pub async fn comment_and_broadcast(
@@ -45,7 +47,7 @@ impl ContestManager {
 
             // Commentをbroadcastする。
             // receiverがいなくてもエラーにしない。
-            let _ = self.comment_sink.send(comment.clone());
+            let _ = self.msg_sink.send(OutgoingMsg::Comment(comment.clone()));
 
             let ret = comment.clone();
 
