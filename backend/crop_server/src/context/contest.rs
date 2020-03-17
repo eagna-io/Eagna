@@ -31,7 +31,7 @@ impl ContestManager {
 
     pub async fn with_contest<F, T>(&self, f: F) -> T
     where
-        F: FnOnce(&mut Contest) -> T,
+        F: for<'a> FnOnce(&'a mut Contest) -> T,
     {
         f(self.contest.lock().await.deref_mut())
     }
