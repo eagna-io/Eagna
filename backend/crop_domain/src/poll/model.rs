@@ -4,30 +4,31 @@ use serde::Serialize;
 use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
 
-use crate::account::model::{Account, AccountName};
+use crate::account::model::AccountName;
 
 #[derive(Debug, Clone)]
 pub struct Poll {
     pub id: Id,
     pub end_at: DateTime<Utc>,
-    pub choices: Vec<Choice>,
-    pub resolved: Option<Choice>,
+    pub choices: HashMap<ChoiceName, ChoiceColor>,
+    pub resolved: Option<ChoiceName>,
 
-    pub user_choice: HashMap<AccountName, Choice>,
+    pub user_choice: HashMap<AccountName, ChoiceName>,
     pub comments: VecDeque<Comment>,
 }
 
 #[derive(Debug, Clone)]
 pub struct Id(Uuid);
 
-#[derive(Debug, Clone)]
-pub struct Choice {
-    pub name: String,
-    pub color: String,
-}
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub struct ChoiceName(pub String);
+
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[serde(transparent)]
+pub struct ChoiceColor(pub String);
 
 impl Poll {
-    pub fn new(end_at: DateTime<Utc>, choices: Vec<Choice>) -> Poll {
+    pub fn new(end_at: DateTime<Utc>, choices: HashMap<ChoiceName, ChoiceColor>) -> Poll {
         Poll {
             id: Id::new(),
             end_at,
@@ -38,16 +39,16 @@ impl Poll {
         }
     }
 
-    pub fn update_choice(&mut self, account: &Account, choice: Choice) {
-        self.user_choice.insert(account.name.clone(), choice);
+    pub fn update_choice(&mut self, account: AccountName, choice: ChoiceName) {
+        self.user_choice.insert(account, choice);
     }
 
     pub fn add_comment(&mut self, account: AccountName, comment_str: String) -> &Comment {
         let color = self
             .user_choice
             .get(&account)
-            .map(|choice| choice.color.clone())
-            .unwrap_or_else(|| "#888888".into());
+            .and_then(|choice| self.choices.get(choice).cloned())
+            .unwrap_or_else(|| ChoiceColor("#888888".into()));
         let comment = Comment {
             account: account,
             comment: comment_str,
@@ -69,18 +70,9 @@ impl Id {
     }
 }
 
-impl Choice {
-    pub fn new(name: impl Into<String>, color: impl Into<String>) -> Choice {
-        Choice {
-            name: name.into(),
-            color: color.into(),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct Comment {
     pub account: AccountName,
     pub comment: String,
-    pub color: String,
+    pub color: ChoiceColor,
 }
