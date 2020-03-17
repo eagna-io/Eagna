@@ -1,6 +1,6 @@
 use crop_domain::{
     account::model::AccountName,
-    poll::model::{ChoiceName, Comment},
+    poll::model::{ChoiceName, Comment, Poll},
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -18,6 +18,7 @@ use warp::filters::ws::Message;
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum OutgoingMsg {
     Comment(Comment),
+    Poll(Poll),
 }
 
 impl Into<Message> for OutgoingMsg {

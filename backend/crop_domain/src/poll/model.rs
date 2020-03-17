@@ -6,21 +6,24 @@ use uuid::Uuid;
 
 use crate::account::model::AccountName;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct Poll {
     pub id: Id,
     pub end_at: DateTime<Utc>,
     pub choices: HashMap<ChoiceName, ChoiceColor>,
     pub resolved: Option<ChoiceName>,
 
+    #[serde(skip)]
     pub user_choice: HashMap<AccountName, ChoiceName>,
+    #[serde(skip)]
     pub comments: VecDeque<Comment>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[serde(transparent)]
 pub struct Id(Uuid);
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct ChoiceName(pub String);
 
