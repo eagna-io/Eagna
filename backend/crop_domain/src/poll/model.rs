@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use uuid::Uuid;
 
@@ -20,7 +20,8 @@ pub struct Poll {
 #[derive(Debug, Clone)]
 pub struct Id(Uuid);
 
-#[derive(Debug, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Deserialize, JsonSchema)]
+#[serde(transparent)]
 pub struct ChoiceName(pub String);
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
