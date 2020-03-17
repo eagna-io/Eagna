@@ -36,6 +36,7 @@ impl Into<Message> for OutgoingMsg {
 #[serde(tag = "type")]
 pub enum IncomingMsg {
     UpdateChoice(UpdateChoiceMsg),
+    AddComment(AddCommentMsg),
 }
 
 impl TryFrom<Message> for IncomingMsg {
@@ -50,4 +51,10 @@ impl TryFrom<Message> for IncomingMsg {
 pub struct UpdateChoiceMsg {
     pub account: AccountName,
     pub choice: ChoiceName,
+}
+
+#[derive(Deserialize, Clone, JsonSchema)]
+pub struct AddCommentMsg {
+    pub account: AccountName,
+    pub comment: String,
 }

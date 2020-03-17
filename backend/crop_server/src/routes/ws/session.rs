@@ -71,5 +71,10 @@ async fn handle_each_incoming_msg(msg: IncomingMsg, contest: ContestManager) -> 
                 })
                 .await
         }
+        IncomingMsg::AddComment(msg) => contest
+            .comment_and_broadcast(msg.account, msg.comment)
+            .await
+            .map(drop)
+            .ok_or(anyhow::anyhow!("No poll is available")),
     }
 }
