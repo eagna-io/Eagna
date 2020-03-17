@@ -47,6 +47,7 @@ const Container = styled.div`
   padding: 8px 20px;
   background-color: ${BackgroundMainColor.hex};
   user-select: none;
+  position: relative;
 `;
 
 const TimerComponent = styled.div`
@@ -72,11 +73,13 @@ const Timer = styled.span`
 const CommentFeed = styled.div`
   width: 100%;
   margin-top: 12px;
-  height: 32vh;
+  height: 50%;
 `;
 
 const PollCard = styled.div`
-  width: 100%;
+  position: absolute;
+  bottom: 20px;
+  width: calc(100vw - 40px);
   border-radius: 4px;
   margin-top: 2vh;
   padding: 2vh 16px;
