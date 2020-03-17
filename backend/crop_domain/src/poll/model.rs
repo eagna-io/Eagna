@@ -6,16 +6,16 @@ use uuid::Uuid;
 
 use crate::account::model::AccountName;
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone)]
 pub struct Poll {
+    // Immutable
     pub id: Id,
     pub end_at: DateTime<Utc>,
     pub choices: HashMap<ChoiceName, ChoiceColor>,
     pub resolved: Option<ChoiceName>,
 
-    #[serde(skip)]
+    // Mutable
     pub user_choice: HashMap<AccountName, ChoiceName>,
-    #[serde(skip)]
     pub comments: VecDeque<Comment>,
 }
 
@@ -72,6 +72,24 @@ impl Poll {
 
         self.comments.back().unwrap()
     }
+
+    pub fn compute_stats(&self) -> Stats {
+        let mut vote_per_choice = self
+            .choices
+            .keys()
+            .map(|c| (c.clone(), 0))
+            .collect::<HashMap<ChoiceName, usize>>();
+
+        // 各Choiceの総得票数を計算
+        self.user_choice
+            .values()
+            .for_each(|choice| *vote_per_choice.get_mut(choice).unwrap() += 1);
+
+        Stats {
+            total_votes: self.user_choice.len(),
+            vote_per_choice,
+        }
+    }
 }
 
 impl Id {
@@ -85,4 +103,10 @@ pub struct Comment {
     pub account: AccountName,
     pub comment: String,
     pub color: ChoiceColor,
+}
+
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+pub struct Stats {
+    pub total_votes: usize,
+    pub vote_per_choice: HashMap<ChoiceName, usize>,
 }
