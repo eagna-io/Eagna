@@ -40,8 +40,14 @@ impl Poll {
         }
     }
 
+    pub fn is_closed(&self) -> bool {
+        self.end_at < Utc::now()
+    }
+
     pub fn update_choice(&mut self, account: AccountName, choice: ChoiceName) {
-        self.user_choice.insert(account, choice);
+        if !self.is_closed() {
+            self.user_choice.insert(account, choice);
+        }
     }
 
     pub fn add_comment(&mut self, account: AccountName, comment_str: String) -> &Comment {
