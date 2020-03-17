@@ -8,19 +8,68 @@ import {
   VoteRateBackGround
 } from "app/components/color";
 
+import { ReactComponent as CorrectIcon } from "../atoms/images/correct.svg";
+
 export const ChoiceList: React.FC = () => {
   return (
     <Container>
-      <Choice choiceTitle="Lebron" choiceColor={ChoiceBlue.hex} selected={true} voteRate={69} />
-      <Choice choiceTitle="Kobe Bean Bryant" choiceColor={ChoiceRed.hex} selected={false} voteRate={30} />
+      <ChoiceContainer
+        choiceTitle="Lebron"
+        choiceColor={ChoiceBlue.hex}
+        selected={true}
+        voteRate={69}
+        correct={true}
+      />
+      <ChoiceContainer
+        choiceTitle="Kobe Bean Bryant"
+        choiceColor={ChoiceRed.hex}
+        selected={false}
+        voteRate={30}
+        correct={false}
+      />
     </Container>
   );
 }
 
 const Container = styled.div`
   width: 100%;
-  padding: 10px;
   overflow: scroll;
+`;
+
+interface ChoiceContainerProps {
+  choiceTitle: string;
+  choiceColor: string;
+  selected: boolean;
+  voteRate: number;
+  correct: boolean;
+}
+
+const ChoiceContainer: React.FC<ChoiceContainerProps> = ({ choiceTitle, choiceColor, selected, voteRate, correct }) => {
+  return (
+    <ChoiceOutcomeContainer>
+      <OutcomeIcon correct={correct} /> 
+      <Choice
+        choiceTitle={choiceTitle}
+        choiceColor={choiceColor}
+        selected={selected}
+        voteRate={voteRate}
+      />
+    </ChoiceOutcomeContainer>
+  )
+}
+
+const ChoiceOutcomeContainer = styled.div`
+  display: flex;
+  position: relative;
+  margin-bottom: 24px;
+`;
+
+const OutcomeIcon = styled(CorrectIcon)<{ correct: boolean }>`
+  position: absolute;
+  left: 0;
+  width: 40px;
+  height: 48px;
+  display: ${ props => props.correct ? "block" : "none" };
 `;
 
 interface ChoiceProps {
@@ -43,13 +92,13 @@ const Choice: React.FC<ChoiceProps> = ({ choiceTitle, choiceColor, selected, vot
 
 const StyledChoiceButton = styled.div`
   position: relative;
-  width: 220px;
-  margin: 8px auto;
+  width: 200px;
+  margin: 0px auto;
 `;
 
 const ChoiceButton = styled.button<{ choiceColor: string, selected: boolean }>`
-  width: 220px;
-  height: 40px;
+  width: 200px;
+  height: 48px;
   border-radius: 24px;
   padding: 4px 8px;
   border: solid 3px ${ props => props.choiceColor };
@@ -60,10 +109,10 @@ const ChoiceButton = styled.button<{ choiceColor: string, selected: boolean }>`
 
 const VoteRate = styled.div<{ voteRate: number }>`
   position: absolute;
-  top: 4px;
-  left: 4px;
+  top: 3px;
+  left: 3px;
   width: ${props => props.voteRate}%;
-  height: 32px;
+  height: 42px;
   border-radius: 24px;
   background-color: ${VoteRateBackGround.hexWithOpacity(0.5)};
 `;
