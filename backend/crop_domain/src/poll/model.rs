@@ -15,6 +15,7 @@ pub struct Poll {
     pub resolved: Option<ChoiceName>,
 
     // Mutable
+    pub status: Status,
     pub user_choice: HashMap<AccountName, ChoiceName>,
     pub comments: VecDeque<Comment>,
 }
@@ -22,6 +23,13 @@ pub struct Poll {
 #[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
 #[serde(transparent)]
 pub struct Id(Uuid);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub enum Status {
+    Open,
+    Closed,
+}
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
@@ -38,17 +46,22 @@ impl Poll {
             end_at: Utc::now() + Duration::seconds(30),
             choices,
             resolved: None,
+            status: Status::Open,
             user_choice: HashMap::new(),
             comments: VecDeque::with_capacity(20),
         }
     }
 
+    pub fn is_open(&self) -> bool {
+        self.status == Status::Open
+    }
+
     pub fn is_closed(&self) -> bool {
-        self.end_at < Utc::now()
+        self.status == Status::Closed
     }
 
     pub fn update_choice(&mut self, account: AccountName, choice: ChoiceName) {
-        if !self.is_closed() {
+        if self.is_open() {
             self.user_choice.insert(account, choice);
         }
     }
@@ -73,7 +86,26 @@ impl Poll {
         self.comments.back().unwrap()
     }
 
-    pub fn compute_stats(&self) -> Stats {
+    pub fn try_close(&mut self) {
+        if self.is_open() && self.is_closable() {
+            self.status = Status::Closed;
+        }
+    }
+
+    fn is_closable(&self) -> bool {
+        self.end_at < Utc::now()
+    }
+
+    pub fn try_resolve(&mut self, choice: ChoiceName) -> Option<Stats> {
+        if self.is_closed() && self.resolved.is_none() && self.choices.contains_key(&choice) {
+            self.resolved = Some(choice);
+            Some(self.compute_stats())
+        } else {
+            None
+        }
+    }
+
+    fn compute_stats(&self) -> Stats {
         let mut vote_per_choice = self
             .choices
             .keys()
