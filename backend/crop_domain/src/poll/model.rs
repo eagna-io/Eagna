@@ -12,12 +12,13 @@ pub struct Poll {
     pub id: Id,
     pub end_at: DateTime<Utc>,
     pub choices: HashMap<ChoiceName, ChoiceColor>,
-    pub resolved: Option<ChoiceName>,
 
     // Mutable
     pub status: Status,
     pub user_choice: HashMap<AccountName, ChoiceName>,
     pub comments: VecDeque<Comment>,
+    pub stats: Option<Stats>,
+    pub resolved: Option<ChoiceName>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
@@ -45,10 +46,11 @@ impl Poll {
             id: Id::new(),
             end_at: Utc::now() + Duration::seconds(30),
             choices,
-            resolved: None,
             status: Status::Open,
             user_choice: HashMap::new(),
             comments: VecDeque::with_capacity(20),
+            stats: None,
+            resolved: None,
         }
     }
 
@@ -86,23 +88,15 @@ impl Poll {
         self.comments.back().unwrap()
     }
 
-    pub fn try_close(&mut self) {
+    pub fn close_or_ignore(&mut self) {
         if self.is_open() && self.is_closable() {
             self.status = Status::Closed;
+            self.stats = Some(self.compute_stats());
         }
     }
 
     fn is_closable(&self) -> bool {
         self.end_at < Utc::now()
-    }
-
-    pub fn try_resolve(&mut self, choice: ChoiceName) -> Option<Stats> {
-        if self.is_closed() && self.resolved.is_none() && self.choices.contains_key(&choice) {
-            self.resolved = Some(choice);
-            Some(self.compute_stats())
-        } else {
-            None
-        }
     }
 
     fn compute_stats(&self) -> Stats {
@@ -120,6 +114,12 @@ impl Poll {
         Stats {
             total_votes: self.user_choice.len(),
             vote_per_choice,
+        }
+    }
+
+    pub fn resolve_or_ignore(&mut self, choice: ChoiceName) {
+        if self.is_closed() && self.resolved.is_none() && self.choices.contains_key(&choice) {
+            self.resolved = Some(choice);
         }
     }
 }
