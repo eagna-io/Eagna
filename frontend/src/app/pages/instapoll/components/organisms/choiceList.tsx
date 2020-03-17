@@ -8,11 +8,34 @@ import {
   VoteRateBackGround
 } from "app/components/color";
 
+import { ReactComponent as CorrectIcon } from "../atoms/images/correct.svg";
+
+interface Props {
+  choiceTitle: string;
+  choiceColor: string;
+  selected: boolean;
+  voteRate: number;
+  show: boolean;
+}
+
+
 export const ChoiceList: React.FC = () => {
   return (
     <Container>
-      <Choice choiceTitle="Lebron" choiceColor={ChoiceBlue.hex} selected={true} voteRate={69} />
-      <Choice choiceTitle="Kobe Bean Bryant" choiceColor={ChoiceRed.hex} selected={false} voteRate={30} />
+      <ChoiceContainer
+        choiceTitle="Lebron"
+        choiceColor={ChoiceBlue.hex}
+        selected={true}
+        voteRate={69}
+        show={true}
+      />
+      <ChoiceContainer
+        choiceTitle="Kobe Bean Bryant"
+        choiceColor={ChoiceRed.hex}
+        selected={false}
+        voteRate={30}
+        show={false}
+      />
     </Container>
   );
 }
@@ -21,6 +44,34 @@ const Container = styled.div`
   width: 100%;
   padding: 10px;
   overflow: scroll;
+`;
+
+const ChoiceContainer: React.FC<Props> = ({ choiceTitle, choiceColor, selected, voteRate, show }) => {
+  return (
+    <ChoiceOutcomeContainer>
+      <OutcomeIcon show={show} /> 
+      <Choice
+        choiceTitle={choiceTitle}
+        choiceColor={choiceColor}
+        selected={selected}
+        voteRate={voteRate}
+      />
+    </ChoiceOutcomeContainer>
+  )
+}
+
+const ChoiceOutcomeContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  position: relative;
+`;
+
+const OutcomeIcon = styled(CorrectIcon)<{ show: boolean }>`
+  position: absolute;
+  left: 0;
+  width: 32px;
+  height: 48px;
+  display: ${ props => props.show ? "block" : "none" };
 `;
 
 interface ChoiceProps {
@@ -43,12 +94,12 @@ const Choice: React.FC<ChoiceProps> = ({ choiceTitle, choiceColor, selected, vot
 
 const StyledChoiceButton = styled.div`
   position: relative;
-  width: 220px;
-  margin: 8px auto;
+  width: 200px;
+  margin: 4px auto;
 `;
 
 const ChoiceButton = styled.button<{ choiceColor: string, selected: boolean }>`
-  width: 220px;
+  width: 200px;
   height: 40px;
   border-radius: 24px;
   padding: 4px 8px;
