@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use crop_domain::{
     account::model::AccountName,
-    poll::model::{ChoiceColor, ChoiceName, Comment, Poll},
+    poll::model::{ChoiceColor, ChoiceName, Comment, Id as PollId, Poll},
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -30,6 +30,7 @@ impl Into<Message> for OutgoingMsg {
 
 #[derive(Serialize, Clone, JsonSchema)]
 pub struct PollMsg {
+    pub id: PollId,
     pub end_at: DateTime<Utc>,
     pub choices: Vec<(ChoiceName, ChoiceColor)>,
     pub resolved: Option<ChoiceName>,
@@ -38,6 +39,7 @@ pub struct PollMsg {
 impl<'a> From<&'a Poll> for PollMsg {
     fn from(poll: &Poll) -> PollMsg {
         PollMsg {
+            id: poll.id,
             end_at: poll.end_at,
             choices: poll
                 .choices

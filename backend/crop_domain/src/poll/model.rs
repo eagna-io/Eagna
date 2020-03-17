@@ -19,7 +19,7 @@ pub struct Poll {
     pub comments: VecDeque<Comment>,
 }
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
 #[serde(transparent)]
 pub struct Id(Uuid);
 
