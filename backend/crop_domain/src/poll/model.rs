@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
@@ -32,10 +32,10 @@ pub struct ChoiceName(pub String);
 pub struct ChoiceColor(pub String);
 
 impl Poll {
-    pub fn new(end_at: DateTime<Utc>, choices: HashMap<ChoiceName, ChoiceColor>) -> Poll {
+    pub fn new(choices: HashMap<ChoiceName, ChoiceColor>) -> Poll {
         Poll {
             id: Id::new(),
-            end_at,
+            end_at: Utc::now() + Duration::seconds(30),
             choices,
             resolved: None,
             user_choice: HashMap::new(),
