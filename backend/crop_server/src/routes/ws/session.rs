@@ -1,9 +1,9 @@
 use crate::context::contest::ContestManager;
-use crate::routes::ws::msg::{IncomingMsg, OutgoingMsg};
+use crate::routes::ws::msg::{IncomingMsg, OutgoingMsg, PollMsg};
 use futures::{
     future,
     sink::{Sink, SinkExt as _},
-    stream::{Stream, StreamExt as _, TryStreamExt as _},
+    stream::{self, Stream, StreamExt as _, TryStreamExt as _},
 };
 use std::convert::TryFrom;
 use tokio::sync::broadcast::Receiver;
@@ -44,7 +44,12 @@ where
     ST: Stream<Item = anyhow::Result<IncomingMsg>> + Send + Unpin + 'static,
     SI: Sink<OutgoingMsg, Error = anyhow::Error> + Send + Unpin + 'static,
 {
-    pub async fn handle(self) {
+    pub async fn handle(mut self) {
+        if let Err(e) = self.initialize().await {
+            log::info!("{:?}", e);
+            return;
+        }
+
         let Session {
             contest,
             ws_stream,
@@ -55,6 +60,20 @@ where
         let fut1 = handle_outgoing(ws_sink, subscriber);
         let fut2 = handle_incoming(ws_stream, contest);
         future::join(fut1, fut2).await;
+    }
+
+    async fn initialize(&mut self) -> anyhow::Result<()> {
+        if let Some(poll_msg) = self
+            .contest
+            .with_contest(|contest| contest.current_poll().map(|poll| PollMsg::from(poll)))
+            .await
+        {
+            let msg = OutgoingMsg::Poll(poll_msg);
+            self.ws_sink
+                .send_all(&mut stream::once(future::ok(msg)))
+                .await?;
+        }
+        Ok(())
     }
 }
 
