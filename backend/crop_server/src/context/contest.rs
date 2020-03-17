@@ -8,8 +8,9 @@ use tokio::sync::{
     broadcast::{channel, Receiver, Sender},
     Mutex,
 };
+use warp::filters::ws::Message;
 
-use crate::routes::ws::msg::{OutgoingMsg, PollMsg};
+use crate::routes::ws::msg::OutgoingMsg;
 
 const MSG_CAPACITY: usize = 100;
 
@@ -17,7 +18,7 @@ const MSG_CAPACITY: usize = 100;
 #[derive(Clone)]
 pub struct ContestManager {
     contest: Arc<Mutex<Contest>>,
-    msg_sink: Sender<OutgoingMsg>,
+    msg_sink: Sender<Message>,
 }
 
 impl ContestManager {
@@ -36,7 +37,7 @@ impl ContestManager {
         f(self.contest.lock().await.deref_mut())
     }
 
-    pub fn subscribe(&self) -> Receiver<OutgoingMsg> {
+    pub fn subscribe(&self) -> Receiver<Message> {
         self.msg_sink.subscribe()
     }
 
@@ -44,9 +45,9 @@ impl ContestManager {
         let mut lock = self.contest.lock().await;
 
         let poll = lock.add_poll(poll);
+        let msg = OutgoingMsg::from(poll).into();
 
-        let msg = PollMsg::from(poll);
-        let _ = self.msg_sink.send(OutgoingMsg::Poll(msg.clone()));
+        let _ = self.msg_sink.send(msg);
 
         // 送信順序担保のため、sendが終わってからlockを解放する
         drop(lock)
@@ -60,10 +61,11 @@ impl ContestManager {
         let mut lock = self.contest.lock().await;
         if let Some(poll) = lock.current_poll_mut() {
             let comment = poll.add_comment(account, comment);
+            let msg = OutgoingMsg::from(comment).into();
 
             // Commentをbroadcastする。
             // receiverがいなくてもエラーにしない。
-            let _ = self.msg_sink.send(OutgoingMsg::Comment(comment.clone()));
+            let _ = self.msg_sink.send(msg);
 
             let ret = comment.clone();
 

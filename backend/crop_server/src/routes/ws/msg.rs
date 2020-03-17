@@ -1,11 +1,10 @@
-use chrono::{DateTime, Utc};
 use crop_domain::{
     account::model::AccountName,
-    poll::model::{ChoiceColor, ChoiceName, Comment, Id as PollId, Poll},
+    poll::model::{ChoiceName, Comment, Poll},
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
+use std::{borrow::Cow, convert::TryFrom};
 use warp::filters::ws::Message;
 
 // Currently, there are no `IncomingMsg`.
@@ -17,37 +16,26 @@ use warp::filters::ws::Message;
  */
 #[derive(Serialize, Clone, JsonSchema)]
 #[serde(tag = "type", rename_all = "camelCase")]
-pub enum OutgoingMsg {
-    Comment(Comment),
-    Poll(PollMsg),
+pub enum OutgoingMsg<'a> {
+    Comment(Cow<'a, Comment>),
+    Poll(Cow<'a, Poll>),
 }
 
-impl Into<Message> for OutgoingMsg {
+impl<'a> Into<Message> for OutgoingMsg<'a> {
     fn into(self) -> Message {
         Message::text(serde_json::to_string(&self).unwrap())
     }
 }
 
-#[derive(Serialize, Clone, JsonSchema)]
-pub struct PollMsg {
-    pub id: PollId,
-    pub end_at: DateTime<Utc>,
-    pub choices: Vec<(ChoiceName, ChoiceColor)>,
-    pub resolved: Option<ChoiceName>,
+impl<'a> From<&'a Comment> for OutgoingMsg<'a> {
+    fn from(comment: &'a Comment) -> Self {
+        OutgoingMsg::Comment(Cow::Borrowed(comment))
+    }
 }
 
-impl<'a> From<&'a Poll> for PollMsg {
-    fn from(poll: &Poll) -> PollMsg {
-        PollMsg {
-            id: poll.id,
-            end_at: poll.end_at,
-            choices: poll
-                .choices
-                .iter()
-                .map(|(n, c)| (n.clone(), c.clone()))
-                .collect(),
-            resolved: poll.resolved.clone(),
-        }
+impl<'a> From<&'a Poll> for OutgoingMsg<'a> {
+    fn from(poll: &'a Poll) -> Self {
+        OutgoingMsg::Poll(Cow::Borrowed(poll))
     }
 }
 

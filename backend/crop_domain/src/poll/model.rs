@@ -6,7 +6,8 @@ use uuid::Uuid;
 
 use crate::account::model::AccountName;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Poll {
     // Immutable
     pub id: Id,
@@ -15,9 +16,13 @@ pub struct Poll {
 
     // Mutable
     pub status: Status,
+    #[serde(skip)]
     pub user_choice: HashMap<AccountName, ChoiceName>,
+    #[serde(skip)]
     pub comments: VecDeque<Comment>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub stats: Option<Stats>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub resolved: Option<ChoiceName>,
 }
 

@@ -1,5 +1,5 @@
 use crate::context::contest::ContestManager;
-use crate::routes::ws::msg::{IncomingMsg, OutgoingMsg, PollMsg};
+use crate::routes::ws::msg::{IncomingMsg, OutgoingMsg};
 use futures::{
     future,
     sink::{Sink, SinkExt as _},
@@ -7,7 +7,7 @@ use futures::{
 };
 use std::convert::TryFrom;
 use tokio::sync::broadcast::Receiver;
-use warp::filters::ws::WebSocket;
+use warp::filters::ws::{Message, WebSocket};
 
 pub struct Session<ST, SI> {
     contest: ContestManager,
@@ -20,7 +20,7 @@ pub fn new(
     ws: WebSocket,
 ) -> Session<
     impl Stream<Item = anyhow::Result<IncomingMsg>> + Send + Unpin + 'static,
-    impl Sink<OutgoingMsg, Error = anyhow::Error> + Send + Unpin + 'static,
+    impl Sink<Message, Error = anyhow::Error> + Send + Unpin + 'static,
 > {
     let (sink, stream) = ws.split();
 
@@ -28,9 +28,7 @@ pub fn new(
         .err_into::<anyhow::Error>()
         .and_then(|msg| future::ready(IncomingMsg::try_from(msg)));
 
-    let ws_sink = sink
-        .sink_err_into::<anyhow::Error>()
-        .with(|msg: OutgoingMsg| future::ok(msg.into()));
+    let ws_sink = sink.sink_err_into::<anyhow::Error>();
 
     Session {
         contest,
@@ -42,7 +40,7 @@ pub fn new(
 impl<ST, SI> Session<ST, SI>
 where
     ST: Stream<Item = anyhow::Result<IncomingMsg>> + Send + Unpin + 'static,
-    SI: Sink<OutgoingMsg, Error = anyhow::Error> + Send + Unpin + 'static,
+    SI: Sink<Message, Error = anyhow::Error> + Send + Unpin + 'static,
 {
     pub async fn handle(mut self) {
         if let Err(e) = self.initialize().await {
@@ -63,12 +61,15 @@ where
     }
 
     async fn initialize(&mut self) -> anyhow::Result<()> {
-        if let Some(poll_msg) = self
+        if let Some(msg) = self
             .contest
-            .with_contest(|contest| contest.current_poll().map(|poll| PollMsg::from(poll)))
+            .with_contest(|contest| {
+                contest
+                    .current_poll()
+                    .map(|poll| OutgoingMsg::from(poll).into())
+            })
             .await
         {
-            let msg = OutgoingMsg::Poll(poll_msg);
             self.ws_sink
                 .send_all(&mut stream::once(future::ok(msg)))
                 .await?;
@@ -78,8 +79,8 @@ where
 }
 
 async fn handle_outgoing(
-    mut sink: impl Sink<OutgoingMsg, Error = anyhow::Error> + Unpin,
-    subscriber: Receiver<OutgoingMsg>,
+    mut sink: impl Sink<Message, Error = anyhow::Error> + Unpin,
+    subscriber: Receiver<Message>,
 ) {
     let mut msg_stream = subscriber.err_into::<anyhow::Error>();
     sink.send_all(&mut msg_stream)
