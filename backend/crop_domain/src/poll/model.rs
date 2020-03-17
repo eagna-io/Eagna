@@ -27,7 +27,7 @@ pub struct Id(Uuid);
 #[serde(transparent)]
 pub struct ChoiceName(pub String);
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct ChoiceColor(pub String);
 

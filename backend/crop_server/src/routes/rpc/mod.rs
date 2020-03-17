@@ -1,5 +1,4 @@
-pub mod get_market_info;
-pub mod vote;
+pub mod create_poll;
 
 use crate::context::Context;
 use warp::{
@@ -21,6 +20,6 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
         .allow_header("Content-Type");
     path::path("rpc")
         .and(path::end())
-        .and(self::vote::filter(ctx.clone()).or(self::get_market_info::filter(ctx)))
+        .and(self::create_poll::filter(ctx.clone()))
         .with(cors)
 }
