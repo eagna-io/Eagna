@@ -77,4 +77,14 @@ impl ContestManager {
             None
         }
     }
+
+    pub async fn close_and_broadcast_or_ignore(&self) {
+        let mut lock = self.contest.lock().await;
+        if let Some(poll) = lock.current_poll_mut() {
+            if poll.close_or_ignore() {
+                let msg = OutgoingMsg::from(&*poll).into();
+                let _ = self.msg_sink.send(msg);
+            }
+        }
+    }
 }

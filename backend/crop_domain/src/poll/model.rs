@@ -93,10 +93,13 @@ impl Poll {
         self.comments.back().unwrap()
     }
 
-    pub fn close_or_ignore(&mut self) {
+    pub fn close_or_ignore(&mut self) -> bool {
         if self.is_open() && self.is_closable() {
             self.status = Status::Closed;
             self.stats = Some(self.compute_stats());
+            true
+        } else {
+            false
         }
     }
 
@@ -122,9 +125,12 @@ impl Poll {
         }
     }
 
-    pub fn resolve_or_ignore(&mut self, choice: ChoiceName) {
+    pub fn resolve_or_ignore(&mut self, choice: ChoiceName) -> bool {
         if self.is_closed() && self.resolved.is_none() && self.choices.contains_key(&choice) {
             self.resolved = Some(choice);
+            true
+        } else {
+            false
         }
     }
 }
