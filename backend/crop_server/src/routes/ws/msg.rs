@@ -15,9 +15,8 @@ use warp::filters::ws::Message;
  * ============
  */
 #[derive(Serialize, Clone, JsonSchema)]
-#[serde(tag = "type")]
+#[serde(tag = "type", rename_all = "camelCase")]
 pub enum OutgoingMsg {
-    #[serde(rename = "comment")]
     Comment(Comment),
 }
 
@@ -33,7 +32,7 @@ impl Into<Message> for OutgoingMsg {
  * ===============
  */
 #[derive(Deserialize, Clone, JsonSchema)]
-#[serde(tag = "type")]
+#[serde(tag = "type", rename_all = "camelCase")]
 pub enum IncomingMsg {
     UpdateChoice(UpdateChoiceMsg),
     AddComment(AddCommentMsg),
@@ -48,11 +47,13 @@ impl TryFrom<Message> for IncomingMsg {
 }
 
 #[derive(Deserialize, Clone, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateChoiceMsg {
     pub account: AccountName,
     pub choice: ChoiceName,
 }
 
+#[serde(rename_all = "camelCase")]
 #[derive(Deserialize, Clone, JsonSchema)]
 pub struct AddCommentMsg {
     pub account: AccountName,
