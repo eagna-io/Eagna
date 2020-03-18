@@ -40,8 +40,8 @@ const ClosedTimer = styled.div`
   line-height: 71px;
   font-size: 12px;
   font-weight: 800;
-  color: ${WhiteBaseColor.hex}
-  background-color: ${ShadowGray.hex}
+  color: ${WhiteBaseColor.hex};
+  background-color: ${ShadowGray.hex};
 `;
 
 const CorrectTimer = styled.div`
@@ -55,8 +55,8 @@ const CorrectTimer = styled.div`
   line-height: 65px;
   font-size: 16px;
   font-weight: 800;
-  color: ${WhiteBaseColor.hex}
-  background-color: ${Correct.hex}
+  color: ${WhiteBaseColor.hex};
+  background-color: ${Correct.hex};
 `;
 
 const IncorrectTimer = styled.div`
@@ -70,8 +70,8 @@ const IncorrectTimer = styled.div`
   line-height: 65px;
   font-size: 16px;
   font-weight: 800;
-  color: ${WhiteBaseColor.hex}
-  background-color: ${Incorrct.hex}
+  color: ${WhiteBaseColor.hex};
+  background-color: ${Incorrct.hex};
 `;
 
 const CountDownTimer = styled.div`
@@ -85,5 +85,5 @@ const CountDownTimer = styled.div`
   line-height: 65px;
   font-size: 16px;
   font-weight: 800;
-  color: ${WhiteBaseColor.hex}
+  color: ${WhiteBaseColor.hex};
 `;
