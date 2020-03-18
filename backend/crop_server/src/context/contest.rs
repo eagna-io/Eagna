@@ -1,7 +1,7 @@
 use crop_domain::{
     account::model::AccountName,
     contest::model::Contest,
-    poll::model::{Comment, Poll},
+    poll::model::{ChoiceName, Comment, Poll},
 };
 use std::{ops::DerefMut, sync::Arc};
 use tokio::sync::{
@@ -86,5 +86,17 @@ impl ContestManager {
                 let _ = self.msg_sink.send(msg);
             }
         }
+        drop(lock);
+    }
+
+    pub async fn resolve_and_broadcast(&self, choice: ChoiceName) -> anyhow::Result<()> {
+        let mut lock = self.contest.lock().await;
+        if let Some(poll) = lock.current_poll_mut() {
+            poll.resolve(choice)?;
+            let msg = OutgoingMsg::from(&*poll).into();
+            let _ = self.msg_sink.send(msg);
+        }
+        drop(lock);
+        Ok(())
     }
 }
