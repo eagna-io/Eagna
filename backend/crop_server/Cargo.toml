@@ -12,6 +12,7 @@ crop_domain = { path = "../crop_domain" }
 anyhow = "1.0"
 chrono = { version = "~0.4", features = ["serde"] }
 futures = "0.3"
+http = "0.2"
 hyper = "~0.13"
 hyper-tls = "~0.4"
 lazy_static = "1.4"
