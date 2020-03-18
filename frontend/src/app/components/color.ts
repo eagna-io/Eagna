@@ -45,6 +45,9 @@ export const ChoiceGreen = Color.fromHex("#57E445");
 export const ChoiceYellow = Color.fromHex("#E4DC45");
 export const ChoicePink = Color.fromHex("#E445B3");
 
+export const Correct = Color.fromHex("#18e68c");
+export const Incorrct = Color.fromHex("#e46345");
+
 export const ShadowGray = Color.fromHex("#616161");
 export const VoteRateBackGround = Color.fromHex("#C9C8C8");
 

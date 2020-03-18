@@ -3,7 +3,6 @@ import styled from "styled-components";
 
 import {
   BackgroundMainColor,
-  ShadowGray,
   WhiteBaseColor,
   ChoiceBlue,
   ChoiceRed,
@@ -11,6 +10,7 @@ import {
   BlackColor
 } from "app/components/color";
 
+import { Timer } from "./components/organisms/timer";
 import { CommentCard } from "./components/organisms/commentCard";
 import { ChoiceList } from "./components/organisms/choiceList";
 import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg";
@@ -18,9 +18,7 @@ import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg
 export const InstapollPage: React.FC = () => {
   return (
     <Container>
-      <TimerComponent>
-        <Timer>2:57</Timer>
-      </TimerComponent>
+      <Timer content={timerState} />
       <CommentFeed>
         <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
         <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceRed.hex}/>
@@ -39,7 +37,8 @@ export const InstapollPage: React.FC = () => {
   );
 }
 
-const themeTitle = "次にポイントを決めるのは誰？"
+const timerState = 123;
+const themeTitle = "次にポイントを決めるのは誰？";
 
 const Container = styled.div`
   width: 100vw;
@@ -48,27 +47,6 @@ const Container = styled.div`
   background-color: ${BackgroundMainColor.hex};
   user-select: none;
   position: relative;
-`;
-
-const TimerComponent = styled.div`
-  width: 71px;
-  height: 71px;
-  margin 0px auto;
-  border-radius: 50%;
-  border: solid 3px ${ShadowGray.hex};
-  position: relative;
-  margin-bottom: 24px;
-`;
-
-const Timer = styled.span`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translateY(-50%) translateX(-50%);
-  -webkit- transform: translateY(-50%) translateX(-50%);
-  font-size: 16px;
-  font-weight: 800;
-  color: ${WhiteBaseColor.hex}
 `;
 
 const CommentFeed = styled.div`
