@@ -3,7 +3,11 @@ use crop_domain::poll::model::{ChoiceColor, ChoiceName, Id as PollId, Poll};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use warp::{filters::body, reject::Rejection, reply, Filter};
+use warp::{
+    filters::{body, method},
+    reject::Rejection,
+    reply, Filter,
+};
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct Body {
@@ -19,6 +23,7 @@ pub fn filter(
     ctx: Context,
 ) -> impl Filter<Extract = (impl reply::Reply,), Error = Rejection> + Clone {
     warp::path!("contest" / "poll")
+        .and(method::post())
         .and(body::json::<Body>())
         .and_then(move |Body { choices }| {
             let ctx = ctx.clone();
