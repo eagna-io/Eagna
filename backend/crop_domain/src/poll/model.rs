@@ -125,12 +125,18 @@ impl Poll {
         }
     }
 
-    pub fn resolve_or_ignore(&mut self, choice: ChoiceName) -> bool {
-        if self.is_closed() && self.resolved.is_none() && self.choices.contains_key(&choice) {
-            self.resolved = Some(choice);
-            true
+    pub fn resolve(&mut self, choice: ChoiceName) -> anyhow::Result<()> {
+        if !self.is_closed() {
+            Err(anyhow::anyhow!("Poll is not closed"))
+        } else if self.resolved.is_some() {
+            Err(anyhow::anyhow!("Poll is already resolved"))
+        } else if !self.choices.contains_key(&choice) {
+            Err(anyhow::anyhow!(
+                "Given choice is not a part of current poll"
+            ))
         } else {
-            false
+            self.resolved = Some(choice);
+            Ok(())
         }
     }
 }

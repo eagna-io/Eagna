@@ -7,6 +7,7 @@ edition = "2018"
 [dependencies]
 crop_primitive = { path = "../crop_primitive" }
 
+anyhow = "1.0"
 arrayvec = "0.5"
 chrono = { version = "~0.4", features = ["serde"] }
 derive_more = "~0.99"
