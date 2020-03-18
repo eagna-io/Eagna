@@ -1,5 +1,4 @@
 pub mod contest;
-pub mod rpc;
 pub mod ws;
 
 use crate::context::Context;
