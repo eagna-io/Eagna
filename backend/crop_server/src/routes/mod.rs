@@ -10,7 +10,8 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
         .allow_methods(vec!["POST", "OPTIONS"])
         .allow_header("Content-Type");
 
-    let rest = self::contest::poll::post::filter(ctx.clone());
+    let rest = self::contest::poll::get::filter(ctx.clone())
+        .or(self::contest::poll::post::filter(ctx.clone()));
 
     let rest_with_cors = rest.with(cors_wrapper);
 
