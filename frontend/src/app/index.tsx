@@ -8,6 +8,7 @@ import {
 import { createGlobalStyle } from "styled-components";
 
 import { MarketPage } from "./pages/market";
+import { Admin } from "./pages/admin";
 
 const App: FC = () => {
   return (
@@ -27,6 +28,11 @@ const AppRouter: FC = () => (
         path="/market/:id"
         exact
         render={({ match }) => <MarketPage marketId={match.params.id} />}
+      />
+      <Route
+        path="/admin"
+        exact
+        render={() => <Admin />}
       />
       <Redirect to="/market" />
     </Switch>
