@@ -8,10 +8,14 @@ import {
   BlackColor
 } from "app/components/color";
 
+import { NavigationBar } from "./conponents/organisms/navbar";
+
 export const Admin: React.FC = () => {
   return (
     <Container>
-      <NavBar></NavBar>
+      <NavBarComponent>
+        <NavigationBar />
+      </NavBarComponent>
       <Content></Content>
     </Container>
   );
@@ -25,10 +29,11 @@ const Container = styled.div`
   display: flex;
 `;
 
-const NavBar = styled.div`
+const NavBarComponent = styled.div`
   width: 250px;
   height: 100vh;
   background-color: ${NavBarBackgroundColor.hex};
+  padding-top: 30px;
 `;
 
 const Content = styled.div`
