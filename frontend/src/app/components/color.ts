@@ -50,3 +50,6 @@ export const Incorrct = Color.fromHex("#e46345");
 
 export const ShadowGray = Color.fromHex("#616161");
 export const VoteRateBackGround = Color.fromHex("#C9C8C8");
+
+export const AdminBackgroundColor = Color.fromHex("#F4FAFF");
+export const NavBarBackgroundColor = Color.fromHex("#1b384e");
