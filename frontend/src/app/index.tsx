@@ -8,6 +8,7 @@ import {
 import { createGlobalStyle } from "styled-components";
 
 import { InstapollPage } from "./pages/instapoll";
+import { Admin } from "./pages/admin";
 
 const App: FC = () => {
   return (
@@ -27,6 +28,11 @@ const AppRouter: FC = () => (
         path="/instapoll"
         exact
         render={() => <InstapollPage />}
+      />
+      <Route
+        path="/admin"
+        exact
+        render={() => <Admin />}
       />
       <Redirect to="/instapoll" />
     </Switch>
