@@ -1,4 +1,10 @@
-import React from "react";
+import React, { FC } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Redirect,
+  Switch
+} from "react-router-dom";
 import styled from "styled-components";
 
 import {
@@ -9,6 +15,8 @@ import {
 } from "app/components/color";
 
 import { NavigationBar } from "./conponents/organisms/navbar";
+import { CreatePoll } from "./conponents/organisms/createPoll";
+import { ResolvePoll } from "./conponents/organisms/resolvePoll";
 
 export const Admin: React.FC = () => {
   return (
@@ -16,10 +24,30 @@ export const Admin: React.FC = () => {
       <NavBarComponent>
         <NavigationBar />
       </NavBarComponent>
-      <Content></Content>
+      <Content>
+        <AppRouter />
+      </Content>
     </Container>
   );
 }
+
+const AppRouter: FC = () => (
+  <Router>
+    <Switch>
+      <Route
+        path="/admin/create"
+        exact
+        component={ CreatePoll }
+      />
+      <Route
+        path="/admin/resolve"
+        exact
+        component={ResolvePoll}
+      />
+      <Redirect to="/admin/create" />
+    </Switch>
+  </Router>
+);
 
 const Container = styled.div`
   width: 100vw;

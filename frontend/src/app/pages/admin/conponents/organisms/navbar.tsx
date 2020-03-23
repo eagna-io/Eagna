@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 import {
   WhiteBaseColor
@@ -8,8 +9,12 @@ import {
 export const NavigationBar: React.FC = () => {
   return (
     <NavBar>
-      <NavBarItem>Poll作成フォーム</NavBarItem>
-      <NavBarItem>PollResolveフォーム</NavBarItem>
+      <NavBarItem>
+        <Link to="/admin/create">Poll作成フォーム</Link>
+      </NavBarItem>
+      <NavBarItem>
+        <Link to="/admin/create">PollResolveフォーム</Link>
+      </NavBarItem>
     </NavBar>
   );
 }
