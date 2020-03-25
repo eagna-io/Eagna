@@ -13,7 +13,7 @@ export const NavigationBar: React.FC = () => {
         <Link to="/admin/create">Poll作成フォーム</Link>
       </NavBarItem>
       <NavBarItem>
-        <Link to="/admin/create">PollResolveフォーム</Link>
+        <Link to="/admin/resolve">PollResolveフォーム</Link>
       </NavBarItem>
     </NavBar>
   );
