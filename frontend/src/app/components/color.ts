@@ -54,3 +54,6 @@ export const VoteRateBackGround = Color.fromHex("#C9C8C8");
 export const AdminBackgroundColor = Color.fromHex("#F4FAFF");
 export const NavBarBackgroundColor = Color.fromHex("#1b384e");
 export const NavBarFocusColor = Color.fromHex("#26506f");
+export const AdminTextMainColor = Color.fromHex("#9b9b9b");
+export const AdminInputBorderColor = Color.fromHex("#eaeaea");
+export const AdminCreatePollButtonColor = Color.fromHex("#ff3b30");
