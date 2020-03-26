@@ -10,13 +10,14 @@ import {
 
 import { NavigationBar } from "./conponents/organisms/navbar";
 
-export const Admin: React.FC = () => {
+export const ResolvePoll: React.FC = () => {
   return (
     <Container>
       <NavBarComponent>
         <NavigationBar />
       </NavBarComponent>
       <Content>
+        this is RESOLVE POLL
       </Content>
     </Container>
   );
