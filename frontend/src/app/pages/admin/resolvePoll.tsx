@@ -46,10 +46,12 @@ const NavBarComponent = styled.div`
 `;
 
 const Content = styled.div`
-  width: 100%;
+  width: 1142px;
+  height: calc(100vh - 40px);
+  margin: 20px 24px;
   background-color: ${WhiteBaseColor.hex};
   box-shadow: 0 1px 4px 0 ${BlackColor.rgba(0.5)};
-  padding: 121px 282px 0px 121px;
+  padding: 121px 282px 0 121px;
 `;
 
 const QuestionTitle = styled.div`
