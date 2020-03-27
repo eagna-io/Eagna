@@ -18,17 +18,17 @@ export const ResolvePoll: React.FC = () => {
         <NavigationBar />
       </NavBarComponent>
       <Content>
-        <QuestionTitle>{questionTitle}</QuestionTitle>
+        <PollTitle>{pollTitle}</PollTitle>
         <ResolveContainer>
-          <ResolveItem choiceItem="LeBron" confirmTitle={questionTitle} />
-          <ResolveItem choiceItem="Kobe Bean Bryant" confirmTitle={questionTitle} />
+          <ResolveItem choiceItem="LeBron" pollTitle={pollTitle} />
+          <ResolveItem choiceItem="Kobe Bean Bryant" pollTitle={pollTitle} />
         </ResolveContainer>
       </Content>
     </Container>
   );
 }
 
-const questionTitle = "次にポイントを決めるのは誰？";
+const pollTitle = "次にポイントを決めるのは誰？";
 
 const Container = styled.div`
   width: 100vw;
@@ -54,7 +54,7 @@ const Content = styled.div`
   padding: 121px 282px 0 121px;
 `;
 
-const QuestionTitle = styled.div`
+const PollTitle = styled.div`
   font-size: 21px;
   font-weight: 500;
   color: ${AdminMainColor.hex};
