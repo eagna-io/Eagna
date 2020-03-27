@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import {
   ChoiceBlue,
-  ChoiceRed,
+  MainRed,
   WhiteBaseColor,
   VoteRateBackGround
 } from "app/components/color";
@@ -22,7 +22,7 @@ export const ChoiceList: React.FC = () => {
       />
       <ChoiceContainer
         choiceTitle="Kobe Bean Bryant"
-        choiceColor={ChoiceRed.hex}
+        choiceColor={MainRed.hex}
         selected={false}
         voteRate={30}
         correct={false}

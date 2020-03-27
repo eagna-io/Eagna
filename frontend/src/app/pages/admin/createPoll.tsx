@@ -3,12 +3,11 @@ import styled from "styled-components";
 
 import {
   AdminBackgroundColor,
-  NavBarBackgroundColor,
+  AdminMainColor,
   WhiteBaseColor,
   BlackColor,
-  AdminTextMainColor,
   AdminInputBorderColor,
-  AdminCreatePollButtonColor
+  MainRed
 } from "app/components/color";
 
 import { NavigationBar } from "./conponents/organisms/navbar";
@@ -52,7 +51,7 @@ const Container = styled.div`
 const NavBarComponent = styled.div`
   width: 250px;
   height: 100vh;
-  background-color: ${NavBarBackgroundColor.hex};
+  background-color: ${AdminMainColor.hex};
   padding-top: 30px;
 `;
 
@@ -79,7 +78,7 @@ const QuestionTag = styled.div`
   font-size: 14px;
   font-weight: 500;
   line-height: 30px;
-  color: ${AdminTextMainColor.hex};
+  color: ${AdminMainColor.hex};
 `;
 
 const QuestionInput = styled.input`
@@ -106,7 +105,7 @@ const ChoiceTag = styled.div`
   font-size: 14px;
   font-weight: 500;
   line-height: 30px;
-  color: ${AdminTextMainColor.hex};
+  color: ${AdminMainColor.hex};
 `;
 
 const ChoiceUl = styled.ul`
@@ -116,7 +115,7 @@ const ChoiceUl = styled.ul`
 
 const Choiceitem = styled.li`
   &::before {
-    background-color: ${AdminTextMainColor.hex};
+    background-color: ${AdminMainColor.hex};
     content: "";
     width: 8px;
     height: 8px;
@@ -140,17 +139,17 @@ const AddChoice = styled.button`
   height: 20px;
   border-radius: 8px;
   background-color: ${WhiteBaseColor.hex};
-  border: solid 1px ${AdminTextMainColor.hex};
+  border: solid 1px ${AdminMainColor.hex};
   display: block;
   margin: 12px 0 0 69px;
   font-size: 10px;
-  color: ${AdminTextMainColor.hex};
+  color: ${AdminMainColor.hex};
 `;
 
 const CreatePollButton = styled.button`
   width: 250px;
   height: 40px;
-  background-color: ${AdminCreatePollButtonColor.hex};
+  background-color: ${MainRed.hex};
   display: block;
   font-size: 14px;
   color: ${WhiteBaseColor.hex};

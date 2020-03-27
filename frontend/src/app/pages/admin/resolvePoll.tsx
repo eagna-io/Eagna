@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import {
   AdminBackgroundColor,
-  NavBarBackgroundColor,
+  AdminMainColor,
   WhiteBaseColor,
   BlackColor
 } from "app/components/color";
@@ -41,7 +41,7 @@ const Container = styled.div`
 const NavBarComponent = styled.div`
   width: 250px;
   height: 100vh;
-  background-color: ${NavBarBackgroundColor.hex};
+  background-color: ${AdminMainColor.hex};
   padding-top: 30px;
 `;
 
@@ -55,7 +55,7 @@ const Content = styled.div`
 const QuestionTitle = styled.div`
   font-size: 21px;
   font-weight: 500;
-  color: ${NavBarBackgroundColor.hex};
+  color: ${AdminMainColor.hex};
 `;
 
 const ResolveContainer = styled.div`
