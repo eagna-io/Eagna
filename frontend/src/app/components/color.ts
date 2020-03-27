@@ -57,3 +57,4 @@ export const NavBarFocusColor = Color.fromHex("#26506f");
 export const AdminTextMainColor = Color.fromHex("#9b9b9b");
 export const AdminInputBorderColor = Color.fromHex("#eaeaea");
 export const AdminCreatePollButtonColor = Color.fromHex("#ff3b30");
+export const AdminResolvePollButtonBorderColor = Color.fromHex("#d9d9d9");
