@@ -5,7 +5,7 @@ import {
   BackgroundMainColor,
   WhiteBaseColor,
   ChoiceBlue,
-  ChoiceRed,
+  MainRed,
   TextBaseColor,
   BlackColor
 } from "app/components/color";
@@ -21,8 +21,8 @@ export const InstapollPage: React.FC = () => {
       <Timer content={timerState} />
       <CommentFeed>
         <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceRed.hex}/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceRed.hex}/>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={MainRed.hex}/>
+        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={MainRed.hex}/>
         <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
       </CommentFeed>
       <PollCard>
