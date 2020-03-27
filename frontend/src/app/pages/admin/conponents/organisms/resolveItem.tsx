@@ -8,13 +8,19 @@ import {
 
 interface Props {
   choiceItem: string;
+  confirmTitle: string;
 }
 
-export const ResolveItem: React.FC<Props> = ({choiceItem}) => {
+export const ResolveItem: React.FC<Props> = ({choiceItem, confirmTitle}) => {
+
+  const handleResolve = () => {
+    window.confirm("「" + confirmTitle + "」を「" + choiceItem + "」でResoveします、よろしいですか？");
+  }
+
   return (
     <Container>
       <ChoiceItem>{choiceItem}</ChoiceItem>
-      <ResolveButton>Resolve</ResolveButton>
+      <ResolveButton onClick={handleResolve}>Resolve</ResolveButton>
     </Container>
   );
 }

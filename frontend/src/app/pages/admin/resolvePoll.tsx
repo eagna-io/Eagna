@@ -20,8 +20,8 @@ export const ResolvePoll: React.FC = () => {
       <Content>
         <QuestionTitle>{questionTitle}</QuestionTitle>
         <ResolveContainer>
-          <ResolveItem choiceItem="LeBron" />
-          <ResolveItem choiceItem="Kobe Bean Bryant" />
+          <ResolveItem choiceItem="LeBron" confirmTitle={questionTitle} />
+          <ResolveItem choiceItem="Kobe Bean Bryant" confirmTitle={questionTitle} />
         </ResolveContainer>
       </Content>
     </Container>
