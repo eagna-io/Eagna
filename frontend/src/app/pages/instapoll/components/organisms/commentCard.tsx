@@ -6,10 +6,10 @@ import {
   TextBaseColor,
   BlackColor
 } from "app/components/color";
-import { Comment } from "../../models";
+import { Comment as CommentModel } from "../../models";
 
 interface Props {
-  comment: Comment;
+  comment: CommentModel;
 }
 
 export const CommentCard: React.FC<Props> = ({ comment }) => {
