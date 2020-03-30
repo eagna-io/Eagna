@@ -20,10 +20,9 @@ export const InstapollPage: React.FC = () => {
     <Container>
       <Timer content={timerState} />
       <CommentFeed>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={MainRed.hex}/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={MainRed.hex}/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
+        {comments.map(comment => (
+          <CommentCard comment={comment} />
+        ))}
       </CommentFeed>
       <PollCard>
         <Theme>{themeTitle}</Theme>
@@ -35,10 +34,32 @@ export const InstapollPage: React.FC = () => {
       </PollCard>
     </Container>
   );
-}
+};
 
 const timerState = 123;
 const themeTitle = "次にポイントを決めるのは誰？";
+const comments = [
+  {
+    user: "Yuya_F",
+    comment: "レブロン調子いいね",
+    color: MainRed.hex
+  },
+  {
+    user: "Yuya_F",
+    comment: "レブロン調子いいね",
+    color: ChoiceBlue.hex
+  },
+  {
+    user: "Yuya_F",
+    comment: "レブロン調子いいね",
+    color: ChoiceBlue.hex
+  },
+  {
+    user: "Yuya_F",
+    comment: "レブロン調子いいね",
+    color: MainRed.hex
+  }
+];
 
 const Container = styled.div`
   width: 100vw;
@@ -50,7 +71,7 @@ const Container = styled.div`
 `;
 
 const CommentFeed = styled.div`
-  width: 100%;  
+  width: 100%;
   height: 50%;
 `;
 
@@ -72,12 +93,12 @@ const Theme = styled.div`
 `;
 
 const CommentContainer = styled.div`
-  width: 100%;  
+  width: 100%;
   display: flex;
 `;
 
 const CommentInput = styled.input`
-  width: 86%;  
+  width: 86%;
   border-radius: 24px;
   height: 30px;
   border: solid 1px ${TextBaseColor.hex};
