@@ -1,11 +1,10 @@
 use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
-use serde::{Deserialize, Serialize};
+use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 use smallvec::{Array, SmallVec};
-use std::string::String as StdString;
+use std::{marker::PhantomData, string::String as StdString};
 
-#[derive(PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
-#[serde(transparent)]
-pub struct GenericString<A: Array<Item = u8>>(#[serde(with = "ser_de_with")] SmallVec<A>);
+#[derive(PartialEq, Eq, Clone, Hash)]
+pub struct GenericString<A: Array<Item = u8>>(SmallVec<A>);
 
 /// Cropサービス内で主に利用する文字列型
 pub type String = GenericString<[u8; 16]>;
@@ -66,28 +65,47 @@ where
     }
 }
 
-mod ser_de_with {
-    use super::*;
-    use serde::{Deserializer, Serializer};
-
-    pub fn serialize<S, A>(vec: &SmallVec<A>, serializer: S) -> Result<S::Ok, S::Error>
+impl<A> Serialize for GenericString<A>
+where
+    A: Array<Item = u8>,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
-        A: Array<Item = u8>,
     {
-        std::str::from_utf8(vec.as_slice())
-            .unwrap()
-            .serialize(serializer)
+        serializer.serialize_str(self.as_str())
+    }
+}
+
+struct StrViditor<A>(PhantomData<A>);
+
+impl<'de, A> Visitor<'de> for StrViditor<A>
+where
+    A: Array<Item = u8>,
+{
+    type Value = GenericString<A>;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("str")
     }
 
-    pub fn deserialize<'de, D, A>(deserializer: D) -> Result<SmallVec<A>, D::Error>
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(GenericString::from_str(v))
+    }
+}
+
+impl<'de, A> Deserialize<'de> for GenericString<A>
+where
+    A: Array<Item = u8>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
-        A: Array<Item = u8>,
     {
-        Ok(SmallVec::from_slice(
-            <&str as Deserialize<'de>>::deserialize(deserializer)?.as_bytes(),
-        ))
+        deserializer.deserialize_str(StrViditor::<A>(PhantomData))
     }
 }
 
@@ -100,6 +118,8 @@ mod tests {
     fn test_ser_de() {
         let s = String::from("hoge");
 
+        assert_tokens(&s, &[Token::Str("hoge")]);
         assert_tokens(&s, &[Token::BorrowedStr("hoge")]);
+        assert_tokens(&s, &[Token::String("hoge")]);
     }
 }
