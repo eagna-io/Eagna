@@ -4,40 +4,71 @@ import moment, { Moment } from "moment";
 export const WS_URL = process.env.REACT_APP_WS_API_BASE;
 
 export interface Params {
-  marketId: string;
-  onOrderMsg: (msg: OrderMsg) => void;
+  onCommentMsg: (msg: CommentMsg) => void;
+  onPollMsg: (msg: PollMsg) => void;
 }
 
-export const open = ({ marketId, onOrderMsg }: Params) => {
-  const ws = new WebSocket(`${WS_URL}/${marketId}`);
+export const open = ({ onCommentMsg, onPollMsg }: Params) => {
+  const ws = new WebSocket(`${WS_URL}`);
   ws.onmessage = event => {
     const data = JSON.parse(event.data);
-    const decoded = OrderMsgDecoder.run(data);
+    const decoded = IncomingMsgDecoder.run(data);
     if (decoded.ok) {
-      onOrderMsg(decoded.result);
+      const msg = decoded.result;
+      if (msg.type === "comment") {
+        onCommentMsg(msg);
+      } else {
+        onPollMsg(msg);
+      }
     } else {
       console.error(decoded);
     }
   };
 };
 
-export interface OrderMsg {
-  type: "order";
-  id: string;
-  outcome: "realize" | "unrealize";
-  accountName: string;
-  time: Moment;
-  tipCost: number;
+export type IncomingMsg = CommentMsg | PollMsg;
+
+export interface CommentMsg {
+  type: "comment";
+  account: string;
+  color: string;
+  comment: string;
 }
 
-const OrderMsgDecoder: D.Decoder<OrderMsg> = D.object({
-  type: D.constant<"order">("order"),
-  id: D.string(),
-  outcome: D.union(
-    D.constant<"realize">("realize"),
-    D.constant<"unrealize">("unrealize")
-  ),
-  accountName: D.string(),
-  time: D.string().map(s => moment(s)),
-  tipCost: D.number()
+export interface PollMsg {
+  type: "poll";
+  id: string;
+  endAt: Moment;
+  status: "open" | "closed";
+  choices: Record<string, string>;
+  stats?: {
+    totalVotes: number;
+    votePerChoice: Record<string, number>;
+  };
+}
+
+const CommentMsgDecoder: D.Decoder<CommentMsg> = D.object({
+  type: D.constant<"comment">("comment"),
+  account: D.string(),
+  color: D.string(),
+  comment: D.string()
 });
+
+const PollMsgDecoder: D.Decoder<PollMsg> = D.object({
+  type: D.constant<"poll">("poll"),
+  id: D.string(),
+  endAt: D.string().map(s => moment(s)),
+  status: D.union(D.constant<"open">("open"), D.constant<"closed">("closed")),
+  choices: D.dict(D.string()),
+  stats: D.optional(
+    D.object({
+      totalVotes: D.number(),
+      votePerChoice: D.dict(D.number())
+    })
+  )
+});
+
+const IncomingMsgDecoder: D.Decoder<IncomingMsg> = D.oneOf<IncomingMsg>(
+  CommentMsgDecoder,
+  PollMsgDecoder
+);
