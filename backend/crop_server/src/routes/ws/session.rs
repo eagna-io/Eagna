@@ -113,10 +113,22 @@ async fn handle_each_incoming_msg(msg: IncomingMsg, contest: ContestManager) -> 
                 })
                 .await
         }
-        IncomingMsg::AddComment(msg) => contest
-            .comment_and_broadcast(msg.account, msg.comment)
-            .await
-            .map(drop)
-            .ok_or(anyhow::anyhow!("No poll is available")),
+        IncomingMsg::AddComment(msg) => {
+            contest
+                .with_contest(|contest, sender| {
+                    // msg.account, msg.comment
+                    if let Some(poll) = contest.current_poll_mut() {
+                        let comment = poll.add_comment(msg.account, msg.comment);
+                        let msg = OutgoingMsg::from(comment).into();
+
+                        // receiverがいなくてもエラーにしない
+                        let _ = sender.send(msg);
+                        Ok(())
+                    } else {
+                        Err(anyhow::anyhow!("No poll is available"))
+                    }
+                })
+                .await
+        }
     }
 }

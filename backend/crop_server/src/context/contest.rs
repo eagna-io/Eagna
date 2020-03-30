@@ -1,8 +1,4 @@
-use crop_domain::{
-    account::model::AccountName,
-    contest::model::Contest,
-    poll::model::{ChoiceName, Comment},
-};
+use crop_domain::{contest::model::Contest, poll::model::ChoiceName};
 use std::{ops::DerefMut, sync::Arc};
 use tokio::sync::{
     broadcast::{channel, Receiver, Sender},
@@ -39,31 +35,6 @@ impl ContestManager {
 
     pub fn subscribe(&self) -> Receiver<Message> {
         self.msg_sink.subscribe()
-    }
-
-    pub async fn comment_and_broadcast(
-        &self,
-        account: AccountName,
-        comment: String,
-    ) -> Option<Comment> {
-        let mut lock = self.contest.lock().await;
-        if let Some(poll) = lock.current_poll_mut() {
-            let comment = poll.add_comment(account, comment);
-            let msg = OutgoingMsg::from(comment).into();
-
-            // Commentをbroadcastする。
-            // receiverがいなくてもエラーにしない。
-            let _ = self.msg_sink.send(msg);
-
-            let ret = comment.clone();
-
-            // 送信順序担保のため、sendが終わってからlockを解放する
-            drop(lock);
-
-            Some(ret)
-        } else {
-            None
-        }
     }
 
     pub async fn close_and_broadcast_or_ignore(&self) {
