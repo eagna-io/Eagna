@@ -8,6 +8,9 @@ import {
 import { createGlobalStyle } from "styled-components";
 
 import { InstapollPage } from "./pages/instapoll";
+import { Admin } from "./pages/admin";
+import { CreatePoll } from "./pages/admin/createPoll";
+import { ResolvePoll } from "./pages/admin/resolvePoll";
 
 const App: FC = () => {
   return (
@@ -27,6 +30,21 @@ const AppRouter: FC = () => (
         path="/instapoll"
         exact
         render={() => <InstapollPage />}
+      />
+      <Route
+        path="/admin"
+        exact
+        render={() => <Admin />}
+      />
+      <Route
+        path="/admin/create"
+        exact
+        render={() => <CreatePoll />}
+      />
+      <Route
+        path="/admin/resolve"
+        exact
+        render={() => <ResolvePoll />}
       />
       <Redirect to="/instapoll" />
     </Switch>

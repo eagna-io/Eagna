@@ -5,7 +5,7 @@ import {
   WhiteBaseColor,
   ShadowGray,
   Correct,
-  Incorrct
+  MainRed
 } from "app/components/color";
 
 interface Props {
@@ -71,7 +71,7 @@ const IncorrectTimer = styled.div`
   font-size: 16px;
   font-weight: 800;
   color: ${WhiteBaseColor.hex};
-  background-color: ${Incorrct.hex};
+  background-color: ${MainRed.hex};
 `;
 
 const CountDownTimer = styled.div`

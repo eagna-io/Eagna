@@ -38,26 +38,18 @@ export const BackgroundMainColor = Color.fromHex("#bb86fc");
 export const WhiteBaseColor = Color.fromHex("#ffffff");
 export const BlackColor = Color.fromHex("#000000");
 export const TextBaseColor = Color.fromHex("#333333");
+export const MainRed = Color.fromHex("#E46345");
 
 export const ChoiceBlue = Color.fromHex("#4583E4");
-export const ChoiceRed = Color.fromHex("#E46345");
 export const ChoiceGreen = Color.fromHex("#57E445");
 export const ChoiceYellow = Color.fromHex("#E4DC45");
 export const ChoicePink = Color.fromHex("#E445B3");
 
 export const Correct = Color.fromHex("#18e68c");
-export const Incorrct = Color.fromHex("#e46345");
 
 export const ShadowGray = Color.fromHex("#616161");
 export const VoteRateBackGround = Color.fromHex("#C9C8C8");
 
-export const PurpleColor = Color.fromHex("#BB86FC");
-export const RankingColor = Color.fromHex("#FAD160");
-export const RedDisagreeColor = Color.fromHex("#F74C61");
-export const GreenAgreeColor = Color.fromHex("#39CCBE");
-export const MarketPredictionValueColor = Color.fromHex("#9B9A9A");
-export const ItemContainerBgColor = Color.fromHex("#3d3d3d");
-
-export const ChartBaseColor = Color.fromHex("#555555");
-export const ChartGraphPink = Color.fromHex("#ffc0cb");
-export const ChartGraphBlue = Color.fromHex("#bfe8ff");
+export const AdminBackgroundColor = Color.fromHex("#F4FAFF");
+export const AdminMainColor = Color.fromHex("#1b384e");
+export const AdminInputBorderColor = Color.fromHex("#d9d9d9");
