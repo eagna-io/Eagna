@@ -2,6 +2,7 @@ use crop_domain::{
     account::model::AccountName,
     poll::model::{ChoiceName, Comment, Poll},
 };
+use crop_primitive::string::String;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::{borrow::Cow, convert::TryFrom};

@@ -1,5 +1,6 @@
 use crate::{context::Context, routes::ws::msg::OutgoingMsg};
 use crop_domain::poll::model::{ChoiceColor, ChoiceName, Id as PollId, Poll};
+use crop_primitive::string::String;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -11,6 +12,7 @@ use warp::{
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct Body {
+    title: String,
     choices: HashMap<ChoiceName, ChoiceColor>,
 }
 
@@ -25,10 +27,10 @@ pub fn filter(
     warp::path!("contest" / "poll")
         .and(method::post())
         .and(body::json::<Body>())
-        .and_then(move |Body { choices }| {
+        .and_then(move |Body { title, choices }| {
             let ctx = ctx.clone();
             async move {
-                let poll = Poll::new(choices);
+                let poll = Poll::new(title, choices);
                 let id = poll.id;
                 ctx.contest_manager()
                     .with_contest(|contest, sender| {
