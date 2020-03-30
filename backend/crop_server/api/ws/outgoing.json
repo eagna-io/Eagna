@@ -3,42 +3,81 @@
   "title": "OutgoingMsg",
   "anyOf": [
     {
-      "description": "対象のOutcomeのShareを1つ買うOrderを表現するモデル",
       "type": "object",
       "required": [
-        "accountName",
-        "id",
-        "outcome",
-        "time",
-        "tipCost",
+        "account",
+        "color",
+        "comment",
         "type"
       ],
       "properties": {
-        "accountName": {
+        "account": {
           "$ref": "#/definitions/AccountName"
         },
-        "id": {
-          "$ref": "#/definitions/OrderId"
+        "color": {
+          "$ref": "#/definitions/ChoiceColor"
         },
-        "outcome": {
-          "$ref": "#/definitions/Outcome"
-        },
-        "time": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "tipCost": {
-          "description": "このOrderに必要なTipの量( >0 )",
-          "allOf": [
-            {
-              "$ref": "#/definitions/TipNum"
-            }
-          ]
+        "comment": {
+          "type": "string"
         },
         "type": {
           "type": "string",
           "enum": [
-            "order"
+            "comment"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "choices",
+        "endAt",
+        "id",
+        "status",
+        "type"
+      ],
+      "properties": {
+        "choices": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ChoiceColor"
+          }
+        },
+        "endAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "$ref": "#/definitions/Id"
+        },
+        "resolved": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ChoiceName"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stats": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Stats"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/definitions/Status"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "poll"
           ]
         }
       }
@@ -48,22 +87,46 @@
     "AccountName": {
       "$ref": "#/definitions/String"
     },
-    "OrderId": {
+    "ChoiceColor": {
+      "type": "string"
+    },
+    "ChoiceName": {
+      "type": "string"
+    },
+    "Id": {
       "type": "string",
       "format": "uuid"
     },
-    "Outcome": {
+    "Stats": {
+      "type": "object",
+      "required": [
+        "totalVotes",
+        "votePerChoice"
+      ],
+      "properties": {
+        "totalVotes": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "votePerChoice": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "uint",
+            "minimum": 0.0
+          }
+        }
+      }
+    },
+    "Status": {
       "enum": [
-        "realize",
-        "unrealize"
+        "open",
+        "closed"
       ]
     },
     "String": {
       "type": "string"
-    },
-    "TipNum": {
-      "type": "integer",
-      "format": "int32"
     }
   }
 }
