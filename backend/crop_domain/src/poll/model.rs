@@ -1,4 +1,5 @@
 use chrono::{DateTime, Duration, Utc};
+use crop_primitive::string::String;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
@@ -11,6 +12,7 @@ use crate::account::model::AccountName;
 pub struct Poll {
     // Immutable
     pub id: Id,
+    pub title: String,
     pub end_at: DateTime<Utc>,
     pub choices: HashMap<ChoiceName, ChoiceColor>,
 
@@ -46,9 +48,10 @@ pub struct ChoiceName(pub String);
 pub struct ChoiceColor(pub String);
 
 impl Poll {
-    pub fn new(choices: HashMap<ChoiceName, ChoiceColor>) -> Poll {
+    pub fn new(title: String, choices: HashMap<ChoiceName, ChoiceColor>) -> Poll {
         Poll {
             id: Id::new(),
+            title,
             end_at: Utc::now() + Duration::seconds(30),
             choices,
             status: Status::Open,
