@@ -15,14 +15,23 @@ import { CommentCard } from "./components/organisms/commentCard";
 import { ChoiceList } from "./components/organisms/choiceList";
 import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg";
 import * as ws from "./infra/ws";
+import { reducer, initialState } from "./reducer";
 
 export const InstapollPage: React.FC = () => {
+  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const { poll, comments } = state;
+
   React.useEffect(() => {
     ws.open({
-      onComment: comment => comment,
-      onPoll: poll => poll,
-    })
+      onComment: comment => {
+        dispatch({ type: "pushComment", comment });
+      },
+      onPoll: poll => {
+        dispatch({ type: "updatePoll", poll });
+      }
+    });
   }, []);
+
   return (
     <Container>
       <Timer content={timerState} />
@@ -45,28 +54,6 @@ export const InstapollPage: React.FC = () => {
 
 const timerState = 123;
 const themeTitle = "次にポイントを決めるのは誰？";
-const comments = [
-  {
-    account: "Yuya_F",
-    comment: "レブロン調子いいね",
-    color: MainRed.hex
-  },
-  {
-    account: "Yuya_F",
-    comment: "レブロン調子いいね",
-    color: ChoiceBlue.hex
-  },
-  {
-    account: "Yuya_F",
-    comment: "レブロン調子いいね",
-    color: ChoiceBlue.hex
-  },
-  {
-    account: "Yuya_F",
-    comment: "レブロン調子いいね",
-    color: MainRed.hex
-  }
-];
 
 const Container = styled.div`
   width: 100vw;
