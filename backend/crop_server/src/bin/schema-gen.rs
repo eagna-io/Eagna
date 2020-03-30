@@ -1,4 +1,4 @@
-use crop_server::routes::ws::msg::OutgoingMsg;
+use crop_server::routes;
 use schemars::schema_for;
 use std::fs::write;
 
@@ -10,5 +10,14 @@ macro_rules! write_json_schema {
 }
 
 fn main() {
-    write_json_schema!("api/ws/outgoing.json", OutgoingMsg);
+    write_json_schema!("api/ws/outgoing.json", routes::ws::msg::OutgoingMsg);
+
+    write_json_schema!(
+        "api/contest/poll/post-req.json",
+        routes::contest::poll::post::Body
+    );
+    write_json_schema!(
+        "api/contest/poll/post-res.json",
+        routes::contest::poll::post::Response
+    );
 }
