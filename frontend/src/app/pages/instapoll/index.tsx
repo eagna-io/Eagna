@@ -28,8 +28,8 @@ export const InstapollPage: React.FC = () => {
         <Theme>{themeTitle}</Theme>
         <ChoiceList />
         <CommentContainer>
-          <CommentInput type="text" placeholder="コメントする"></CommentInput>
-          <Submit></Submit>
+          <CommentInput type="text" placeholder="コメントする" />
+          <Submit />
         </CommentContainer>
       </PollCard>
     </Container>
