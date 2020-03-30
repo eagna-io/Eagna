@@ -7,5 +7,7 @@ async fn main() {
 
     let context = Context::new(Contest::new());
 
-    server::Server::bind(([0, 0, 0, 0], 8080), context).await;
+    log::info!("Server is running on port {}", 8080);
+
+    server::Server::bind(([127, 0, 0, 1], 8080), context).await;
 }

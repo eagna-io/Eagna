@@ -85,7 +85,7 @@ export const CreatePoll: React.FC = () => {
               },
               decoder: D.anyJson()
             });
-            alert(res);
+            alert(JSON.stringify(res));
           }}
         >
           作成
