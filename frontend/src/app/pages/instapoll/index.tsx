@@ -55,7 +55,7 @@ export const InstapollPage: React.FC = () => {
           ))}
         </CommentFeed>
         <PollCard>
-          <Theme>{themeTitle}</Theme>
+          <Theme>{poll.title}</Theme>
           <ChoiceList />
           <CommentContainer>
             <CommentInput type="text" placeholder="コメントする" />

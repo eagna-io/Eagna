@@ -8,6 +8,7 @@ export interface Comment {
 
 export interface Poll {
   id: string;
+  title: string;
   endAt: Moment;
   status: "open" | "closed";
   choices: Record<string, string>;

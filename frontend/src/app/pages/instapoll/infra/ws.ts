@@ -30,6 +30,7 @@ interface CommentMsg {
 
 interface PollMsg {
   type: "poll";
+  title: string;
   id: string;
   endAt: Moment;
   status: "open" | "closed";
@@ -50,6 +51,7 @@ const CommentMsgDecoder: D.Decoder<CommentMsg> = D.object({
 const PollMsgDecoder: D.Decoder<PollMsg> = D.object({
   type: D.constant<"poll">("poll"),
   id: D.string(),
+  title: D.string(),
   endAt: D.string().map(s => moment(s)),
   status: D.union(D.constant<"open">("open"), D.constant<"closed">("closed")),   choices: D.dict(D.string()),
   stats: D.optional(
