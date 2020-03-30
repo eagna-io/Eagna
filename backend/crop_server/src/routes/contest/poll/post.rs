@@ -1,4 +1,4 @@
-use crate::context::Context;
+use crate::{context::Context, routes::ws::msg::OutgoingMsg};
 use crop_domain::poll::model::{ChoiceColor, ChoiceName, Id as PollId, Poll};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,13 @@ pub fn filter(
             async move {
                 let poll = Poll::new(choices);
                 let id = poll.id;
-                ctx.contest_manager().add_poll_and_broadcast(poll).await;
+                ctx.contest_manager()
+                    .with_contest(|contest, sender| {
+                        let poll = contest.add_poll(poll);
+                        let msg = OutgoingMsg::from(poll).into();
+                        let _ = sender.send(msg);
+                    })
+                    .await;
                 Ok::<_, Rejection>(reply::with_status(
                     reply::json(&Response { id }),
                     http::StatusCode::CREATED,

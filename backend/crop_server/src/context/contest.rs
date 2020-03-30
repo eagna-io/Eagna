@@ -1,7 +1,7 @@
 use crop_domain::{
     account::model::AccountName,
     contest::model::Contest,
-    poll::model::{ChoiceName, Comment, Poll},
+    poll::model::{ChoiceName, Comment},
 };
 use std::{ops::DerefMut, sync::Arc};
 use tokio::sync::{
@@ -39,18 +39,6 @@ impl ContestManager {
 
     pub fn subscribe(&self) -> Receiver<Message> {
         self.msg_sink.subscribe()
-    }
-
-    pub async fn add_poll_and_broadcast(&self, poll: Poll) {
-        let mut lock = self.contest.lock().await;
-
-        let poll = lock.add_poll(poll);
-        let msg = OutgoingMsg::from(poll).into();
-
-        let _ = self.msg_sink.send(msg);
-
-        // 送信順序担保のため、sendが終わってからlockを解放する
-        drop(lock)
     }
 
     pub async fn comment_and_broadcast(
