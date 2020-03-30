@@ -155,6 +155,7 @@ pub struct Comment {
 }
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Stats {
     pub total_votes: usize,
     pub vote_per_choice: HashMap<ChoiceName, usize>,
