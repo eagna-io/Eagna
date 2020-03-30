@@ -16,7 +16,7 @@ export const CommentCard: React.FC<Props> = ({ comment }) => {
   return (
     <Container>
       <Contents>
-        <UserName>{comment.user}</UserName>
+        <UserName>{comment.account}</UserName>
         <Comment>{comment.comment}</Comment>
       </Contents>
       <ChoiceFlag flagColor={comment.color}></ChoiceFlag>
