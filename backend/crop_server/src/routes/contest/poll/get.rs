@@ -19,7 +19,7 @@ pub fn filter(
 
 async fn handler(ctx: Context) -> Result<impl reply::Reply, Infallible> {
     ctx.contest_manager()
-        .with_contest(|contest| {
+        .with_contest(|contest, _| {
             if let Some(poll) = contest.current_poll() {
                 Ok(reply::with_status(reply::json(poll), http::StatusCode::OK))
             } else {

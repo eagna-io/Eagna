@@ -63,7 +63,7 @@ where
     async fn initialize(&mut self) -> anyhow::Result<()> {
         if let Some(msg) = self
             .contest
-            .with_contest(|contest| {
+            .with_contest(|contest, _| {
                 contest
                     .current_poll()
                     .map(|poll| OutgoingMsg::from(poll).into())
@@ -104,7 +104,7 @@ async fn handle_each_incoming_msg(msg: IncomingMsg, contest: ContestManager) -> 
     match msg {
         IncomingMsg::UpdateChoice(msg) => {
             contest
-                .with_contest(|contest| {
+                .with_contest(|contest, _| {
                     if let Some(poll) = contest.current_poll_mut() {
                         Ok(poll.update_choice(msg.account, msg.choice))
                     } else {

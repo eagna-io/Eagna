@@ -32,9 +32,9 @@ impl ContestManager {
 
     pub async fn with_contest<F, T>(&self, f: F) -> T
     where
-        F: for<'a> FnOnce(&'a mut Contest) -> T,
+        F: for<'a> FnOnce(&'a mut Contest, &'a Sender<Message>) -> T,
     {
-        f(self.contest.lock().await.deref_mut())
+        f(self.contest.lock().await.deref_mut(), &self.msg_sink)
     }
 
     pub fn subscribe(&self) -> Receiver<Message> {
