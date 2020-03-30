@@ -69,8 +69,6 @@ export const InstapollPage: React.FC = () => {
   }
 };
 
-const themeTitle = "次にポイントを決めるのは誰？";
-
 const Container = styled.div`
   width: 100vw;
   height: calc(100vh - 75px);

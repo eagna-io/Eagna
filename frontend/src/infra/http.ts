@@ -1,6 +1,6 @@
 import * as D from "@mojotech/json-type-validation";
 
-export const RPC_URL = process.env.REACT_APP_RPC_API_BASE!;
+export const API_BASE = process.env.REACT_APP_API_BASE!;
 
 export enum Method {
   GET = "GET",
@@ -73,7 +73,7 @@ export enum FailureCode {
 }
 
 const constructUrl = (path: string, params?: RequestParams): string => {
-  let url = `${RPC_URL}/${path}`;
+  let url = `${API_BASE}${path}`;
   if (params == null) {
     return url;
   } else {
