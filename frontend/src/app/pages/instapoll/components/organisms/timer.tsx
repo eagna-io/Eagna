@@ -7,9 +7,10 @@ import {
   Correct,
   MainRed
 } from "app/components/color";
+import { Timer as TimerModel } from "../../models";
 
 interface Props {
-  content: number | "closed" | "correct" | "incorrect"
+  content: TimerModel;
 }
 
 export const Timer: React.FC<Props> = ({ content }) => {
@@ -22,13 +23,13 @@ export const Timer: React.FC<Props> = ({ content }) => {
   } else {
     return <CountDownTimer>{formatTime(content)}</CountDownTimer>;
   }
-}
+};
 
 const formatTime = (seconds: number) => {
   const min = Math.floor(seconds / 60).toString();
   const sec = `0${seconds % 60}`.slice(-2);
   return `${min}:${sec}`;
-}
+};
 
 const ClosedTimer = styled.div`
   width: 71px;

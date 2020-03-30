@@ -16,3 +16,5 @@ export interface Poll {
     votePerChoice: Record<string, number>;
   };
 }
+
+export type Timer = number | "closed" | "correct" | "incorrect";

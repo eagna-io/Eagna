@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import moment from "moment";
 
 import {
   BackgroundMainColor,
@@ -19,8 +20,9 @@ import { reducer, initialState } from "./reducer";
 
 export const InstapollPage: React.FC = () => {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const { poll, comments } = state;
+  const { poll, comments, timer } = state;
 
+  // Websocketコネクションを確立する
   React.useEffect(() => {
     ws.open({
       onComment: comment => {
@@ -32,27 +34,41 @@ export const InstapollPage: React.FC = () => {
     });
   }, []);
 
-  return (
-    <Container>
-      <Timer content={timerState} />
-      <CommentFeed>
-        {comments.map(comment => (
-          <CommentCard comment={comment} />
-        ))}
-      </CommentFeed>
-      <PollCard>
-        <Theme>{themeTitle}</Theme>
-        <ChoiceList />
-        <CommentContainer>
-          <CommentInput type="text" placeholder="コメントする" />
-          <Submit />
-        </CommentContainer>
-      </PollCard>
-    </Container>
-  );
+  // 一定間隔でtickアクションを送る
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      dispatch({ type: "tick", time: moment() });
+    }, 950);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  if (poll && timer) {
+    return (
+      <Container>
+        <Timer content={timer} />
+        <CommentFeed>
+          {comments.map(comment => (
+            <CommentCard comment={comment} />
+          ))}
+        </CommentFeed>
+        <PollCard>
+          <Theme>{themeTitle}</Theme>
+          <ChoiceList />
+          <CommentContainer>
+            <CommentInput type="text" placeholder="コメントする" />
+            <Submit />
+          </CommentContainer>
+        </PollCard>
+      </Container>
+    );
+  } else {
+    return <Container>Loading...</Container>;
+  }
 };
 
-const timerState = 123;
 const themeTitle = "次にポイントを決めるのは誰？";
 
 const Container = styled.div`
