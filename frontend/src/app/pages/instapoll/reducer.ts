@@ -41,8 +41,12 @@ export const reducer = (state: State, action: Action): State =>
   produce(state, state => {
     switch (action.type) {
       case "tick":
-        if (state.poll && typeof state.timer === "number") {
-          state.timer = action.time.unix() - state.poll.endAt.unix();
+        if (
+          state.poll &&
+          // Timerをカウントダウンする必要があるとき
+          (state.timer === undefined || typeof state.timer === "number")
+        ) {
+          state.timer = state.poll.endAt.unix() - action.time.unix();
           if (state.timer < 0) {
             state.timer = "closed";
           }
