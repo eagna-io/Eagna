@@ -35,7 +35,7 @@ pub fn filter(
     ctx: Context,
 ) -> impl Filter<Extract = (impl reply::Reply,), Error = Rejection> + Clone {
     warp::path!("contest" / "poll")
-        .and(method::post())
+        .and(method::patch())
         .and(body::json::<Body>())
         .and_then(move |body| {
             let ctx = ctx.clone();
