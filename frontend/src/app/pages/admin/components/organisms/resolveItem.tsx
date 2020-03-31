@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 import { AdminMainColor, AdminInputBorderColor } from "app/components/color";
+import * as pollApi from "infra/http/poll";
 
 interface Props {
   choiceItem: string;
@@ -17,7 +18,7 @@ export const ResolveItem: React.FC<{
       `「 ${pollTitle} 」を「${choiceItem}」でResoveします、よろしいですか？`
     );
     if (confirmed) {
-      // pollApi.resolve()
+      pollApi.resolve(choiceItem).then(res => alert(JSON.stringify(res)));
     }
   };
 

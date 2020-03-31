@@ -5,7 +5,8 @@ export const API_BASE = process.env.REACT_APP_API_BASE!;
 export enum Method {
   GET = "GET",
   POST = "POST",
-  PUT = "PUT"
+  PUT = "PUT",
+  PATCH = "PATCH"
 }
 
 export interface RequestArgs<T> {
@@ -24,6 +25,9 @@ export const post = <T>(args: RequestArgs<T>): Promise<T> =>
 
 export const put = <T>(args: RequestArgs<T>): Promise<T> =>
   request(Method.PUT, args);
+
+export const patch = <T>(args: RequestArgs<T>): Promise<T> =>
+  request(Method.PATCH, args);
 
 export const request = async <T>(
   method: Method,

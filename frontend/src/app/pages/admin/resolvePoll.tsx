@@ -20,7 +20,7 @@ export const ResolvePoll: React.FC = () => {
     pollApi.get().then(poll => setPoll(poll));
   }, []);
 
-  if (!poll || poll.status === "open") {
+  if (!poll || poll.status === "open" || poll.resolved) {
     return (
       <Container>
         <NavBarComponent>

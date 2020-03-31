@@ -12,6 +12,7 @@ export interface Poll {
   endAt: Moment;
   status: "open" | "closed";
   choices: Record<string, string>;
+  resolved?: string;
   stats?: {
     totalVotes: number;
     votePerChoice: Record<string, number>;
