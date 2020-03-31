@@ -17,7 +17,7 @@ import {
 } from "app/components/color";
 import * as http from "infra/http";
 
-import { NavigationBar } from "./conponents/organisms/navbar";
+import { NavigationBar } from "./components/organisms/navbar";
 
 export const CreatePoll: React.FC = () => {
   const [title, setTitle] = React.useState("");

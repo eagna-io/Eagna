@@ -8,8 +8,8 @@ import {
   BlackColor
 } from "app/components/color";
 
-import { NavigationBar } from "./conponents/organisms/navbar";
-import { ResolveItem } from "./conponents/organisms/resolveItem";
+import { NavigationBar } from "./components/organisms/navbar";
+import { ResolveItem } from "./components/organisms/resolveItem";
 
 export const ResolvePoll: React.FC = () => {
   return (
