@@ -27,7 +27,7 @@ export const InstapollPage: React.FC = () => {
       </CommentFeed>
       <PollCard>
         <Theme>{themeTitle}</Theme>
-        <ChoiceList />
+        <ChoiceList isClosed={timerState} />
         <CommentContainer>
           <CommentInput type="text" placeholder="コメントする"></CommentInput>
           <Submit></Submit>

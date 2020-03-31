@@ -10,7 +10,12 @@ import {
 
 import { ReactComponent as CorrectIcon } from "../atoms/images/correct.svg";
 
-export const ChoiceList: React.FC = () => {
+
+interface closedStateProps {
+  isClosed: number | "closed" | "correct" | "incorrect";
+}
+
+export const ChoiceList: React.FC<closedStateProps> = ({ isClosed }) => {
   return (
     <Container>
       <ChoiceContainer
@@ -19,6 +24,7 @@ export const ChoiceList: React.FC = () => {
         selected={true}
         voteRate={69}
         correct={true}
+        closedState={ isClosed === "closed" }
       />
       <ChoiceContainer
         choiceTitle="Kobe Bean Bryant"
@@ -26,6 +32,7 @@ export const ChoiceList: React.FC = () => {
         selected={false}
         voteRate={30}
         correct={false}
+        closedState={ isClosed === "closed" }
       />
     </Container>
   );
@@ -42,9 +49,10 @@ interface ChoiceContainerProps {
   selected: boolean;
   voteRate: number;
   correct: boolean;
+  closedState: boolean;
 }
 
-const ChoiceContainer: React.FC<ChoiceContainerProps> = ({ choiceTitle, choiceColor, selected, voteRate, correct }) => {
+const ChoiceContainer: React.FC<ChoiceContainerProps> = ({ choiceTitle, choiceColor, selected, voteRate, correct, closedState }) => {
   return (
     <ChoiceOutcomeContainer>
       <OutcomeIcon correct={correct} /> 
@@ -53,6 +61,7 @@ const ChoiceContainer: React.FC<ChoiceContainerProps> = ({ choiceTitle, choiceCo
         choiceColor={choiceColor}
         selected={selected}
         voteRate={voteRate}
+        closedState={closedState}
       />
     </ChoiceOutcomeContainer>
   )
@@ -77,12 +86,13 @@ interface ChoiceProps {
   choiceColor: string;
   selected: boolean;
   voteRate: number;
+  closedState: boolean;
 }
 
-const Choice: React.FC<ChoiceProps> = ({ choiceTitle, choiceColor, selected, voteRate }) => {
+const Choice: React.FC<ChoiceProps> = ({ choiceTitle, choiceColor, selected, voteRate, closedState }) => {
   return (
-    <StyledChoiceButton>
-      <ChoiceButton choiceColor={choiceColor} selected={selected}></ChoiceButton>
+    <StyledChoiceButton selected={selected} closedState={closedState}>
+      <ChoiceButton choiceColor={choiceColor} selected={selected} disabled={closedState}></ChoiceButton>
       <VoteRate voteRate={voteRate}></VoteRate>
       <Choicetitle choiceColor={choiceColor} selected={selected}>{choiceTitle}</Choicetitle>
       <RateValue choiceColor={choiceColor} selected={selected}>{voteRate}%</RateValue>
@@ -90,13 +100,14 @@ const Choice: React.FC<ChoiceProps> = ({ choiceTitle, choiceColor, selected, vot
   )
 }
 
-const StyledChoiceButton = styled.div`
+const StyledChoiceButton = styled.div<{ selected: boolean, closedState: boolean }>`
   position: relative;
   width: 200px;
   margin: 0px auto;
+  opacity: ${ props => props.closedState ? props.selected ? null : "0.5" : null };
 `;
 
-const ChoiceButton = styled.button<{ choiceColor: string, selected: boolean }>`
+const ChoiceButton = styled.button<{ choiceColor: string, selected: boolean}>`
   width: 200px;
   height: 48px;
   border-radius: 24px;
