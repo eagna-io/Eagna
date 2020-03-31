@@ -4,7 +4,7 @@ import moment, { Moment } from "moment";
 import * as http from "./";
 
 export const get = async (): Promise<GetRes> =>
-  http.get({ path: "/contest/poll", decoder: GetResDecoder });
+  http.get({ path: "/contest/poll/current", decoder: GetResDecoder });
 
 interface GetRes {
   title: string;
