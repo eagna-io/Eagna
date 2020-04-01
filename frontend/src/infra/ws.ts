@@ -8,7 +8,7 @@ export interface Params<T> {
   msgDecoder: D.Decoder<T>;
 }
 
-export const open = <T>({ onMsg, msgDecoder }: Params<T>) => {
+export const open = <T>({ onMsg, msgDecoder }: Params<T>): WebSocket => {
   const ws = new WebSocket(`${WS_URL}`);
   ws.onmessage = event => {
     const data = JSON.parse(event.data);
@@ -20,4 +20,5 @@ export const open = <T>({ onMsg, msgDecoder }: Params<T>) => {
       console.error(decoded);
     }
   };
+  return ws;
 };

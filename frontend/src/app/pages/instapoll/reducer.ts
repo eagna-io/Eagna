@@ -60,7 +60,7 @@ export const reducer = (state: State, action: Action): State =>
         state.poll = action.poll;
         break;
       case "pushComment":
-        state.comments.push(action.comment);
+        state.comments = [action.comment, ...state.comments];
         break;
     }
   });

@@ -9,8 +9,8 @@ export interface Params {
   onPoll: (poll: Poll) => void;
 }
 
-export const open = ({ onComment, onPoll}: Params) => {
-  ws.open({msgDecoder: IncomingMsgDecoder, onMsg: (msg) => {
+export const open = ({ onComment, onPoll}: Params): WebSocket => {
+  return ws.open({msgDecoder: IncomingMsgDecoder, onMsg: (msg) => {
     if (msg.type === "comment") {
       onComment(msg);
     } else {

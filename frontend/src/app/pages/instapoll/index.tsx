@@ -15,16 +15,18 @@ import { Timer } from "./components/organisms/timer";
 import { CommentCard } from "./components/organisms/commentCard";
 import { ChoiceList } from "./components/organisms/choiceList";
 import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg";
-import * as ws from "./infra/ws";
+import * as websocket from "./infra/ws";
 import { reducer, initialState } from "./reducer";
 
 export const InstapollPage: React.FC = () => {
+  const [ws, setWs] = React.useState<WebSocket | undefined>();
+  const [commentInput, setCommentInput] = React.useState("");
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { poll, comments, timer } = state;
 
   // Websocketコネクションを確立する
   React.useEffect(() => {
-    ws.open({
+    const ws = websocket.open({
       onComment: comment => {
         dispatch({ type: "pushComment", comment });
       },
@@ -32,6 +34,7 @@ export const InstapollPage: React.FC = () => {
         dispatch({ type: "updatePoll", poll });
       }
     });
+    setWs(ws);
   }, []);
 
   // 一定間隔でtickアクションを送る
@@ -67,8 +70,26 @@ export const InstapollPage: React.FC = () => {
             }}
           />
           <CommentContainer>
-            <CommentInput type="text" placeholder="コメントする" />
-            <Submit />
+            <CommentInput
+              type="text"
+              placeholder="コメントする"
+              value={commentInput}
+              onChange={e => setCommentInput(e.target.value)}
+            />
+            <Submit
+              onClick={() => {
+                if (commentInput && ws) {
+                  ws.send(
+                    JSON.stringify({
+                      type: "addComment",
+                      account: "hoge",
+                      comment: commentInput
+                    })
+                  );
+                  setCommentInput("");
+                }
+              }}
+            />
           </CommentContainer>
         </PollCard>
       </Container>
@@ -129,4 +150,5 @@ const CommentInput = styled.input`
 const Submit = styled(SubmitIcon)`
   width: 32px;
   height: 28px;
+  cursor: pointer;
 `;
