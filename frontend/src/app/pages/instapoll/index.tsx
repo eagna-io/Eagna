@@ -49,7 +49,7 @@ export const InstapollPage: React.FC = () => {
     };
   }, []);
 
-  if (poll && timer) {
+  if (poll && timer !== undefined) {
     return (
       <Container>
         <Timer content={timer} />

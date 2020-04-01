@@ -37,15 +37,15 @@ export type Action =
  * Reducer
  * =============
  */
-export const reducer = (state: State, action: Action): State =>
-  produce(state, state => {
+export const reducer = (state: State, action: Action): State => {
+  console.log("======== State =======");
+  console.dir(state);
+  console.log("======== Action =======");
+  console.dir(action);
+  return produce(state, state => {
     switch (action.type) {
       case "tick":
-        if (
-          state.poll &&
-          // Timerをカウントダウンする必要があるとき
-          (state.timer === undefined || typeof state.timer === "number")
-        ) {
+        if (state.poll) {
           state.timer = state.poll.endAt.unix() - action.time.unix();
           if (state.timer < 0) {
             state.timer = "closed";
@@ -64,3 +64,4 @@ export const reducer = (state: State, action: Action): State =>
         break;
     }
   });
+};
