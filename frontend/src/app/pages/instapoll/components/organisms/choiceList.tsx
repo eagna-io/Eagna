@@ -17,11 +17,7 @@ interface Props {
   onSelected: (choice: string) => void;
 }
 
-export const ChoiceList: React.FC<Props> = ({
-  poll,
-  selected,
-  onSelected
-}) => {
+export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
   if (poll.status === "open") {
     return (
       <Container>
@@ -50,6 +46,7 @@ export const ChoiceList: React.FC<Props> = ({
             }}
             disabled
             correct={poll.resolved === title}
+            voteRate={poll.stats!.votePerChoice[title] / poll.stats!.totalVotes * 100}
           />
         ))}
       </Container>
