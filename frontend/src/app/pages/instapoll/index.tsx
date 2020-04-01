@@ -20,6 +20,7 @@ import { reducer, initialState } from "./reducer";
 
 export const InstapollPage: React.FC = () => {
   const [ws, setWs] = React.useState<WebSocket | undefined>();
+  const [selected, setSelected] = React.useState<string | undefined>();
   const [commentInput, setCommentInput] = React.useState("");
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { poll, comments, timer } = state;
@@ -61,12 +62,18 @@ export const InstapollPage: React.FC = () => {
           <Theme>{poll.title}</Theme>
           <ChoiceList
             poll={poll}
-            selected={
-              // TODO
-              undefined
-            }
+            selected={selected}
             onSelected={choice => {
-              // TODO;
+              if (ws) {
+                ws.send(
+                  JSON.stringify({
+                    type: "updateChoice",
+                    account: "hoge",
+                    choice
+                  })
+                );
+                setSelected(choice);
+              }
             }}
           />
           <CommentContainer>

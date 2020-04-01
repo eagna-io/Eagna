@@ -17,7 +17,11 @@ interface Props {
   onSelected: (choice: string) => void;
 }
 
-export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
+export const ChoiceList: React.FC<Props> = ({
+  poll,
+  selected,
+  onSelected
+}) => {
   if (poll.status === "open") {
     return (
       <Container>
