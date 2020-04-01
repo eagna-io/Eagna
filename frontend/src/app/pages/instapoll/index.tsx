@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import moment from "moment";
 
 import {
   BackgroundMainColor,
@@ -14,31 +15,96 @@ import { Timer } from "./components/organisms/timer";
 import { CommentCard } from "./components/organisms/commentCard";
 import { ChoiceList } from "./components/organisms/choiceList";
 import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg";
+import * as websocket from "./infra/ws";
+import { reducer, initialState } from "./reducer";
 
 export const InstapollPage: React.FC = () => {
-  return (
-    <Container>
-      <Timer content={timerState} />
-      <CommentFeed>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={MainRed.hex}/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={MainRed.hex}/>
-        <CommentCard userName="Yuya_F" comment="レブロン調子いいね" flagColor={ChoiceBlue.hex}/>
-      </CommentFeed>
-      <PollCard>
-        <Theme>{themeTitle}</Theme>
-        <ChoiceList />
-        <CommentContainer>
-          <CommentInput type="text" placeholder="コメントする"></CommentInput>
-          <Submit></Submit>
-        </CommentContainer>
-      </PollCard>
-    </Container>
-  );
-}
+  const [ws, setWs] = React.useState<WebSocket | undefined>();
+  const [selected, setSelected] = React.useState<string | undefined>();
+  const [commentInput, setCommentInput] = React.useState("");
+  const [state, dispatch] = React.useReducer(reducer, initialState);
+  const { poll, comments, timer } = state;
 
-const timerState = 123;
-const themeTitle = "次にポイントを決めるのは誰？";
+  // Websocketコネクションを確立する
+  React.useEffect(() => {
+    const ws = websocket.open({
+      onComment: comment => {
+        dispatch({ type: "pushComment", comment });
+      },
+      onPoll: poll => {
+        dispatch({ type: "updatePoll", poll });
+      }
+    });
+    setWs(ws);
+  }, []);
+
+  // 一定間隔でtickアクションを送る
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      dispatch({ type: "tick", time: moment() });
+    }, 950);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  if (poll && timer !== undefined) {
+    return (
+      <Container>
+        <Timer content={timer} />
+        <CommentFeed>
+          {comments.map(comment => (
+            <CommentCard comment={comment} />
+          ))}
+        </CommentFeed>
+        <PollCard>
+          <Theme>{poll.title}</Theme>
+          <ChoiceList
+            poll={poll}
+            selected={selected}
+            onSelected={choice => {
+              if (ws) {
+                ws.send(
+                  JSON.stringify({
+                    type: "updateChoice",
+                    account: "hoge",
+                    choice
+                  })
+                );
+                setSelected(choice);
+              }
+            }}
+          />
+          <CommentContainer>
+            <CommentInput
+              type="text"
+              placeholder="コメントする"
+              value={commentInput}
+              onChange={e => setCommentInput(e.target.value)}
+            />
+            <Submit
+              onClick={() => {
+                if (commentInput && ws) {
+                  ws.send(
+                    JSON.stringify({
+                      type: "addComment",
+                      account: "hoge",
+                      comment: commentInput
+                    })
+                  );
+                  setCommentInput("");
+                }
+              }}
+            />
+          </CommentContainer>
+        </PollCard>
+      </Container>
+    );
+  } else {
+    return <Container>Loading...</Container>;
+  }
+};
 
 const Container = styled.div`
   width: 100vw;
@@ -50,7 +116,7 @@ const Container = styled.div`
 `;
 
 const CommentFeed = styled.div`
-  width: 100%;  
+  width: 100%;
   height: 50%;
 `;
 
@@ -72,12 +138,12 @@ const Theme = styled.div`
 `;
 
 const CommentContainer = styled.div`
-  width: 100%;  
+  width: 100%;
   display: flex;
 `;
 
 const CommentInput = styled.input`
-  width: 86%;  
+  width: 86%;
   border-radius: 24px;
   height: 30px;
   border: solid 1px ${TextBaseColor.hex};
@@ -91,4 +157,5 @@ const CommentInput = styled.input`
 const Submit = styled(SubmitIcon)`
   width: 32px;
   height: 28px;
+  cursor: pointer;
 `;

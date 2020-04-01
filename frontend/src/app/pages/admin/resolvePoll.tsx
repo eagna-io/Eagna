@@ -7,26 +7,50 @@ import {
   WhiteBaseColor,
   BlackColor
 } from "app/components/color";
+import { Poll } from "app/pages/instapoll/models";
+import * as pollApi from "infra/http/poll";
 
-import { NavigationBar } from "./conponents/organisms/navbar";
-import { ResolveItem } from "./conponents/organisms/resolveItem";
+import { NavigationBar } from "./components/organisms/navbar";
+import { ResolveItem } from "./components/organisms/resolveItem";
 
 export const ResolvePoll: React.FC = () => {
+  const [poll, setPoll] = React.useState<Poll | undefined>();
+
+  React.useEffect(() => {
+    pollApi.get().then(poll => setPoll(poll));
+  }, []);
+
+  if (!poll || poll.status === "open" || poll.resolved) {
+    return (
+      <Container>
+        <NavBarComponent>
+          <NavigationBar />
+        </NavBarComponent>
+        <Content>Pollが見つかりません</Content>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <NavBarComponent>
         <NavigationBar />
       </NavBarComponent>
       <Content>
-        <PollTitle>{pollTitle}</PollTitle>
+        <PollTitle>{poll.title}</PollTitle>
         <ResolveContainer>
-          <ResolveItem choiceItem="LeBron" pollTitle={pollTitle} />
-          <ResolveItem choiceItem="Kobe Bean Bryant" pollTitle={pollTitle} />
+          {Object.keys(poll.choices).map(choice => (
+            <ResolveItem
+              key={choice}
+              choiceItem={choice}
+              pollTitle={poll.title}
+            />
+          ))}
         </ResolveContainer>
       </Content>
     </Container>
   );
-}
+};
 
 const pollTitle = "次にポイントを決めるのは誰？";
 

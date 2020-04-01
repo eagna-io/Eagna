@@ -1,18 +1,30 @@
 import React from "react";
 import styled from "styled-components";
+import * as D from "@mojotech/json-type-validation";
 
 import {
+  Color,
   AdminBackgroundColor,
   AdminMainColor,
   WhiteBaseColor,
   BlackColor,
   AdminInputBorderColor,
-  MainRed
+  MainRed,
+  ChoiceBlue,
+  ChoiceGreen,
+  ChoiceYellow,
+  ChoicePink
 } from "app/components/color";
+import * as http from "infra/http";
 
-import { NavigationBar } from "./conponents/organisms/navbar";
+import { NavigationBar } from "./components/organisms/navbar";
 
 export const CreatePoll: React.FC = () => {
+  const [title, setTitle] = React.useState("");
+  const [choices, setChoices] = React.useState<[string, string][]>([
+    ["", colorOfIdx(0).hex]
+  ]);
+
   return (
     <Container>
       <NavBarComponent>
@@ -21,24 +33,71 @@ export const CreatePoll: React.FC = () => {
       <Content>
         <QuestionContainer>
           <QuestionTag>問題文</QuestionTag>
-          <QuestionInput></QuestionInput>
+          <QuestionInput
+            onChange={e => {
+              setTitle(e.target.value);
+            }}
+          />
         </QuestionContainer>
         <ChoiceContainer>
           <ChoiceList>
-            <ChoiceTag>問題文</ChoiceTag>
+            <ChoiceTag>選択肢</ChoiceTag>
             <ChoiceUl>
-              <Choiceitem>
-                <ChoiceInput placeholder="name"></ChoiceInput>
-              </Choiceitem>
+              {choices.map(([choice, color], i) => (
+                <Choiceitem key={i}>
+                  <ChoiceInput
+                    placeholder="選択肢名"
+                    onChange={e => {
+                      const newChoices = [...choices];
+                      newChoices[i][0] = e.target.value;
+                      setChoices(newChoices);
+                    }}
+                  />
+                </Choiceitem>
+              ))}
             </ChoiceUl>
           </ChoiceList>
-          <AddChoice>選択肢を追加</AddChoice>
+          <AddChoice
+            onClick={() => {
+              const nextColor = colorOfIdx(choices.length);
+              setChoices([...choices, ["", nextColor.hex]]);
+            }}
+          >
+            選択肢を追加
+          </AddChoice>
+          <RemoveChoice
+            onClick={() => {
+              const n = [...choices];
+              n.pop();
+              setChoices(n);
+            }}
+          >
+            選択肢を削除
+          </RemoveChoice>
         </ChoiceContainer>
-        <CreatePollButton>作成</CreatePollButton>
+        <CreatePollButton
+          onClick={async () => {
+            const res = await http.post({
+              path: "/contest/poll",
+              body: {
+                title,
+                choices: Object.fromEntries(choices)
+              },
+              decoder: D.anyJson()
+            });
+            alert(JSON.stringify(res));
+          }}
+        >
+          作成
+        </CreatePollButton>
       </Content>
     </Container>
   );
-}
+};
+
+const colorOfIdx = (idx: number): Color => {
+  return [MainRed, ChoiceBlue, ChoiceGreen, ChoiceYellow, ChoicePink][idx];
+};
 
 const Container = styled.div`
   width: 100vw;
@@ -120,7 +179,7 @@ const Choiceitem = styled.li`
     width: 8px;
     height: 8px;
     display: inline-block;
-    border-radius: 50%; 
+    border-radius: 50%;
     margin-right: 20px;
   }
   margin-bottom: 8px;
@@ -146,6 +205,18 @@ const AddChoice = styled.button`
   color: ${AdminMainColor.hex};
 `;
 
+const RemoveChoice = styled.button`
+  width: 100px;
+  height: 20px;
+  border-radius: 8px;
+  background-color: ${WhiteBaseColor.hex};
+  border: solid 1px ${MainRed.hex};
+  display: block;
+  margin: 12px 0 0 69px;
+  font-size: 10px;
+  color: ${MainRed.hex};
+`;
+
 const CreatePollButton = styled.button`
   width: 250px;
   height: 40px;
@@ -157,5 +228,5 @@ const CreatePollButton = styled.button`
   bottom: 31px;
   left: 50%;
   transform: translateY(0%) translateX(-50%);
-  -webkit- transform: translateY(0%) translateX(-50%);
+  -webkit-transform: translateY(0%) translateX(-50%);
 `;

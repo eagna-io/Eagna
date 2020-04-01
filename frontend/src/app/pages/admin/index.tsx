@@ -8,7 +8,7 @@ import {
   BlackColor
 } from "app/components/color";
 
-import { NavigationBar } from "./conponents/organisms/navbar";
+import { NavigationBar } from "./components/organisms/navbar";
 
 export const Admin: React.FC = () => {
   return (
