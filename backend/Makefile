@@ -11,4 +11,4 @@ test:
 .PHONY: deploy
 deploy:
 	heroku container:push web --arg BUILD_MODE=debug -a crop-instapoll-backend-staging
-	heroku container:release web
+	heroku container:release web -a crop-instapoll-backend-staging
