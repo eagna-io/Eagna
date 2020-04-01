@@ -56,7 +56,16 @@ export const InstapollPage: React.FC = () => {
         </CommentFeed>
         <PollCard>
           <Theme>{poll.title}</Theme>
-          <ChoiceList />
+          <ChoiceList
+            poll={poll}
+            selected={
+              // TODO
+              undefined
+            }
+            onSelected={choice => {
+              // TODO;
+            }}
+          />
           <CommentContainer>
             <CommentInput type="text" placeholder="コメントする" />
             <Submit />
