@@ -19,11 +19,20 @@ import * as websocket from "./infra/ws";
 import { reducer, initialState } from "./reducer";
 
 export const InstapollPage: React.FC = () => {
+  const [account, setAccount] = React.useState("");
   const [ws, setWs] = React.useState<WebSocket | undefined>();
   const [selected, setSelected] = React.useState<string | undefined>();
   const [commentInput, setCommentInput] = React.useState("");
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { poll, comments, timer } = state;
+
+  React.useEffect(() => {
+    if (account === "") {
+      const accountName =
+        window.prompt("ユーザー名を入力してください") || "HOGEO";
+      setAccount(accountName);
+    }
+  }, [account]);
 
   // Websocketコネクションを確立する
   React.useEffect(() => {
@@ -68,7 +77,7 @@ export const InstapollPage: React.FC = () => {
                 ws.send(
                   JSON.stringify({
                     type: "updateChoice",
-                    account: "hoge",
+                    account,
                     choice
                   })
                 );
@@ -89,7 +98,7 @@ export const InstapollPage: React.FC = () => {
                   ws.send(
                     JSON.stringify({
                       type: "addComment",
-                      account: "hoge",
+                      account,
                       comment: commentInput
                     })
                   );
