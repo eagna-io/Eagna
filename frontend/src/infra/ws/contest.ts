@@ -2,7 +2,7 @@ import * as D from "@mojotech/json-type-validation";
 import moment, { Moment } from "moment";
 
 import * as ws from "infra/ws";
-import { Comment, Poll} from "../models";
+import { Comment, Poll} from "model/poll";
 
 export interface Params {
   onComment: (comment: Comment) => void;

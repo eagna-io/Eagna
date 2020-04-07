@@ -1,15 +1,10 @@
 import React from "react";
 import styled from "styled-components";
 
-import {
-  ChoiceBlue,
-  MainRed,
-  WhiteBaseColor,
-  VoteRateBackGround
-} from "app/components/color";
+import { WhiteBaseColor, VoteRateBackGround } from "app/components/color";
 
 import { ReactComponent as CorrectIcon } from "../atoms/images/correct.svg";
-import { Poll } from "../../models";
+import { Poll } from "model/poll";
 
 interface Props {
   poll: Poll;
@@ -46,7 +41,9 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
             }}
             disabled
             correct={poll.resolved === title}
-            voteRate={poll.stats!.votePerChoice[title] / poll.stats!.totalVotes * 100}
+            voteRate={
+              (poll.stats!.votePerChoice[title] / poll.stats!.totalVotes) * 100
+            }
           />
         ))}
       </Container>

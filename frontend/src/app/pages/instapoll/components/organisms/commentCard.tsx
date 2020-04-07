@@ -6,7 +6,7 @@ import {
   TextBaseColor,
   BlackColor
 } from "app/components/color";
-import { Comment as CommentModel } from "../../models";
+import { Comment as CommentModel } from "model/poll";
 
 interface Props {
   comment: CommentModel;

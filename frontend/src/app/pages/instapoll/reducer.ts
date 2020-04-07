@@ -1,7 +1,7 @@
 import produce from "immer";
 import { Moment } from "moment";
 
-import { Comment, Poll, Timer } from "./models";
+import { Comment, Poll, Timer } from "model/poll";
 
 export type State = {
   poll?: Poll;
