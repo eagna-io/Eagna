@@ -9,7 +9,7 @@ import {
 } from "app/components/color";
 
 import { ReactComponent as CorrectIcon } from "../atoms/images/correct.svg";
-import { Poll } from "../../models";
+import { Poll } from "model/poll";
 
 interface Props {
   poll: Poll;

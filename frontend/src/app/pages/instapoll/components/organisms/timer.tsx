@@ -7,7 +7,7 @@ import {
   Correct,
   MainRed
 } from "app/components/color";
-import { Timer as TimerModel } from "../../models";
+import { Timer as TimerModel } from "model/poll";
 
 interface Props {
   content: TimerModel;

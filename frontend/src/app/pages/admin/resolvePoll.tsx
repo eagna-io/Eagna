@@ -7,7 +7,7 @@ import {
   WhiteBaseColor,
   BlackColor
 } from "app/components/color";
-import { Poll } from "app/pages/instapoll/models";
+import { Poll } from "model/poll";
 import * as pollApi from "infra/http/poll";
 
 import { NavigationBar } from "./components/organisms/navbar";
