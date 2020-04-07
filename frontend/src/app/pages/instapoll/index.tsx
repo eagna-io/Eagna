@@ -1,15 +1,6 @@
 import React from "react";
-import styled from "styled-components";
 import moment from "moment";
 
-import {
-  BackgroundMainColor,
-  WhiteBaseColor,
-  ChoiceBlue,
-  MainRed,
-  TextBaseColor,
-  BlackColor
-} from "app/components/color";
 import * as websocket from "infra/ws/contest";
 
 import { Page, LoadingPage } from "./page";
@@ -18,8 +9,6 @@ import { reducer, initialState } from "./reducer";
 export const InstapollPage: React.FC = () => {
   const [account, setAccount] = React.useState("");
   const [ws, setWs] = React.useState<WebSocket | undefined>();
-  const [selected, setSelected] = React.useState<string | undefined>();
-  const [commentInput, setCommentInput] = React.useState("");
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { poll, comments, timer } = state;
 

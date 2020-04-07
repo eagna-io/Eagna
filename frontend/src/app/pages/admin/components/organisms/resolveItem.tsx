@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { AdminMainColor, AdminInputBorderColor } from "app/components/color";
+import { AdminMainColor } from "app/components/color";
 import * as pollApi from "infra/http/poll";
 
 interface Props {

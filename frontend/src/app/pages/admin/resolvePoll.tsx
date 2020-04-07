@@ -52,8 +52,6 @@ export const ResolvePoll: React.FC = () => {
   );
 };
 
-const pollTitle = "次にポイントを決めるのは誰？";
-
 const Container = styled.div`
   width: 100vw;
   height: 100vh;
