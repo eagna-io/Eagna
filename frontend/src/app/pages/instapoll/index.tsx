@@ -10,12 +10,12 @@ import {
   TextBaseColor,
   BlackColor
 } from "app/components/color";
+import * as websocket from "infra/ws/contest";
 
 import { Timer } from "./components/organisms/timer";
 import { CommentCard } from "./components/organisms/commentCard";
 import { ChoiceList } from "./components/organisms/choiceList";
 import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg";
-import * as websocket from "./infra/ws";
 import { reducer, initialState } from "./reducer";
 
 export const InstapollPage: React.FC = () => {
