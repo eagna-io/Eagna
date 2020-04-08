@@ -1,3 +1,4 @@
+pub mod contest;
 pub(crate) mod schema;
 
 use diesel::{
