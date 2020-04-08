@@ -30,7 +30,7 @@ pub struct Poll {
 
 #[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
 #[serde(transparent)]
-pub struct Id(Uuid);
+pub struct Id(pub Uuid);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]

@@ -42,10 +42,10 @@ impl PollTable for Connection {
 #[derive(Insertable)]
 #[table_name = "polls"]
 pub struct NewPoll<'a> {
-    id: &'a Uuid,
-    contest_id: &'a Uuid,
-    title: &'a str,
-    end_at: &'a DateTime<Utc>,
+    pub id: &'a Uuid,
+    pub contest_id: &'a Uuid,
+    pub title: &'a str,
+    pub end_at: &'a DateTime<Utc>,
 }
 
 #[derive(Queryable)]
