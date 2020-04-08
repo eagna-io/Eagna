@@ -2,4 +2,3 @@
 
 pub mod account;
 pub mod contest;
-pub mod poll;

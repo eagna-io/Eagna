@@ -1,4 +1,4 @@
-use crate::poll::model::Poll;
+use crate::contest::poll::model::Poll;
 use uuid::Uuid;
 
 pub struct Contest {
