@@ -1,4 +1,5 @@
 pub mod contest;
+pub mod poll;
 pub(crate) mod schema;
 
 use diesel::{

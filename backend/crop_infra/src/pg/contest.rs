@@ -25,6 +25,12 @@ pub trait ContestTable {
     }
 }
 
+impl ContestTable for Connection {
+    fn conn(&self) -> &Connection {
+        self
+    }
+}
+
 #[derive(Insertable)]
 #[table_name = "contests"]
 pub struct NewContest<'a> {
