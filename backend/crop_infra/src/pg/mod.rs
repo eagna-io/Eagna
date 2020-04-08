@@ -1,3 +1,4 @@
+pub mod choice;
 pub mod contest;
 pub mod poll;
 pub(crate) mod schema;

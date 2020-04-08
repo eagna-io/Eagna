@@ -21,7 +21,8 @@ CREATE TABLE polls (
 );
 
 CREATE TABLE choices (
-  id        UUID PRIMARY KEY,
+  /* unused */
+  id        SERIAL PRIMARY KEY,
   poll_id   UUID NOT NULL,
   name      TEXT NOT NULL,
   color     TEXT NOT NULL,
@@ -33,14 +34,17 @@ CREATE TABLE choices (
 );
 
 CREATE TABLE account_choices (
+  /* unused */
   id          SERIAL PRIMARY KEY,
   account_id  UUID NOT NULL,
-  choice_id   UUID NOT NULL,
+  poll_id     UUID NOT NULL,
+  choice_name TEXT NOT NULL,
 
+  UNIQUE (account_id, poll_id),
   CONSTRAINT account_choices_account_fkey FOREIGN KEY(account_id)
     REFERENCES accounts(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT account_choices_choice_fkey FOREIGN KEY(choice_id)
-    REFERENCES choices(id) ON UPDATE RESTRICT ON DELETE RESTRICT
+  CONSTRAINT account_choices_poll_fkey FOREIGN KEY(poll_id)
+    REFERENCES polls(id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 CREATE TABLE comments (
