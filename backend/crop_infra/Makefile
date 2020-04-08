@@ -1,6 +1,6 @@
 .PHONY: print_schema
 TMP_PG_URL:=postgres://postgres:postgres@localhost:5430/postgres
-SCHEMA_FILE:=src/postgres/schema.rs
+SCHEMA_FILE:=src/pg/schema.rs
 print_schema:
 	docker stop postgres-print-schema || true
 	docker run -d --rm --name postgres-print-schema -p 5430:5432 postgres
