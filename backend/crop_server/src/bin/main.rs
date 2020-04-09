@@ -1,16 +1,17 @@
-use crop_domain::contest::model::Contest;
+use crop_infra::pg::Pool;
 use crop_server::{context::Context, server};
 
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
 
-    let context = Context::new();
+    // Contextの初期化
+    let pg_pool = Pool::new(get_env_var_or_panic("DATABASE_URL"));
+    let context = Context::new(pg_pool);
 
+    // Serverの起動
     let port = get_env_var_u16_or_panic("PORT");
-
     log::info!("Server is running on port {}", port);
-
     server::Server::bind(([0, 0, 0, 0], port), context).await;
 }
 
