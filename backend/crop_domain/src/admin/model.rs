@@ -1,5 +1,6 @@
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use crop_infra::jwt;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -13,7 +14,7 @@ pub trait Admin {
     }
 }
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct AdminId(pub Uuid);
 
@@ -24,6 +25,7 @@ pub struct AdminId(pub Uuid);
  */
 const ACCESS_TOKEN_EXPIRE_DAYS: i64 = 30;
 
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, JsonSchema)]
 pub struct AccessToken {
     pub admin_id: AdminId,
     pub expire_at: DateTime<Utc>,
