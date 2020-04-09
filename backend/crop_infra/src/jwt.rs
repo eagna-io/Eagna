@@ -1,4 +1,4 @@
-use jsonwebtoken::{errors::Error as JwtError, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
 use lazycell::AtomicLazyCell;
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -7,11 +7,11 @@ pub fn init(secret: &'static [u8]) {
     GLOBAL_JWT.inner.fill(jwt).unwrap()
 }
 
-pub fn encode<T: Serialize>(claim: &T) -> Result<String, JwtError> {
+pub fn encode<T: Serialize>(claim: &T) -> anyhow::Result<String> {
     GLOBAL_JWT.inner.borrow().unwrap().encode(claim)
 }
 
-pub fn decode<T: DeserializeOwned>(token: &str) -> Result<T, JwtError> {
+pub fn decode<T: DeserializeOwned>(token: &str) -> anyhow::Result<T> {
     GLOBAL_JWT.inner.borrow().unwrap().decode(token)
 }
 
@@ -41,11 +41,15 @@ impl<'a> JwtInner<'a> {
         }
     }
 
-    fn encode<T: Serialize>(&self, claim: &T) -> Result<String, JwtError> {
-        jsonwebtoken::encode(&Header::default(), claim, &self.encoding_key)
+    fn encode<T: Serialize>(&self, claim: &T) -> anyhow::Result<String> {
+        Ok(jsonwebtoken::encode(
+            &Header::default(),
+            claim,
+            &self.encoding_key,
+        )?)
     }
 
-    fn decode<T: DeserializeOwned>(&self, token: &str) -> Result<T, JwtError> {
+    fn decode<T: DeserializeOwned>(&self, token: &str) -> anyhow::Result<T> {
         Ok(jsonwebtoken::decode(token, &self.decoding_key, &Validation::default())?.claims)
     }
 }

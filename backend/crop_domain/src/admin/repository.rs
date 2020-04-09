@@ -1,6 +1,6 @@
 use super::{
     model::{Admin, AdminId},
-    service::verify_credentials,
+    service::auth::verify_credentials,
 };
 use crop_infra::pg::{admin::AdminTable as _, Connection};
 use uuid::Uuid;
