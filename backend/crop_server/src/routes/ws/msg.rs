@@ -1,6 +1,6 @@
 use crop_domain::{
     account::model::AccountName,
-    poll::model::{ChoiceName, Comment, Poll},
+    contest::poll::model::{ChoiceName, Comment, Poll},
 };
 use crop_primitive::string::String;
 use schemars::JsonSchema;

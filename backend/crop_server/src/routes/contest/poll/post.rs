@@ -1,5 +1,5 @@
 use crate::{context::Context, routes::ws::msg::OutgoingMsg};
-use crop_domain::poll::model::{ChoiceColor, ChoiceName, Id as PollId, Poll};
+use crop_domain::contest::poll::model::{ChoiceColor, ChoiceName, Id as PollId, Poll};
 use crop_primitive::string::String;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

@@ -1,5 +1,5 @@
 use crate::{context::Context, routes::ws::msg::OutgoingMsg};
-use crop_domain::poll::model::ChoiceName;
+use crop_domain::contest::poll::model::ChoiceName;
 use schemars::JsonSchema;
 use serde::Deserialize;
 use std::convert::Infallible;
