@@ -18,13 +18,19 @@ pub trait AdminTable {
     ) -> anyhow::Result<Option<QueriedAdminCredentials>> {
         match admins::table
             .filter(admins::email.eq(email))
-            .select((admins::id, admins::credential, admins::salt))
+            .select((admins::id, admins::cred, admins::salt))
             .first::<QueriedAdminCredentials>(self.conn())
         {
             Ok(cred) => Ok(Some(cred)),
             Err(PgError::NotFound) => Ok(None),
             Err(e) => Err(e.into()),
         }
+    }
+}
+
+impl AdminTable for Connection {
+    fn conn(&self) -> &Connection {
+        self
     }
 }
 
