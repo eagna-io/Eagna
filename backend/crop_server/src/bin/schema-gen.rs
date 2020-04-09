@@ -10,14 +10,10 @@ macro_rules! write_json_schema {
 }
 
 fn main() {
-    write_json_schema!("api/ws/outgoing.json", routes::ws::msg::OutgoingMsg);
-
-    write_json_schema!(
-        "api/contest/poll/post-req.json",
-        routes::contest::poll::post::Body
-    );
+    /*
     write_json_schema!(
         "api/contest/poll/post-res.json",
         routes::contest::poll::post::Response
     );
+    */
 }

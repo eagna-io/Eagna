@@ -1,6 +1,3 @@
-pub mod contest;
-pub mod ws;
-
 use crate::context::Context;
 use warp::{filters::cors, reject::Rejection, reply::Reply, Filter};
 
@@ -10,11 +7,7 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
         .allow_methods(vec!["POST", "PATCH", "PUT", "OPTIONS"])
         .allow_header("Content-Type");
 
-    let rest = self::contest::poll::get::filter(ctx.clone())
-        .or(self::contest::poll::post::filter(ctx.clone()))
-        .or(self::contest::poll::patch::filter(ctx.clone()));
+    let routes = warp::filters::any::any().map(|| "Hello world");
 
-    let rest_with_cors = rest.with(cors_wrapper);
-
-    self::ws::filter(ctx).or(rest_with_cors)
+    routes.with(cors_wrapper)
 }

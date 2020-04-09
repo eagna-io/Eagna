@@ -5,7 +5,7 @@ use crop_server::{context::Context, server};
 async fn main() {
     pretty_env_logger::init();
 
-    let context = Context::new(Contest::new());
+    let context = Context::new();
 
     let port = get_env_var_u16_or_panic("PORT");
 
