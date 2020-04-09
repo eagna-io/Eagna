@@ -52,6 +52,7 @@ CREATE TABLE comments (
   poll_id     UUID NOT NULL,
   account_id  UUID NOT NULL,
   content     TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   CONSTRAINT poll_comment_fkey FOREIGN KEY(poll_id)
     REFERENCES polls(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
