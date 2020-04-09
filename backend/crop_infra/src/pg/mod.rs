@@ -1,3 +1,4 @@
+pub mod admin;
 pub mod choice;
 pub mod comment;
 pub mod contest;

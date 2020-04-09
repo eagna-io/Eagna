@@ -1,3 +1,10 @@
+CREATE TABLE admins (
+  id      UUID PRIMARY KEY,
+  email   TEXT UNIQUE NOT NULL,
+  cred    BYTEA NOT NULL, -- 64byte
+  salt    BYTEA NOT NULL -- 64byte
+);
+
 CREATE TABLE accounts (
   id        UUID PRIMARY KEY,
   name      TEXT NOT NULL
