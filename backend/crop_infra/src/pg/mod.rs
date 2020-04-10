@@ -26,7 +26,7 @@ impl Pool {
         Pool { pool }
     }
 
-    pub async fn with_conn<F, T>(&self, func: F) -> anyhow::Result<T>
+    pub async fn with_conn<T, F>(&self, func: F) -> anyhow::Result<T>
     where
         F: FnOnce(Connection) -> T + Send + 'static,
         T: Send + 'static,

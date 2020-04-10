@@ -1,4 +1,5 @@
 pub mod admins;
+pub mod contests;
 
 use crate::context::Context;
 use warp::{filters::cors, reject::Rejection, reply::Reply, Filter};
