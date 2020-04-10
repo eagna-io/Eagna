@@ -1,5 +1,5 @@
 use super::{
-    model::{Admin, AdminId},
+    model::{Admin, AdminId, AuthenticatedAdmin},
     service::auth::verify_credentials,
 };
 use crop_infra::pg::{admin::AdminTable as _, Connection};
@@ -35,15 +35,5 @@ impl Unauthenticated {
         Ok(AuthenticatedAdmin {
             id: AdminId(self.id),
         })
-    }
-}
-
-pub struct AuthenticatedAdmin {
-    pub id: AdminId,
-}
-
-impl Admin for AuthenticatedAdmin {
-    fn id(&self) -> &AdminId {
-        &self.id
     }
 }

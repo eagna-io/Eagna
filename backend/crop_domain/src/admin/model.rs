@@ -59,8 +59,37 @@ impl AccessToken {
     }
 }
 
+impl std::str::FromStr for AccessToken {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> anyhow::Result<Self> {
+        AccessToken::decode(s)
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct JwtClaim {
     admin_id: AdminId,
     exp: usize,
+}
+
+/*
+ * ==================
+ * AuthenticatedAdmin
+ * ==================
+ */
+pub struct AuthenticatedAdmin {
+    pub id: AdminId,
+}
+
+impl Admin for AuthenticatedAdmin {
+    fn id(&self) -> &AdminId {
+        &self.id
+    }
+}
+
+impl From<AccessToken> for AuthenticatedAdmin {
+    fn from(token: AccessToken) -> AuthenticatedAdmin {
+        AuthenticatedAdmin { id: token.admin_id }
+    }
 }
