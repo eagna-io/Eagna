@@ -31,8 +31,8 @@ pub trait PollTable {
                 polls::id,
                 polls::contest_id,
                 polls::title,
-                polls::duration_sec,
                 polls::created_at,
+                polls::duration_sec,
                 polls::closed_at,
                 choices::name.nullable(),
                 choices::color.nullable(),
@@ -59,6 +59,7 @@ pub struct NewPoll<'a> {
     pub id: &'a Uuid,
     pub contest_id: &'a Uuid,
     pub title: &'a str,
+    pub created_at: &'a DateTime<Utc>,
     pub duration_sec: Option<i32>,
 }
 
@@ -67,8 +68,8 @@ pub struct QueriedPoll {
     pub id: Uuid,
     pub contest_id: Uuid,
     pub title: String,
-    pub duration_sec: Option<i32>,
     pub created_at: DateTime<Utc>,
+    pub duration_sec: Option<i32>,
     pub closed_at: Option<DateTime<Utc>>,
     pub resolved_choice_name: Option<String>,
     pub resolved_choice_color: Option<String>,

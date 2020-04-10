@@ -1,17 +1,28 @@
 use crate::contest::poll::model::Poll;
+use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 pub struct Contest {
     pub id: ContestId,
+    pub title: String,
+    pub category: String,
+    pub event_start_at: Option<DateTime<Utc>>,
     pub polls: Vec<Poll>,
 }
 
 pub struct ContestId(pub Uuid);
 
 impl Contest {
-    pub fn new() -> Contest {
+    pub fn new(
+        title: impl Into<String>,
+        category: impl Into<String>,
+        event_start_at: Option<DateTime<Utc>>,
+    ) -> Contest {
         Contest {
             id: ContestId::new(),
+            title: title.into(),
+            category: category.into(),
+            event_start_at,
             polls: Vec::new(),
         }
     }

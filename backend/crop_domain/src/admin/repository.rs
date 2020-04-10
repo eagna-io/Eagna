@@ -1,5 +1,5 @@
 use super::{
-    model::{Admin, AdminId, AuthenticatedAdmin},
+    model::{AdminId, AuthenticatedAdmin},
     service::auth::verify_credentials,
 };
 use crop_infra::pg::{admin::AdminTable as _, Connection};

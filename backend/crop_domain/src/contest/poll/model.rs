@@ -1,4 +1,4 @@
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Utc};
 use crop_primitive::string::String;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -13,7 +13,9 @@ pub struct Poll {
     // Immutable
     pub id: Id,
     pub title: String,
-    pub end_at: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub duration_sec: Option<i32>,
     pub choices: HashMap<ChoiceName, ChoiceColor>,
 
     // Mutable
@@ -48,11 +50,16 @@ pub struct ChoiceName(pub String);
 pub struct ChoiceColor(pub String);
 
 impl Poll {
-    pub fn new(title: String, choices: HashMap<ChoiceName, ChoiceColor>) -> Poll {
+    pub fn new(
+        title: String,
+        duration_sec: Option<i32>,
+        choices: HashMap<ChoiceName, ChoiceColor>,
+    ) -> Poll {
         Poll {
             id: Id::new(),
             title,
-            end_at: Utc::now() + Duration::seconds(30),
+            created_at: Utc::now(),
+            duration_sec,
             choices,
             status: Status::Open,
             user_choice: HashMap::new(),
@@ -97,17 +104,13 @@ impl Poll {
     }
 
     pub fn close_or_ignore(&mut self) -> bool {
-        if self.is_open() && self.is_closable() {
+        if self.is_open() {
             self.status = Status::Closed;
             self.stats = Some(self.compute_stats());
             true
         } else {
             false
         }
-    }
-
-    fn is_closable(&self) -> bool {
-        self.end_at < Utc::now()
     }
 
     fn compute_stats(&self) -> Stats {
