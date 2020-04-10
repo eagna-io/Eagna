@@ -11,9 +11,22 @@ macro_rules! write_json_schema {
 
 fn main() {
     /*
+     * GET /contests
+     */
     write_json_schema!(
-        "api/contest/poll/post-res.json",
-        routes::contest::poll::post::Response
+        "api/contests__get__res.json",
+        routes::contests::get::ResBody
     );
-    */
+
+    /*
+     * POST /admins/me/access_tokens
+     */
+    write_json_schema!(
+        "api/admins_me_access_tokens__post__req.json",
+        routes::admins::me::access_tokens::post::ReqBody
+    );
+    write_json_schema!(
+        "api/admins_me_access_tokens__post__res.json",
+        routes::admins::me::access_tokens::post::ResBody
+    );
 }

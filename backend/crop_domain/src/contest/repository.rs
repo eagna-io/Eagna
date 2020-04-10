@@ -42,11 +42,9 @@ pub trait ContestRepository {
 
     // ArchivedでないContestを全てqueryする
     fn query_not_archived(&self) -> anyhow::Result<Vec<Contest<Unknown>>> {
-        use crop_infra::pg::contest::ContestTable as _;
+        use crop_infra::pg::contest::ContestTable;
 
-        Ok(self
-            .conn()
-            .query_not_archived()?
+        Ok(ContestTable::query_not_archived(self.conn())?
             .into_iter()
             .map(|queried| Contest {
                 id: ContestId(queried.id),
@@ -57,5 +55,11 @@ pub trait ContestRepository {
                 polls: Unknown,
             })
             .collect())
+    }
+}
+
+impl ContestRepository for Connection {
+    fn conn(&self) -> &Connection {
+        self
     }
 }

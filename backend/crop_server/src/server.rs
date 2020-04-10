@@ -1,10 +1,6 @@
 use crate::{context::Context, routes};
-use futures::{
-    future::{self, FutureExt as _},
-    stream::StreamExt as _,
-};
+use futures::future;
 use std::{convert::Infallible, net::SocketAddr};
-use tokio::time::{interval, Duration};
 use warp::{filters::log::log, Filter as _};
 
 pub struct Server {}
@@ -16,6 +12,9 @@ impl Server {
         let make_svc =
             hyper::service::make_service_fn(move |_| future::ok::<_, Infallible>(svc.clone()));
 
-        hyper::Server::bind(&socket.into()).serve(make_svc).await;
+        hyper::Server::bind(&socket.into())
+            .serve(make_svc)
+            .await
+            .unwrap();
     }
 }

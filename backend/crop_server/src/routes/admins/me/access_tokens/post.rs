@@ -7,7 +7,6 @@ use crop_domain::admin::{
     self,
     model::{AccessToken, Admin as _},
 };
-use crop_infra::pg::Connection;
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

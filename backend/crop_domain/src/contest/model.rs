@@ -1,7 +1,10 @@
 use crate::contest::poll::model::Poll;
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
+use serde::Serialize;
 use uuid::Uuid;
 
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct Contest<P> {
     pub id: ContestId,
     pub status: ContestStatus,
@@ -11,10 +14,12 @@ pub struct Contest<P> {
     pub polls: P,
 }
 
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct ContestId(pub Uuid);
 
 pub type ContestStatus = crop_infra::pg::types::ContestStatus;
 
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct Unknown;
 
 pub struct Polls(Vec<Poll>);
