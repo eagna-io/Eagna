@@ -3,7 +3,9 @@ pub mod choice;
 pub mod comment;
 pub mod contest;
 pub mod poll;
+#[allow(unused_imports)]
 pub(crate) mod schema;
+pub mod types;
 
 use diesel::{
     pg::PgConnection,

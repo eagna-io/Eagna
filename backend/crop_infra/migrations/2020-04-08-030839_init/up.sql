@@ -10,17 +10,32 @@ CREATE TABLE accounts (
   name      TEXT NOT NULL
 );
 
+CREATE TYPE contest_status AS ENUM (
+  'upcoming',
+  'open',
+  'closed',
+  'archived'
+);
+
 CREATE TABLE contests (
-  id  UUID PRIMARY KEY
+  id              UUID PRIMARY KEY,
+  status          contest_status NOT NULL DEFAULT 'upcoming',
+  title           TEXT NOT NULL,
+  category        TEXT NOT NULL,
+  /* 対応するイベントがいつ開催されるか */
+  /* 「未定」のこともある */
+  event_start_at  TIMESTAMPTZ
 );
 
 CREATE TABLE polls (
   id                  UUID PRIMARY KEY,
   contest_id          UUID NOT NULL,
   title               TEXT NOT NULL,
+  duration_sec        INTEGER,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
-  end_at              TIMESTAMPTZ NOT NULL,
-  resolved_choice_id  TEXT DEFAULT NULL,
+  /* いつcloseしたか。not nullのとき、closed状態 */
+  closed_at           TIMESTAMPTZ DEFAULT NULL,
+  resolved_choice_id  INTEGER DEFAULT NULL,
 
   UNIQUE (contest_id, title),
   CONSTRAINT contest_poll_fkey FOREIGN KEY(contest_id)

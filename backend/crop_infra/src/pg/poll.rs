@@ -1,6 +1,13 @@
-use super::{schema::polls, Connection};
+use super::{
+    schema::{choices, polls},
+    Connection,
+};
 use chrono::{DateTime, Utc};
-use diesel::{prelude::*, result::Error as PgError};
+use diesel::{
+    expression_methods::{NullableExpressionMethods as _, PgExpressionMethods as _},
+    prelude::*,
+    result::Error as PgError,
+};
 use uuid::Uuid;
 
 pub trait PollTable {
@@ -15,14 +22,21 @@ pub trait PollTable {
 
     fn query_by_id(&self, id: &Uuid) -> anyhow::Result<Option<QueriedPoll>> {
         match polls::table
+            .left_join(
+                choices::table
+                    .on(polls::resolved_choice_id.is_not_distinct_from(choices::id.nullable())),
+            )
             .filter(polls::id.eq(id))
             .select((
                 polls::id,
                 polls::contest_id,
                 polls::title,
+                polls::duration_sec,
                 polls::created_at,
-                polls::end_at,
-                polls::resolved_choice_id,
+                polls::closed_at,
+                choices::name.nullable(),
+                choices::color.nullable(),
+                choices::idx.nullable(),
             ))
             .first::<QueriedPoll>(self.conn())
         {
@@ -45,7 +59,7 @@ pub struct NewPoll<'a> {
     pub id: &'a Uuid,
     pub contest_id: &'a Uuid,
     pub title: &'a str,
-    pub end_at: &'a DateTime<Utc>,
+    pub duration_sec: Option<i32>,
 }
 
 #[derive(Queryable)]
@@ -53,7 +67,10 @@ pub struct QueriedPoll {
     pub id: Uuid,
     pub contest_id: Uuid,
     pub title: String,
+    pub duration_sec: Option<i32>,
     pub created_at: DateTime<Utc>,
-    pub end_at: DateTime<Utc>,
-    pub resolved_choice_id: Option<String>,
+    pub closed_at: Option<DateTime<Utc>>,
+    pub resolved_choice_name: Option<String>,
+    pub resolved_choice_color: Option<String>,
+    pub resolved_choice_idx: Option<i32>,
 }
