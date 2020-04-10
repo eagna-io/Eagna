@@ -4,5 +4,5 @@ pub enum ContestStatus {
     Upcoming,
     Open,
     Closed,
-    Resolved,
+    Archived,
 }

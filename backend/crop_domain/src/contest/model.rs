@@ -2,41 +2,53 @@ use crate::contest::poll::model::Poll;
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-pub struct Contest {
+pub struct Contest<P> {
     pub id: ContestId,
+    pub status: ContestStatus,
     pub title: String,
     pub category: String,
     pub event_start_at: Option<DateTime<Utc>>,
-    pub polls: Vec<Poll>,
+    pub polls: P,
 }
 
 pub struct ContestId(pub Uuid);
 
-impl Contest {
+pub type ContestStatus = crop_infra::pg::types::ContestStatus;
+
+pub struct Unknown;
+
+pub struct Polls(Vec<Poll>);
+
+impl Contest<Polls> {
     pub fn new(
         title: impl Into<String>,
         category: impl Into<String>,
         event_start_at: Option<DateTime<Utc>>,
-    ) -> Contest {
+    ) -> Contest<Polls> {
         Contest {
             id: ContestId::new(),
+            status: ContestStatus::Upcoming,
             title: title.into(),
             category: category.into(),
             event_start_at,
-            polls: Vec::new(),
+            polls: Polls(Vec::new()),
         }
     }
 
+    pub fn polls(&self) -> &Vec<Poll> {
+        &self.polls.0
+    }
+
     pub fn current_poll(&self) -> Option<&Poll> {
-        self.polls.last()
+        self.polls.0.last()
     }
 
     pub fn current_poll_mut(&mut self) -> Option<&mut Poll> {
-        self.polls.last_mut()
+        self.polls.0.last_mut()
     }
 
     pub fn add_poll(&mut self, poll: Poll) -> &Poll {
-        self.polls.push(poll);
+        self.polls.0.push(poll);
         self.current_poll().unwrap()
     }
 }

@@ -30,6 +30,19 @@ pub trait ContestTable {
             Err(e) => Err(e.into()),
         }
     }
+
+    fn query_not_archived(&self) -> anyhow::Result<Vec<QueriedContest>> {
+        Ok(contests::table
+            .filter(contests::status.ne(ContestStatus::Archived))
+            .select((
+                contests::id,
+                contests::status,
+                contests::title,
+                contests::category,
+                contests::event_start_at,
+            ))
+            .load::<QueriedContest>(self.conn())?)
+    }
 }
 
 impl ContestTable for Connection {
