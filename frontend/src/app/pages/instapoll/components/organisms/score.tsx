@@ -14,6 +14,7 @@ export const Score: React.FC<Props> = ({ numer, denom }) => {
       正解数
       <UserScore>
         {numer}<Slash>/</Slash>{denom}<Every>問中</Every>
+        {/* {numer}/{denom}問中 */}
       </UserScore>
     </Container>
   )
@@ -34,15 +35,16 @@ const UserScore = styled.div`
 `;
 
 const Slash = styled.span`
-  font-size: 14px;
-  line-height: 20px;
+  display: inline-block;
+  font-size: 10px;
   font-weight: 600;
   margin: 0px 2px;
 `;
 
 const Every = styled.span`
+  display: inline-block;
   font-size: 10px;
   font-weight: 800;
-  margin-top: 6px;
   margin-left: 3px;
+  margin-top: 6px;
 `;
