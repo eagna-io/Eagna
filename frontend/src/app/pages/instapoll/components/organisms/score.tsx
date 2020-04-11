@@ -33,14 +33,14 @@ const UserScore = styled.div`
   align-items: center;
 `;
 
-const Hyphen = styled.div`
+const Hyphen = styled.span`
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
   margin: 0px 2px;
 `;
 
-const Every = styled.div`
+const Every = styled.span`
   font-size: 10px;
   font-weight: 800;
   margin-top: 6px;

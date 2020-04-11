@@ -14,9 +14,7 @@ interface Props {
 export const Timer: React.FC<Props> = ({ content }) => {
   // TODO: state upcoming
   if (
-    content === "closed" ||
-    content === "correct" ||
-    content === "incorrect"
+    content === "closed"
   ) {
     return <Container>投票時間<TimeOut>締切</TimeOut></Container>;
   } else {

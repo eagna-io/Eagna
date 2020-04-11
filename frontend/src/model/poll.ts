@@ -19,4 +19,4 @@ export interface Comment {
   color: string;
 }
 
-export type Timer = number | "closed" | "correct" | "incorrect";
+export type Timer = number | "closed";
