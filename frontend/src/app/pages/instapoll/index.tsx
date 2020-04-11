@@ -73,8 +73,8 @@ const testpoll = {
   endAt: moment(),
   status: "open" as const,
   choices: {
-    Lebron: "#424242",
-    BBebron: "#424332"
+    Lebron: "#4583e4",
+    KobeBeanBryant: "#e46345"
   }
 };
 const testcomments = [{
