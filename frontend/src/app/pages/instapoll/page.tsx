@@ -40,7 +40,7 @@ export const Page: React.FC<Props> = ({
       <Header>
         <Logo>LOGO</Logo>
         <TimerComponent content={timer} />
-        <Score numerator={2} denominator={3} />
+        <Score numer={2} denom={3} />
       </Header>
       <CommentFeed>
         {comments.map(comment => (

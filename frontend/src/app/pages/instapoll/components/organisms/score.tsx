@@ -4,16 +4,16 @@ import styled from "styled-components";
 import { WhiteBaseColor } from "app/components/color";
 
 interface Props {
-  numerator: number;
-  denominator: number;
+  numer: number;
+  denom: number;
 }
 
-export const Score: React.FC<Props> = ({ numerator, denominator }) => {
+export const Score: React.FC<Props> = ({ numer, denom }) => {
   return (
     <Container>
       正解数
       <UserScore>
-        {numerator}<Slash>/</Slash>{denominator}<Every>問中</Every>
+        {numer}<Slash>/</Slash>{denom}<Every>問中</Every>
       </UserScore>
     </Container>
   )
