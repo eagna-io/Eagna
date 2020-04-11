@@ -13,7 +13,7 @@ export const Score: React.FC<Props> = ({ numerator, denominator }) => {
     <Container>
       正解数
       <UserScore>
-        {numerator}<Hyphen>/</Hyphen>{denominator}<Every>問中</Every>
+        {numerator}<Slash>/</Slash>{denominator}<Every>問中</Every>
       </UserScore>
     </Container>
   )
@@ -33,7 +33,7 @@ const UserScore = styled.div`
   align-items: center;
 `;
 
-const Hyphen = styled.span`
+const Slash = styled.span`
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
