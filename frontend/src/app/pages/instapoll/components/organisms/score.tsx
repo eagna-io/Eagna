@@ -35,7 +35,7 @@ const UserScore = styled.div`
 
 const Slash = styled.span`
   display: inline-block;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 600;
   margin: 0px 2px;
 `;
