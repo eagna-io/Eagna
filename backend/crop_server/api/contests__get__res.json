@@ -9,29 +9,16 @@
     "contests": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/Contest_for_Unknown"
+        "$ref": "#/definitions/BriefContest"
       }
     }
   },
   "definitions": {
-    "ContestId": {
-      "type": "string",
-      "format": "uuid"
-    },
-    "ContestStatus": {
-      "enum": [
-        "Upcoming",
-        "Open",
-        "Closed",
-        "Archived"
-      ]
-    },
-    "Contest_for_Unknown": {
+    "BriefContest": {
       "type": "object",
       "required": [
         "category",
         "id",
-        "polls",
         "status",
         "title"
       ],
@@ -49,9 +36,6 @@
         "id": {
           "$ref": "#/definitions/ContestId"
         },
-        "polls": {
-          "$ref": "#/definitions/Unknown"
-        },
         "status": {
           "$ref": "#/definitions/ContestStatus"
         },
@@ -60,8 +44,17 @@
         }
       }
     },
-    "Unknown": {
-      "type": "null"
+    "ContestId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "ContestStatus": {
+      "enum": [
+        "Upcoming",
+        "Open",
+        "Closed",
+        "Archived"
+      ]
     }
   }
 }

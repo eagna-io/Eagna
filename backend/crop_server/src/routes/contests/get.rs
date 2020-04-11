@@ -3,10 +3,7 @@ use crate::{
     error::Error,
     response::{self, Response},
 };
-use crop_domain::contest::{
-    model::{Contest, Unknown},
-    repository::ContestRepository as _,
-};
+use crop_domain::contest::{BriefContest, ContestRepository as _};
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -14,7 +11,7 @@ use warp::{reject::Rejection, Filter};
 
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct ResBody {
-    contests: Vec<Contest<Unknown>>,
+    contests: Vec<BriefContest>,
 }
 
 pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejection> + Clone {
