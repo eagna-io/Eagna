@@ -14,7 +14,6 @@ export const Score: React.FC<Props> = ({ numer, denom }) => {
       正解数
       <UserScore>
         {numer}<Slash>/</Slash>{denom}<Every>問中</Every>
-        {/* {numer}/{denom}問中 */}
       </UserScore>
     </Container>
   )
