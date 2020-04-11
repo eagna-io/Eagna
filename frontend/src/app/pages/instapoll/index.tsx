@@ -8,7 +8,7 @@ import { reducer, initialState } from "./reducer";
 
 export const InstapollPage: React.FC = () => {
   const [account, setAccount] = React.useState("");
-  const [ws, setWs] = React.useState<WebSocket | undefined >();
+  const [ws, setWs] = React.useState<WebSocket | undefined>();
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { poll, comments, timer } = state;
 
@@ -43,23 +43,6 @@ export const InstapollPage: React.FC = () => {
       clearInterval(timer);
     };
   }, []);
-  const testaccount = "test-account";
-  const testpoll = {
-    id: 'sssss',
-    title: 'title',
-    endAt: moment(),
-    status: "open" as const,
-    choices: {
-      Lebron: "#424242",
-      BBebron: "#ff0000"
-    }
-  };
-  const testcomments = [{
-    account: "test-account",
-    comment: "testtest",
-    color: "#424242"
-  }];
-  const testtimer = 300;
   
   // if (poll !== undefined && timer !== undefined && ws !== undefined) {
     return (
@@ -82,3 +65,21 @@ export const InstapollPage: React.FC = () => {
   //   return <LoadingPage />;
   // }
 };
+
+const testaccount = "test-account";
+const testpoll = {
+  id: 'sssss',
+  title: 'title',
+  endAt: moment(),
+  status: "open" as const,
+  choices: {
+    Lebron: "#424242",
+    BBebron: "#424332"
+  }
+};
+const testcomments = [{
+  account: "test-account",
+  comment: "testtest",
+  color: "#424242"
+}];
+const testtimer = 300;
