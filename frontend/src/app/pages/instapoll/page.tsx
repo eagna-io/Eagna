@@ -19,7 +19,7 @@ interface Props {
   poll: Poll;
   comments: Comment[];
   timer: Timer;
-  ws: WebSocket;
+  ws?: WebSocket;
 }
 
 export const Page: React.FC<Props> = ({
@@ -46,14 +46,16 @@ export const Page: React.FC<Props> = ({
           poll={poll}
           selected={selected}
           onSelected={choice => {
-            ws.send(
-              JSON.stringify({
-                type: "updateChoice",
-                account,
-                choice
-              })
-            );
-            setSelected(choice);
+            if(ws) {
+              ws.send(
+                JSON.stringify({
+                  type: "updateChoice",
+                  account,
+                  choice
+                })
+              );
+              setSelected(choice);
+            }
           }}
         />
         <CommentContainer>
@@ -66,13 +68,15 @@ export const Page: React.FC<Props> = ({
           <Submit
             onClick={() => {
               if (commentInput) {
-                ws.send(
-                  JSON.stringify({
-                    type: "addComment",
-                    account,
-                    comment: commentInput
-                  })
-                );
+                if (ws) {
+                  ws.send(
+                    JSON.stringify({
+                      type: "addComment",
+                      account,
+                      comment: commentInput
+                    })
+                  )
+                }
                 setCommentInput("");
               }
             }}
