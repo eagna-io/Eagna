@@ -51,7 +51,7 @@ export const InstapollPage: React.FC = () => {
     status: "open" as const,
     choices: {
       Lebron: "#424242",
-      BBebron: "#424332"
+      BBebron: "#ff0000"
     }
   };
   const testcomments = [{
