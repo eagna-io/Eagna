@@ -45,6 +45,11 @@ export const ChoiceGreen = Color.fromHex("#57E445");
 export const ChoiceYellow = Color.fromHex("#E4DC45");
 export const ChoicePink = Color.fromHex("#E445B3");
 
+export const WildWatermelon = Color.fromHex("#fd6585");
+export const ToreaBay = Color.fromHex("#0d25b9");
+export const Alto = Color.fromHex("#d8d8d8");
+
+
 export const Correct = Color.fromHex("#18e68c");
 
 export const ShadowGray = Color.fromHex("#616161");

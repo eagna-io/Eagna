@@ -2,7 +2,8 @@ import React from "react";
 import styled from "styled-components";
 
 import {
-  BackgroundMainColor,
+  WildWatermelon,
+  ToreaBay,
   WhiteBaseColor,
   TextBaseColor,
   BlackColor
@@ -10,9 +11,11 @@ import {
 import { Poll, Comment, Timer } from "model/poll";
 
 import { Timer as TimerComponent } from "./components/organisms/timer";
+import { Score } from "./components/organisms/score";
 import { CommentCard } from "./components/organisms/commentCard";
 import { ChoiceList } from "./components/organisms/choiceList";
 import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg";
+import { ReactComponent as LogoIcon } from "./components/atoms/images/PlayPoll_logo_white.svg";
 
 interface Props {
   account: string;
@@ -34,7 +37,11 @@ export const Page: React.FC<Props> = ({
 
   return (
     <Container>
-      <TimerComponent content={timer} />
+      <Header>
+        <Logo>LOGO</Logo>
+        <TimerComponent content={timer} />
+        <Score numerator={2} denominator={3} />
+      </Header>
       <CommentFeed>
         {comments.map(comment => (
           <CommentCard comment={comment} />
@@ -94,10 +101,24 @@ export const LoadingPage: React.FC = () => {
 const Container = styled.div`
   width: 100vw;
   height: calc(100vh - 75px);
-  padding: 8px 28px;
-  background-color: ${BackgroundMainColor.hex};
+  padding: 16px 28px;
+  background-image: linear-gradient(151deg, ${WildWatermelon.hex} 0%, ${ToreaBay.hex} 100%);
   user-select: none;
   position: relative;
+`;
+
+const Header = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+`;
+
+const Logo = styled(LogoIcon)`
+  width: 136px;
+  height: 31px;
+  margin-top: 8px;
+  margin-right: auto;
 `;
 
 const CommentFeed = styled.div`

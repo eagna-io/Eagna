@@ -3,9 +3,7 @@ import styled from "styled-components";
 
 import {
   WhiteBaseColor,
-  ShadowGray,
-  Correct,
-  MainRed
+  Alto
 } from "app/components/color";
 import { Timer as TimerModel } from "model/poll";
 
@@ -14,14 +12,15 @@ interface Props {
 }
 
 export const Timer: React.FC<Props> = ({ content }) => {
-  if (content === "closed") {
-    return <ClosedTimer>CLOSED</ClosedTimer>;
-  } else if (content === "correct") {
-    return <CorrectTimer>正解！</CorrectTimer>;
-  } else if (content === "incorrect") {
-    return <IncorrectTimer>残念..</IncorrectTimer>;
+  // TODO: state upcoming
+  if (
+    content === "closed" ||
+    content === "correct" ||
+    content === "incorrect"
+  ) {
+    return <Container>投票時間<TimeOut>締切</TimeOut></Container>;
   } else {
-    return <CountDownTimer>{formatTime(content)}</CountDownTimer>;
+    return <Container>投票時間<CountDownTimer>{formatTime(content)}</CountDownTimer></Container>;
   }
 };
 
@@ -31,60 +30,24 @@ const formatTime = (seconds: number) => {
   return `${min}:${sec}`;
 };
 
-const ClosedTimer = styled.div`
-  width: 71px;
-  height: 71px;
-  margin 0px auto;
-  border-radius: 50%;
-  margin-bottom: 24px;
+const Container = styled.div`
+  width: 56px;
+  margin-right: 21px;
+  font-size: 8px;
   text-align: center;
-  line-height: 71px;
-  font-size: 12px;
-  font-weight: 800;
   color: ${WhiteBaseColor.hex};
-  background-color: ${ShadowGray.hex};
 `;
 
-const CorrectTimer = styled.div`
-  width: 71px;
-  height: 71px;
-  margin 0px auto;
-  border-radius: 50%;
-  border: solid 3px ${ShadowGray.hex};
-  margin-bottom: 24px;
-  text-align: center;
-  line-height: 65px;
-  font-size: 16px;
+const TimeOut = styled.div`
+  font-size: 20px;
+  letter-spacing: 0.71px;
   font-weight: 800;
-  color: ${WhiteBaseColor.hex};
-  background-color: ${Correct.hex};
-`;
-
-const IncorrectTimer = styled.div`
-  width: 71px;
-  height: 71px;
-  margin 0px auto;
-  border-radius: 50%;
-  border: solid 3px ${ShadowGray.hex};
-  margin-bottom: 24px;
-  text-align: center;
-  line-height: 65px;
-  font-size: 16px;
-  font-weight: 800;
-  color: ${WhiteBaseColor.hex};
-  background-color: ${MainRed.hex};
+  color: ${Alto.hex};
 `;
 
 const CountDownTimer = styled.div`
-  width: 71px;
-  height: 71px;
-  margin 0px auto;
-  border-radius: 50%;
-  border: solid 3px ${ShadowGray.hex};
-  margin-bottom: 24px;
-  text-align: center;
-  line-height: 65px;
-  font-size: 16px;
+  font-size: 20px;
+  letter-spacing: 0.71px;
   font-weight: 800;
   color: ${WhiteBaseColor.hex};
 `;
