@@ -35,6 +35,7 @@ const Container = styled.div`
   }
 `;
 
+// Memo:CommentのheightにFlagの円（radius）が影響されるためFlagBlockで切り出す対応
 const FlagBlock = styled.div`
   height: 16px;
 `;
