@@ -42,11 +42,6 @@ export const Page: React.FC<Props> = ({
         <TimerComponent content={timer} />
         <Score numer={2} denom={3} />
       </Header>
-      <CommentFeed>
-        {comments.map(comment => (
-          <CommentCard comment={comment} />
-        ))}
-      </CommentFeed>
       <PollCard>
         <Theme>{poll.title}</Theme>
         <ChoiceList
@@ -65,7 +60,13 @@ export const Page: React.FC<Props> = ({
             }
           }}
         />
-        <CommentContainer>
+      </PollCard>
+      <CommentFeed>
+        {comments.map(comment => (
+          <CommentCard comment={comment} />
+        ))}
+      </CommentFeed>
+      <CommentContainer>
           <CommentInput
             type="text"
             placeholder="コメントする"
@@ -89,7 +90,6 @@ export const Page: React.FC<Props> = ({
             }}
           />
         </CommentContainer>
-      </PollCard>
     </Container>
   );
 };
@@ -127,14 +127,11 @@ const CommentFeed = styled.div`
 `;
 
 const PollCard = styled.div`
-  position: absolute;
   height: 244px;
-  bottom: 20px;
-  width: calc(100vw - 56px);
   border-radius: 4px;
   padding: 8px 13px;
   background-color: ${WhiteBaseColor.hex};
-  box-shadow: 0 2px 4px 0 ${BlackColor.rgba(0.5)};
+  box-shadow: 0 24px 24px 0 ${BlackColor.rgba(0.3)}, 0 0 24px 0 ${BlackColor.rgba(0.22)};
 `;
 
 const Theme = styled.div`
@@ -144,20 +141,27 @@ const Theme = styled.div`
 `;
 
 const CommentContainer = styled.div`
-  width: 100%;
   display: flex;
+  position: absolute;
+  bottom: 16px;
+  width: calc(100vw - 56px);
 `;
 
 const CommentInput = styled.input`
   width: 86%;
-  border-radius: 24px;
   height: 30px;
-  border: solid 1px ${TextBaseColor.hex};
   margin-right: 8px;
   padding: 0px 16px;
+  border: solid 1px ${WhiteBaseColor.hex};
+  border-radius: 4px;
   font-size: 16px;
   line-height: 30px;
   transform: scale(0.95);
+  background-color:transparent;
+  ::placeholder {
+    color: ${WhiteBaseColor.hex};
+    font-size: 14px;
+  }
 `;
 
 const Submit = styled(SubmitIcon)`
