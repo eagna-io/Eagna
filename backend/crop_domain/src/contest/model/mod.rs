@@ -11,6 +11,7 @@ pub use brief::BriefContest;
 pub use detailed::DetailedContest;
 
 pub trait Contest {
+    /*
     fn new(
         title: String,
         category: String,
@@ -25,6 +26,7 @@ pub trait Contest {
             poll: None,
         }
     }
+    */
 
     fn id(&self) -> ContestId;
 
@@ -56,16 +58,17 @@ pub trait Contest {
         self._event_start_at()
     }
 
-    fn current_poll(&self) -> Option<&Poll>
+    fn current_poll(&self) -> Option<&Self::Poll>
     where
         Self: WithPoll,
     {
         self._current_poll()
     }
 
-    fn add_poll(&self, poll: Poll) -> anyhow::Result<PollAdded<&Self>>
+    fn add_poll<P>(&self, poll: P) -> anyhow::Result<PollAdded<&Self, P>>
     where
         Self: WithAttrs,
+        P: Poll,
     {
         if self.status() == ContestStatus::Open {
             Ok(PollAdded {
@@ -89,7 +92,9 @@ pub trait WithAttrs: Contest {
 }
 
 pub trait WithPoll: Contest {
-    fn _current_poll(&self) -> Option<&Poll>;
+    type Poll: Poll;
+
+    fn _current_poll(&self) -> Option<&Self::Poll>;
 }
 
 #[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
@@ -137,7 +142,9 @@ impl<'a, C> WithPoll for &'a C
 where
     C: WithPoll,
 {
-    fn _current_poll(&self) -> Option<&Poll> {
+    type Poll = C::Poll;
+
+    fn _current_poll(&self) -> Option<&Self::Poll> {
         C::_current_poll(self)
     }
 }
@@ -147,7 +154,7 @@ where
  * PollAdded
  * ============
  */
-pub struct PollAdded<C> {
+pub struct PollAdded<C, P> {
     pub contest: C,
-    pub added_poll: Poll,
+    pub added_poll: P,
 }

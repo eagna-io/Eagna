@@ -8,22 +8,22 @@ use super::{Contest, ContestId, ContestStatus, WithAttrs, WithPoll};
  * DetailedContest
  * ===============
  */
-pub struct DetailedContest {
+pub struct DetailedContest<P> {
     pub(super) id: ContestId,
     pub(super) status: ContestStatus,
     pub(super) title: String,
     pub(super) category: String,
     pub(super) event_start_at: Option<DateTime<Utc>>,
-    pub(super) poll: Option<Poll>,
+    pub(super) poll: Option<P>,
 }
 
-impl Contest for DetailedContest {
+impl<P> Contest for DetailedContest<P> {
     fn id(&self) -> ContestId {
         self.id
     }
 }
 
-impl WithAttrs for DetailedContest {
+impl<P> WithAttrs for DetailedContest<P> {
     fn _status(&self) -> ContestStatus {
         self.status
     }
@@ -41,8 +41,13 @@ impl WithAttrs for DetailedContest {
     }
 }
 
-impl WithPoll for DetailedContest {
-    fn _current_poll(&self) -> Option<&Poll> {
+impl<P> WithPoll for DetailedContest<P>
+where
+    P: Poll,
+{
+    type Poll = P;
+
+    fn _current_poll(&self) -> Option<&P> {
         self.poll.as_ref()
     }
 }
