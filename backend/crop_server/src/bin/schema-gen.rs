@@ -19,6 +19,18 @@ fn main() {
     );
 
     /*
+     * POST /contests
+     */
+    write_json_schema!(
+        "api/contests__post__req.json",
+        routes::contests::post::ReqBody
+    );
+    write_json_schema!(
+        "api/contests__post__res.json",
+        routes::contests::post::ResBody
+    );
+
+    /*
      * POST /admins/me/access_tokens
      */
     write_json_schema!(
