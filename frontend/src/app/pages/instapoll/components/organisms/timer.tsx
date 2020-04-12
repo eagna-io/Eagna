@@ -31,21 +31,21 @@ const formatTime = (seconds: number) => {
 const Container = styled.div`
   width: 56px;
   margin-right: 21px;
-  font-size: 8px;
   text-align: center;
+  font-size: 8px;  
   color: ${WhiteBaseColor.hex};
 `;
 
 const TimeOut = styled.div`
   font-size: 20px;
-  letter-spacing: 0.71px;
   font-weight: 800;
+  letter-spacing: 0.71px;
   color: ${Alto.hex};
 `;
 
 const CountDownTimer = styled.div`
   font-size: 20px;
-  letter-spacing: 0.71px;
   font-weight: 800;
+  letter-spacing: 0.71px;
   color: ${WhiteBaseColor.hex};
 `;

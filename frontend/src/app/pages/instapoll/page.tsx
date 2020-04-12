@@ -99,18 +99,18 @@ export const LoadingPage: React.FC = () => {
 };
 
 const Container = styled.div`
+  position: relative;
   width: 100vw;
   height: calc(100vh - 75px);
   padding: 16px 28px;
   background-image: linear-gradient(151deg, ${WildWatermelon.hex} 0%, ${ToreaBay.hex} 100%);
   user-select: none;
-  position: relative;
 `;
 
 const Header = styled.div`
-  width: 100%;
   display: flex;
   justify-content: flex-end;
+  width: 100%;
   margin-bottom: 16px;
 `;
 

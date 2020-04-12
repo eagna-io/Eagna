@@ -27,23 +27,20 @@ const Container = styled.div`
 
 const UserScore = styled.div`
   font-size: 20px;
-  letter-spacing: 0.71px;
   font-weight: 800;
-  display: flex;
-  align-items: center;
+  letter-spacing: 0.71px;
 `;
 
 const Slash = styled.span`
-  display: inline-block;
-  font-size: 14px;
-  font-weight: 600;
+  vertical-align: 2px;
   margin: 0px 2px;
+  font-size: 10px;
+  font-weight: 600;
 `;
 
 const Every = styled.span`
-  display: inline-block;
+  vertical-align: 1px
+  margin-left: 3px;
   font-size: 10px;
   font-weight: 800;
-  margin-left: 3px;
-  margin-top: 6px;
 `;
