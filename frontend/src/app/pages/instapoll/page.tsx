@@ -34,16 +34,15 @@ export const Page: React.FC<Props> = ({
 }) => {
   const [commentInput, setCommentInput] = React.useState("");
   const [selected, setSelected] = React.useState<string | undefined>();
-
   return (
     <Container>
       <Header>
-        <Logo>LOGO</Logo>
+        <Logo />
         <TimerComponent content={timer} />
         <Score numer={2} denom={3} />
       </Header>
       <PollCard>
-        <Theme>{poll.title}</Theme>
+        <Theme><Qindex>Q{QuestionIndex}.</Qindex>{poll.title}</Theme>
         <ChoiceList
           poll={poll}
           selected={selected}
@@ -98,6 +97,9 @@ export const LoadingPage: React.FC = () => {
   return <Container>Loading...</Container>;
 };
 
+// TODO: propsで渡す？
+const QuestionIndex = 1;
+
 const Container = styled.div`
   position: relative;
   width: 100vw;
@@ -127,17 +129,22 @@ const CommentFeed = styled.div`
 `;
 
 const PollCard = styled.div`
-  height: 244px;
   border-radius: 4px;
-  padding: 8px 13px;
+  padding: 24px 14px 31px 14px;
+  margin-bottom: 20px;
   background-color: ${WhiteBaseColor.hex};
   box-shadow: 0 24px 24px 0 ${BlackColor.rgba(0.3)}, 0 0 24px 0 ${BlackColor.rgba(0.22)};
 `;
 
 const Theme = styled.div`
   width: 100%;
+  margin-bottom: 30px;
   font-size: 16px;
-  margin-bottom: 24px;
+  font-weight: bold;
+`;
+
+const Qindex = styled.span`
+  margin-right: 4px;
 `;
 
 const CommentContainer = styled.div`

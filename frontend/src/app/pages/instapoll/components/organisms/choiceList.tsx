@@ -53,7 +53,17 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
 
 const Container = styled.div`
   width: 100%;
-  overflow: scroll;
+  height: 127px;
+  overflow-y: scroll;
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+  }
+  ::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background-color: rgba(0,0,0,.5);
+      box-shadow: 0 0 1px rgba(255,255,255,.5);
+  }
 `;
 
 interface ChoiceProps {
@@ -104,6 +114,9 @@ const ChoiceContainer = styled.div`
   display: flex;
   position: relative;
   margin-bottom: 24px;
+  &:last-child {
+    margin-bottom: 0px;
+  }
 `;
 
 const OutcomeIcon = styled(CorrectIcon)<{ correct?: boolean }>`
@@ -116,12 +129,12 @@ const OutcomeIcon = styled(CorrectIcon)<{ correct?: boolean }>`
 
 const ChoiceButton = styled.button<{ color: string; selected: boolean }>`
   position: relative;
-  width: 200px;
-  height: 48px;
+  width: 196px;
+  height: 50px;
   border-radius: 24px;
   margin: 0px auto;
   padding: 4px 8px;
-  border: solid 3px ${props => props.color};
+  border: solid 4px ${props => props.color};
   background-color: ${props =>
     props.selected ? props.color : WhiteBaseColor.hex};
   font-size: 14px;
@@ -150,8 +163,11 @@ const Choicetitle = styled.div<{ color: string; selected: boolean }>`
   transform: translateY(-50%) translateX(-50%);
   -webkit-transform: translateY(-50%) translateX(-50%);
   width: 180px;
+  padding: 0 40px 0 10px;
   text-align: left;
   color: ${props => (props.selected ? WhiteBaseColor.hex : props.color)};
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 `;
 
 const RateValue = styled.div<{ color: string; selected: boolean }>`
