@@ -87,7 +87,7 @@ const Choice: React.FC<ChoiceProps> = ({
   correct
 }) => {
 /* 
-【L102の方針】
+【MEMO：正誤アイコン表示の方針】
 不正解&&自分が選んだ => <Wrong />
 不正解&&自分が選んでない => null
 正解&&自分が選んでない => <Correct />
