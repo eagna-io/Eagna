@@ -1,4 +1,4 @@
-use super::model::{BriefContest, Contest, WithPolls};
+use super::model::{BriefContest, Contest, WithAttrs, WithPoll};
 use crop_infra::pg::Connection;
 
 pub trait ContestRepository {
@@ -9,11 +9,11 @@ pub trait ContestRepository {
     // いないはずなので、Pollの保存は試みない
     fn save_new<C>(&self, contest: &C) -> anyhow::Result<()>
     where
-        C: Contest + WithPolls,
+        C: Contest + WithAttrs + WithPoll,
     {
         use crop_infra::pg::contest::{ContestTable as _, NewContest};
 
-        assert!(Contest::polls(contest).is_empty());
+        assert!(contest.current_poll().is_none());
 
         let new_contest = NewContest {
             id: &contest.id().0,
@@ -33,6 +33,16 @@ pub trait ContestRepository {
             .map(BriefContest::from)
             .collect())
     }
+
+    /*
+    fn query_by_id(&self, id: &ContestId) -> anyhow::Result<Option<DetailedContest>> {
+        use crop_infra::pg::{contest::ContestTable, poll::PollTable};
+
+        if let Some(contest) = ContestTable::query_by_id(self.conn(), &id.0)? {
+            let polls = PollTable::query_by_contest_id(self.conn(), &id.0)?;
+        }
+    }
+    */
 }
 
 impl ContestRepository for Connection {

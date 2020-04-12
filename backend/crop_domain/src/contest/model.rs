@@ -17,54 +17,74 @@ pub trait Contest {
             title,
             category,
             event_start_at,
-            polls: Vec::new(),
+            poll: None,
         }
     }
 
     fn id(&self) -> ContestId;
 
-    fn status(&self) -> ContestStatus;
-
-    fn title(&self) -> &str;
-
-    fn category(&self) -> &str;
-
-    fn event_start_at(&self) -> Option<&DateTime<Utc>>;
-
-    fn polls(&self) -> &[Poll]
+    fn status(&self) -> ContestStatus
     where
-        Self: WithPolls,
+        Self: WithAttrs,
     {
-        self._polls()
+        self._status()
+    }
+
+    fn title(&self) -> &str
+    where
+        Self: WithAttrs,
+    {
+        self._title()
+    }
+
+    fn category(&self) -> &str
+    where
+        Self: WithAttrs,
+    {
+        self._category()
+    }
+
+    fn event_start_at(&self) -> Option<&DateTime<Utc>>
+    where
+        Self: WithAttrs,
+    {
+        self._event_start_at()
     }
 
     fn current_poll(&self) -> Option<&Poll>
     where
-        Self: WithPolls,
+        Self: WithPoll,
     {
-        self._polls().last()
+        self._current_poll()
     }
 
-    fn current_poll_mut(&mut self) -> Option<&mut Poll>
+    fn add_poll(&self, poll: Poll) -> anyhow::Result<PollAdded<&Self>>
     where
-        Self: WithPolls,
+        Self: WithAttrs,
     {
-        self._polls_mut().last_mut()
-    }
-
-    fn add_poll(&mut self, poll: Poll) -> &Poll
-    where
-        Self: WithPolls,
-    {
-        self._polls_mut().push(poll);
-        self.current_poll().unwrap()
+        if self.status() == ContestStatus::Open {
+            Ok(PollAdded {
+                contest: self,
+                added_poll: poll,
+            })
+        } else {
+            Err(anyhow::anyhow!("You can't add a poll to non-open contest"))
+        }
     }
 }
 
-pub trait WithPolls: Contest {
-    fn _polls(&self) -> &Vec<Poll>;
+pub trait WithAttrs: Contest {
+    fn _status(&self) -> ContestStatus;
 
-    fn _polls_mut(&mut self) -> &mut Vec<Poll>;
+    fn _title(&self) -> &str;
+
+    fn _category(&self) -> &str;
+
+    fn _event_start_at(&self) -> Option<&DateTime<Utc>>;
+}
+
+pub trait WithPoll: Contest {
+    fn _current_poll(&self) -> Option<&Poll>;
 }
 
 #[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
@@ -77,6 +97,55 @@ impl ContestId {
 }
 
 pub type ContestStatus = crop_infra::pg::types::ContestStatus;
+
+impl<'a, C> Contest for &'a C
+where
+    C: Contest,
+{
+    fn id(&self) -> ContestId {
+        C::id(self)
+    }
+}
+
+impl<'a, C> WithAttrs for &'a C
+where
+    C: WithAttrs,
+{
+    fn _status(&self) -> ContestStatus {
+        C::_status(self)
+    }
+
+    fn _title(&self) -> &str {
+        C::_title(self)
+    }
+
+    fn _category(&self) -> &str {
+        C::_category(self)
+    }
+
+    fn _event_start_at(&self) -> Option<&DateTime<Utc>> {
+        C::_event_start_at(self)
+    }
+}
+
+impl<'a, C> WithPoll for &'a C
+where
+    C: WithPoll,
+{
+    fn _current_poll(&self) -> Option<&Poll> {
+        C::_current_poll(self)
+    }
+}
+
+/*
+ * ============
+ * PollAdded
+ * ============
+ */
+pub struct PollAdded<C> {
+    pub contest: C,
+    pub added_poll: Poll,
+}
 
 /*
  * ============
@@ -102,20 +171,22 @@ impl Contest for BriefContest {
     fn id(&self) -> ContestId {
         self.id
     }
+}
 
-    fn status(&self) -> ContestStatus {
+impl WithAttrs for BriefContest {
+    fn _status(&self) -> ContestStatus {
         self.status
     }
 
-    fn title(&self) -> &str {
+    fn _title(&self) -> &str {
         self.title.as_str()
     }
 
-    fn category(&self) -> &str {
+    fn _category(&self) -> &str {
         self.category.as_str()
     }
 
-    fn event_start_at(&self) -> Option<&DateTime<Utc>> {
+    fn _event_start_at(&self) -> Option<&DateTime<Utc>> {
         self.event_start_at.as_ref()
     }
 }
@@ -143,37 +214,35 @@ pub struct DetailedContest {
     title: String,
     category: String,
     event_start_at: Option<DateTime<Utc>>,
-    polls: Vec<Poll>,
+    poll: Option<Poll>,
 }
 
 impl Contest for DetailedContest {
     fn id(&self) -> ContestId {
         self.id
     }
+}
 
-    fn status(&self) -> ContestStatus {
+impl WithAttrs for DetailedContest {
+    fn _status(&self) -> ContestStatus {
         self.status
     }
 
-    fn title(&self) -> &str {
+    fn _title(&self) -> &str {
         self.title.as_str()
     }
 
-    fn category(&self) -> &str {
+    fn _category(&self) -> &str {
         self.category.as_str()
     }
 
-    fn event_start_at(&self) -> Option<&DateTime<Utc>> {
+    fn _event_start_at(&self) -> Option<&DateTime<Utc>> {
         self.event_start_at.as_ref()
     }
 }
 
-impl WithPolls for DetailedContest {
-    fn _polls(&self) -> &Vec<Poll> {
-        &self.polls
-    }
-
-    fn _polls_mut(&mut self) -> &mut Vec<Poll> {
-        &mut self.polls
+impl WithPoll for DetailedContest {
+    fn _current_poll(&self) -> Option<&Poll> {
+        self.poll.as_ref()
     }
 }
