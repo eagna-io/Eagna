@@ -166,7 +166,7 @@ const VoteRate = styled.div<{ voteRate: number }>`
   left: 0px;
   width: ${props => props.voteRate}%;
   height: 42px;
-  border-radius: 24px;
+  border-radius: 24px 0 0 24px;
   background-color: ${VoteRateBackGround.hexWithOpacity(0.5)};
 `;
 
