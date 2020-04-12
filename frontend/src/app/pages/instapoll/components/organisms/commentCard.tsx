@@ -14,10 +14,10 @@ interface Props {
 export const CommentCard: React.FC<Props> = ({ comment }) => {
   return (
     <Container>
-      <Account>
+      <FlagBlock>
         <ChoiceFlag flagColor={comment.color}></ChoiceFlag>
-        <UserName>{comment.account}</UserName>
-      </Account>
+      </FlagBlock>  
+      <UserName>{comment.account}</UserName>
       <Comment>{comment.comment}</Comment>
     </Container>
   );
@@ -35,13 +35,8 @@ const Container = styled.div`
   }
 `;
 
-const Account = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: middle;
+const FlagBlock = styled.div`
   height: 16px;
-  margin-right: 4px;
-  font-weight: 400;
 `;
 
 const ChoiceFlag = styled.div<{ flagColor: string }>`
@@ -53,11 +48,17 @@ const ChoiceFlag = styled.div<{ flagColor: string }>`
 `;
 
 const UserName = styled.div`
+  max-width: 80px;
+  margin-right: 4px;
   font-size: 8px;
   line-height: 16px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const Comment = styled.div`
+  max-width: 220px;
   font-size: 12px;
   line-height: 16px;
   color: ${Gallery.hex};

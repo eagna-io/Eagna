@@ -82,8 +82,8 @@ const testpoll = {
 };
 const testcomments = [
   {
-    account: "Yuya_F",
-    comment: "いけえええええええええええええええええええええええええええええええええええええ!!!!",
+    account: "Yuya_FYuya_FYuya_F",
+    comment: "いけえええええええええええええええええええええええええええええええええええええいけええ!!!!",
     color: "#4583e4"
   },
   {
@@ -102,8 +102,8 @@ const testcomments = [
     color: "#4583e4"
   },
   {
-    account: "Atsuki",
-    comment: "おわた",
+    account: "AtsukiAtsukiAtsukiAtsukiAtsukiAtsukiAtsuki",
+    comment: "おわたおわたおわたおわた",
     color: "#c9c8c8"
   },
   {
