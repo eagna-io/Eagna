@@ -81,10 +81,10 @@ const testpoll = {
   },
   resolved: 'Lebron',
   stats: {
-    totalVotes: 40,
+    totalVotes: 30,
     votePerChoice: {
       'Lebron': 16,
-      'Lebron青年期': 16,
+      'Lebron青年期': 6,
       'Lebron完全体': 4,
       'KobeBeanBrsssssssssssssssssssssssssssssssssyant': 4
     }
