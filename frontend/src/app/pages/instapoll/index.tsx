@@ -69,12 +69,15 @@ export const InstapollPage: React.FC = () => {
 const testaccount = "test-account";
 const testpoll = {
   id: 'sssss',
-  title: 'title',
+  idx: 1,
+  title: '次にポイントを決めるのは誰？',
   endAt: moment(),
   status: "open" as const,
   choices: {
     Lebron: "#4583e4",
-    KobeBeanBryant: "#e46345"
+    Lebron青年期: "#4583e4",
+    Lebron完全体: "#4583e4",
+    KobeBeanBrsssssssssssssssssssssssssssssssssyant: "#e46345",
   }
 };
 const testcomments = [{

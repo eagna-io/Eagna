@@ -2,6 +2,7 @@ import { Moment } from "moment";
 
 export interface Poll {
   id: string;
+  idx: number;
   title: string;
   endAt: Moment;
   status: "open" | "closed";
