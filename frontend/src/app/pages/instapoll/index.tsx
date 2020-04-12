@@ -59,6 +59,8 @@ export const InstapollPage: React.FC = () => {
         poll={testpoll}
         comments={testcomments}
         timer={testtimer}
+        isResolve={false}
+        isCorrect={false}
       />
     );
   // } else {

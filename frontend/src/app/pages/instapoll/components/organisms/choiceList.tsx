@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { WhiteBaseColor, VoteRateBackGround } from "app/components/color";
 
 import { ReactComponent as CorrectIcon } from "../atoms/images/correct.svg";
+import { ReactComponent as WrongIcon } from "../atoms/images/wrong.svg";
 import { Poll } from "model/poll";
 
 interface Props {
@@ -120,11 +121,11 @@ const ChoiceContainer = styled.div`
 `;
 
 const OutcomeIcon = styled(CorrectIcon)<{ correct?: boolean }>`
+  display: ${props => (props.correct ? "block" : "none")};
   position: absolute;
   left: 0;
-  width: 40px;
-  height: 48px;
-  display: ${props => (props.correct ? "block" : "none")};
+  width: 22px;
+  height: 50px;
 `;
 
 const ChoiceButton = styled.button<{ color: string; selected: boolean }>`

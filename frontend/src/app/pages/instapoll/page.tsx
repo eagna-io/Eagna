@@ -5,7 +5,9 @@ import {
   WildWatermelon,
   ToreaBay,
   WhiteBaseColor,
-  BlackColor
+  BlackColor,
+  Correct,
+  MainRed
 } from "app/components/color";
 import { Poll, Comment, Timer } from "model/poll";
 
@@ -22,6 +24,8 @@ interface Props {
   comments: Comment[];
   timer: Timer;
   ws?: WebSocket;
+  isResolve: boolean;
+  isCorrect: boolean;
 }
 
 export const Page: React.FC<Props> = ({
@@ -29,12 +33,19 @@ export const Page: React.FC<Props> = ({
   poll,
   comments,
   timer,
-  ws
+  ws,
+  isResolve,
+  isCorrect
 }) => {
   const [commentInput, setCommentInput] = React.useState("");
   const [selected, setSelected] = React.useState<string | undefined>();
+  let result = '正解!';
+  if (!isCorrect) {
+    result = '残念...';
+  }
   return (
     <Container>
+      <ResultContainer isResolve={isResolve} isCorrect={isCorrect}>{result}</ResultContainer>
       <Header>
         <Logo />
         <TimerComponent content={timer} />
@@ -103,6 +114,25 @@ const Container = styled.div`
   padding: 16px 28px;
   background-image: linear-gradient(151deg, ${WildWatermelon.hex} 0%, ${ToreaBay.hex} 100%);
   user-select: none;
+`;
+
+const ResultContainer = styled.div<{ isResolve: boolean, isCorrect: boolean }>`
+  display: ${props => (props.isResolve ? 'block' : 'none')};
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  -webkit-transform: translateY(-50%) translateX(-50%);
+  width: 286px;
+  height: 97px;
+  background-color: ${props => (props.isCorrect ? Correct.rgba(0.9) : MainRed.rgba(0.9))};
+  font-size: 32px;
+  line-height: 97px;
+  font-weight: 800;
+  letter-spacing: 1.14px;
+  color: ${WhiteBaseColor.hex};
+  text-align: center;
+  z-index: 100;
 `;
 
 const Header = styled.div`
