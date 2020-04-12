@@ -42,7 +42,7 @@ export const Page: React.FC<Props> = ({
         <Score numer={2} denom={3} />
       </Header>
       <PollCard>
-        <Theme><Qindex>Q{QuestionIndex}.</Qindex>{poll.title}</Theme>
+        <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme>
         <ChoiceList
           poll={poll}
           selected={selected}
@@ -97,9 +97,6 @@ export const LoadingPage: React.FC = () => {
   return <Container>Loading...</Container>;
 };
 
-// TODO: propsで渡す？
-const QuestionIndex = 1;
-
 const Container = styled.div`
   position: relative;
   width: 100vw;
@@ -143,7 +140,7 @@ const Theme = styled.div`
   font-weight: bold;
 `;
 
-const Qindex = styled.span`
+const PollIndex = styled.span`
   margin-right: 4px;
 `;
 

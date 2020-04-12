@@ -166,8 +166,12 @@ const Choicetitle = styled.div<{ color: string; selected: boolean }>`
   padding: 0 40px 0 10px;
   text-align: left;
   color: ${props => (props.selected ? WhiteBaseColor.hex : props.color)};
+  overflow: hidden;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 `;
 
 const RateValue = styled.div<{ color: string; selected: boolean }>`
