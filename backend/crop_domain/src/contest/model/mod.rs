@@ -6,27 +6,21 @@ use uuid::Uuid;
 
 mod brief;
 mod detailed;
+mod new;
 
 pub use brief::BriefContest;
 pub use detailed::DetailedContest;
+pub use new::New;
 
 pub trait Contest {
-    /*
-    fn new(
-        title: String,
-        category: String,
-        event_start_at: Option<DateTime<Utc>>,
-    ) -> DetailedContest {
-        DetailedContest {
+    fn new(title: String, category: String, event_start_at: Option<DateTime<Utc>>) -> New {
+        New {
             id: ContestId::new(),
-            status: ContestStatus::Upcoming,
             title,
             category,
             event_start_at,
-            poll: None,
         }
     }
-    */
 
     fn id(&self) -> ContestId;
 

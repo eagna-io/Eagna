@@ -1,4 +1,4 @@
-use super::model::{BriefContest, Contest, WithAttrs, WithPoll};
+use super::model::{BriefContest, Contest, New, WithAttrs, WithPoll};
 use crop_infra::pg::Connection;
 
 pub trait ContestRepository {
@@ -7,21 +7,11 @@ pub trait ContestRepository {
     // 新規作成されたContestを保存する
     // 新規作成されたContestにはPollはまだ設定されて
     // いないはずなので、Pollの保存は試みない
-    fn save_new<C>(&self, contest: &C) -> anyhow::Result<()>
+    fn save<C>(&self, contest: &C) -> anyhow::Result<()>
     where
-        C: Contest + WithAttrs + WithPoll,
+        C: Updatable,
     {
-        use crop_infra::pg::contest::{ContestTable as _, NewContest};
-
-        assert!(contest.current_poll().is_none());
-
-        let new_contest = NewContest {
-            id: &contest.id().0,
-            title: contest.title(),
-            category: contest.category(),
-            event_start_at: contest.event_start_at(),
-        };
-        self.conn().save(new_contest)
+        contest.save(self.conn())
     }
 
     /// ArchivedでないContestを全て取得する
@@ -48,5 +38,28 @@ pub trait ContestRepository {
 impl ContestRepository for Connection {
     fn conn(&self) -> &Connection {
         self
+    }
+}
+
+/*
+ * ==========
+ * Updatable
+ * ==========
+ */
+pub trait Updatable {
+    fn save(&self, conn: &Connection) -> anyhow::Result<()>;
+}
+
+impl Updatable for New {
+    fn save(&self, conn: &Connection) -> anyhow::Result<()> {
+        use crop_infra::pg::contest::{ContestTable, NewContest};
+
+        let new_contest = NewContest {
+            id: &self.id().0,
+            title: self.title(),
+            category: self.category(),
+            event_start_at: self.event_start_at(),
+        };
+        ContestTable::save(conn, new_contest)
     }
 }
