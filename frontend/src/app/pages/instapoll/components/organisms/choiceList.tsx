@@ -84,7 +84,7 @@ const Choice: React.FC<ChoiceProps> = ({
   onSelected,
   disabled,
   voteRate,
-  correct,
+  correct
 }) => {
 /* 
 【L102の方針】
