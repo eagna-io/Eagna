@@ -80,9 +80,41 @@ const testpoll = {
     KobeBeanBrsssssssssssssssssssssssssssssssssyant: "#e46345",
   }
 };
-const testcomments = [{
-  account: "test-account",
-  comment: "testtest",
-  color: "#424242"
-}];
+const testcomments = [
+  {
+    account: "Yuya_F",
+    comment: "いけえええええええええええええええええええええええええええええええええええええ!!!!",
+    color: "#4583e4"
+  },
+  {
+    account: "Atsuki",
+    comment: "いや、いくだろこれは",
+    color: "#4583e4"
+  },
+  {
+    account: "ふな",
+    comment: "Lebron風引いてるらしいぞ",
+    color: "#e46345"
+  },
+  {
+    account: "Yuya_F",
+    comment: "嘘やろ",
+    color: "#4583e4"
+  },
+  {
+    account: "Atsuki",
+    comment: "おわた",
+    color: "#c9c8c8"
+  },
+  {
+    account: "Atsuki",
+    comment: "やってくれんだろ",
+    color: "#4583e4"
+  },
+  {
+    account: "Yuya_F",
+    comment: "変えよう",
+    color: "#e46345"
+  }
+];
 const testtimer = 300;
