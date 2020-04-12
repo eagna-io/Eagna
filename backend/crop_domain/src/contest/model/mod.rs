@@ -1,9 +1,14 @@
 use crate::contest::poll::model::Poll;
 use chrono::{DateTime, Utc};
-use crop_infra::pg::contest::QueriedContest;
 use schemars::JsonSchema;
 use serde::Serialize;
 use uuid::Uuid;
+
+mod brief;
+mod detailed;
+
+pub use brief::BriefContest;
+pub use detailed::DetailedContest;
 
 pub trait Contest {
     fn new(
@@ -145,104 +150,4 @@ where
 pub struct PollAdded<C> {
     pub contest: C,
     pub added_poll: Poll,
-}
-
-/*
- * ============
- * BriefContest
- * ============
- */
-// QueriedContestに直接Contestを実装することも可能だが、
-// その場合infra層の実装をapplication層まで伝搬することになりちょっとよくない。
-// 特に、SerializeやJsonSchemaの実装をinfra層のモデルに対して行うことになってしまう。
-// また、このモデルが表現したい本質的内容は、「DBからQueryしたContest」ではなく
-// 「簡潔なContest」である。
-// そのため、ここでQueriedContestのラッパーとしてBriefContestを実装する。
-#[derive(Debug, Clone, Serialize, JsonSchema)]
-pub struct BriefContest {
-    id: ContestId,
-    status: ContestStatus,
-    title: String,
-    category: String,
-    event_start_at: Option<DateTime<Utc>>,
-}
-
-impl Contest for BriefContest {
-    fn id(&self) -> ContestId {
-        self.id
-    }
-}
-
-impl WithAttrs for BriefContest {
-    fn _status(&self) -> ContestStatus {
-        self.status
-    }
-
-    fn _title(&self) -> &str {
-        self.title.as_str()
-    }
-
-    fn _category(&self) -> &str {
-        self.category.as_str()
-    }
-
-    fn _event_start_at(&self) -> Option<&DateTime<Utc>> {
-        self.event_start_at.as_ref()
-    }
-}
-
-impl From<QueriedContest> for BriefContest {
-    fn from(queried: QueriedContest) -> Self {
-        BriefContest {
-            id: ContestId(queried.id),
-            status: queried.status,
-            title: queried.title,
-            category: queried.category,
-            event_start_at: queried.event_start_at,
-        }
-    }
-}
-
-/*
- * ===============
- * DetailedContest
- * ===============
- */
-pub struct DetailedContest {
-    id: ContestId,
-    status: ContestStatus,
-    title: String,
-    category: String,
-    event_start_at: Option<DateTime<Utc>>,
-    poll: Option<Poll>,
-}
-
-impl Contest for DetailedContest {
-    fn id(&self) -> ContestId {
-        self.id
-    }
-}
-
-impl WithAttrs for DetailedContest {
-    fn _status(&self) -> ContestStatus {
-        self.status
-    }
-
-    fn _title(&self) -> &str {
-        self.title.as_str()
-    }
-
-    fn _category(&self) -> &str {
-        self.category.as_str()
-    }
-
-    fn _event_start_at(&self) -> Option<&DateTime<Utc>> {
-        self.event_start_at.as_ref()
-    }
-}
-
-impl WithPoll for DetailedContest {
-    fn _current_poll(&self) -> Option<&Poll> {
-        self.poll.as_ref()
-    }
 }
