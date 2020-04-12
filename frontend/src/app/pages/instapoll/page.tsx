@@ -24,8 +24,6 @@ interface Props {
   comments: Comment[];
   timer: Timer;
   ws?: WebSocket;
-  isResolve: boolean;
-  isCorrect: boolean;
 }
 
 export const Page: React.FC<Props> = ({
@@ -33,19 +31,18 @@ export const Page: React.FC<Props> = ({
   poll,
   comments,
   timer,
-  ws,
-  isResolve,
-  isCorrect
+  ws
 }) => {
   const [commentInput, setCommentInput] = React.useState("");
   const [selected, setSelected] = React.useState<string | undefined>();
   let result = '正解!';
-  if (!isCorrect) {
+  if (!poll.correct) {
     result = '残念...';
   }
+  console.log(poll.correct)
   return (
     <Container>
-      <ResultContainer isResolve={isResolve} isCorrect={isCorrect}>{result}</ResultContainer>
+      <ResultContainer isResolve={poll.status === "closed"} isCorrect={poll.correct === true}>{result}</ResultContainer>
       <Header>
         <Logo />
         <TimerComponent content={timer} />
@@ -55,7 +52,7 @@ export const Page: React.FC<Props> = ({
         <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme>
         <ChoiceList
           poll={poll}
-          selected={selected}
+          selected={"Lebron青年期"}
           onSelected={choice => {
             if(ws) {
               ws.send(

@@ -84,11 +84,18 @@ const Choice: React.FC<ChoiceProps> = ({
   onSelected,
   disabled,
   voteRate,
-  correct
+  correct,
 }) => {
+/* 
+【L102の方針】
+不正解&&自分が選んだ => <Wrong />
+不正解&&自分が選んでない => null
+正解&&自分が選んでない => <Correct />
+正解&&自分が選んだ => <Correct /> 
+*/
   return (
     <ChoiceContainer>
-      <OutcomeIcon correct={correct} />
+      { !correct ? selected ?  <Wrong /> : null : <Correct /> }
       <ChoiceButton
         color={color}
         selected={selected}
@@ -120,8 +127,14 @@ const ChoiceContainer = styled.div`
   }
 `;
 
-const OutcomeIcon = styled(CorrectIcon)<{ correct?: boolean }>`
-  display: ${props => (props.correct ? "block" : "none")};
+const Correct = styled(CorrectIcon)`
+  position: absolute;
+  left: 0;
+  width: 22px;
+  height: 50px;
+`;
+
+const Wrong = styled(WrongIcon)`
   position: absolute;
   left: 0;
   width: 22px;

@@ -12,6 +12,7 @@ export interface Poll {
     totalVotes: number;
     votePerChoice: Record<string, number>;
   };
+  correct?: boolean;
 }
 
 export interface Comment {
