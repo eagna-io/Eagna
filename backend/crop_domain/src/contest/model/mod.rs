@@ -12,16 +12,16 @@ pub use brief::BriefContest;
 pub use detailed::DetailedContest;
 pub use new::New;
 
-pub trait Contest {
-    fn new(title: String, category: String, event_start_at: Option<DateTime<Utc>>) -> New {
-        New {
-            id: ContestId::new(),
-            title,
-            category,
-            event_start_at,
-        }
+pub fn new(title: String, category: String, event_start_at: Option<DateTime<Utc>>) -> New {
+    New {
+        id: ContestId::new(),
+        title,
+        category,
+        event_start_at,
     }
+}
 
+pub trait Contest {
     fn id(&self) -> ContestId;
 
     fn status(&self) -> ContestStatus

@@ -10,7 +10,9 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
         .allow_methods(vec!["POST", "PATCH", "PUT", "OPTIONS"])
         .allow_header("Content-Type");
 
-    let routes = contests::get::route(ctx.clone()).or(admins::me::access_tokens::post::route(ctx));
+    let routes = contests::get::route(ctx.clone())
+        .or(contests::post::route(ctx.clone()))
+        .or(admins::me::access_tokens::post::route(ctx));
 
     routes.with(cors_wrapper)
 }
