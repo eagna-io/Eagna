@@ -79,7 +79,7 @@ const testpoll = {
     Lebron完全体: "#4583e4",
     KobeBeanBrsssssssssssssssssssssssssssssssssyant: "#e46345",
   },
-  resolved: 'Lebron',
+  resolved: 'Lebron青年期',
   stats: {
     totalVotes: 30,
     votePerChoice: {
@@ -89,7 +89,7 @@ const testpoll = {
       'KobeBeanBrsssssssssssssssssssssssssssssssssyant': 4
     }
   },
-  correct: false
+  correct: true
 };
 const testcomments = [
   {

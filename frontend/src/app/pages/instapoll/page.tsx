@@ -52,7 +52,7 @@ export const Page: React.FC<Props> = ({
         <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme>
         <ChoiceList
           poll={poll}
-          selected={"Lebron青年期"}
+          selected={"Lebron"}
           onSelected={choice => {
             if(ws) {
               ws.send(
