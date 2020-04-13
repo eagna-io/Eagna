@@ -72,13 +72,24 @@ const testpoll = {
   idx: 1,
   title: '次にポイントを決めるのは誰？',
   endAt: moment(),
-  status: "open" as const,
+  status: "closed" as const,
   choices: {
     Lebron: "#4583e4",
     Lebron青年期: "#4583e4",
     Lebron完全体: "#4583e4",
     KobeBeanBrsssssssssssssssssssssssssssssssssyant: "#e46345",
-  }
+  },
+  resolved: "Lebron青年期",
+  stats: {
+    totalVotes: 30,
+    votePerChoice: {
+      'Lebron': 16,
+      'Lebron青年期': 6,
+      'Lebron完全体': 4,
+      'KobeBeanBrsssssssssssssssssssssssssssssssssyant': 4
+    }
+  },
+  selected: "Lebron青年期"
 };
 const testcomments = [
   {
@@ -117,4 +128,4 @@ const testcomments = [
     color: "#e46345"
   }
 ];
-const testtimer = 300;
+const testtimer = "closed";

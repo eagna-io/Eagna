@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { WhiteBaseColor, VoteRateBackGround } from "app/components/color";
 
 import { ReactComponent as CorrectIcon } from "../atoms/images/correct.svg";
+import { ReactComponent as WrongIcon } from "../atoms/images/wrong.svg";
 import { Poll } from "model/poll";
 
 interface Props {
@@ -42,7 +43,7 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
             disabled
             correct={poll.resolved === title}
             voteRate={
-              (poll.stats!.votePerChoice[title] / poll.stats!.totalVotes) * 100
+              Math.floor((poll.stats!.votePerChoice[title] / poll.stats!.totalVotes) * 100)
             }
           />
         ))}
@@ -85,9 +86,16 @@ const Choice: React.FC<ChoiceProps> = ({
   voteRate,
   correct
 }) => {
+/* 
+【MEMO：正誤アイコン表示の方針】
+正解 => <Correct />
+不正解 && 自分が選んだ => <Wrong />
+不正解 && 自分が選んでいない => null
+*/
   return (
     <ChoiceContainer>
-      <OutcomeIcon correct={correct} />
+      { correct === true ? <Correct /> : null }
+      { correct === false && selected ? <Wrong /> : null }
       <ChoiceButton
         color={color}
         selected={selected}
@@ -119,12 +127,18 @@ const ChoiceContainer = styled.div`
   }
 `;
 
-const OutcomeIcon = styled(CorrectIcon)<{ correct?: boolean }>`
+const Correct = styled(CorrectIcon)`
   position: absolute;
   left: 0;
-  width: 40px;
-  height: 48px;
-  display: ${props => (props.correct ? "block" : "none")};
+  width: 22px;
+  height: 50px;
+`;
+
+const Wrong = styled(WrongIcon)`
+  position: absolute;
+  left: 0;
+  width: 22px;
+  height: 50px;
 `;
 
 const ChoiceButton = styled.button<{ color: string; selected: boolean }>`
@@ -152,7 +166,7 @@ const VoteRate = styled.div<{ voteRate: number }>`
   left: 0px;
   width: ${props => props.voteRate}%;
   height: 42px;
-  border-radius: 24px;
+  border-radius: 24px 0 0 24px;
   background-color: ${VoteRateBackGround.hexWithOpacity(0.5)};
 `;
 

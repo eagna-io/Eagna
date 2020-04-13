@@ -5,7 +5,9 @@ import {
   WildWatermelon,
   ToreaBay,
   WhiteBaseColor,
-  BlackColor
+  BlackColor,
+  Correct,
+  MainRed
 } from "app/components/color";
 import { Poll, Comment, Timer } from "model/poll";
 
@@ -33,8 +35,16 @@ export const Page: React.FC<Props> = ({
 }) => {
   const [commentInput, setCommentInput] = React.useState("");
   const [selected, setSelected] = React.useState<string | undefined>();
+/* 
+【MEMO：正誤モーダル表示の方針】
+pollがresolveされていない => null
+pollがresolve && 正解 => CorectModal
+pollがresolve && 不正解 => WrongModal
+*/
   return (
     <Container>
+      { poll.resolved !== undefined && poll.selected === poll.resolved ? <CorrectModal>正解！</CorrectModal> : null }
+      { poll.resolved !== undefined && poll.selected !== poll.resolved ? <WrongModal>残念...</WrongModal> : null }
       <Header>
         <Logo />
         <TimerComponent content={timer} />
@@ -44,7 +54,7 @@ export const Page: React.FC<Props> = ({
         <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme>
         <ChoiceList
           poll={poll}
-          selected={selected}
+          selected={"Lebron"}
           onSelected={choice => {
             if(ws) {
               ws.send(
@@ -103,6 +113,42 @@ const Container = styled.div`
   padding: 16px 28px;
   background-image: linear-gradient(151deg, ${WildWatermelon.hex} 0%, ${ToreaBay.hex} 100%);
   user-select: none;
+`;
+
+const CorrectModal = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  -webkit-transform: translateY(-50%) translateX(-50%);
+  width: 286px;
+  height: 97px;
+  background-color: ${Correct.rgba(0.9)};
+  font-size: 32px;
+  line-height: 97px;
+  font-weight: 800;
+  letter-spacing: 1.14px;
+  color: ${WhiteBaseColor.hex};
+  text-align: center;
+  z-index: 100;
+`;
+
+const WrongModal = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  -webkit-transform: translateY(-50%) translateX(-50%);
+  width: 286px;
+  height: 97px;
+  background-color: ${MainRed.rgba(0.9)};
+  font-size: 32px;
+  line-height: 97px;
+  font-weight: 800;
+  letter-spacing: 1.14px;
+  color: ${WhiteBaseColor.hex};
+  text-align: center;
+  z-index: 100;
 `;
 
 const Header = styled.div`
