@@ -22,7 +22,6 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
             title={title}
             color={color}
             selected={selected === title}
-            isOpen={true}
             onSelected={() => {
               onSelected(title);
             }}
@@ -41,7 +40,6 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
             onSelected={() => {
               onSelected(title);
             }}
-            isOpen={false}
             disabled
             correct={poll.resolved === title}
             voteRate={
@@ -77,7 +75,6 @@ interface ChoiceProps {
   disabled?: boolean;
   voteRate?: number;
   correct?: boolean;
-  isOpen: boolean;
 }
 
 const Choice: React.FC<ChoiceProps> = ({
@@ -87,8 +84,7 @@ const Choice: React.FC<ChoiceProps> = ({
   onSelected,
   disabled,
   voteRate,
-  correct,
-  isOpen
+  correct
 }) => {
 /* 
 【MEMO：正誤アイコン表示の方針】
@@ -98,7 +94,8 @@ const Choice: React.FC<ChoiceProps> = ({
 */
   return (
     <ChoiceContainer>
-      { correct ? <Correct /> : selected&&correct === false ? <Wrong /> : null }
+      { correct === true ? <Correct /> : null }
+      { correct === false && selected ? <Wrong /> : null }
       <ChoiceButton
         color={color}
         selected={selected}

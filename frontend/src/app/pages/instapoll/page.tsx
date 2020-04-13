@@ -37,13 +37,14 @@ export const Page: React.FC<Props> = ({
   const [selected, setSelected] = React.useState<string | undefined>();
 /* 
 【MEMO：正誤モーダル表示の方針】
-pollがopen => null
-pollがclosed && 正解 => CorectModal
-pollがclosed && 不正解 => WrongModal
+pollがresolveされていない => null
+pollがresolve && 正解 => CorectModal
+pollがresolve && 不正解 => WrongModal
 */
   return (
     <Container>
-      { poll.status === "open" ? null : poll.selected === poll.resolved ? <CorrectModal>正解</CorrectModal> : <WrongModal>残念...</WrongModal> }
+      { poll.resolved !== undefined && poll.selected === poll.resolved ? <CorrectModal>正解！</CorrectModal> : null }
+      { poll.resolved !== undefined && poll.selected !== poll.resolved ? <WrongModal>残念...</WrongModal> : null }
       <Header>
         <Logo />
         <TimerComponent content={timer} />
