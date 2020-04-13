@@ -1,6 +1,6 @@
 use super::{schema::contests, types::ContestStatus, Connection};
 use chrono::{DateTime, Utc};
-use diesel::{prelude::*, result::Error as PgError};
+use diesel::prelude::*;
 use uuid::Uuid;
 
 pub trait ContestTable {
@@ -14,7 +14,7 @@ pub trait ContestTable {
     }
 
     fn query_by_id(&self, id: &Uuid) -> anyhow::Result<Option<QueriedContest>> {
-        match contests::table
+        Ok(contests::table
             .filter(contests::id.eq(id))
             .select((
                 contests::id,
@@ -24,11 +24,7 @@ pub trait ContestTable {
                 contests::event_start_at,
             ))
             .first::<QueriedContest>(self.conn())
-        {
-            Ok(contest) => Ok(Some(contest)),
-            Err(PgError::NotFound) => Ok(None),
-            Err(e) => Err(e.into()),
-        }
+            .optional()?)
     }
 
     fn query_not_archived(&self) -> anyhow::Result<Vec<QueriedContest>> {

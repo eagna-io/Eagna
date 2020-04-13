@@ -1,5 +1,5 @@
 use super::{schema::admins, Connection};
-use diesel::{prelude::*, result::Error as PgError};
+use diesel::prelude::*;
 use uuid::Uuid;
 
 pub trait AdminTable {
@@ -16,15 +16,11 @@ pub trait AdminTable {
         &self,
         email: &str,
     ) -> anyhow::Result<Option<QueriedAdminCredentials>> {
-        match admins::table
+        Ok(admins::table
             .filter(admins::email.eq(email))
             .select((admins::id, admins::cred, admins::salt))
             .first::<QueriedAdminCredentials>(self.conn())
-        {
-            Ok(cred) => Ok(Some(cred)),
-            Err(PgError::NotFound) => Ok(None),
-            Err(e) => Err(e.into()),
-        }
+            .optional()?)
     }
 }
 

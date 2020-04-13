@@ -13,9 +13,13 @@ pub trait PollTable {
         Ok(())
     }
 
-    fn query_by_contest_id(&self, id: &Uuid) -> anyhow::Result<Vec<QueriedPoll>> {
+    fn query_not_resolved_by_contest_id(&self, id: &Uuid) -> anyhow::Result<Option<QueriedPoll>> {
         Ok(polls::table
-            .filter(polls::contest_id.eq(id))
+            .filter(
+                polls::contest_id
+                    .eq(id)
+                    .and(polls::resolved_choice_name.is_null()),
+            )
             .select((
                 polls::id,
                 polls::contest_id,
@@ -25,7 +29,8 @@ pub trait PollTable {
                 polls::closed_at,
                 polls::resolved_choice_name,
             ))
-            .load::<QueriedPoll>(self.conn())?)
+            .first::<QueriedPoll>(self.conn())
+            .optional()?)
     }
 }
 
