@@ -7,6 +7,16 @@ import {
 } from "app/components/color";
 
 export const NavigationBar: React.FC = () => {
+  const isLoggedIn = true;
+  if (!isLoggedIn) {
+    return (
+      <NavBar>
+        <NavBarItem>
+          <Link to="/admin/login">ログイン</Link>
+        </NavBarItem>
+      </NavBar>
+    );
+  }
   return (
     <NavBar>
       <NavBarItem>

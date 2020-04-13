@@ -32,6 +32,7 @@ const NavBarComponent = styled.div`
 `;
 
 const Content = styled.div`
+  position: relative;
   width: 1142px;
   height: calc(100vh - 40px);
   margin: 20px 24px;

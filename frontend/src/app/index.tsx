@@ -11,6 +11,7 @@ import { InstapollPage } from "./pages/instapoll";
 import { Admin } from "./pages/admin";
 import { CreatePoll } from "./pages/admin/createPoll";
 import { ResolvePoll } from "./pages/admin/resolvePoll";
+import { AdminLogin } from "./pages/admin/login";
 
 const App: FC = () => {
   return (
@@ -35,6 +36,11 @@ const AppRouter: FC = () => (
         path="/admin"
         exact
         render={() => <Admin />}
+      />
+      <Route
+        path="/admin/login"
+        exact
+        render={() => <AdminLogin />}
       />
       <Route
         path="/admin/create"
