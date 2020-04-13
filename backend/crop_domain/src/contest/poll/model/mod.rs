@@ -139,14 +139,16 @@ pub trait Poll {
     where
         Self: WithAttrs,
     {
-        if self.is_open() {
+        if !self.is_open() {
+            Err(anyhow::anyhow!("You can't update choice of closed poll"))
+        } else if !self.choices.contains_key(&choice) {
+            Err(anyhow::anyhow!("Given choice is not a part of this poll"))
+        } else {
             Ok(ChoiceUpdated {
                 poll: self,
                 account,
                 choice,
             })
-        } else {
-            Err(anyhow::anyhow!("You can't update choice of closed poll"))
         }
     }
 
