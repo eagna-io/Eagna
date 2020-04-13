@@ -5,10 +5,18 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Account {
-    pub id: AccountId,
-    pub name: AccountName,
+mod new;
+
+pub use new::New;
+
+pub fn new(name: String) -> New {
+    New::new(name)
+}
+
+pub trait Account {
+    fn id(&self) -> &AccountId;
+
+    fn name(&self) -> &str;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deref, Serialize, Deserialize, JsonSchema)]
@@ -18,19 +26,6 @@ pub struct AccountId(pub Uuid);
 impl AccountId {
     fn new() -> AccountId {
         AccountId(Uuid::new_v4())
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deref, Serialize, Deserialize, JsonSchema)]
-#[serde(transparent)]
-pub struct AccountName(pub String);
-
-impl Account {
-    pub fn new(name: AccountName) -> Account {
-        Account {
-            id: AccountId::new(),
-            name,
-        }
     }
 }
 

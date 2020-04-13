@@ -1,8 +1,8 @@
 use super::ChoiceName;
-use crate::account::model::AccountName;
+use crate::account::AccountId;
 
 pub struct ChoiceUpdated<P> {
     pub(super) poll: P,
-    pub(super) account: AccountName,
+    pub(super) account: AccountId,
     pub(super) choice: ChoiceName,
 }

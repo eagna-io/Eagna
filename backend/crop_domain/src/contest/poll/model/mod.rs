@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-use crate::account::model::AccountName;
+use crate::account::AccountId;
 
 mod brief;
 mod choice_updated;
@@ -123,7 +123,7 @@ pub trait Poll {
         }
     }
 
-    fn user_choices(&self) -> &HashMap<AccountName, ChoiceName>
+    fn user_choices(&self) -> &HashMap<AccountId, ChoiceName>
     where
         Self: WithUserChoices,
     {
@@ -133,7 +133,7 @@ pub trait Poll {
     #[must_use]
     fn update_choice(
         &self,
-        account: AccountName,
+        account: AccountId,
         choice: ChoiceName,
     ) -> anyhow::Result<ChoiceUpdated<&Self>>
     where
@@ -187,7 +187,7 @@ pub trait Poll {
     /// ## Idea
     /// Accountに今どのChoiceを選択しているかの情報を持たせる
     #[must_use]
-    fn add_comment(&mut self, account: AccountName, comment_str: String) -> CommentAdded<&Self>
+    fn add_comment(&mut self, account: AccountId, comment_str: String) -> CommentAdded<&Self>
     where
         Self: WithAttrs + WithUserChoices,
     {
@@ -237,7 +237,7 @@ pub struct ChoiceColor(pub String);
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct Comment {
-    pub account: AccountName,
+    pub account: AccountId,
     pub comment: String,
     pub color: ChoiceColor,
 }
@@ -262,7 +262,7 @@ pub trait WithAttrs: Poll {
 }
 
 pub trait WithUserChoices: Poll {
-    fn _user_choices(&self) -> &HashMap<AccountName, ChoiceName>;
+    fn _user_choices(&self) -> &HashMap<AccountId, ChoiceName>;
 }
 
 pub trait WithComments: Poll {
@@ -307,7 +307,7 @@ impl<'a, P> WithUserChoices for &'a P
 where
     P: WithUserChoices,
 {
-    fn _user_choices(&self) -> &HashMap<AccountName, ChoiceName> {
+    fn _user_choices(&self) -> &HashMap<AccountId, ChoiceName> {
         P::_user_choices(self)
     }
 }
