@@ -36,8 +36,8 @@ const NavBar = styled.ul`
 `;
 
 const NavBarItem = styled.li`
+  padding: 9px 0px 9px 9px;
   font-size: 16px;
   font-weight: 500;
   color: ${WhiteBaseColor.hex};
-  padding: 9px 0px 9px 9px;
 `;

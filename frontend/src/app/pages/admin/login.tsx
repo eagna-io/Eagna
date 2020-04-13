@@ -38,8 +38,8 @@ const MailAddress = styled.input`
   width: 526px;
   height: 30px;
   padding: 10px 8px;
-  font-size: 10px;
   border: solid 1px ${color.AdminInputBorderColor.hex};
+  font-size: 10px;
 `;
 
 const PassWrapper = styled.div`
@@ -52,20 +52,20 @@ const Password = styled.input`
   width: 526px;
   height: 30px;
   padding: 10px 8px;
-  font-size: 10px;
   border: solid 1px ${color.AdminInputBorderColor.hex};
+  font-size: 10px;
 `;
 
 const Submit = styled.button`
-  width: 250px;
-  height: 40px;
-  background-color: ${color.Correct.hex};
   display: block;
-  font-size: 14px;
-  color: ${color.WhiteBaseColor.hex};
   position: absolute;
   bottom: 31px;
   left: 50%;
   transform: translateY(0%) translateX(-50%);
   -webkit-transform: translateY(0%) translateX(-50%);
+  width: 250px;
+  height: 40px;
+  background-color: ${color.Correct.hex};
+  font-size: 14px;
+  color: ${color.WhiteBaseColor.hex};
 `;
