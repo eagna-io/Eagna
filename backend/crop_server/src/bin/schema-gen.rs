@@ -59,6 +59,18 @@ fn main() {
     );
 
     /*
+     * POST /accounts/
+     */
+    write_json_schema!(
+        "api/accounts__post__req.json",
+        routes::accounts::post::ReqBody
+    );
+    write_json_schema!(
+        "api/accounts__post__res.json",
+        routes::accounts::post::ResBody
+    );
+
+    /*
      * POST /admins/me/access_tokens
      */
     write_json_schema!(

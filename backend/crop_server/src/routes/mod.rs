@@ -1,3 +1,4 @@
+pub mod accounts;
 pub mod admins;
 pub mod contests;
 
@@ -15,6 +16,7 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
         .or(contests::_id::get::route(ctx.clone()))
         .or(contests::_id::polls::post::route(ctx.clone()))
         .or(contests::_id::polls::_id::patch::route(ctx.clone()))
+        .or(accounts::post::route(ctx.clone()))
         .or(admins::me::access_tokens::post::route(ctx));
 
     routes.with(cors_wrapper)

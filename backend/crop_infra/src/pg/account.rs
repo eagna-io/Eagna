@@ -22,6 +22,6 @@ impl AccountTable for Connection {
 #[derive(Insertable)]
 #[table_name = "accounts"]
 pub struct NewAccount<'a> {
-    id: &'a Uuid,
-    name: &'a str,
+    pub id: &'a Uuid,
+    pub name: &'a str,
 }
