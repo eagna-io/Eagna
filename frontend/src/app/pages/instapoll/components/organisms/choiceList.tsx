@@ -41,6 +41,7 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
             onSelected={() => {
               onSelected(title);
             }}
+            isOpen={false}
             disabled
             correct={poll.resolved === title}
             voteRate={
@@ -76,7 +77,7 @@ interface ChoiceProps {
   disabled?: boolean;
   voteRate?: number;
   correct?: boolean;
-  isOpen? : boolean;
+  isOpen: boolean;
 }
 
 const Choice: React.FC<ChoiceProps> = ({
@@ -137,7 +138,7 @@ const Correct = styled(CorrectIcon)`
   height: 50px;
 `;
 
-const Wrong = styled(WrongIcon)<{ isOpen: boolean | undefined }>`
+const Wrong = styled(WrongIcon)<{ isOpen: boolean }>`
   display: ${ props => props.isOpen ? "none" : "block" };
   position: absolute;
   left: 0;
