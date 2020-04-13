@@ -35,14 +35,9 @@ export const Page: React.FC<Props> = ({
 }) => {
   const [commentInput, setCommentInput] = React.useState("");
   const [selected, setSelected] = React.useState<string | undefined>();
-  let result = '正解!';
-  if (!poll.correct) {
-    result = '残念...';
-  }
-  console.log(poll.correct)
   return (
     <Container>
-      <ResultContainer isResolve={poll.status === "closed"} isCorrect={poll.correct === true}>{result}</ResultContainer>
+      { poll.status === "open" ? null : poll.selected === poll.resolved ? <CorrectModal>正解</CorrectModal> : <WrongModal>残念...</WrongModal> }
       <Header>
         <Logo />
         <TimerComponent content={timer} />
@@ -113,8 +108,7 @@ const Container = styled.div`
   user-select: none;
 `;
 
-const ResultContainer = styled.div<{ isResolve: boolean, isCorrect: boolean }>`
-  display: ${props => (props.isResolve ? 'block' : 'none')};
+const CorrectModal = styled.div`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -122,7 +116,25 @@ const ResultContainer = styled.div<{ isResolve: boolean, isCorrect: boolean }>`
   -webkit-transform: translateY(-50%) translateX(-50%);
   width: 286px;
   height: 97px;
-  background-color: ${props => (props.isCorrect ? Correct.rgba(0.9) : MainRed.rgba(0.9))};
+  background-color: ${Correct.rgba(0.9)};
+  font-size: 32px;
+  line-height: 97px;
+  font-weight: 800;
+  letter-spacing: 1.14px;
+  color: ${WhiteBaseColor.hex};
+  text-align: center;
+  z-index: 100;
+`;
+
+const WrongModal = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  -webkit-transform: translateY(-50%) translateX(-50%);
+  width: 286px;
+  height: 97px;
+  background-color: ${MainRed.rgba(0.9)};
   font-size: 32px;
   line-height: 97px;
   font-weight: 800;

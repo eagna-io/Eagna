@@ -98,7 +98,7 @@ const Choice: React.FC<ChoiceProps> = ({
 */
   return (
     <ChoiceContainer>
-      { correct ? <Correct /> : selected ? <Wrong isOpen={isOpen} /> : null }
+      { correct ? <Correct /> : selected&&correct === false ? <Wrong /> : null }
       <ChoiceButton
         color={color}
         selected={selected}
@@ -137,8 +137,7 @@ const Correct = styled(CorrectIcon)`
   height: 50px;
 `;
 
-const Wrong = styled(WrongIcon)<{ isOpen: boolean }>`
-  display: ${ props => props.isOpen ? "none" : "block" };
+const Wrong = styled(WrongIcon)`
   position: absolute;
   left: 0;
   width: 22px;
