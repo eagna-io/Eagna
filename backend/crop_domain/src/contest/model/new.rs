@@ -1,6 +1,8 @@
 use super::{Contest, ContestId, ContestStatus, WithAttrs, WithPoll};
 use crate::contest::poll::model::{Poll, PollId};
+use crate::contest::repository::Updatable;
 use chrono::{DateTime, Utc};
+use crop_infra::pg::Connection;
 
 pub struct New {
     pub(super) id: ContestId,
@@ -46,5 +48,19 @@ pub enum NeverPoll {}
 impl Poll for NeverPoll {
     fn id(&self) -> PollId {
         panic!("never call");
+    }
+}
+
+impl Updatable for New {
+    fn save(&self, conn: &Connection) -> anyhow::Result<()> {
+        use crop_infra::pg::contest::{ContestTable, NewContest};
+
+        let new_contest = NewContest {
+            id: &self.id().0,
+            title: self.title(),
+            category: self.category(),
+            event_start_at: self.event_start_at(),
+        };
+        ContestTable::save(conn, new_contest)
     }
 }

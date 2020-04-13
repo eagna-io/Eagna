@@ -1,4 +1,4 @@
-use super::model::{BriefContest, Contest, New};
+use super::model::BriefContest;
 use super::poll::Poll;
 use crop_infra::pg::Connection;
 
@@ -49,18 +49,4 @@ impl ContestRepository for Connection {
  */
 pub trait Updatable {
     fn save(&self, conn: &Connection) -> anyhow::Result<()>;
-}
-
-impl Updatable for New {
-    fn save(&self, conn: &Connection) -> anyhow::Result<()> {
-        use crop_infra::pg::contest::{ContestTable, NewContest};
-
-        let new_contest = NewContest {
-            id: &self.id().0,
-            title: self.title(),
-            category: self.category(),
-            event_start_at: self.event_start_at(),
-        };
-        ContestTable::save(conn, new_contest)
-    }
 }
