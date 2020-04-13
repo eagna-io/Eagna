@@ -7,7 +7,8 @@ import {
   WhiteBaseColor,
   BlackColor,
   Correct,
-  MainRed
+  MainRed,
+  VoteRateBackGround
 } from "app/components/color";
 import { Poll, Comment, Timer } from "model/poll";
 
@@ -187,16 +188,7 @@ const PollIndex = styled.span`
 const CommentFeed = styled.div`
   height: 190px;
   margin: 0 14px 18px 14px;
-  overflow-y: scroll;
-  ::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 7px;
-  }
-  ::-webkit-scrollbar-thumb {
-      border-radius: 4px;
-      background-color: rgba(0,0,0,.5);
-      box-shadow: 0 0 1px rgba(255,255,255,.5);
-  }
+  overflow: scroll;
 `;
 
 const CommentContainer = styled.div`
