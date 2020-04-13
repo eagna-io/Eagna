@@ -33,8 +33,8 @@ CREATE TABLE polls (
   title                 TEXT NOT NULL,
   duration_sec          INTEGER,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
-  /* いつcloseしたか。not nullのとき、closed状態 */
-  closed_at             TIMESTAMPTZ DEFAULT NULL,
+  /* いつresolveしたか */
+  resolved_at           TIMESTAMPTZ DEFAULT NULL,
   resolved_choice_name  TEXT DEFAULT NULL,
 
   UNIQUE (contest_id, title),

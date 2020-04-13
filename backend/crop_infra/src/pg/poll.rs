@@ -26,11 +26,25 @@ pub trait PollTable {
                 polls::title,
                 polls::created_at,
                 polls::duration_sec,
-                polls::closed_at,
+                polls::resolved_at,
                 polls::resolved_choice_name,
             ))
             .first::<QueriedPoll>(self.conn())
             .optional()?)
+    }
+
+    fn update_resolved_choice_name(
+        &self,
+        id: &Uuid,
+        resolved_choice_name: &str,
+    ) -> anyhow::Result<()> {
+        diesel::update(polls::table.filter(polls::id.eq(id)))
+            .set((
+                polls::resolved_choice_name.eq(resolved_choice_name),
+                polls::resolved_at.eq(Utc::now()),
+            ))
+            .execute(self.conn())?;
+        Ok(())
     }
 }
 
@@ -57,6 +71,6 @@ pub struct QueriedPoll {
     pub title: String,
     pub created_at: DateTime<Utc>,
     pub duration_sec: Option<i32>,
-    pub closed_at: Option<DateTime<Utc>>,
+    pub resolved_at: Option<DateTime<Utc>>,
     pub resolved_choice_name: Option<String>,
 }
