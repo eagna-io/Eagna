@@ -1,4 +1,4 @@
-use super::model::{BriefContest, ContestId};
+use crate::contest::{BriefContest, ContestId};
 use crop_infra::pg::Connection;
 
 pub trait ContestRepository {

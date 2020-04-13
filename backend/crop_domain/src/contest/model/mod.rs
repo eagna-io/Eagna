@@ -1,5 +1,4 @@
-use super::poll::{self, ChoiceColor, ChoiceName};
-use crate::contest::poll::model::Poll;
+use crate::contest::poll::{self, ChoiceColor, ChoiceName, Poll};
 use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
 use serde::Serialize;

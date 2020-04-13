@@ -1,8 +1,9 @@
-use super::{Contest, ContestId, ContestStatus, WithAttrs, WithPoll};
-use crate::contest::poll::model::{Poll, PollId};
-use crate::contest::repository::Updatable;
+use crate::contest::poll::{Poll, PollId};
+use crate::contest::Updatable;
 use chrono::{DateTime, Utc};
 use crop_infra::pg::Connection;
+
+use super::{Contest, ContestId, ContestStatus, WithAttrs, WithPoll};
 
 pub struct New {
     pub(super) id: ContestId,

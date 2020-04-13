@@ -1,12 +1,11 @@
-use super::Contest;
-use crate::contest::poll::{self, Poll as _};
-use crate::contest::repository::Updatable;
+use crate::contest::poll::{New, Poll as _};
+use crate::contest::{Contest, Updatable};
 use crop_infra::pg::Connection;
 
 #[must_use]
 pub struct PollAdded<C> {
     pub(crate) contest: C,
-    pub(crate) poll: poll::New,
+    pub(crate) poll: New,
 }
 
 impl<C> PollAdded<C> {
@@ -14,7 +13,7 @@ impl<C> PollAdded<C> {
         &self.contest
     }
 
-    pub fn poll(&self) -> &poll::New {
+    pub fn poll(&self) -> &New {
         &self.poll
     }
 }

@@ -1,5 +1,5 @@
-use crate::contest::poll::model::{ChoiceName, Poll};
-use crate::contest::repository::Updatable;
+use crate::contest::poll::{ChoiceName, Poll};
+use crate::contest::Updatable;
 use crop_infra::pg::{poll::PollTable as _, Connection};
 
 #[must_use]
