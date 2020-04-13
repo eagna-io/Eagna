@@ -5,8 +5,10 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+mod authenticated;
 mod new;
 
+pub use authenticated::Authenticated;
 pub use new::New;
 
 pub fn new(name: String) -> New {
@@ -16,11 +18,20 @@ pub fn new(name: String) -> New {
 pub trait Account {
     fn id(&self) -> &AccountId;
 
-    fn name(&self) -> &str;
-
     fn gen_access_token(&self) -> AccessToken {
         AccessToken::new(*self.id())
     }
+
+    fn name(&self) -> &str
+    where
+        Self: WithAttrs,
+    {
+        self._name()
+    }
+}
+
+pub trait WithAttrs {
+    fn _name(&self) -> &str;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deref, Serialize, Deserialize, JsonSchema)]

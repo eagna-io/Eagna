@@ -1,4 +1,4 @@
-use crate::account::{Account, AccountId, Updatable};
+use crate::account::{Account, AccountId, Updatable, WithAttrs};
 use crop_infra::pg::{
     account::{AccountTable, NewAccount},
     Connection,
@@ -23,8 +23,10 @@ impl Account for New {
     fn id(&self) -> &AccountId {
         &self.id
     }
+}
 
-    fn name(&self) -> &str {
+impl WithAttrs for New {
+    fn _name(&self) -> &str {
         self.name.as_str()
     }
 }
