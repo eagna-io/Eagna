@@ -1,5 +1,4 @@
 use super::model::{BriefContest, ContestId};
-use super::poll::Poll;
 use crop_infra::pg::Connection;
 
 pub trait ContestRepository {

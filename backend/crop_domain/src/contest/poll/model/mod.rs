@@ -102,12 +102,13 @@ pub trait Poll {
         self._resolved_choice()
     }
 
+    #[must_use]
     fn resolve(&self, choice: ChoiceName) -> anyhow::Result<Resolved<&Self>>
     where
         Self: WithAttrs,
     {
-        if !self.is_closed() {
-            Err(anyhow::anyhow!("Poll is not closed"))
+        if self.is_open() {
+            Err(anyhow::anyhow!("Poll is still open"))
         } else if self.resolved_choice().is_some() {
             Err(anyhow::anyhow!("Poll is already resolved"))
         } else if !self.choices().contains_key(&choice) {
@@ -127,6 +128,7 @@ pub trait Poll {
         self._user_choices()
     }
 
+    #[must_use]
     fn update_choice(
         &self,
         account: AccountName,
@@ -146,6 +148,7 @@ pub trait Poll {
         }
     }
 
+    #[must_use]
     fn compute_stats(&self) -> Stats
     where
         Self: WithAttrs + WithUserChoices,
@@ -179,6 +182,7 @@ pub trait Poll {
     ///
     /// ## Idea
     /// Accountに今どのChoiceを選択しているかの情報を持たせる
+    #[must_use]
     fn add_comment(&mut self, account: AccountName, comment_str: String) -> CommentAdded<&Self>
     where
         Self: WithAttrs + WithUserChoices,
