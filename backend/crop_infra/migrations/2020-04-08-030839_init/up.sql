@@ -28,14 +28,14 @@ CREATE TABLE contests (
 );
 
 CREATE TABLE polls (
-  id                  UUID PRIMARY KEY,
-  contest_id          UUID NOT NULL,
-  title               TEXT NOT NULL,
-  duration_sec        INTEGER,
-  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+  id                    UUID PRIMARY KEY,
+  contest_id            UUID NOT NULL,
+  title                 TEXT NOT NULL,
+  duration_sec          INTEGER,
+  created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
   /* いつcloseしたか。not nullのとき、closed状態 */
-  closed_at           TIMESTAMPTZ DEFAULT NULL,
-  resolved_choice_id  INTEGER DEFAULT NULL,
+  closed_at             TIMESTAMPTZ DEFAULT NULL,
+  resolved_choice_name  TEXT DEFAULT NULL,
 
   UNIQUE (contest_id, title),
   CONSTRAINT contest_poll_fkey FOREIGN KEY(contest_id)

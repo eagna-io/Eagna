@@ -1,12 +1,6 @@
-use super::{
-    schema::{choices, polls},
-    Connection,
-};
+use super::{schema::polls, Connection};
 use chrono::{DateTime, Utc};
-use diesel::{
-    expression_methods::{NullableExpressionMethods as _, PgExpressionMethods as _},
-    prelude::*,
-};
+use diesel::prelude::*;
 use uuid::Uuid;
 
 pub trait PollTable {
@@ -21,10 +15,6 @@ pub trait PollTable {
 
     fn query_by_contest_id(&self, id: &Uuid) -> anyhow::Result<Vec<QueriedPoll>> {
         Ok(polls::table
-            .left_join(
-                choices::table
-                    .on(polls::resolved_choice_id.is_not_distinct_from(choices::id.nullable())),
-            )
             .filter(polls::contest_id.eq(id))
             .select((
                 polls::id,
@@ -33,9 +23,7 @@ pub trait PollTable {
                 polls::created_at,
                 polls::duration_sec,
                 polls::closed_at,
-                choices::name.nullable(),
-                choices::color.nullable(),
-                choices::idx.nullable(),
+                polls::resolved_choice_name,
             ))
             .load::<QueriedPoll>(self.conn())?)
     }
@@ -66,6 +54,4 @@ pub struct QueriedPoll {
     pub duration_sec: Option<i32>,
     pub closed_at: Option<DateTime<Utc>>,
     pub resolved_choice_name: Option<String>,
-    pub resolved_choice_color: Option<String>,
-    pub resolved_choice_idx: Option<i32>,
 }
