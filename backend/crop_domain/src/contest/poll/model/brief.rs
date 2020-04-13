@@ -1,15 +1,32 @@
 use super::{ChoiceColor, ChoiceName, Poll, PollId, WithAttrs};
 use chrono::{DateTime, Duration, Utc};
 use crop_infra::pg::{choice::QueriedChoice, poll::QueriedPoll};
+use schemars::JsonSchema;
+use serde::Serialize;
 use std::collections::HashMap;
 
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct BriefPoll {
     pub(super) id: PollId,
     pub(super) title: String,
     pub(super) created_at: DateTime<Utc>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "serialize_duration")]
+    // https://github.com/GREsau/schemars/issues/15#issuecomment-593006526
+    #[schemars(with = "Option<i64>")]
     pub(super) duration: Option<Duration>,
     pub(super) choices: HashMap<ChoiceName, ChoiceColor>,
     pub(super) resolved_choice: Option<ChoiceName>,
+}
+
+fn serialize_duration<S>(value: &Option<Duration>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::ser::Serializer,
+{
+    value
+        .as_ref()
+        .map(|d| d.num_seconds())
+        .serialize(serializer)
 }
 
 impl Poll for BriefPoll {

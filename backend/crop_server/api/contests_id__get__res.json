@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ResBody",
+  "allOf": [
+    {
+      "$ref": "#/definitions/DetailedContest_for_BriefPoll"
+    }
+  ],
+  "definitions": {
+    "BriefPoll": {
+      "type": "object",
+      "required": [
+        "choices",
+        "created_at",
+        "id",
+        "title"
+      ],
+      "properties": {
+        "choices": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ChoiceColor"
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duration": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64"
+        },
+        "id": {
+          "$ref": "#/definitions/PollId"
+        },
+        "resolved_choice": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ChoiceName"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "ChoiceColor": {
+      "type": "string"
+    },
+    "ChoiceName": {
+      "type": "string"
+    },
+    "ContestId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "ContestStatus": {
+      "enum": [
+        "Upcoming",
+        "Open",
+        "Closed",
+        "Archived"
+      ]
+    },
+    "DetailedContest_for_BriefPoll": {
+      "type": "object",
+      "required": [
+        "category",
+        "id",
+        "status",
+        "title"
+      ],
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "event_start_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "id": {
+          "$ref": "#/definitions/ContestId"
+        },
+        "poll": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/BriefPoll"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/definitions/ContestStatus"
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "PollId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

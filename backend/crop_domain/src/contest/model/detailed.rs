@@ -4,12 +4,15 @@ use chrono::{DateTime, Utc};
 use crop_infra::pg::{choice::ChoiceTable, contest::ContestTable, poll::PollTable, Connection};
 
 use super::{Contest, ContestId, ContestStatus, WithAttrs, WithPoll};
+use schemars::JsonSchema;
+use serde::Serialize;
 
 /*
  * ===============
  * DetailedContest
  * ===============
  */
+#[derive(Debug, Serialize, JsonSchema)]
 pub struct DetailedContest<P> {
     pub(super) id: ContestId,
     pub(super) status: ContestStatus,

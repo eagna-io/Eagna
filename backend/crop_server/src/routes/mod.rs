@@ -12,6 +12,7 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
 
     let routes = contests::get::route(ctx.clone())
         .or(contests::post::route(ctx.clone()))
+        .or(contests::_id::get::route(ctx.clone()))
         .or(contests::_id::polls::post::route(ctx.clone()))
         .or(contests::_id::polls::_id::patch::route(ctx.clone()))
         .or(admins::me::access_tokens::post::route(ctx));

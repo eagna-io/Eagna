@@ -31,6 +31,14 @@ fn main() {
     );
 
     /*
+     * GET /contests/:id
+     */
+    write_json_schema!(
+        "api/contests_id__get__res.json",
+        routes::contests::_id::get::ResBody
+    );
+
+    /*
      * POST /contests/:id/polls
      */
     write_json_schema!(
@@ -40,6 +48,14 @@ fn main() {
     write_json_schema!(
         "api/contests_id_polls__post__res.json",
         routes::contests::_id::polls::post::ResBody
+    );
+
+    /*
+     * PATCH /contests/:id/polls/:id
+     */
+    write_json_schema!(
+        "api/contests_id_polls_id__patch__req.json",
+        routes::contests::_id::polls::_id::patch::ReqBody
     );
 
     /*
