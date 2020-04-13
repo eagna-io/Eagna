@@ -58,16 +58,16 @@ const Container = styled.div`
   overflow-y: scroll;
   ::-webkit-scrollbar {
     -webkit-appearance: none;
-    width: 7px;
+    width: 3px;
   }
   ::-webkit-scrollbar-thumb {
-      border-radius: 4px;
+      border-radius: 2px;
       background-color: rgba(0,0,0,.5);
       box-shadow: 0 0 1px rgba(255,255,255,.5);
   }
   ::-webkit-scrollbar-track
   {
-    border-radius: 6px;
+    border-radius: 3px;
     background-color: ${VoteRateBackGround.rgba(0.5)};
   }
 `;
