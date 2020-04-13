@@ -5,11 +5,8 @@ use crate::{
     response::{self, Response},
 };
 use chrono::Duration;
-use crop_domain::contest::{
-    model::{Contest, ContestId},
-    poll::model::{ChoiceColor, ChoiceName, Poll, PollId},
-    repository::ContestRepository as _,
-};
+use crop_domain::contest::poll::{ChoiceColor, ChoiceName, Poll, PollId};
+use crop_domain::contest::{BriefContest, Contest, ContestId, ContestRepository as _};
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -45,7 +42,7 @@ async fn inner(ctx: Context, contest_id: ContestId, body: ReqBody) -> Result<Res
         .with_conn::<Result<Response, Error>, _>(move |conn| {
             let duration = body.duration_sec.map(|s| Duration::seconds(s as i64));
             let contest = conn
-                .query_brief_by_id(&contest_id)?
+                .query_by_id::<BriefContest>(&contest_id)?
                 .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
             let added = contest.add_poll(body.title, duration, body.choices)?;
             conn.save(&added)?;

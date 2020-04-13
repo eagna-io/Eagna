@@ -207,13 +207,21 @@ pub trait Poll {
     }
 }
 
-#[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 #[serde(transparent)]
 pub struct PollId(pub Uuid);
 
 impl PollId {
     pub fn new() -> PollId {
         PollId(Uuid::new_v4())
+    }
+}
+
+impl std::str::FromStr for PollId {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(PollId(Uuid::parse_str(s)?))
     }
 }
 
