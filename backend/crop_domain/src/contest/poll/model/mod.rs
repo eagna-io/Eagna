@@ -1,5 +1,4 @@
 use chrono::{DateTime, Duration, Utc};
-use crop_primitive::string::String;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -9,11 +8,28 @@ use crate::account::model::AccountName;
 
 mod choice_updated;
 mod comment_added;
+mod new;
 mod resolved;
 
 pub use choice_updated::ChoiceUpdated;
 pub use comment_added::CommentAdded;
+pub use new::New;
 pub use resolved::Resolved;
+
+pub(crate) fn new(
+    title: String,
+    created_at: DateTime<Utc>,
+    duration: Option<Duration>,
+    choices: HashMap<ChoiceName, ChoiceColor>,
+) -> New {
+    New {
+        id: PollId::new(),
+        title,
+        created_at,
+        duration,
+        choices,
+    }
+}
 
 pub trait Poll {
     fn id(&self) -> PollId;
@@ -34,15 +50,11 @@ pub trait Poll {
     }
 
     /// Pollが開いている長さ
-    fn duration(&self) -> Option<Duration>
+    fn duration(&self) -> Option<&Duration>
     where
         Self: WithAttrs,
     {
-        if let Some(sec) = self._duration_sec() {
-            Some(Duration::seconds(sec as i64))
-        } else {
-            None
-        }
+        self._duration()
     }
 
     /// PollがClosed（回答不可）になる日時
@@ -51,7 +63,7 @@ pub trait Poll {
         Self: WithAttrs,
     {
         if let Some(dur) = self.duration() {
-            Some(*self.created_at() + dur)
+            Some(*self.created_at() + *dur)
         } else {
             None
         }
@@ -227,7 +239,7 @@ pub trait WithAttrs: Poll {
 
     fn _created_at(&self) -> &DateTime<Utc>;
 
-    fn _duration_sec(&self) -> Option<i32>;
+    fn _duration(&self) -> Option<&Duration>;
 
     fn _choices(&self) -> &HashMap<ChoiceName, ChoiceColor>;
 
@@ -263,8 +275,8 @@ where
         P::_created_at(self)
     }
 
-    fn _duration_sec(&self) -> Option<i32> {
-        P::_duration_sec(self)
+    fn _duration(&self) -> Option<&Duration> {
+        P::_duration(self)
     }
 
     fn _choices(&self) -> &HashMap<ChoiceName, ChoiceColor> {

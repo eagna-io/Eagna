@@ -1,16 +1,20 @@
+use super::poll::{self, ChoiceColor, ChoiceName};
 use crate::contest::poll::model::Poll;
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
 use serde::Serialize;
+use std::collections::HashMap;
 use uuid::Uuid;
 
 mod brief;
 mod detailed;
 mod new;
+mod poll_added;
 
 pub use brief::BriefContest;
 pub use detailed::DetailedContest;
 pub use new::New;
+pub use poll_added::PollAdded;
 
 pub fn new(title: String, category: String, event_start_at: Option<DateTime<Utc>>) -> New {
     New {
@@ -59,15 +63,26 @@ pub trait Contest {
         self._current_poll()
     }
 
-    fn add_poll<P>(&self, poll: P) -> anyhow::Result<PollAdded<&Self, P>>
+    /// Contestに新しいPollを追加する。
+    /// ContestがOpenのときのみ追加できる。
+    ///
+    /// ## TODO
+    /// Contestで現在un-resolvedなPollが存在するときには追加できないようにする
+    fn add_poll(
+        &self,
+        title: String,
+        created_at: DateTime<Utc>,
+        duration: Option<Duration>,
+        choices: HashMap<ChoiceName, ChoiceColor>,
+    ) -> anyhow::Result<PollAdded<&Self>>
     where
         Self: WithAttrs,
-        P: Poll,
     {
         if self.status() == ContestStatus::Open {
+            let new_poll = poll::new(title, created_at, duration, choices);
             Ok(PollAdded {
                 contest: self,
-                added_poll: poll,
+                poll: new_poll,
             })
         } else {
             Err(anyhow::anyhow!("You can't add a poll to non-open contest"))
@@ -141,14 +156,4 @@ where
     fn _current_poll(&self) -> Option<&Self::Poll> {
         C::_current_poll(self)
     }
-}
-
-/*
- * ============
- * PollAdded
- * ============
- */
-pub struct PollAdded<C, P> {
-    pub contest: C,
-    pub added_poll: P,
 }
