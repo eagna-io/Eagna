@@ -6,11 +6,13 @@ use uuid::Uuid;
 
 use crate::account::model::AccountName;
 
+mod brief;
 mod choice_updated;
 mod comment_added;
 mod new;
 mod resolved;
 
+pub use brief::BriefPoll;
 pub use choice_updated::ChoiceUpdated;
 pub use comment_added::CommentAdded;
 pub use new::New;
