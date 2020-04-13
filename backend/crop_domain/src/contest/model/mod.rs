@@ -3,7 +3,7 @@ use crate::contest::poll::model::Poll;
 use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
 use serde::Serialize;
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 use uuid::Uuid;
 
 mod brief;
@@ -68,10 +68,10 @@ pub trait Contest {
     ///
     /// ## TODO
     /// Contestで現在un-resolvedなPollが存在するときには追加できないようにする
+    #[must_use]
     fn add_poll(
         &self,
         title: String,
-        created_at: DateTime<Utc>,
         duration: Option<Duration>,
         choices: HashMap<ChoiceName, ChoiceColor>,
     ) -> anyhow::Result<PollAdded<&Self>>
@@ -79,7 +79,7 @@ pub trait Contest {
         Self: WithAttrs,
     {
         if self.status() == ContestStatus::Open {
-            let new_poll = poll::new(title, created_at, duration, choices);
+            let new_poll = poll::new(title, duration, choices);
             Ok(PollAdded {
                 contest: self,
                 poll: new_poll,
@@ -112,6 +112,14 @@ pub struct ContestId(pub Uuid);
 impl ContestId {
     pub fn new() -> ContestId {
         ContestId(Uuid::new_v4())
+    }
+}
+
+impl FromStr for ContestId {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(ContestId(Uuid::parse_str(s)?))
     }
 }
 

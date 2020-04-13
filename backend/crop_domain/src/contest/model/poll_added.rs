@@ -3,9 +3,20 @@ use crate::contest::poll::{self, Poll as _};
 use crate::contest::repository::Updatable;
 use crop_infra::pg::Connection;
 
+#[must_use]
 pub struct PollAdded<C> {
     pub(crate) contest: C,
     pub(crate) poll: poll::New,
+}
+
+impl<C> PollAdded<C> {
+    pub fn contest(&self) -> &C {
+        &self.contest
+    }
+
+    pub fn poll(&self) -> &poll::New {
+        &self.poll
+    }
 }
 
 impl<C> Updatable for PollAdded<C>

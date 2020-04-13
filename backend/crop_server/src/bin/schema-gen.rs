@@ -31,6 +31,18 @@ fn main() {
     );
 
     /*
+     * POST /contests/:id/polls
+     */
+    write_json_schema!(
+        "api/contests_id_polls__post__req.json",
+        routes::contests::_id::polls::post::ReqBody
+    );
+    write_json_schema!(
+        "api/contests_id_polls__post__res.json",
+        routes::contests::_id::polls::post::ResBody
+    );
+
+    /*
      * POST /admins/me/access_tokens
      */
     write_json_schema!(

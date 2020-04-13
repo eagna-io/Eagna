@@ -1,4 +1,4 @@
-use super::model::BriefContest;
+use super::model::{BriefContest, ContestId};
 use super::poll::Poll;
 use crop_infra::pg::Connection;
 
@@ -25,15 +25,15 @@ pub trait ContestRepository {
             .collect())
     }
 
-    /*
-    fn query_by_id(&self, id: &ContestId) -> anyhow::Result<Option<DetailedContest>> {
-        use crop_infra::pg::{contest::ContestTable, poll::PollTable};
+    fn query_brief_by_id(&self, id: &ContestId) -> anyhow::Result<Option<BriefContest>> {
+        use crop_infra::pg::contest::ContestTable;
 
-        if let Some(contest) = ContestTable::query_by_id(self.conn(), &id.0)? {
-            let polls = PollTable::query_by_contest_id(self.conn(), &id.0)?;
+        if let Some(queried) = ContestTable::query_by_id(self.conn(), &id.0)? {
+            Ok(Some(BriefContest::from(queried)))
+        } else {
+            Ok(None)
         }
     }
-    */
 }
 
 impl ContestRepository for Connection {

@@ -18,14 +18,13 @@ pub use resolved::Resolved;
 
 pub(crate) fn new(
     title: String,
-    created_at: DateTime<Utc>,
     duration: Option<Duration>,
     choices: HashMap<ChoiceName, ChoiceColor>,
 ) -> New {
     New {
         id: PollId::new(),
         title,
-        created_at,
+        created_at: Utc::now(),
         duration,
         choices,
     }
