@@ -1,4 +1,4 @@
-use crate::contest::{BriefContest, ContestId};
+use crate::contest::ContestId;
 use crop_infra::pg::Connection;
 
 pub trait ContestRepository {
@@ -15,23 +15,18 @@ pub trait ContestRepository {
     }
 
     /// ArchivedでないContestを全て取得する
-    fn query_not_archived(&self) -> anyhow::Result<Vec<BriefContest>> {
-        use crop_infra::pg::contest::ContestTable;
-
-        Ok(ContestTable::query_not_archived(self.conn())?
-            .into_iter()
-            .map(BriefContest::from)
-            .collect())
+    fn query_not_archived<C>(&self) -> anyhow::Result<Vec<C>>
+    where
+        C: ListQueryable,
+    {
+        C::query_not_archived(self.conn())
     }
 
-    fn query_brief_by_id(&self, id: &ContestId) -> anyhow::Result<Option<BriefContest>> {
-        use crop_infra::pg::contest::ContestTable;
-
-        if let Some(queried) = ContestTable::query_by_id(self.conn(), &id.0)? {
-            Ok(Some(BriefContest::from(queried)))
-        } else {
-            Ok(None)
-        }
+    fn query_by_id<C>(&self, id: &ContestId) -> anyhow::Result<Option<C>>
+    where
+        C: Queryable,
+    {
+        C::query_by_id(self.conn(), id)
     }
 }
 
@@ -41,11 +36,14 @@ impl ContestRepository for Connection {
     }
 }
 
-/*
- * ==========
- * Updatable
- * ==========
- */
 pub trait Updatable {
     fn save(&self, conn: &Connection) -> anyhow::Result<()>;
+}
+
+pub trait Queryable: Sized {
+    fn query_by_id(conn: &Connection, id: &ContestId) -> anyhow::Result<Option<Self>>;
+}
+
+pub trait ListQueryable: Sized {
+    fn query_not_archived(conn: &Connection) -> anyhow::Result<Vec<Self>>;
 }

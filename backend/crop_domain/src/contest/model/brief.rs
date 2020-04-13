@@ -1,5 +1,6 @@
+use crate::contest::{ListQueryable, Queryable};
 use chrono::{DateTime, Utc};
-use crop_infra::pg::contest::QueriedContest;
+use crop_infra::pg::{contest::ContestTable, Connection};
 use schemars::JsonSchema;
 use serde::Serialize;
 
@@ -49,14 +50,33 @@ impl WithAttrs for BriefContest {
     }
 }
 
-impl From<QueriedContest> for BriefContest {
-    fn from(queried: QueriedContest) -> Self {
-        BriefContest {
-            id: ContestId(queried.id),
-            status: queried.status,
-            title: queried.title,
-            category: queried.category,
-            event_start_at: queried.event_start_at,
+impl Queryable for BriefContest {
+    fn query_by_id(conn: &Connection, id: &ContestId) -> anyhow::Result<Option<Self>> {
+        if let Some(queried) = ContestTable::query_by_id(conn, &id.0)? {
+            Ok(Some(BriefContest {
+                id: ContestId(queried.id),
+                status: queried.status,
+                title: queried.title,
+                category: queried.category,
+                event_start_at: queried.event_start_at,
+            }))
+        } else {
+            Ok(None)
         }
+    }
+}
+
+impl ListQueryable for BriefContest {
+    fn query_not_archived(conn: &Connection) -> anyhow::Result<Vec<Self>> {
+        Ok(ContestTable::query_not_archived(conn)?
+            .into_iter()
+            .map(|queried| BriefContest {
+                id: ContestId(queried.id),
+                status: queried.status,
+                title: queried.title,
+                category: queried.category,
+                event_start_at: queried.event_start_at,
+            })
+            .collect())
     }
 }
