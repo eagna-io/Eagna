@@ -1,4 +1,8 @@
-use super::{Account, AccountId};
+use crate::account::{Account, AccountId, Updatable};
+use crop_infra::pg::{
+    account::{AccountTable, NewAccount},
+    Connection,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct New {
@@ -22,5 +26,15 @@ impl Account for New {
 
     fn name(&self) -> &str {
         self.name.as_str()
+    }
+}
+
+impl Updatable for New {
+    fn save(&self, conn: &Connection) -> anyhow::Result<()> {
+        let new = NewAccount {
+            id: self.id(),
+            name: self.name(),
+        };
+        AccountTable::save(conn, new)
     }
 }

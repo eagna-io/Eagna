@@ -11,6 +11,12 @@ pub trait AccountRepository {
     }
 }
 
+impl AccountRepository for Connection {
+    fn conn(&self) -> &Connection {
+        self
+    }
+}
+
 pub trait Updatable {
     fn save(&self, conn: &Connection) -> anyhow::Result<()>;
 }
