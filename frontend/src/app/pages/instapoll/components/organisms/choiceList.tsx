@@ -22,7 +22,7 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
             title={title}
             color={color}
             selected={selected === title}
-            isOpen={ poll.status }
+            isOpen={true}
             onSelected={() => {
               onSelected(title);
             }}
@@ -76,7 +76,7 @@ interface ChoiceProps {
   disabled?: boolean;
   voteRate?: number;
   correct?: boolean;
-  isOpen? : string;
+  isOpen? : boolean;
 }
 
 const Choice: React.FC<ChoiceProps> = ({
@@ -98,7 +98,7 @@ const Choice: React.FC<ChoiceProps> = ({
 */
   return (
     <ChoiceContainer>
-      { !correct ? selected ?  <Wrong isOpen={isOpen === 'open'} /> : null : <Correct /> }
+      { !correct ? selected ?  <Wrong isOpen={isOpen} /> : null : <Correct /> }
       <ChoiceButton
         color={color}
         selected={selected}
@@ -137,7 +137,7 @@ const Correct = styled(CorrectIcon)`
   height: 50px;
 `;
 
-const Wrong = styled(WrongIcon)<{ isOpen: boolean }>`
+const Wrong = styled(WrongIcon)<{ isOpen: boolean | undefined }>`
   display: ${ props => props.isOpen ? "none" : "block" };
   position: absolute;
   left: 0;
