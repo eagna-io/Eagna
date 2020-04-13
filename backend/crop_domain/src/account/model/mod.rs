@@ -17,6 +17,10 @@ pub trait Account {
     fn id(&self) -> &AccountId;
 
     fn name(&self) -> &str;
+
+    fn gen_access_token(&self) -> AccessToken {
+        AccessToken::new(*self.id())
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deref, Serialize, Deserialize, JsonSchema)]
