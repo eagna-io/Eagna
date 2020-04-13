@@ -92,14 +92,13 @@ const Choice: React.FC<ChoiceProps> = ({
 }) => {
 /* 
 【MEMO：正誤アイコン表示の方針】
-不正解&&自分が選んだ => <Wrong />
-不正解&&自分が選んでない => null
-正解&&自分が選んでない => <Correct />
-正解&&自分が選んだ => <Correct /> 
+正解 => <Correct />
+不正解 && 自分が選んだ => <Wrong />
+不正解 && 自分が選んでいない => null
 */
   return (
     <ChoiceContainer>
-      { !correct ? selected ?  <Wrong isOpen={isOpen} /> : null : <Correct /> }
+      { correct ? <Correct /> : selected ? <Wrong isOpen={isOpen} /> : null }
       <ChoiceButton
         color={color}
         selected={selected}
