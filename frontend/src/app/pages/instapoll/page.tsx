@@ -52,7 +52,9 @@ pollがresolve && 不正解 => WrongModal
         <Score numer={2} denom={3} />
       </Header>
       <PollCard>
-        <Theme isShow={poll.status === "open"}><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme>
+        { poll.status === "open" ? 
+          <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme> : null
+        }
         <ChoiceList
           poll={poll}
           selected={poll.selected}
@@ -71,7 +73,7 @@ pollがresolve && 不正解 => WrongModal
           }}
         />
       </PollCard>
-      <CommentFeed switchHeight={poll.status === "open"}>
+      <CommentFeed isOpen={poll.status === "open"}>
         {comments.map(comment => (
           <CommentCard comment={comment} />
         ))}
@@ -139,8 +141,7 @@ const PollCard = styled.div`
   box-shadow: 0 24px 24px 0 ${BlackColor.rgba(0.3)}, 0 0 24px 0 ${BlackColor.rgba(0.22)};
 `;
 
-const Theme = styled.div<{ isShow: boolean }>`
-  display: ${ props => props.isShow ? "block" : "none" }
+const Theme = styled.div`
   width: 100%;
   margin-bottom: 30px;
   font-size: 16px;
@@ -151,8 +152,8 @@ const PollIndex = styled.span`
   margin-right: 4px;
 `;
 
-const CommentFeed = styled.div<{ switchHeight: boolean }>`
-  height: ${ props => props.switchHeight ? "208px" : "336px"};
+const CommentFeed = styled.div<{ isOpen: boolean }>`
+  height: ${ props => props.isOpen ? "208px" : "336px"};
   margin: 0 14px 18px 14px;
   overflow: scroll;
 `;
