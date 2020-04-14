@@ -13,8 +13,7 @@ import { Timer as TimerComponent } from "./components/organisms/timer";
 import { Score } from "./components/organisms/score";
 import { CommentCard } from "./components/organisms/commentCard";
 import { ChoiceList } from "./components/organisms/choiceList";
-import { CorrectModal } from "./components/organisms/correctModal";
-import { WrongModal } from "./components/organisms/wrongModal";
+import { ResultModal } from "./components/organisms/resultModal";
 import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg";
 import { ReactComponent as LogoIcon } from "./components/atoms/images/PlayPoll_logo_white.svg";
 
@@ -43,8 +42,8 @@ pollがresolve && 不正解 => WrongModal
 */
   return (
     <Container>
-      { poll.resolved !== undefined && poll.selected === poll.resolved ? <CorrectModal /> : null }
-      { poll.resolved !== undefined && poll.selected !== poll.resolved ?<WrongModal /> : null }
+      { poll.resolved !== undefined && poll.selected === poll.resolved ? <ResultModal isCorrect={true} /> : null }
+      { poll.resolved !== undefined && poll.selected !== poll.resolved ?<ResultModal isCorrect={false} /> : null }
       <Header>
         <Logo />
         <TimerComponent content={timer} />
