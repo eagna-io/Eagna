@@ -1,3 +1,4 @@
+use crate::account::Account;
 use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -131,13 +132,14 @@ pub trait Poll {
     }
 
     #[must_use]
-    fn update_choice(
+    fn update_account_choice<A>(
         &self,
-        account: AccountId,
+        account: &A,
         choice: ChoiceName,
     ) -> anyhow::Result<ChoiceUpdated<&Self>>
     where
         Self: WithAttrs,
+        A: Account,
     {
         if !self.is_open() {
             Err(anyhow::anyhow!("You can't update choice of closed poll"))
@@ -146,7 +148,7 @@ pub trait Poll {
         } else {
             Ok(ChoiceUpdated {
                 poll: self,
-                account,
+                account_id: *account.id(),
                 choice,
             })
         }

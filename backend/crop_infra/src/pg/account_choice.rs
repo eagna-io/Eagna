@@ -16,6 +16,12 @@ pub trait AccountChoiceTable {
     }
 }
 
+impl AccountChoiceTable for Connection {
+    fn conn(&self) -> &Connection {
+        self
+    }
+}
+
 #[derive(Insertable, Clone, Copy)]
 #[table_name = "account_choices"]
 pub struct NewAccountChoice<'a> {
