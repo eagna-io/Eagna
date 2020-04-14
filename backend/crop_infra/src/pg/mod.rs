@@ -1,4 +1,5 @@
 pub mod account;
+pub mod account_choice;
 pub mod admin;
 pub mod choice;
 pub mod comment;
