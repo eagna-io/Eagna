@@ -16,7 +16,7 @@ interface Props {
 export const ContestBoard: React.FC<Props> = ({ contest, schedule, numer, denom }) => {
     return (
       <Container>
-        <StatusMessage>
+        <StatusMessage noMargin={contest==="open"}>
           {contest==="upcoming" ? message[0] : ""}
           {contest==="open" ? message[1] : ""}
           {contest==="closed" || contest==="archived" ? message[2] : ""}
@@ -42,8 +42,8 @@ const Container = styled.div`
   color: ${TextBaseColor.hex};
 `;
 
-const StatusMessage = styled.div`
-  margin-bottom: 10px;
+const StatusMessage = styled.div<{ noMargin: boolean }>`
+  margin-bottom: ${ props => props.noMargin ? "0" : "10px" };
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 1.56px;

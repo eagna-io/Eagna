@@ -59,7 +59,7 @@ export const InstapollPage: React.FC = () => {
         poll={testpoll}
         comments={testcomments}
         timer={testtimer}
-        contest={"upcoming"}
+        contest={"open"}
       />
     );
   // } else {

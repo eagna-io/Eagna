@@ -52,7 +52,7 @@ pollがresolve && 不正解 => WrongModal
         <Score numer={2} denom={3} />
       </Header>
       <PollCard>
-        <Theme isShow={contest === "open"}><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme>
+        <Theme isShow={poll.status === "open"}><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme>
         <ChoiceList
           poll={poll}
           selected={poll.selected}
@@ -71,7 +71,7 @@ pollがresolve && 不正解 => WrongModal
           }}
         />
       </PollCard>
-      <CommentFeed>
+      <CommentFeed switchHeight={poll.status === "open"}>
         {comments.map(comment => (
           <CommentCard comment={comment} />
         ))}
@@ -133,7 +133,7 @@ const Logo = styled(LogoIcon)`
 
 const PollCard = styled.div`
   border-radius: 4px;
-  padding: 24px 14px 31px 14px;
+  padding: 24px 14px;
   margin-bottom: 20px;
   background-color: ${WhiteBaseColor.hex};
   box-shadow: 0 24px 24px 0 ${BlackColor.rgba(0.3)}, 0 0 24px 0 ${BlackColor.rgba(0.22)};
@@ -151,8 +151,8 @@ const PollIndex = styled.span`
   margin-right: 4px;
 `;
 
-const CommentFeed = styled.div`
-  height: 190px;
+const CommentFeed = styled.div<{ switchHeight: boolean }>`
+  height: ${ props => props.switchHeight ? "208px" : "336px"};
   margin: 0 14px 18px 14px;
   overflow: scroll;
 `;

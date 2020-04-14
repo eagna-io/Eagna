@@ -5,7 +5,7 @@ export interface Poll {
   idx: number;
   title: string;
   endAt: Moment;
-  status: "open" | "closed";
+  status?: "open" | "closed";
   choices: Record<string, string>;
   resolved?: string;
   stats?: {
