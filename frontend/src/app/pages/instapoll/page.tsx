@@ -23,6 +23,7 @@ interface Props {
   comments: Comment[];
   timer: Timer;
   ws?: WebSocket;
+  contest: "upcoming" | "open" | "closed" | "archived";
 }
 
 export const Page: React.FC<Props> = ({
@@ -30,7 +31,8 @@ export const Page: React.FC<Props> = ({
   poll,
   comments,
   timer,
-  ws
+  ws,
+  contest
 }) => {
   const [commentInput, setCommentInput] = React.useState("");
   const [selected, setSelected] = React.useState<string | undefined>();
@@ -50,10 +52,11 @@ pollがresolve && 不正解 => WrongModal
         <Score numer={2} denom={3} />
       </Header>
       <PollCard>
-        <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme>
+        <Theme isShow={contest === "open"}><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme>
         <ChoiceList
           poll={poll}
           selected={poll.selected}
+          contest={contest}
           onSelected={choice => {
             if(ws) {
               ws.send(
@@ -136,7 +139,8 @@ const PollCard = styled.div`
   box-shadow: 0 24px 24px 0 ${BlackColor.rgba(0.3)}, 0 0 24px 0 ${BlackColor.rgba(0.22)};
 `;
 
-const Theme = styled.div`
+const Theme = styled.div<{ isShow: boolean }>`
+  display: ${ props => props.isShow ? "block" : "none" }
   width: 100%;
   margin-bottom: 30px;
   font-size: 16px;
