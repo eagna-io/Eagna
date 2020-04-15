@@ -1,9 +1,11 @@
-use crate::contest::poll::{BriefPoll, Poll};
+use super::{Contest, ContestId, ContestStatus, WithAttrs, WithPoll};
+use crate::contest::poll::{BriefPoll, DetailedPoll, Poll};
 use crate::contest::Queryable;
 use chrono::{DateTime, Utc};
-use crop_infra::pg::{choice::ChoiceTable, contest::ContestTable, poll::PollTable, Connection};
-
-use super::{Contest, ContestId, ContestStatus, WithAttrs, WithPoll};
+use crop_infra::pg::{
+    account_choice::AccountChoiceTable, choice::ChoiceTable, comment::CommentTable,
+    contest::ContestTable, poll::PollTable, Connection,
+};
 use schemars::JsonSchema;
 use serde::Serialize;
 
@@ -64,25 +66,52 @@ impl Queryable for DetailedContest<BriefPoll> {
             None => return Ok(None),
         };
 
-        if let Some(poll) = PollTable::query_not_resolved_by_contest_id(conn, &id.0)? {
+        let poll = if let Some(poll) = PollTable::query_not_resolved_by_contest_id(conn, &id.0)? {
             let choices = ChoiceTable::query_by_poll_id(conn, &poll.id)?;
-            Ok(Some(DetailedContest {
-                id: *id,
-                status: contest.status,
-                title: contest.title,
-                category: contest.category,
-                event_start_at: contest.event_start_at,
-                poll: Some(BriefPoll::from((poll, choices))),
-            }))
+            Some(BriefPoll::from((poll, choices)))
         } else {
-            Ok(Some(DetailedContest {
-                id: *id,
-                status: contest.status,
-                title: contest.title,
-                category: contest.category,
-                event_start_at: contest.event_start_at,
-                poll: None,
-            }))
-        }
+            None
+        };
+
+        Ok(Some(DetailedContest {
+            id: *id,
+            status: contest.status,
+            title: contest.title,
+            category: contest.category,
+            event_start_at: contest.event_start_at,
+            poll,
+        }))
+    }
+}
+
+impl Queryable for DetailedContest<DetailedPoll> {
+    fn query_by_id(conn: &Connection, id: &ContestId) -> anyhow::Result<Option<Self>> {
+        let contest = match ContestTable::query_by_id(conn, &id.0)? {
+            Some(contest) => contest,
+            None => return Ok(None),
+        };
+
+        let poll = if let Some(poll) = PollTable::query_not_resolved_by_contest_id(conn, &id.0)? {
+            let choices = ChoiceTable::query_by_poll_id(conn, &poll.id)?;
+            let account_choices = AccountChoiceTable::query_by_poll_id(conn, &poll.id)?;
+            let comments = CommentTable::query_recent_by_poll_id(conn, &poll.id)?;
+            Some(DetailedPoll::from((
+                poll,
+                choices,
+                account_choices,
+                comments,
+            )))
+        } else {
+            None
+        };
+
+        Ok(Some(DetailedContest {
+            id: *id,
+            status: contest.status,
+            title: contest.title,
+            category: contest.category,
+            event_start_at: contest.event_start_at,
+            poll,
+        }))
     }
 }
