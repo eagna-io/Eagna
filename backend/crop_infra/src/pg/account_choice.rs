@@ -14,6 +14,17 @@ pub trait AccountChoiceTable {
             .execute(self.conn())?;
         Ok(())
     }
+
+    fn query_by_poll_id(&self, poll_id: &Uuid) -> anyhow::Result<Vec<QueriedAccountChoice>> {
+        Ok(account_choices::table
+            .filter(account_choices::poll_id.eq(poll_id))
+            .select((
+                account_choices::poll_id,
+                account_choices::account_id,
+                account_choices::choice_name,
+            ))
+            .load::<QueriedAccountChoice>(self.conn())?)
+    }
 }
 
 impl AccountChoiceTable for Connection {
@@ -28,4 +39,11 @@ pub struct NewAccountChoice<'a> {
     pub poll_id: &'a Uuid,
     pub account_id: &'a Uuid,
     pub choice_name: &'a str,
+}
+
+#[derive(Queryable, Clone)]
+pub struct QueriedAccountChoice {
+    pub poll_id: Uuid,
+    pub account_id: Uuid,
+    pub choice_name: String,
 }
