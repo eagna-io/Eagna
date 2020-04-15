@@ -6,28 +6,15 @@ import { WhiteBaseColor, VoteRateBackGround } from "app/components/color";
 import { ReactComponent as CorrectIcon } from "../atoms/images/correct.svg";
 import { ReactComponent as WrongIcon } from "../atoms/images/wrong.svg";
 import { Poll } from "model/poll";
-import { ContestBoard } from "../molecules/contestMessage";
 
 interface Props {
   poll: Poll;
   selected?: string;
   onSelected: (choice: string) => void;
-  contest: "upcoming" | "open" | "closed" | "archived";
 }
-/*
-コンテストのステータスメッセージの方針
-contestが"upcoming" => upcoming message
-contestが"open" && pollが未作成 => 問題作成中 message
-contestが"open" && pollがopen => 問題と選択肢
-contestが"open" && pollがresolve => 問題と選択肢(Voterate, 正誤判定)
-contestが"closed" =>  終了＋結果 message
-*/
-export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected, contest }) => {
-  if (contest === "upcoming" ) {
-    return <ContestBoard contest={"upcoming"} schedule={"06.01 11:00〜"}/>
-  } else if (contest === "open" && poll.status === undefined) {
-    return <ContestBoard contest={"open"} />
-  } else if (contest === "open" && poll.status === "open") {
+
+export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
+  if (poll.status === "open") {
     return (
       <Container>
         {Object.entries(poll.choices).map(([title, color]) => (
@@ -42,7 +29,7 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected, contes
         ))}
       </Container>
     );
-  } else if (contest === "open" && poll.status === "closed") {
+  } else  {
     return (
       <Container>
         {Object.entries(poll.choices).map(([title, color]) => (
@@ -62,8 +49,6 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected, contes
         ))}
       </Container>
     );
-  } else {
-    return <ContestBoard contest={"closed"} numer={2} denom={3} />
   }
 };
 

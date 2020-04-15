@@ -14,12 +14,13 @@ import { Score } from "./components/organisms/score";
 import { CommentCard } from "./components/organisms/commentCard";
 import { ChoiceList } from "./components/organisms/choiceList";
 import { ResultModal } from "./components/organisms/resultModal";
+import { ContestBoard } from "./components/molecules/contestMessage";
 import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg";
 import { ReactComponent as LogoIcon } from "./components/atoms/images/PlayPoll_logo_white.svg";
 
 interface Props {
   account: string;
-  poll: Poll;
+  poll?: Poll;
   comments: Comment[];
   timer: Timer;
   ws?: WebSocket;
@@ -42,68 +43,113 @@ pollがresolveされていない => null
 pollがresolve && 正解 => CorectModal
 pollがresolve && 不正解 => WrongModal
 */
-  return (
-    <Container>
-      { poll.resolved !== undefined && poll.selected === poll.resolved ? <ResultModal isCorrect={true} /> : null }
-      { poll.resolved !== undefined && poll.selected !== poll.resolved ?<ResultModal isCorrect={false} /> : null }
-      <Header>
-        <Logo />
-        <TimerComponent content={timer} />
-        <Score numer={2} denom={3} />
-      </Header>
-      <PollCard>
-        { poll.status === "open" ? 
-          <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme> : null
-        }
-        <ChoiceList
-          poll={poll}
-          selected={poll.selected}
-          contest={contest}
-          onSelected={choice => {
-            if(ws) {
-              ws.send(
-                JSON.stringify({
-                  type: "updateChoice",
-                  account,
-                  choice
-                })
-              );
-              setSelected(choice);
-            }
-          }}
-        />
-      </PollCard>
-      <CommentFeed isOpen={poll.status === "open"}>
-        {comments.map(comment => (
-          <CommentCard comment={comment} />
-        ))}
-      </CommentFeed>
-      <CommentContainer>
-          <CommentInput
-            type="text"
-            placeholder="コメントする"
-            value={commentInput}
-            onChange={e => setCommentInput(e.target.value)}
-          />
-          <Submit
-            onClick={() => {
-              if (commentInput) {
-                if (ws) {
-                  ws.send(
-                    JSON.stringify({
-                      type: "addComment",
-                      account,
-                      comment: commentInput
-                    })
-                  )
+  if (poll === undefined || contest === "closed"){
+    return (
+      <Container>
+        <Header>
+          <Logo />
+          <TimerComponent content={timer} />
+          <Score numer={2} denom={3} />
+        </Header>
+        <PollCard>
+          { contest==="upcoming" ? <ContestBoard contest={"upcoming"} schedule={"06.01 11:00〜"} /> : null }
+          { contest==="open" ? <ContestBoard contest={"open"} /> : null }
+          { contest==="closed" || contest==="archived" ? <ContestBoard contest={contest} numer={2} denom={3} /> : null }
+        </PollCard>
+        <CommentFeed small={false}>
+          {comments.map(comment => (
+            <CommentCard comment={comment} />
+          ))}
+        </CommentFeed>
+        <CommentContainer>
+            <CommentInput
+              type="text"
+              placeholder="コメントする"
+              value={commentInput}
+              onChange={e => setCommentInput(e.target.value)}
+            />
+            <Submit
+              onClick={() => {
+                if (commentInput) {
+                  if (ws) {
+                    ws.send(
+                      JSON.stringify({
+                        type: "addComment",
+                        account,
+                        comment: commentInput
+                      })
+                    )
+                  }
+                  setCommentInput("");
                 }
-                setCommentInput("");
+              }}
+            />
+          </CommentContainer>
+      </Container>
+    );
+  } else {
+    return (
+      <Container>
+        { poll.resolved !== undefined && poll.selected === poll.resolved ? <ResultModal isCorrect={true} /> : null }
+        { poll.resolved !== undefined && poll.selected !== poll.resolved ?<ResultModal isCorrect={false} /> : null }
+        <Header>
+          <Logo />
+          <TimerComponent content={timer} />
+          <Score numer={2} denom={3} />
+        </Header>
+        <PollCard>
+          { poll.status === "open" ? 
+            <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme> : null
+          }
+          <ChoiceList
+            poll={poll}
+            selected={poll.selected}
+            onSelected={choice => {
+              if(ws) {
+                ws.send(
+                  JSON.stringify({
+                    type: "updateChoice",
+                    account,
+                    choice
+                  })
+                );
+                setSelected(choice);
               }
             }}
           />
-        </CommentContainer>
-    </Container>
-  );
+        </PollCard>
+        <CommentFeed small={true}>
+          {comments.map(comment => (
+            <CommentCard comment={comment} />
+          ))}
+        </CommentFeed>
+        <CommentContainer>
+            <CommentInput
+              type="text"
+              placeholder="コメントする"
+              value={commentInput}
+              onChange={e => setCommentInput(e.target.value)}
+            />
+            <Submit
+              onClick={() => {
+                if (commentInput) {
+                  if (ws) {
+                    ws.send(
+                      JSON.stringify({
+                        type: "addComment",
+                        account,
+                        comment: commentInput
+                      })
+                    )
+                  }
+                  setCommentInput("");
+                }
+              }}
+            />
+          </CommentContainer>
+      </Container>
+    );
+  }
 };
 
 export const LoadingPage: React.FC = () => {
@@ -152,8 +198,8 @@ const PollIndex = styled.span`
   margin-right: 4px;
 `;
 
-const CommentFeed = styled.div<{ isOpen: boolean }>`
-  height: ${ props => props.isOpen ? "208px" : "336px"};
+const CommentFeed = styled.div<{ small: boolean }>`
+  height: ${ props => props.small ? "208px" : "336px"};
   margin: 0 14px 18px 14px;
   overflow: scroll;
 `;
