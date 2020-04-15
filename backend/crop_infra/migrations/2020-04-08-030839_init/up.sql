@@ -38,8 +38,8 @@ CREATE TABLE polls (
   resolved_choice_name  TEXT DEFAULT NULL,
 
   UNIQUE (contest_id, title),
-  CONSTRAINT contest_poll_fkey FOREIGN KEY(contest_id)
-    REFERENCES contests(id) ON UPDATE RESTRICT ON DELETE RESTRICT
+  CONSTRAINT contest_poll_fkey FOREIGN KEY (contest_id)
+    REFERENCES contests (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 CREATE TABLE choices (
@@ -51,8 +51,8 @@ CREATE TABLE choices (
   idx       INTEGER NOT NULL DEFAULT 0,
 
   UNIQUE (poll_id, name),
-  CONSTRAINT poll_choice_fkey FOREIGN KEY(poll_id)
-    REFERENCES polls(id) ON UPDATE RESTRICT ON DELETE RESTRICT
+  CONSTRAINT poll_choice_fkey FOREIGN KEY (poll_id)
+    REFERENCES polls (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 CREATE TABLE account_choices (
@@ -63,21 +63,27 @@ CREATE TABLE account_choices (
   choice_name TEXT NOT NULL,
 
   UNIQUE (account_id, poll_id),
-  CONSTRAINT account_choices_account_fkey FOREIGN KEY(account_id)
-    REFERENCES accounts(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT account_choices_poll_fkey FOREIGN KEY(poll_id)
-    REFERENCES polls(id) ON UPDATE RESTRICT ON DELETE RESTRICT
+  CONSTRAINT account_choices_account_fkey FOREIGN KEY (account_id)
+    REFERENCES accounts (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
+  CONSTRAINT account_choices_poll_fkey FOREIGN KEY (poll_id)
+    REFERENCES polls (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
+  CONSTRAINT account_choices_choice_fkey FOREIGN KEY (poll_id, choice_name)
+    REFERENCES choices (poll_id, name) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 CREATE TABLE comments (
+  /* unused */
   id          SERIAL PRIMARY KEY,
   poll_id     UUID NOT NULL,
   account_id  UUID NOT NULL,
+  choice_name TEXT, /* そのコメントをしたときに選択していたchoice */
   content     TEXT NOT NULL,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-  CONSTRAINT poll_comment_fkey FOREIGN KEY(poll_id)
-    REFERENCES polls(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT account_comment_fkey FOREIGN KEY(account_id)
-    REFERENCES accounts(id) ON UPDATE RESTRICT ON DELETE RESTRICT
+  CONSTRAINT comment_poll_fkey FOREIGN KEY (poll_id)
+    REFERENCES polls (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
+  CONSTRAINT comment_account_fkey FOREIGN KEY (account_id)
+    REFERENCES accounts (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
+  CONSTRAINT comment_choice_fkey FOREIGN KEY (poll_id, choice_name)
+    REFERENCES choices (poll_id, name) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
