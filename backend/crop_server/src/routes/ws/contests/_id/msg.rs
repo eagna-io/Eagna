@@ -10,6 +10,7 @@ use warp::filters::ws::Message;
 #[derive(Debug, Serialize, JsonSchema)]
 pub enum OutgoingMsg<'a> {
     Poll(PollMsg<'a>),
+    Comment(CommentMsg<'a>),
 }
 
 #[derive(Debug, Serialize, JsonSchema)]
@@ -21,6 +22,13 @@ pub struct PollMsg<'a> {
     choices: &'a HashMap<ChoiceName, ChoiceColor>,
     resolved_choice: Option<&'a ChoiceName>,
     stats: Option<Stats>,
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct CommentMsg<'a> {
+    account_name: &'a str,
+    comment: &'a str,
+    color: &'a ChoiceColor,
 }
 
 impl<'a> Into<Message> for OutgoingMsg<'a> {
