@@ -105,7 +105,7 @@ pub trait WithPoll: Contest {
     fn _current_poll(&self) -> Option<&Self::Poll>;
 }
 
-#[derive(Debug, Clone, Copy, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, JsonSchema)]
 pub struct ContestId(pub Uuid);
 
 impl ContestId {

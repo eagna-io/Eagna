@@ -10,12 +10,14 @@ use crate::account::AccountId;
 mod brief;
 mod choice_updated;
 mod comment_added;
+mod detailed;
 mod new;
 mod resolved;
 
 pub use brief::BriefPoll;
 pub use choice_updated::ChoiceUpdated;
 pub use comment_added::CommentAdded;
+pub use detailed::DetailedPoll;
 pub use new::New;
 pub use resolved::Resolved;
 
@@ -196,8 +198,7 @@ pub trait Poll {
         let color = self
             .user_choices()
             .get(&account)
-            .and_then(|choice| self.choices().get(choice).cloned())
-            .unwrap_or_else(|| ChoiceColor("#888888".into()));
+            .and_then(|choice| self.choices().get(choice).cloned());
         let comment = Comment {
             account: account,
             comment: comment_str,
@@ -241,7 +242,7 @@ pub struct ChoiceColor(pub String);
 pub struct Comment {
     pub account: AccountId,
     pub comment: String,
-    pub color: ChoiceColor,
+    pub color: Option<ChoiceColor>,
 }
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
