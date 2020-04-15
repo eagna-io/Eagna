@@ -37,11 +37,16 @@ pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejecti
 }
 
 async fn inner(ctx: Context, body: ReqBody) -> Result<Response, Error> {
-    ctx.pg
-        .with_conn::<Result<Response, Error>, _>(move |conn| {
+    let contest_id = ctx
+        .pg
+        .with_conn::<Result<ContestId, Error>, _>(move |conn| {
             let contest = contest::new(body.title, body.category, body.event_start_at);
             conn.save(&contest)?;
-            Ok(response::new(StatusCode::CREATED, &ResBody(contest.id())))
+            Ok(contest.id())
         })
-        .await?
+        .await??;
+
+    ctx.contest_manager.enable_subscribe(contest_id).await;
+
+    Ok(response::new(StatusCode::CREATED, &ResBody(contest_id)))
 }

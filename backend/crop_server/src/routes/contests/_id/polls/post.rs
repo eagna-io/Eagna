@@ -5,7 +5,7 @@ use crate::{
     response::{self, Response},
 };
 use chrono::Duration;
-use crop_domain::contest::poll::{ChoiceColor, ChoiceName, Poll, PollId};
+use crop_domain::contest::poll::{self, ChoiceColor, ChoiceName, Poll, PollId};
 use crop_domain::contest::{BriefContest, Contest, ContestId, ContestRepository as _};
 use http::StatusCode;
 use schemars::JsonSchema;
@@ -38,18 +38,20 @@ pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejecti
 }
 
 async fn inner(ctx: Context, contest_id: ContestId, body: ReqBody) -> Result<Response, Error> {
-    ctx.pg
-        .with_conn::<Result<Response, Error>, _>(move |conn| {
+    let poll = ctx
+        .pg
+        .with_conn::<Result<poll::New, Error>, _>(move |conn| {
             let duration = body.duration_sec.map(|s| Duration::seconds(s as i64));
             let contest = conn
                 .query_by_id::<BriefContest>(&contest_id)?
                 .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
             let added = contest.add_poll(body.title, duration, body.choices)?;
             conn.save(&added)?;
-            Ok(response::new(
-                StatusCode::CREATED,
-                &ResBody(added.poll().id()),
-            ))
+            Ok(added.poll)
         })
-        .await?
+        .await??;
+
+    ctx.contest_manager.notify_update(contest_id, &poll).await;
+
+    Ok(response::new(StatusCode::CREATED, &ResBody(poll.id())))
 }

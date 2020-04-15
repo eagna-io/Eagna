@@ -25,9 +25,9 @@ impl ContestManager {
         self.senders.write().await.remove(&contest_id);
     }
 
-    pub async fn notify_update<U>(&self, contest_id: ContestId, update: U)
+    pub async fn notify_update<'a, U: 'a>(&self, contest_id: ContestId, update: U)
     where
-        for<'a> OutgoingMsg<'a>: From<U>,
+        OutgoingMsg<'a>: From<U>,
     {
         let msg = OutgoingMsg::from(update).into();
         if let Some(sender) = self.senders.read().await.get(&contest_id) {

@@ -4,8 +4,8 @@ use crop_infra::pg::Connection;
 
 #[must_use]
 pub struct PollAdded<C> {
-    pub(crate) contest: C,
-    pub(crate) poll: New,
+    pub contest: C,
+    pub poll: New,
 }
 
 impl<C> PollAdded<C> {
