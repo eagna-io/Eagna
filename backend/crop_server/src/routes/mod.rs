@@ -1,6 +1,7 @@
 pub mod accounts;
 pub mod admins;
 pub mod contests;
+pub mod ws;
 
 use crate::context::Context;
 use warp::{filters::cors, reject::Rejection, reply::Reply, Filter};
@@ -11,7 +12,7 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
         .allow_methods(vec!["POST", "PATCH", "PUT", "OPTIONS"])
         .allow_header("Content-Type");
 
-    let routes = contests::get::route(ctx.clone())
+    let rest_routes = contests::get::route(ctx.clone())
         .or(contests::post::route(ctx.clone()))
         .or(contests::_id::get::route(ctx.clone()))
         .or(contests::_id::polls::post::route(ctx.clone()))
@@ -20,7 +21,11 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
         ))
         .or(contests::_id::polls::_id::patch::route(ctx.clone()))
         .or(accounts::post::route(ctx.clone()))
-        .or(admins::me::access_tokens::post::route(ctx));
+        .or(admins::me::access_tokens::post::route(ctx.clone()));
 
-    routes.with(cors_wrapper)
+    let rest = rest_routes.with(cors_wrapper);
+
+    let ws = ws::contests::_id::route(ctx.clone());
+
+    rest.or(ws)
 }
