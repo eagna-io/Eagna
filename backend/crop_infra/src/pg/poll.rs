@@ -1,4 +1,4 @@
-use super::{schema::polls, Connection};
+use super::{schema::polls, types::PollStatus, Connection};
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
 use uuid::Uuid;
@@ -23,6 +23,7 @@ pub trait PollTable {
             .select((
                 polls::id,
                 polls::contest_id,
+                polls::status,
                 polls::title,
                 polls::created_at,
                 polls::duration_sec,
@@ -31,6 +32,13 @@ pub trait PollTable {
             ))
             .first::<QueriedPoll>(self.conn())
             .optional()?)
+    }
+
+    fn update_status(&self, id: &Uuid, new_status: PollStatus) -> anyhow::Result<()> {
+        diesel::update(polls::table.filter(polls::id.eq(id)))
+            .set(polls::status.eq(new_status))
+            .execute(self.conn())?;
+        Ok(())
     }
 
     fn update_resolved_choice_name(
@@ -68,6 +76,7 @@ pub struct NewPoll<'a> {
 pub struct QueriedPoll {
     pub id: Uuid,
     pub contest_id: Uuid,
+    pub status: PollStatus,
     pub title: String,
     pub created_at: DateTime<Utc>,
     pub duration_sec: Option<i32>,

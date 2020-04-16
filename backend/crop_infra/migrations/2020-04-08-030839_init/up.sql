@@ -27,13 +27,18 @@ CREATE TABLE contests (
   event_start_at  TIMESTAMPTZ
 );
 
+CREATE TYPE poll_status AS ENUM (
+  'open',
+  'closed'
+);
+
 CREATE TABLE polls (
   id                    UUID PRIMARY KEY,
+  status                poll_status NOT NULL DEFAULT 'open',
   contest_id            UUID NOT NULL,
   title                 TEXT NOT NULL,
   duration_sec          INTEGER,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
-  /* いつresolveしたか */
   resolved_at           TIMESTAMPTZ DEFAULT NULL,
   resolved_choice_name  TEXT DEFAULT NULL,
 

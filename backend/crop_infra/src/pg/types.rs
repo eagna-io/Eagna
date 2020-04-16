@@ -9,3 +9,10 @@ pub enum ContestStatus {
     Closed,
     Archived,
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, JsonSchema)]
+#[DieselType = "Poll_status"]
+pub enum PollStatus {
+    Open,
+    Closed,
+}
