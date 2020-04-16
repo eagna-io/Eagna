@@ -71,18 +71,6 @@ pub trait Poll {
         self._duration()
     }
 
-    /// PollがClosed（回答不可）になる日時
-    fn closed_at(&self) -> Option<DateTime<Utc>>
-    where
-        Self: WithAttrs,
-    {
-        if let Some(dur) = self.duration() {
-            Some(*self.created_at() + *dur)
-        } else {
-            None
-        }
-    }
-
     fn choices(&self) -> &HashMap<ChoiceName, ChoiceColor>
     where
         Self: WithAttrs,
@@ -103,10 +91,17 @@ pub trait Poll {
         Self: WithAttrs,
     {
         if self.status() != PollStatus::Open {
-            Err(anyhow::anyhow!("Poll is not open"))
-        } else {
-            Ok(Closed { poll: self })
+            return Err(anyhow::anyhow!("Poll is not open"));
         }
+
+        if let Some(duration) = self.duration() {
+            if Utc::now() < (*self.created_at() + *duration) {
+                // まだ開催期間が終わっていない
+                return Err(anyhow::anyhow!("Before closing time"));
+            }
+        }
+
+        Ok(Closed { poll: self })
     }
 
     #[must_use]
