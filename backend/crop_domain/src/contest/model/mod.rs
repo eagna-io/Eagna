@@ -1,4 +1,4 @@
-use crate::contest::poll::{self, Choice, Poll};
+use crate::contest::poll::{self, Choice, New as NewPoll, Poll, PollId};
 use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -75,17 +75,27 @@ pub trait Contest {
         choices: Vec<Choice>,
     ) -> anyhow::Result<PollAdded<&Self>>
     where
-        Self: WithAttrs,
+        Self: WithAttrs + WithPoll,
+        <Self as WithPoll>::Poll: poll::WithAttrs,
     {
-        if self.status() == ContestStatus::Open {
-            let new_poll = poll::new(title, duration, choices);
-            Ok(PollAdded {
-                contest: self,
-                poll: new_poll,
-            })
-        } else {
-            Err(anyhow::anyhow!("You can't add a poll to non-open contest"))
+        if self.status() != ContestStatus::Open {
+            return Err(anyhow::anyhow!("You can't add a poll to non-open contest"));
         }
+
+        let idx = self.current_poll().map(|poll| poll.idx() + 1).unwrap_or(0);
+
+        let new_poll = NewPoll {
+            id: PollId::new(),
+            title,
+            created_at: Utc::now(),
+            duration,
+            idx,
+            choices,
+        };
+        Ok(PollAdded {
+            contest: self,
+            poll: new_poll,
+        })
     }
 }
 

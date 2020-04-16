@@ -44,6 +44,10 @@ impl WithAttrs for DetailedPoll {
         self.inner._duration()
     }
 
+    fn _idx(&self) -> usize {
+        self.inner._idx()
+    }
+
     fn _choices(&self) -> &[Choice] {
         &self.inner._choices()
     }

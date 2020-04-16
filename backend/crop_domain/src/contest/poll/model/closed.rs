@@ -41,6 +41,10 @@ where
         self.poll._duration()
     }
 
+    fn _idx(&self) -> usize {
+        self.poll._idx()
+    }
+
     fn _choices(&self) -> &[Choice] {
         self.poll._choices()
     }

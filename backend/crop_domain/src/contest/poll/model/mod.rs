@@ -24,16 +24,6 @@ pub use resolved::Resolved;
 
 pub use crop_infra::pg::types::PollStatus;
 
-pub(crate) fn new(title: String, duration: Option<Duration>, choices: Vec<Choice>) -> New {
-    New {
-        id: PollId::new(),
-        title,
-        created_at: Utc::now(),
-        duration,
-        choices,
-    }
-}
-
 pub trait Poll {
     fn id(&self) -> PollId;
 
@@ -65,6 +55,13 @@ pub trait Poll {
         Self: WithAttrs,
     {
         self._duration()
+    }
+
+    fn idx(&self) -> usize
+    where
+        Self: WithAttrs,
+    {
+        self._idx()
     }
 
     fn choices(&self) -> &[Choice]
@@ -253,6 +250,8 @@ pub trait WithAttrs: Poll {
 
     fn _duration(&self) -> Option<&Duration>;
 
+    fn _idx(&self) -> usize;
+
     fn _choices(&self) -> &[Choice];
 
     fn _resolved_choice(&self) -> Option<&ChoiceName>;
@@ -295,6 +294,10 @@ where
 
     fn _duration(&self) -> Option<&Duration> {
         P::_duration(self)
+    }
+
+    fn _idx(&self) -> usize {
+        P::_idx(self)
     }
 
     fn _choices(&self) -> &[Choice] {

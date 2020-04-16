@@ -34,6 +34,7 @@ where
             title: self.poll.title(),
             created_at: self.poll.created_at(),
             duration_sec: self.poll.duration().map(|d| d.num_seconds() as i32),
+            idx: self.poll.idx as i32,
         };
         PollTable::save(conn, new_poll)?;
 

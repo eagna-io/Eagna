@@ -15,6 +15,7 @@ pub struct BriefPoll {
     // https://github.com/GREsau/schemars/issues/15#issuecomment-593006526
     #[schemars(with = "Option<i64>")]
     pub(super) duration: Option<Duration>,
+    pub(super) idx: usize,
     pub(super) choices: Vec<Choice>,
     pub(super) resolved_choice: Option<ChoiceName>,
 }
@@ -52,6 +53,10 @@ impl WithAttrs for BriefPoll {
         self.duration.as_ref()
     }
 
+    fn _idx(&self) -> usize {
+        self.idx
+    }
+
     fn _choices(&self) -> &[Choice] {
         self.choices.as_slice()
     }
@@ -70,6 +75,7 @@ impl From<(QueriedPoll, Vec<QueriedChoice>)> for BriefPoll {
             title: poll.title,
             created_at: poll.created_at,
             duration: poll.duration_sec.map(|s| Duration::seconds(s as i64)),
+            idx: poll.idx as usize,
             resolved_choice: poll.resolved_choice_name.map(|s| ChoiceName(s)),
             choices: choices
                 .into_iter()

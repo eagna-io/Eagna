@@ -18,6 +18,7 @@ pub struct PollMsg<'a> {
     title: &'a str,
     created_at: &'a DateTime<Utc>,
     duration_sec: Option<i64>,
+    idx: usize,
     #[schemars(with = "Vec<Choice>")]
     choices: &'a [Choice],
     resolved_choice: Option<&'a ChoiceName>,
@@ -56,6 +57,7 @@ where
             title: poll.title(),
             created_at: poll.created_at(),
             duration_sec: poll.duration().map(|d| d.num_seconds()),
+            idx: poll.idx(),
             choices: poll.choices(),
             resolved_choice: poll.resolved_choice(),
             stats,

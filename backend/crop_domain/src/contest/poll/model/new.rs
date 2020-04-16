@@ -4,11 +4,12 @@ use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
 
 pub struct New {
-    pub(crate) id: PollId,
-    pub(crate) title: String,
-    pub(crate) created_at: DateTime<Utc>,
-    pub(crate) duration: Option<Duration>,
-    pub(crate) choices: Vec<Choice>,
+    pub id: PollId,
+    pub title: String,
+    pub created_at: DateTime<Utc>,
+    pub duration: Option<Duration>,
+    pub idx: usize,
+    pub choices: Vec<Choice>,
 }
 
 impl Poll for New {
@@ -32,6 +33,10 @@ impl WithAttrs for New {
 
     fn _duration(&self) -> Option<&Duration> {
         self.duration.as_ref()
+    }
+
+    fn _idx(&self) -> usize {
+        self.idx
     }
 
     fn _choices(&self) -> &[Choice] {
