@@ -5,12 +5,22 @@ import * as color from "app/components/color";
 
 import { ReactComponent as LogoWhite } from "./components/atoms/images/PlayPoll_logo_white.svg";
 import { ReactComponent as LogoGrad } from "./components/atoms/images/PlayPoll_logo_grad.svg";
+import { ReactComponent as FireIcon } from "./components/atoms/images/fire.svg";
+import { ReactComponent as TimerIcon } from "./components/atoms/images/clock.svg";
 
 export const Top: React.FC = () => {
   return (
     <Container>
         <Wrapper>
           <Header><LogoW /></Header>
+          <Openning>
+            <LargeFire />
+            <SectionTitle>開催中のコンテスト</SectionTitle>
+          </Openning>
+          <Upcoming>
+            <LargeTimer />
+            <SectionTitle>開催予定のコンテスト</SectionTitle>
+          </Upcoming>
         </Wrapper>
         <Footer>
           <LogoG />
@@ -42,6 +52,39 @@ const Wrapper = styled.div`
 const Header = styled.div`
   width: 100%;
   margin-bottom: 16px;
+`;
+
+const Openning = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 26px;
+`;
+
+const LargeFire = styled(FireIcon)`
+  width: 20px;
+  height: 20px;
+  margin-right: 4px;
+`;
+
+const SectionTitle = styled.div`
+  font-size: 18px;
+  font-weight: 800;
+  color: ${color.WhiteBaseColor.hex};
+  letter-spacing: 1px;
+`;
+
+const Upcoming = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 26px;
+`;
+
+const LargeTimer = styled(TimerIcon)`
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
 `;
 
 const LogoW = styled(LogoWhite)`
