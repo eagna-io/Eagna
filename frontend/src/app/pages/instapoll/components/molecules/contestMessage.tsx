@@ -8,12 +8,12 @@ import { ReactComponent as TimerIcon } from "../atoms/images/timer.svg";
 
 interface Props {
   contest: "upcoming" | "open" | "closed" | "archived";
-  schedule?: string;
+  startAt?: string;
   numer?: number;
   denom?: number;
 }
 
-export const ContestBoard: React.FC<Props> = ({ contest, schedule, numer, denom }) => {
+export const ContestBoard: React.FC<Props> = ({ contest, startAt, numer, denom }) => {
     return (
       <Container>
         <StatusMessage noMargin={contest==="open"}>
@@ -22,7 +22,7 @@ export const ContestBoard: React.FC<Props> = ({ contest, schedule, numer, denom 
           {contest==="closed" || contest==="archived" ? message[2] : ""}
         </StatusMessage>
         <Schedule>
-          {contest==="upcoming" ? <><Timer /><ScheduleDetail>{schedule}</ScheduleDetail></> : ""}
+          {contest==="upcoming" ? <><Timer /><ScheduleDetail>{startAt}</ScheduleDetail></> : ""}
           {contest==="closed" || contest==="archived" ? 
             <ScoreBoard>あなたのスコア｜<Score>{numer}</Score><Slash>/</Slash><Score>{denom}</Score>問正解!!</ScoreBoard> : ""
           }

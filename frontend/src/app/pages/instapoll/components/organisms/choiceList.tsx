@@ -29,7 +29,7 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
         ))}
       </Container>
     );
-  } else  {
+  } else {
     return (
       <Container>
         {Object.entries(poll.choices).map(([title, color]) => (

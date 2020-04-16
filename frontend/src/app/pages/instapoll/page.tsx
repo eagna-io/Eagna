@@ -52,7 +52,7 @@ pollがresolve && 不正解 => WrongModal
           <Score numer={2} denom={3} />
         </Header>
         <PollCard>
-          { contest==="upcoming" ? <ContestBoard contest={"upcoming"} schedule={"06.01 11:00〜"} /> : null }
+          { contest==="upcoming" ? <ContestBoard contest={"upcoming"} startAt={"06.01 11:00〜"} /> : null }
           { contest==="open" ? <ContestBoard contest={"open"} /> : null }
           { contest==="closed" || contest==="archived" ? <ContestBoard contest={contest} numer={2} denom={3} /> : null }
         </PollCard>
