@@ -30,6 +30,10 @@ impl ContestManager {
         OutgoingMsg<'a>: From<U>,
     {
         let msg = OutgoingMsg::from(update).into();
+        self.broadcast_msg(contest_id, msg).await
+    }
+
+    pub async fn broadcast_msg(&self, contest_id: ContestId, msg: Message) {
         if let Some(sender) = self.senders.read().await.get(&contest_id) {
             // receiver がいないことによるエラーは無視
             let _ = sender.send(msg);

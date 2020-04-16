@@ -1,9 +1,7 @@
 use chrono::{DateTime, Utc};
 use crop_domain::account::{Account as _, BriefAccount};
 use crop_domain::contest::comment::{BriefComment, Comment as _};
-use crop_domain::contest::poll::{
-    self, ChoiceColor, ChoiceName, DetailedPoll, Poll, PollId, Stats,
-};
+use crop_domain::contest::poll::{self, ChoiceColor, ChoiceName, Poll, PollId, Stats};
 use schemars::JsonSchema;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -39,8 +37,16 @@ impl<'a> Into<Message> for OutgoingMsg<'a> {
     }
 }
 
-impl<'a> From<&'a DetailedPoll> for OutgoingMsg<'a> {
-    fn from(poll: &'a DetailedPoll) -> OutgoingMsg<'a> {
+/*
+ * ==========
+ * PollMsg
+ * ==========
+ */
+impl<'a, P> From<&'a P> for OutgoingMsg<'a>
+where
+    P: Poll + poll::WithAttrs + poll::WithUserChoices,
+{
+    fn from(poll: &'a P) -> OutgoingMsg<'a> {
         let stats = if poll.is_closed() {
             Some(poll.compute_stats())
         } else {
@@ -58,20 +64,11 @@ impl<'a> From<&'a DetailedPoll> for OutgoingMsg<'a> {
     }
 }
 
-impl<'a> From<&'a poll::New> for OutgoingMsg<'a> {
-    fn from(poll: &'a poll::New) -> OutgoingMsg<'a> {
-        OutgoingMsg::Poll(PollMsg {
-            id: poll.id(),
-            title: poll.title(),
-            created_at: poll.created_at(),
-            duration_sec: poll.duration().map(|d| d.num_seconds()),
-            choices: poll.choices(),
-            resolved_choice: None,
-            stats: None,
-        })
-    }
-}
-
+/*
+ * ==========
+ * CommentMsg
+ * ==========
+ */
 impl<'a> From<(&'a BriefComment, &'a BriefAccount)> for OutgoingMsg<'a> {
     fn from(source: (&'a BriefComment, &'a BriefAccount)) -> OutgoingMsg<'a> {
         let (comment, account) = source;
