@@ -38,6 +38,7 @@ CREATE TABLE polls (
   contest_id            UUID NOT NULL,
   title                 TEXT NOT NULL,
   duration_sec          INTEGER,
+  idx                   INTEGER NOT NULL,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
   resolved_at           TIMESTAMPTZ DEFAULT NULL,
   resolved_choice_name  TEXT DEFAULT NULL,
@@ -53,7 +54,7 @@ CREATE TABLE choices (
   poll_id   UUID NOT NULL,
   name      TEXT NOT NULL,
   color     TEXT NOT NULL,
-  idx       INTEGER NOT NULL DEFAULT 0,
+  idx       INTEGER NOT NULL,
 
   UNIQUE (poll_id, name),
   CONSTRAINT poll_choice_fkey FOREIGN KEY (poll_id)

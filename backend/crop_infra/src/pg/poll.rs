@@ -27,6 +27,7 @@ pub trait PollTable {
                 polls::title,
                 polls::created_at,
                 polls::duration_sec,
+                polls::idx,
                 polls::resolved_at,
                 polls::resolved_choice_name,
             ))
@@ -70,6 +71,7 @@ pub struct NewPoll<'a> {
     pub title: &'a str,
     pub created_at: &'a DateTime<Utc>,
     pub duration_sec: Option<i32>,
+    pub idx: i32,
 }
 
 #[derive(Queryable)]
@@ -80,6 +82,7 @@ pub struct QueriedPoll {
     pub title: String,
     pub created_at: DateTime<Utc>,
     pub duration_sec: Option<i32>,
+    pub idx: i32,
     pub resolved_at: Option<DateTime<Utc>>,
     pub resolved_choice_name: Option<String>,
 }
