@@ -13,7 +13,7 @@ pub trait CommentTable {
         Ok(())
     }
 
-    /// 直近100件のコメントを取得する
+    /// 直近20件のコメントを取得する
     fn query_recent_by_poll_id(&self, poll_id: &Uuid) -> anyhow::Result<Vec<QueriedComment>> {
         Ok(comments::table
             .filter(comments::poll_id.is_not_distinct_from(poll_id))
@@ -27,7 +27,7 @@ pub trait CommentTable {
                 comments::content,
             ))
             .order(comments::created_at.desc())
-            .limit(100)
+            .limit(20)
             .load::<QueriedComment>(self.conn())?)
     }
 }
