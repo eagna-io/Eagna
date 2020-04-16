@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 
+import { Top } from "./pages/top";
 import { InstapollPage } from "./pages/instapoll";
 import { Admin } from "./pages/admin";
 import { CreatePoll } from "./pages/admin/createPoll";
@@ -26,6 +27,11 @@ export default App;
 const AppRouter: FC = () => (
   <Router>
     <Switch>
+      <Route
+        path="/"
+        exact
+        render={() => <Top />}
+      />
       <Route
         path="/instapoll"
         exact
