@@ -1,7 +1,4 @@
-use super::{
-    schema::{accounts, choices, comments},
-    Connection,
-};
+use super::{schema::comments, Connection};
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
 use uuid::Uuid;
@@ -22,21 +19,15 @@ pub trait CommentTable {
     /// test
     fn query_recent_by_poll_id(&self, poll_id: &Uuid) -> anyhow::Result<Vec<QueriedComment>> {
         Ok(comments::table
-            .inner_join(accounts::table)
-            .left_join(
-                choices::table.on(comments::choice_name
-                    .is_not_distinct_from(choices::name.nullable())
-                    .and(comments::poll_id.eq(choices::poll_id))),
-            )
-            .filter(comments::poll_id.eq(poll_id))
+            .filter(comments::poll_id.is_not_distinct_from(poll_id))
             .select((
+                comments::id,
+                comments::contest_id,
                 comments::poll_id,
-                accounts::id,
-                accounts::name,
-                choices::name.nullable(),
-                choices::color.nullable(),
-                comments::content,
+                comments::account_id,
+                comments::choice_name,
                 comments::created_at,
+                comments::content,
             ))
             .order(comments::created_at.desc())
             .limit(100)
@@ -53,19 +44,22 @@ impl CommentTable for Connection {
 #[derive(Insertable)]
 #[table_name = "comments"]
 pub struct NewComment<'a> {
-    pub poll_id: &'a Uuid,
+    pub id: &'a Uuid,
+    pub contest_id: Option<&'a Uuid>,
+    pub poll_id: Option<&'a Uuid>,
     pub account_id: &'a Uuid,
     pub choice_name: Option<&'a str>,
+    pub created_at: &'a DateTime<Utc>,
     pub content: &'a str,
 }
 
 #[derive(Queryable)]
 pub struct QueriedComment {
-    pub poll_id: Uuid,
+    pub id: Uuid,
+    pub contest_id: Option<Uuid>,
+    pub poll_id: Option<Uuid>,
     pub account_id: Uuid,
-    pub account_name: String,
     pub choice_name: Option<String>,
-    pub choice_color: Option<String>,
-    pub content: String,
     pub created_at: DateTime<Utc>,
+    pub content: String,
 }

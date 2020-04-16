@@ -72,14 +72,16 @@ CREATE TABLE account_choices (
 );
 
 CREATE TABLE comments (
-  /* unused */
-  id          SERIAL PRIMARY KEY,
-  poll_id     UUID NOT NULL,
+  id          UUID PRIMARY KEY,
+  contest_id  UUID, /* Contestに紐づくCommentの場合 */
+  poll_id     UUID, /* Pollに紐づくCommentの場合 */
   account_id  UUID NOT NULL,
   choice_name TEXT, /* そのコメントをしたときに選択していたchoice */
-  content     TEXT NOT NULL,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  content     TEXT NOT NULL,
 
+  CONSTRAINT comment_contest_fkey FOREIGN KEY (contest_id)
+    REFERENCES contests (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT comment_poll_fkey FOREIGN KEY (poll_id)
     REFERENCES polls (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT comment_account_fkey FOREIGN KEY (account_id)
