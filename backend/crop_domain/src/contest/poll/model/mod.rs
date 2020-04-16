@@ -185,7 +185,7 @@ pub trait Poll {
     }
 
     #[must_use]
-    fn add_comment<A>(&self, account: A, comment_str: String) -> CommentAdded<&Self>
+    fn add_comment<A>(&self, account: &A, comment_str: String) -> CommentAdded<&Self>
     where
         Self: WithAttrs + WithUserChoices,
         A: Account,

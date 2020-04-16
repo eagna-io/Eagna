@@ -4,10 +4,10 @@ use crate::{
     filters::auth,
     response::{self, Response},
 };
-use crop_domain::account::Authenticated;
-use crop_domain::contest::comment::{Comment, CommentId};
-use crop_domain::contest::poll::{DetailedPoll, Poll, PollId};
-use crop_domain::contest::{Contest, ContestId, ContestRepository, DetailedContest};
+use crop_domain::account::{Account as _, AccountRepository, Authenticated, BriefAccount};
+use crop_domain::contest::comment::{BriefComment, Comment as _, CommentId};
+use crop_domain::contest::poll::{DetailedPoll, Poll as _, PollId};
+use crop_domain::contest::{Contest as _, ContestId, ContestRepository, DetailedContest};
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -41,8 +41,9 @@ async fn inner(
     account: Authenticated,
     body: ReqBody,
 ) -> Result<Response, Error> {
-    ctx.pg
-        .with_conn::<Result<Response, Error>, _>(move |conn| {
+    let (comment, brief_account) = ctx
+        .pg
+        .with_conn::<Result<(BriefComment, BriefAccount), Error>, _>(move |conn| {
             let contest = ContestRepository::query_by_id::<DetailedContest<DetailedPoll>>(
                 &conn,
                 &contest_id,
@@ -53,16 +54,25 @@ async fn inner(
                 .current_poll()
                 .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
 
-            if poll.id() == poll_id {
-                let comment_added = poll.add_comment(account, body.comment);
-                ContestRepository::save(&conn, &comment_added)?;
-                Ok(response::new(
-                    StatusCode::CREATED,
-                    &ResBody(*comment_added.comment.id()),
-                ))
-            } else {
-                Err(Error::new(StatusCode::NOT_FOUND, "poll id mismatch"))
+            if poll.id() != poll_id {
+                return Err(Error::new(StatusCode::NOT_FOUND, "poll id mismatch"));
             }
+
+            // コメントを追加する
+            let comment_added = poll.add_comment(&account, body.comment);
+            ContestRepository::save(&conn, &comment_added)?;
+
+            // アカウント名を取得するためにアカウントを取得する
+            let brief_account =
+                AccountRepository::query_by_id::<BriefAccount>(&conn, account.id())?.unwrap();
+
+            Ok((comment_added.comment, brief_account))
         })
-        .await?
+        .await??;
+
+    ctx.contest_manager
+        .notify_update(contest_id, (&comment, &brief_account))
+        .await;
+
+    Ok(response::new(StatusCode::CREATED, &ResBody(*comment.id())))
 }

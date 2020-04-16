@@ -1,4 +1,6 @@
 use chrono::{DateTime, Utc};
+use crop_domain::account::{Account as _, BriefAccount};
+use crop_domain::contest::comment::{BriefComment, Comment as _};
 use crop_domain::contest::poll::{
     self, ChoiceColor, ChoiceName, DetailedPoll, Poll, PollId, Stats,
 };
@@ -28,7 +30,7 @@ pub struct PollMsg<'a> {
 pub struct CommentMsg<'a> {
     account_name: &'a str,
     comment: &'a str,
-    color: &'a ChoiceColor,
+    choice: Option<&'a ChoiceName>,
 }
 
 impl<'a> Into<Message> for OutgoingMsg<'a> {
@@ -66,6 +68,17 @@ impl<'a> From<&'a poll::New> for OutgoingMsg<'a> {
             choices: poll.choices(),
             resolved_choice: None,
             stats: None,
+        })
+    }
+}
+
+impl<'a> From<(&'a BriefComment, &'a BriefAccount)> for OutgoingMsg<'a> {
+    fn from(source: (&'a BriefComment, &'a BriefAccount)) -> OutgoingMsg<'a> {
+        let (comment, account) = source;
+        OutgoingMsg::Comment(CommentMsg {
+            account_name: account.name(),
+            comment: comment.comment(),
+            choice: comment.choice_name(),
         })
     }
 }

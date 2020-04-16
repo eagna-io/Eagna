@@ -10,6 +10,13 @@ pub trait AccountRepository {
     {
         account.save(self.conn())
     }
+
+    fn query_by_id<A>(&self, id: &AccountId) -> anyhow::Result<Option<A>>
+    where
+        A: Queryable,
+    {
+        A::query_by_id(self.conn(), id)
+    }
 }
 
 impl AccountRepository for Connection {
