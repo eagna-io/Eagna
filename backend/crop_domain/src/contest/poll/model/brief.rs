@@ -1,4 +1,4 @@
-use super::{ChoiceColor, ChoiceName, Poll, PollId, WithAttrs};
+use super::{ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs};
 use chrono::{DateTime, Duration, Utc};
 use crop_infra::pg::{choice::QueriedChoice, poll::QueriedPoll};
 use schemars::JsonSchema;
@@ -8,6 +8,7 @@ use std::collections::HashMap;
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct BriefPoll {
     pub(super) id: PollId,
+    pub(super) status: PollStatus,
     pub(super) title: String,
     pub(super) created_at: DateTime<Utc>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -36,6 +37,10 @@ impl Poll for BriefPoll {
 }
 
 impl WithAttrs for BriefPoll {
+    fn _status(&self) -> PollStatus {
+        self.status
+    }
+
     fn _title(&self) -> &str {
         self.title.as_str()
     }
@@ -62,6 +67,7 @@ impl From<(QueriedPoll, Vec<QueriedChoice>)> for BriefPoll {
         let (poll, choices) = queried;
         BriefPoll {
             id: PollId(poll.id),
+            status: poll.status,
             title: poll.title,
             created_at: poll.created_at,
             duration: poll.duration_sec.map(|s| Duration::seconds(s as i64)),

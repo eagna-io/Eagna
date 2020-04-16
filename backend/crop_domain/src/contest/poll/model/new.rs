@@ -1,4 +1,4 @@
-use super::{ChoiceColor, ChoiceName, Poll, PollId, WithAttrs, WithUserChoices};
+use super::{ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithUserChoices};
 use crate::account::AccountId;
 use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
@@ -18,6 +18,10 @@ impl Poll for New {
 }
 
 impl WithAttrs for New {
+    fn _status(&self) -> PollStatus {
+        PollStatus::Open
+    }
+
     fn _title(&self) -> &str {
         self.title.as_str()
     }

@@ -1,5 +1,6 @@
 use super::{
-    BriefPoll, ChoiceColor, ChoiceName, Poll, PollId, WithAttrs, WithComments, WithUserChoices,
+    BriefPoll, ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithComments,
+    WithUserChoices,
 };
 use crate::account::AccountId;
 use crate::contest::comment::BriefComment;
@@ -27,6 +28,10 @@ impl Poll for DetailedPoll {
 }
 
 impl WithAttrs for DetailedPoll {
+    fn _status(&self) -> PollStatus {
+        self.inner._status()
+    }
+
     fn _title(&self) -> &str {
         self.inner._title()
     }

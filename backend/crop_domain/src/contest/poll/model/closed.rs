@@ -1,28 +1,18 @@
-use crate::account::AccountId;
-use crate::contest::poll::{
-    ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithUserChoices,
+use super::{
+    ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithComments, WithUserChoices,
 };
+use crate::account::AccountId;
 use crate::contest::Updatable;
 use chrono::{DateTime, Duration, Utc};
-use crop_infra::pg::{poll::PollTable as _, Connection};
+use crop_infra::pg::{poll::PollTable, Connection};
 use std::collections::HashMap;
 
 #[must_use]
-pub struct Resolved<P> {
-    pub(super) poll: P,
-    pub(super) resolved: ChoiceName,
+pub struct Closed<P> {
+    pub poll: P,
 }
 
-impl<P> Updatable for Resolved<P>
-where
-    P: Poll,
-{
-    fn save(&self, conn: &Connection) -> anyhow::Result<()> {
-        conn.update_resolved_choice_name(&self.poll.id().0, self.resolved.0.as_str())
-    }
-}
-
-impl<P> Poll for Resolved<P>
+impl<P> Poll for Closed<P>
 where
     P: Poll,
 {
@@ -31,7 +21,7 @@ where
     }
 }
 
-impl<P> WithAttrs for Resolved<P>
+impl<P> WithAttrs for Closed<P>
 where
     P: WithAttrs,
 {
@@ -56,15 +46,35 @@ where
     }
 
     fn _resolved_choice(&self) -> Option<&ChoiceName> {
-        Some(&self.resolved)
+        self.poll._resolved_choice()
     }
 }
 
-impl<P> WithUserChoices for Resolved<P>
+impl<P> WithUserChoices for Closed<P>
 where
     P: WithUserChoices,
 {
     fn _user_choices(&self) -> &HashMap<AccountId, ChoiceName> {
         self.poll._user_choices()
+    }
+}
+
+impl<P> WithComments for Closed<P>
+where
+    P: WithComments,
+{
+    type Comment = P::Comment;
+
+    fn _comments(&self) -> &[Self::Comment] {
+        self.poll._comments()
+    }
+}
+
+impl<P> Updatable for Closed<P>
+where
+    P: Poll,
+{
+    fn save(&self, conn: &Connection) -> anyhow::Result<()> {
+        PollTable::update_status(conn, &self.id().0, PollStatus::Closed)
     }
 }

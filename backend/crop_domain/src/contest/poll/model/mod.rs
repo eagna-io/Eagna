@@ -8,6 +8,7 @@ use uuid::Uuid;
 
 mod brief;
 mod choice_updated;
+mod closed;
 mod comment_added;
 mod detailed;
 mod new;
@@ -15,10 +16,13 @@ mod resolved;
 
 pub use brief::BriefPoll;
 pub use choice_updated::ChoiceUpdated;
+pub use closed::Closed;
 pub use comment_added::CommentAdded;
 pub use detailed::DetailedPoll;
 pub use new::New;
 pub use resolved::Resolved;
+
+pub use crop_infra::pg::types::PollStatus;
 
 pub(crate) fn new(
     title: String,
@@ -36,6 +40,13 @@ pub(crate) fn new(
 
 pub trait Poll {
     fn id(&self) -> PollId;
+
+    fn status(&self) -> PollStatus
+    where
+        Self: WithAttrs,
+    {
+        self._status()
+    }
 
     fn title(&self) -> &str
     where
@@ -72,26 +83,6 @@ pub trait Poll {
         }
     }
 
-    /// PollがOpen（回答可能）かどうか
-    fn is_open(&self) -> bool
-    where
-        Self: WithAttrs,
-    {
-        if let Some(closed_at) = self.closed_at() {
-            Utc::now() < closed_at
-        } else {
-            self.resolved_choice().is_none()
-        }
-    }
-
-    /// PollがClosedかどうか
-    fn is_closed(&self) -> bool
-    where
-        Self: WithAttrs,
-    {
-        !self.is_open()
-    }
-
     fn choices(&self) -> &HashMap<ChoiceName, ChoiceColor>
     where
         Self: WithAttrs,
@@ -107,12 +98,26 @@ pub trait Poll {
     }
 
     #[must_use]
+    fn close(&self) -> anyhow::Result<Closed<&Self>>
+    where
+        Self: WithAttrs,
+    {
+        if self.status() != PollStatus::Open {
+            Err(anyhow::anyhow!("Poll is not open"))
+        } else {
+            Ok(Closed { poll: self })
+        }
+    }
+
+    #[must_use]
     fn resolve(&self, choice: ChoiceName) -> anyhow::Result<Resolved<&Self>>
     where
         Self: WithAttrs,
     {
-        if self.is_open() {
-            Err(anyhow::anyhow!("Poll is still open"))
+        if self.status() != PollStatus::Closed {
+            // CloseしてないPollはResolveできない
+            // まずCloseする必要がある
+            Err(anyhow::anyhow!("Poll is not closed"))
         } else if self.resolved_choice().is_some() {
             Err(anyhow::anyhow!("Poll is already resolved"))
         } else if !self.choices().contains_key(&choice) {
@@ -142,8 +147,9 @@ pub trait Poll {
         Self: WithAttrs,
         A: Account,
     {
-        if !self.is_open() {
-            Err(anyhow::anyhow!("You can't update choice of closed poll"))
+        if self.status() != PollStatus::Open {
+            // OpenしていないPollで、選択を変更することはできない
+            Err(anyhow::anyhow!("Poll is already closed"))
         } else if !self.choices().contains_key(&choice) {
             Err(anyhow::anyhow!("Given choice is not a part of this poll"))
         } else {
@@ -241,6 +247,8 @@ pub struct Stats {
 }
 
 pub trait WithAttrs: Poll {
+    fn _status(&self) -> PollStatus;
+
     fn _title(&self) -> &str;
 
     fn _created_at(&self) -> &DateTime<Utc>;
@@ -275,6 +283,10 @@ impl<'a, P> WithAttrs for &'a P
 where
     P: WithAttrs,
 {
+    fn _status(&self) -> PollStatus {
+        P::_status(self)
+    }
+
     fn _title(&self) -> &str {
         P::_title(self)
     }
