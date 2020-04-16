@@ -11,6 +11,14 @@ pub trait AccountTable {
             .execute(self.conn())?;
         Ok(())
     }
+
+    fn query_by_id(&self, id: &Uuid) -> anyhow::Result<Option<QueriedAccount>> {
+        Ok(accounts::table
+            .filter(accounts::id.eq(id))
+            .select((accounts::id, accounts::name))
+            .first::<QueriedAccount>(self.conn())
+            .optional()?)
+    }
 }
 
 impl AccountTable for Connection {
@@ -24,4 +32,10 @@ impl AccountTable for Connection {
 pub struct NewAccount<'a> {
     pub id: &'a Uuid,
     pub name: &'a str,
+}
+
+#[derive(Queryable)]
+pub struct QueriedAccount {
+    pub id: Uuid,
+    pub name: String,
 }
