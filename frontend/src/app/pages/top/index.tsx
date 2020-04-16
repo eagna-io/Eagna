@@ -18,14 +18,15 @@ export const Top: React.FC = () => {
             <LargeFire />
             <SectionTitle>開催中のコンテスト</SectionTitle>
           </Openning>
-          <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"}/>
+          { contestState === "open" ? 
+            <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"} state={"open"}/> : null
+          }
           <Upcoming>
             <LargeTimer />
             <SectionTitle>開催予定のコンテスト</SectionTitle>
           </Upcoming>
-          <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"}/>
-          <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"}/>
-          <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"}/>
+          {/* TODO: contestStatus === "upcoming" */}
+            <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"} state={"upcoming"}/>
         </Wrapper>
         <Footer>
           <LogoG />
@@ -42,6 +43,7 @@ export const Top: React.FC = () => {
 }
 
 const title = "Los Angels Lakers vs Golden State Warriors"
+const contestState = "open";
 
 const Container = styled.div`
   position: relative;

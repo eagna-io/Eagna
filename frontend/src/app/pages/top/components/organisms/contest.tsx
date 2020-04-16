@@ -3,29 +3,48 @@ import styled from "styled-components";
 
 import * as color from "app/components/color";
 
-import { ReactComponent as FireIcon } from "./components/atoms/images/fire.svg";
+import { ReactComponent as FireIcon } from "../atoms/images/fire.svg";
 import { ReactComponent as TimerBlackIcon } from "../atoms/images/clock-b.svg";
 
 interface Props {
   category: string;
   title: string;
   startAt: string;
+  state: "upcoming" | "open" | "closed" | "archived";
 }
 
-export const Contest: React.FC<Props> = ({ category, title, startAt }) => {
-  return (
-    <Container>
-      <ContestImage></ContestImage>
-      <ContestDetail>
-        <Category>{category}</Category>
-        <Title>{title}</Title>
-        <StartAt>
-          <Timer />
-          <Date>{startAt}</Date>
-        </StartAt>
-      </ContestDetail>
-    </Container>
-  );
+export const Contest: React.FC<Props> = ({ category, title, startAt, state }) => {
+  if (state === "upcoming") {
+    return (
+      <Container>
+        <ContestImage></ContestImage>
+        <ContestDetail>
+          <Category>{category}</Category>
+          <Title>{title}</Title>
+          <StartAt>
+            <Timer />
+            <Date>{startAt}</Date>
+          </StartAt>
+        </ContestDetail>
+      </Container>
+    );
+  } else if  (state === "open") { 
+    return (
+      <Container>
+        <ContestImage></ContestImage>
+        <ContestDetail>
+          <Category>{category}</Category>
+          <Title>{title}</Title>
+          <OnGoing>
+            <Fire />
+            <OnGoingText>開催中！</OnGoingText>
+          </OnGoing>
+        </ContestDetail>
+      </Container>
+    );
+  } else {
+    return null
+  }
 }
 
 const Container = styled.div`
@@ -65,7 +84,6 @@ const StartAt = styled.div`
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-bottom: 12px;
 `;
 
 const Timer = styled(TimerBlackIcon)`
@@ -77,4 +95,25 @@ const Timer = styled(TimerBlackIcon)`
 const Date = styled.div`
   font-size: 12px;
   color: ${color.TextBaseColor.hex};
+`;
+
+const OnGoing = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 71px;
+  height: 20px;
+  border-radius: 2px;
+  background-color: ${color.MainRed.hex};
+`;
+
+const Fire = styled(FireIcon)`
+  width: 14px;
+  height: 14px;
+  margin: 0 4px;
+`;
+
+const OnGoingText = styled.div`
+  font-size: 12px;
+  color: ${color.WhiteBaseColor.hex};
 `;
