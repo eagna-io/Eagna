@@ -74,15 +74,15 @@ const FooterList = styled.ul`
 const FooterListItem = styled.li`
   font-size: 16px;
   margin-bottom: 32px;
-  color: ${color.TextBaseColor.hex};
   text-align: center;
+  color: ${color.TextBaseColor.hex};
   &:last-child {
     margin-bottom: 0;
   }
 `;
 
 const CopyRights = styled.div`
+  text-align: center;
   font-size: 12px;
   color: ${color.TextBaseColor.hex};
-  text-align: center;
 `;
