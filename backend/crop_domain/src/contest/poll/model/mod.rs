@@ -1,11 +1,10 @@
-use crate::account::Account;
+use crate::account::{Account, AccountId};
+use crate::contest::comment::{BriefComment, Comment, CommentId};
 use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
-
-use crate::account::AccountId;
 
 mod brief;
 mod choice_updated;
@@ -178,31 +177,27 @@ pub trait Poll {
         }
     }
 
-    fn comments(&self) -> &[Comment]
+    fn comments(&self) -> &[Self::Comment]
     where
         Self: WithComments,
     {
         self._comments()
     }
 
-    /// ## TODO
-    /// コメントを追加するたびに `WithUserChoices` を要求するのは重たい気がする
-    ///
-    /// ## Idea
-    /// Accountに今どのChoiceを選択しているかの情報を持たせる
     #[must_use]
-    fn add_comment(&mut self, account: AccountId, comment_str: String) -> CommentAdded<&Self>
+    fn add_comment<A>(&self, account: A, comment_str: String) -> CommentAdded<&Self>
     where
         Self: WithAttrs + WithUserChoices,
+        A: Account,
     {
-        let color = self
-            .user_choices()
-            .get(&account)
-            .and_then(|choice| self.choices().get(choice).cloned());
-        let comment = Comment {
-            account: account,
+        let choice = self.user_choices().get(account.id()).cloned();
+
+        let comment = BriefComment {
+            id: CommentId::new(),
+            account_id: *account.id(),
+            choice_name: choice,
+            created_at: Utc::now(),
             comment: comment_str,
-            color,
         };
 
         CommentAdded {
@@ -239,13 +234,6 @@ pub struct ChoiceName(pub String);
 pub struct ChoiceColor(pub String);
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-pub struct Comment {
-    pub account: AccountId,
-    pub comment: String,
-    pub color: Option<ChoiceColor>,
-}
-
-#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct Stats {
     pub total_votes: usize,
@@ -269,7 +257,9 @@ pub trait WithUserChoices: Poll {
 }
 
 pub trait WithComments: Poll {
-    fn _comments(&self) -> &[Comment];
+    type Comment: Comment;
+
+    fn _comments(&self) -> &[Self::Comment];
 }
 
 impl<'a, P> Poll for &'a P
@@ -319,7 +309,9 @@ impl<'a, P> WithComments for &'a P
 where
     P: WithComments,
 {
-    fn _comments(&self) -> &[Comment] {
+    type Comment = P::Comment;
+
+    fn _comments(&self) -> &[Self::Comment] {
         P::_comments(self)
     }
 }

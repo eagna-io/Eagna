@@ -1,8 +1,8 @@
 use super::{
-    BriefPoll, ChoiceColor, ChoiceName, Comment, Poll, PollId, WithAttrs, WithComments,
-    WithUserChoices,
+    BriefPoll, ChoiceColor, ChoiceName, Poll, PollId, WithAttrs, WithComments, WithUserChoices,
 };
 use crate::account::AccountId;
+use crate::contest::comment::BriefComment;
 use chrono::{DateTime, Duration, Utc};
 use crop_infra::pg::{
     account_choice::QueriedAccountChoice, choice::QueriedChoice, comment::QueriedComment,
@@ -17,7 +17,7 @@ pub struct DetailedPoll {
     #[serde(flatten)]
     inner: BriefPoll,
     account_choices: HashMap<AccountId, ChoiceName>,
-    comments: Vec<Comment>,
+    comments: Vec<BriefComment>,
 }
 
 impl Poll for DetailedPoll {
@@ -55,7 +55,9 @@ impl WithUserChoices for DetailedPoll {
 }
 
 impl WithComments for DetailedPoll {
-    fn _comments(&self) -> &[Comment] {
+    type Comment = BriefComment;
+
+    fn _comments(&self) -> &[BriefComment] {
         self.comments.as_slice()
     }
 }
@@ -84,14 +86,7 @@ impl
                 .into_iter()
                 .map(|record| (AccountId(record.account_id), ChoiceName(record.choice_name)))
                 .collect(),
-            comments: comments
-                .into_iter()
-                .map(|comment| Comment {
-                    account: AccountId(comment.account_id),
-                    comment: comment.content,
-                    color: comment.choice_color.map(ChoiceColor),
-                })
-                .collect(),
+            comments: comments.into_iter().map(BriefComment::from).collect(),
         }
     }
 }

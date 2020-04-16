@@ -14,9 +14,6 @@ pub trait CommentTable {
     }
 
     /// 直近100件のコメントを取得する
-    ///
-    /// TODO
-    /// test
     fn query_recent_by_poll_id(&self, poll_id: &Uuid) -> anyhow::Result<Vec<QueriedComment>> {
         Ok(comments::table
             .filter(comments::poll_id.is_not_distinct_from(poll_id))
