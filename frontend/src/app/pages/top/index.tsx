@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 import * as color from "app/components/color";
+
 import { ReactComponent as LogoWhite } from "./components/atoms/images/PlayPoll_logo_white.svg";
 import { ReactComponent as LogoGrad } from "./components/atoms/images/PlayPoll_logo_grad.svg";
 
@@ -14,10 +15,10 @@ export const Top: React.FC = () => {
         <Footer>
           <LogoG />
           <FooterList>
-            <FooterListItem>プレイガイド</FooterListItem>
-            <FooterListItem>利用規約</FooterListItem>
-            <FooterListItem>プライバシーポリシー</FooterListItem>
-            <FooterListItem>運営会社</FooterListItem>
+            <FooterListItem><Link href="/play-guide.pdf" target="_blank">プレイガイド</Link></FooterListItem>
+            <FooterListItem><Link href="/terms.pdf" target="_blank">利用規約</Link></FooterListItem>
+            <FooterListItem><Link href="/privacy-policy.pdf" target="_blank">プライバシーポリシー</Link></FooterListItem>
+            <FooterListItem><Link href="https://www.crop-predictionmarket.com/" target="_blank">運営会社</Link></FooterListItem>
           </FooterList>
           <CopyRights>©2020 crop,Inc.</CopyRights>
         </Footer>
@@ -79,6 +80,10 @@ const FooterListItem = styled.li`
   &:last-child {
     margin-bottom: 0;
   }
+`;
+
+const Link = styled.a`
+  text-decoration: none;
 `;
 
 const CopyRights = styled.div`
