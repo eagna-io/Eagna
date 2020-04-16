@@ -1,7 +1,7 @@
 use chrono::{DateTime, Utc};
 use crop_domain::account::{Account as _, BriefAccount};
 use crop_domain::contest::comment::{BriefComment, Comment as _};
-use crop_domain::contest::poll::{self, ChoiceColor, ChoiceName, Poll, PollId, Stats};
+use crop_domain::contest::poll::{self, ChoiceColor, ChoiceName, Poll, PollId, PollStatus, Stats};
 use schemars::JsonSchema;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -47,10 +47,9 @@ where
     P: Poll + poll::WithAttrs + poll::WithUserChoices,
 {
     fn from(poll: &'a P) -> OutgoingMsg<'a> {
-        let stats = if poll.is_closed() {
-            Some(poll.compute_stats())
-        } else {
-            None
+        let stats = match poll.status() {
+            PollStatus::Open => None,
+            PollStatus::Closed => Some(poll.compute_stats()),
         };
         OutgoingMsg::Poll(PollMsg {
             id: poll.id(),
