@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 
 import * as color from "app/components/color";
-// import privacyPolicy from './privacy_policy.pdf';
 
 import { ReactComponent as LogoWhite } from "./components/atoms/images/PlayPoll_logo_white.svg";
 import { ReactComponent as LogoGrad } from "./components/atoms/images/PlayPoll_logo_grad.svg";
