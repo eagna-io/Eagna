@@ -6,9 +6,11 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 mod authenticated;
+mod brief;
 mod new;
 
 pub use authenticated::Authenticated;
+pub use brief::BriefAccount;
 pub use new::New;
 
 pub fn new(name: String) -> New {
