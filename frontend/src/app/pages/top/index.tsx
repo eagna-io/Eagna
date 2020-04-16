@@ -3,10 +3,11 @@ import styled from "styled-components";
 
 import * as color from "app/components/color";
 
+import { Contest } from "./components/organisms/contest";
 import { ReactComponent as LogoWhite } from "./components/atoms/images/PlayPoll_logo_white.svg";
 import { ReactComponent as LogoGrad } from "./components/atoms/images/PlayPoll_logo_grad.svg";
 import { ReactComponent as FireIcon } from "./components/atoms/images/fire.svg";
-import { ReactComponent as TimerIcon } from "./components/atoms/images/clock.svg";
+import { ReactComponent as TimerIcon } from "./components/atoms/images/clock-w.svg";
 
 export const Top: React.FC = () => {
   return (
@@ -17,10 +18,14 @@ export const Top: React.FC = () => {
             <LargeFire />
             <SectionTitle>開催中のコンテスト</SectionTitle>
           </Openning>
+          <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"}/>
           <Upcoming>
             <LargeTimer />
             <SectionTitle>開催予定のコンテスト</SectionTitle>
           </Upcoming>
+          <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"}/>
+          <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"}/>
+          <Contest category={"NBA（バスケ）"} title={title} startAt={"2020.06.01｜11:00 OPEN"}/>
         </Wrapper>
         <Footer>
           <LogoG />
@@ -36,17 +41,18 @@ export const Top: React.FC = () => {
   );
 }
 
+const title = "Los Angels Lakers vs Golden State Warriors"
+
 const Container = styled.div`
   position: relative;
   width: 100vw;
-  height: 100vh;
   background-image: linear-gradient(151deg, ${color.WildWatermelon.hex} 0%, ${color.ToreaBay.hex} 100%);
   user-select: none;
 `;
 
 const Wrapper = styled.div`
   position: relative;
-  padding: 16px 28px 387px 28px;
+  padding: 16px 28px 432px 28px;
 `;
 
 const Header = styled.div`
