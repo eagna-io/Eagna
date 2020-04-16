@@ -48,7 +48,7 @@ pollがresolve && 不正解 => WrongModal
       <Container>
         <Header>
           <Logo />
-          <TimerComponent content={timer} />
+          <TimerComponent content={undefined} />
           <Score numer={2} denom={3} />
         </Header>
         <PollCard>

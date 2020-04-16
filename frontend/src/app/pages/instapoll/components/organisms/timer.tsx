@@ -8,14 +8,14 @@ import {
 import { Timer as TimerModel } from "model/poll";
 
 interface Props {
-  content: TimerModel;
+  content?: TimerModel;
 }
 
 export const Timer: React.FC<Props> = ({ content }) => {
-  // TODO: state upcoming
-  if (
-    content === "closed"
-  ) {
+  if ( content === undefined) {
+    return <Container>投票時間<TimeOut>-</TimeOut></Container>;
+  }
+  else if ( content === "closed") {
     return <Container>投票時間<TimeOut>締切</TimeOut></Container>;
   } else {
     return <Container>投票時間<CountDownTimer>{formatTime(content)}</CountDownTimer></Container>;
@@ -37,7 +37,8 @@ const Container = styled.div`
 `;
 
 const TimeOut = styled.div`
-  font-size: 20px;
+  font-size: 18px;
+  line-height: 30px;
   font-weight: 800;
   letter-spacing: 0.71px;
   color: ${Alto.hex};
@@ -45,6 +46,7 @@ const TimeOut = styled.div`
 
 const CountDownTimer = styled.div`
   font-size: 20px;
+  line-height: 30px;
   font-weight: 800;
   letter-spacing: 0.71px;
   color: ${WhiteBaseColor.hex};
