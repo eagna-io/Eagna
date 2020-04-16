@@ -7,8 +7,8 @@ use crop_infra::pg::{
 };
 
 pub struct CommentAdded<P> {
-    pub(super) poll: P,
-    pub(super) comment: BriefComment,
+    pub poll: P,
+    pub comment: BriefComment,
 }
 
 impl<P> Updatable for CommentAdded<P>
