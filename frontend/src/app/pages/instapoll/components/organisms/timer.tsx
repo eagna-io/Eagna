@@ -8,17 +8,17 @@ import {
 import { Timer as TimerModel } from "model/poll";
 
 interface Props {
-  content?: TimerModel;
+  timer?: TimerModel;
 }
 
-export const Timer: React.FC<Props> = ({ content }) => {
-  if ( content === undefined) {
+export const Timer: React.FC<Props> = ({ timer }) => {
+  if ( timer === undefined) {
     return <Container>投票時間<TimeOut>-</TimeOut></Container>;
   }
-  else if ( content === "closed") {
+  else if ( timer === "closed") {
     return <Container>投票時間<TimeOut>締切</TimeOut></Container>;
   } else {
-    return <Container>投票時間<CountDownTimer>{formatTime(content)}</CountDownTimer></Container>;
+    return <Container>投票時間<CountDownTimer>{formatTime(timer)}</CountDownTimer></Container>;
   }
 };
 

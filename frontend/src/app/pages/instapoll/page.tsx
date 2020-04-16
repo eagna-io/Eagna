@@ -48,7 +48,7 @@ pollがresolve && 不正解 => WrongModal
       <Container>
         <Header>
           <Logo />
-          <TimerComponent content={undefined} />
+          <TimerComponent timer={undefined} />
           <Score numer={2} denom={3} />
         </Header>
         <PollCard>
@@ -94,7 +94,7 @@ pollがresolve && 不正解 => WrongModal
         { poll.resolved !== undefined && poll.selected !== poll.resolved ?<ResultModal isCorrect={false} /> : null }
         <Header>
           <Logo />
-          <TimerComponent content={timer} />
+          <TimerComponent timer={timer} />
           <Score numer={2} denom={3} />
         </Header>
         <PollCard>
