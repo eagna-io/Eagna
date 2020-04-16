@@ -1,10 +1,9 @@
 use chrono::{DateTime, Utc};
 use crop_domain::account::{Account as _, BriefAccount};
 use crop_domain::contest::comment::{BriefComment, Comment as _};
-use crop_domain::contest::poll::{self, ChoiceColor, ChoiceName, Poll, PollId, PollStatus, Stats};
+use crop_domain::contest::poll::{self, Choice, ChoiceName, Poll, PollId, PollStatus, Stats};
 use schemars::JsonSchema;
 use serde::Serialize;
-use std::collections::HashMap;
 use warp::filters::ws::Message;
 
 #[derive(Debug, Serialize, JsonSchema)]
@@ -19,7 +18,8 @@ pub struct PollMsg<'a> {
     title: &'a str,
     created_at: &'a DateTime<Utc>,
     duration_sec: Option<i64>,
-    choices: &'a HashMap<ChoiceName, ChoiceColor>,
+    #[schemars(with = "Vec<Choice>")]
+    choices: &'a [Choice],
     resolved_choice: Option<&'a ChoiceName>,
     stats: Option<Stats>,
 }

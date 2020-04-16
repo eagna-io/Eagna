@@ -13,13 +13,14 @@
         "choices",
         "created_at",
         "id",
+        "status",
         "title"
       ],
       "properties": {
         "choices": {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/ChoiceColor"
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Choice"
           }
         },
         "created_at": {
@@ -46,8 +47,32 @@
             }
           ]
         },
+        "status": {
+          "$ref": "#/definitions/PollStatus"
+        },
         "title": {
           "type": "string"
+        }
+      }
+    },
+    "Choice": {
+      "type": "object",
+      "required": [
+        "color",
+        "idx",
+        "name"
+      ],
+      "properties": {
+        "color": {
+          "$ref": "#/definitions/ChoiceColor"
+        },
+        "idx": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "name": {
+          "$ref": "#/definitions/ChoiceName"
         }
       }
     },
@@ -112,6 +137,12 @@
     "PollId": {
       "type": "string",
       "format": "uuid"
+    },
+    "PollStatus": {
+      "enum": [
+        "Open",
+        "Closed"
+      ]
     }
   }
 }

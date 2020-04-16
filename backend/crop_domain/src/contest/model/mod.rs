@@ -1,8 +1,8 @@
-use crate::contest::poll::{self, ChoiceColor, ChoiceName, Poll};
+use crate::contest::poll::{self, Choice, Poll};
 use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
 use serde::Serialize;
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 use uuid::Uuid;
 
 mod brief;
@@ -72,7 +72,7 @@ pub trait Contest {
         &self,
         title: String,
         duration: Option<Duration>,
-        choices: HashMap<ChoiceName, ChoiceColor>,
+        choices: Vec<Choice>,
     ) -> anyhow::Result<PollAdded<&Self>>
     where
         Self: WithAttrs,

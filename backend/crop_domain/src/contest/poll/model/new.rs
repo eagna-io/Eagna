@@ -1,4 +1,4 @@
-use super::{ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithUserChoices};
+use super::{Choice, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithUserChoices};
 use crate::account::AccountId;
 use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
@@ -8,7 +8,7 @@ pub struct New {
     pub(crate) title: String,
     pub(crate) created_at: DateTime<Utc>,
     pub(crate) duration: Option<Duration>,
-    pub(crate) choices: HashMap<ChoiceName, ChoiceColor>,
+    pub(crate) choices: Vec<Choice>,
 }
 
 impl Poll for New {
@@ -34,8 +34,8 @@ impl WithAttrs for New {
         self.duration.as_ref()
     }
 
-    fn _choices(&self) -> &HashMap<ChoiceName, ChoiceColor> {
-        &self.choices
+    fn _choices(&self) -> &[Choice] {
+        &self.choices.as_slice()
     }
 
     fn _resolved_choice(&self) -> Option<&ChoiceName> {

@@ -5,19 +5,18 @@ use crate::{
     response::{self, Response},
 };
 use chrono::Duration;
-use crop_domain::contest::poll::{self, ChoiceColor, ChoiceName, Poll, PollId};
+use crop_domain::contest::poll::{self, Choice, Poll, PollId};
 use crop_domain::contest::{BriefContest, Contest, ContestId, ContestRepository as _};
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use warp::{reject::Rejection, Filter};
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ReqBody {
     title: String,
     duration_sec: Option<i32>,
-    choices: HashMap<ChoiceName, ChoiceColor>,
+    choices: Vec<Choice>,
 }
 
 #[derive(Debug, Serialize, JsonSchema)]

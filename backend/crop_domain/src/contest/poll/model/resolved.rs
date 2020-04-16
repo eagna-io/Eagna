@@ -1,6 +1,6 @@
 use crate::account::AccountId;
 use crate::contest::poll::{
-    ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithUserChoices,
+    Choice, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithUserChoices,
 };
 use crate::contest::Updatable;
 use chrono::{DateTime, Duration, Utc};
@@ -51,7 +51,7 @@ where
         self.poll._duration()
     }
 
-    fn _choices(&self) -> &HashMap<ChoiceName, ChoiceColor> {
+    fn _choices(&self) -> &[Choice] {
         self.poll._choices()
     }
 

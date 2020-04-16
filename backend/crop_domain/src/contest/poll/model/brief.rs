@@ -1,9 +1,8 @@
-use super::{ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs};
+use super::{Choice, ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs};
 use chrono::{DateTime, Duration, Utc};
 use crop_infra::pg::{choice::QueriedChoice, poll::QueriedPoll};
 use schemars::JsonSchema;
 use serde::Serialize;
-use std::collections::HashMap;
 
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct BriefPoll {
@@ -16,7 +15,7 @@ pub struct BriefPoll {
     // https://github.com/GREsau/schemars/issues/15#issuecomment-593006526
     #[schemars(with = "Option<i64>")]
     pub(super) duration: Option<Duration>,
-    pub(super) choices: HashMap<ChoiceName, ChoiceColor>,
+    pub(super) choices: Vec<Choice>,
     pub(super) resolved_choice: Option<ChoiceName>,
 }
 
@@ -53,8 +52,8 @@ impl WithAttrs for BriefPoll {
         self.duration.as_ref()
     }
 
-    fn _choices(&self) -> &HashMap<ChoiceName, ChoiceColor> {
-        &self.choices
+    fn _choices(&self) -> &[Choice] {
+        self.choices.as_slice()
     }
 
     fn _resolved_choice(&self) -> Option<&ChoiceName> {
@@ -74,7 +73,11 @@ impl From<(QueriedPoll, Vec<QueriedChoice>)> for BriefPoll {
             resolved_choice: poll.resolved_choice_name.map(|s| ChoiceName(s)),
             choices: choices
                 .into_iter()
-                .map(|choice| (ChoiceName(choice.name), ChoiceColor(choice.color)))
+                .map(|choice| Choice {
+                    name: ChoiceName(choice.name),
+                    color: ChoiceColor(choice.color),
+                    idx: choice.idx as usize,
+                })
                 .collect(),
         }
     }

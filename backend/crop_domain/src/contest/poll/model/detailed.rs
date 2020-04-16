@@ -1,5 +1,5 @@
 use super::{
-    BriefPoll, ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithComments,
+    BriefPoll, Choice, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithComments,
     WithUserChoices,
 };
 use crate::account::AccountId;
@@ -44,7 +44,7 @@ impl WithAttrs for DetailedPoll {
         self.inner._duration()
     }
 
-    fn _choices(&self) -> &HashMap<ChoiceName, ChoiceColor> {
+    fn _choices(&self) -> &[Choice] {
         &self.inner._choices()
     }
 

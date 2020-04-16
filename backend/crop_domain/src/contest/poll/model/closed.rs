@@ -1,5 +1,5 @@
 use super::{
-    ChoiceColor, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithComments, WithUserChoices,
+    Choice, ChoiceName, Poll, PollId, PollStatus, WithAttrs, WithComments, WithUserChoices,
 };
 use crate::account::AccountId;
 use crate::contest::Updatable;
@@ -41,7 +41,7 @@ where
         self.poll._duration()
     }
 
-    fn _choices(&self) -> &HashMap<ChoiceName, ChoiceColor> {
+    fn _choices(&self) -> &[Choice] {
         self.poll._choices()
     }
 

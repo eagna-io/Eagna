@@ -24,11 +24,7 @@ pub use resolved::Resolved;
 
 pub use crop_infra::pg::types::PollStatus;
 
-pub(crate) fn new(
-    title: String,
-    duration: Option<Duration>,
-    choices: HashMap<ChoiceName, ChoiceColor>,
-) -> New {
+pub(crate) fn new(title: String, duration: Option<Duration>, choices: Vec<Choice>) -> New {
     New {
         id: PollId::new(),
         title,
@@ -71,7 +67,7 @@ pub trait Poll {
         self._duration()
     }
 
-    fn choices(&self) -> &HashMap<ChoiceName, ChoiceColor>
+    fn choices(&self) -> &[Choice]
     where
         Self: WithAttrs,
     {
@@ -115,7 +111,7 @@ pub trait Poll {
             Err(anyhow::anyhow!("Poll is not closed"))
         } else if self.resolved_choice().is_some() {
             Err(anyhow::anyhow!("Poll is already resolved"))
-        } else if !self.choices().contains_key(&choice) {
+        } else if self.choices().iter().find(|c| c.name == choice).is_none() {
             Err(anyhow::anyhow!("Given choice is not a part of this poll"))
         } else {
             Ok(Resolved {
@@ -145,7 +141,7 @@ pub trait Poll {
         if self.status() != PollStatus::Open {
             // OpenしていないPollで、選択を変更することはできない
             Err(anyhow::anyhow!("Poll is already closed"))
-        } else if !self.choices().contains_key(&choice) {
+        } else if self.choices().iter().find(|c| c.name == choice).is_none() {
             Err(anyhow::anyhow!("Given choice is not a part of this poll"))
         } else {
             Ok(ChoiceUpdated {
@@ -163,8 +159,8 @@ pub trait Poll {
     {
         let mut vote_per_choice = self
             .choices()
-            .keys()
-            .map(|c| (c.clone(), 0))
+            .iter()
+            .map(|c| (c.name.clone(), 0))
             .collect::<HashMap<ChoiceName, usize>>();
 
         // 各Choiceの総得票数を計算
@@ -226,11 +222,18 @@ impl std::str::FromStr for PollId {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct Choice {
+    pub idx: usize,
+    pub name: ChoiceName,
+    pub color: ChoiceColor,
+}
+
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct ChoiceName(pub String);
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 pub struct ChoiceColor(pub String);
 
@@ -250,7 +253,7 @@ pub trait WithAttrs: Poll {
 
     fn _duration(&self) -> Option<&Duration>;
 
-    fn _choices(&self) -> &HashMap<ChoiceName, ChoiceColor>;
+    fn _choices(&self) -> &[Choice];
 
     fn _resolved_choice(&self) -> Option<&ChoiceName>;
 }
@@ -294,7 +297,7 @@ where
         P::_duration(self)
     }
 
-    fn _choices(&self) -> &HashMap<ChoiceName, ChoiceColor> {
+    fn _choices(&self) -> &[Choice] {
         P::_choices(self)
     }
 

@@ -41,13 +41,11 @@ where
             .poll
             .choices()
             .iter()
-            .map(|(choice_name, choice_color)| {
-                NewChoice {
-                    poll_id: &poll_id,
-                    name: choice_name.0.as_str(),
-                    color: choice_color.0.as_str(),
-                    idx: 0, // TODO
-                }
+            .map(|choice| NewChoice {
+                poll_id: &poll_id,
+                name: choice.name.0.as_str(),
+                color: choice.color.0.as_str(),
+                idx: choice.idx as i32,
             })
             .collect();
         ChoiceTable::save_all(conn, &new_choices)
