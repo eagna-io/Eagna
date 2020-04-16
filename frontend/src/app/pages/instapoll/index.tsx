@@ -59,6 +59,7 @@ export const InstapollPage: React.FC = () => {
         poll={testpoll}
         comments={testcomments}
         timer={testtimer}
+        contest={"closed"}
       />
     );
   // } else {
@@ -72,14 +73,14 @@ const testpoll = {
   idx: 1,
   title: '次にポイントを決めるのは誰？',
   endAt: moment(),
-  status: "closed" as const,
+  status: "open" as const,
   choices: {
     Lebron: "#4583e4",
     Lebron青年期: "#4583e4",
     Lebron完全体: "#4583e4",
     KobeBeanBrsssssssssssssssssssssssssssssssssyant: "#e46345",
   },
-  resolved: "Lebron青年期",
+  // resolved: "Lebron青年期",
   stats: {
     totalVotes: 30,
     votePerChoice: {
@@ -89,7 +90,7 @@ const testpoll = {
       'KobeBeanBrsssssssssssssssssssssssssssssssssyant': 4
     }
   },
-  selected: "Lebron青年期"
+  // selected: "Lebron青年期"
 };
 const testcomments = [
   {
