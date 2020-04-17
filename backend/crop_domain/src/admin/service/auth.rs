@@ -59,7 +59,7 @@ mod tests {
     fn derive_and_verify() {
         let pass = "hogehoge";
 
-        let Credentials { salt, cred } = UserAuthService::derive_credentials(pass);
-        UserAuthService::verify_credentials(&salt[..], &cred[..], pass).unwrap();
+        let Credentials { salt, cred } = derive_credentials(pass);
+        verify_credentials(&salt[..], &cred[..], pass).unwrap();
     }
 }
