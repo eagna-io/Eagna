@@ -4,11 +4,11 @@ import { Page } from "./page";
 
 export const Top: React.FC = () => {
   return (
-    <Page contests={contest}/>
+    <Page contests={contests}/>
   );
 }
 
-const contest = [
+const contests = [
   {
     category: "NBA（バスケ）",
     title: "Los Angels Lakers vs Golden State Warriors",

@@ -19,7 +19,7 @@ export const ContestComponent: React.FC<Props> = ({ contest }) => {
         <ContestDetail>
           <Category>{contest.category}</Category>
           <Title>{contest.title}</Title>
-          { contest.status === "upcoming" ? <StartSchedule contest={contest} /> : contest.status === "open" ? <OnGoing /> : null }
+          { contest.status === "upcoming" ? <StartSchedule startAt={contest.startAt} /> : contest.status === "open" ? <OnGoing /> : null }
         </ContestDetail>
       </Container>
     );

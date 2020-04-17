@@ -2,19 +2,18 @@ import React from "react";
 import styled from "styled-components";
 
 import * as color from "app/components/color";
-import { Contest } from "model/contest";
 
 import { ReactComponent as TimerBlackIcon } from "../atoms/images/clock-b.svg";
 
 interface Props {
-  contest: Contest;
+  startAt: string;
 }
 
-export const StartSchedule: React.FC<Props> = ({ contest }) => {
+export const StartSchedule: React.FC<Props> = ({ startAt }) => {
     return (
       <Container>
-        <Timer />
-        <Date>{contest.startAt} OPEN</Date>
+        <TimerIcon />
+        <Date>{startAt} OPEN</Date>
       </Container>
     );
 }
@@ -25,7 +24,7 @@ const Container = styled.div`
   align-items: center;
 `;
 
-const Timer = styled(TimerBlackIcon)`
+const TimerIcon = styled(TimerBlackIcon)`
   width: 14px;
   height: 14px;
   margin-right: 4px;
