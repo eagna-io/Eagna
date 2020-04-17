@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ResBody",
+  "allOf": [
+    {
+      "$ref": "#/definitions/AccessToken"
+    }
+  ],
+  "definitions": {
+    "AccessToken": {
+      "type": "object",
+      "required": [
+        "account_id",
+        "expire_at"
+      ],
+      "properties": {
+        "account_id": {
+          "$ref": "#/definitions/AccountId"
+        },
+        "expire_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "AccountId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

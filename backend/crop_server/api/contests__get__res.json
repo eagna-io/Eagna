@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ResBody",
+  "type": "object",
+  "required": [
+    "contests"
+  ],
+  "properties": {
+    "contests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/BriefContest"
+      }
+    }
+  },
+  "definitions": {
+    "BriefContest": {
+      "type": "object",
+      "required": [
+        "category",
+        "id",
+        "status",
+        "title"
+      ],
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "event_start_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "id": {
+          "$ref": "#/definitions/ContestId"
+        },
+        "status": {
+          "$ref": "#/definitions/ContestStatus"
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "ContestId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "ContestStatus": {
+      "enum": [
+        "Upcoming",
+        "Open",
+        "Closed",
+        "Archived"
+      ]
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ReqBody",
+  "type": "object",
+  "required": [
+    "choices",
+    "title"
+  ],
+  "properties": {
+    "choices": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Choice"
+      }
+    },
+    "duration_sec": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "int32"
+    },
+    "title": {
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "Choice": {
+      "type": "object",
+      "required": [
+        "color",
+        "idx",
+        "name"
+      ],
+      "properties": {
+        "color": {
+          "$ref": "#/definitions/ChoiceColor"
+        },
+        "idx": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "name": {
+          "$ref": "#/definitions/ChoiceName"
+        }
+      }
+    },
+    "ChoiceColor": {
+      "type": "string"
+    },
+    "ChoiceName": {
+      "type": "string"
+    }
+  }
+}

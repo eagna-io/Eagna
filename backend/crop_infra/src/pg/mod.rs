@@ -1,4 +1,13 @@
+pub mod account;
+pub mod account_choice;
+pub mod admin;
+pub mod choice;
+pub mod comment;
+pub mod contest;
+pub mod poll;
+#[allow(unused_imports)]
 pub(crate) mod schema;
+pub mod types;
 
 use diesel::{
     pg::PgConnection,
@@ -19,7 +28,7 @@ impl Pool {
         Pool { pool }
     }
 
-    pub async fn with_conn<F, T>(&self, func: F) -> anyhow::Result<T>
+    pub async fn with_conn<T, F>(&self, func: F) -> anyhow::Result<T>
     where
         F: FnOnce(Connection) -> T + Send + 'static,
         T: Send + 'static,

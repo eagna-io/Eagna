@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ResBody",
+  "allOf": [
+    {
+      "$ref": "#/definitions/ContestId"
+    }
+  ],
+  "definitions": {
+    "ContestId": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

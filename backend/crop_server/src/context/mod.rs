@@ -1,22 +1,31 @@
-pub mod contest;
+use crate::{error::Error, response::Response};
+use crop_infra::pg::Pool;
+use futures::future::{TryFuture, TryFutureExt};
+use warp::reject::Rejection;
 
-use self::contest::ContestManager;
+mod contest;
 
-use crop_domain::contest::model::Contest;
+pub use contest::ContestManager;
 
 #[derive(Clone)]
 pub struct Context {
-    contest: ContestManager,
+    pub pg: Pool,
+    pub contest_manager: ContestManager,
 }
 
 impl Context {
-    pub fn new(contest: Contest) -> Context {
+    pub fn new(pg: Pool) -> Context {
         Context {
-            contest: ContestManager::new(contest),
+            pg,
+            contest_manager: ContestManager::new(),
         }
     }
 
-    pub fn contest_manager(&self) -> ContestManager {
-        self.contest.clone()
+    pub async fn handle_request<F, Fut>(self, func: F) -> Result<Response, Rejection>
+    where
+        F: FnOnce(Context) -> Fut,
+        Fut: TryFuture<Ok = Response, Error = Error>,
+    {
+        func(self).err_into().await
     }
 }

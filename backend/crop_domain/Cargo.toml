@@ -6,12 +6,17 @@ edition = "2018"
 
 [dependencies]
 crop_primitive = { path = "../crop_primitive" }
+crop_infra = { path = "../crop_infra" }
 
 anyhow = "1.0"
 arrayvec = "0.5"
 chrono = { version = "~0.4", features = ["serde"] }
+data-encoding = "2.1"
 derive_more = "~0.99"
+fallible-iterator = "0.2"
+lazy_static = "1.4"
 rand = "~0.7"
-schemars = { git = "https://github.com/AtsukiTak/schemars.git", features = ["uuid", "chrono"] }
+ring = "~0.16"
+schemars = { version = "0.7", features = ["uuid", "chrono"] }
 serde = { version = "~1.0", features = ["derive", "rc"] }
 uuid = { version = "~0.8", features = ["v4", "serde"] }
