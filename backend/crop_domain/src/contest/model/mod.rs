@@ -6,11 +6,13 @@ use std::str::FromStr;
 use uuid::Uuid;
 
 mod brief;
+mod closed;
 mod detailed;
 mod new;
 mod poll_added;
 
 pub use brief::BriefContest;
+pub use closed::Closed;
 pub use detailed::DetailedContest;
 pub use new::New;
 pub use poll_added::PollAdded;
@@ -96,6 +98,25 @@ pub trait Contest {
             contest: self,
             poll: new_poll,
         })
+    }
+
+    #[must_use]
+    fn close(&self) -> anyhow::Result<Closed<&Self>>
+    where
+        Self: WithAttrs + WithPoll,
+        <Self as WithPoll>::Poll: poll::WithAttrs,
+    {
+        if self.status() != ContestStatus::Open {
+            return Err(anyhow::anyhow!("Contest status is not open"));
+        }
+
+        if let Some(poll) = self.current_poll() {
+            if poll.resolved_choice().is_none() {
+                return Err(anyhow::anyhow!("Contest has active poll"));
+            }
+        }
+
+        Ok(Closed { contest: self })
     }
 }
 
