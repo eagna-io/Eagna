@@ -4,6 +4,7 @@ import styled from "styled-components";
 import * as color from "app/components/color";
 import { Contest } from "model/contest";
 
+import { Schedule } from "../molecules/schedule";
 import { ReactComponent as FireIcon } from "../atoms/images/fire.svg";
 import { ReactComponent as TimerBlackIcon } from "../atoms/images/clock-b.svg";
 
@@ -12,31 +13,14 @@ interface Props {
 }
 
 export const ContestComponent: React.FC<Props> = ({ contest }) => {
-  if (contest.status === "upcoming") {
+  if (contest.status === "upcoming" || contest.status === "open") {
     return (
       <Container>
-        <ContestImage></ContestImage>
+        <ContestImage />
         <ContestDetail>
           <Category>{contest.category}</Category>
           <Title>{contest.title}</Title>
-          <StartAt>
-            <Timer />
-            <Date>{contest.startAt}OPEN</Date>
-          </StartAt>
-        </ContestDetail>
-      </Container>
-    );
-  } else if  (contest.status === "open") { 
-    return (
-      <Container>
-        <ContestImage></ContestImage>
-        <ContestDetail>
-          <Category>{contest.category}</Category>
-          <Title>{contest.title}</Title>
-          <OnGoing>
-            <Fire />
-            <OnGoingText>開催中！</OnGoingText>
-          </OnGoing>
+          <Schedule contest={contest}/>
         </ContestDetail>
       </Container>
     );
