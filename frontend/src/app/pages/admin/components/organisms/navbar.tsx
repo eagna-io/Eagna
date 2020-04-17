@@ -7,6 +7,16 @@ import {
 } from "app/components/color";
 
 export const NavigationBar: React.FC = () => {
+  const isLoggedIn = true;
+  if (!isLoggedIn) {
+    return (
+      <NavBar>
+        <NavBarItem>
+          <Link to="/admin/login">ログイン</Link>
+        </NavBarItem>
+      </NavBar>
+    );
+  }
   return (
     <NavBar>
       <NavBarItem>
@@ -26,8 +36,8 @@ const NavBar = styled.ul`
 `;
 
 const NavBarItem = styled.li`
+  padding: 9px 0px 9px 9px;
   font-size: 16px;
   font-weight: 500;
   color: ${WhiteBaseColor.hex};
-  padding: 9px 0px 9px 9px;
 `;
