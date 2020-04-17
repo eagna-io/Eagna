@@ -1,4 +1,4 @@
-use crate::account::{Account, AccountId};
+use crate::account::AccountId;
 use crate::contest::poll::{self, Choice, New as NewPoll, Poll, PollId};
 use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
@@ -121,9 +121,9 @@ pub trait Contest {
     }
 
     #[must_use]
-    fn close(&self) -> anyhow::Result<Closed<&Self>>
+    fn close(self) -> anyhow::Result<Closed<Self>>
     where
-        Self: WithAttrs + WithCurrentPoll,
+        Self: WithAttrs + WithCurrentPoll + Sized,
         <Self as WithCurrentPoll>::Poll: poll::WithAttrs,
     {
         if self.status() != ContestStatus::Open {
@@ -140,9 +140,9 @@ pub trait Contest {
     }
 
     #[must_use]
-    fn archive(&self) -> anyhow::Result<Archived<&Self>>
+    fn archive(self) -> anyhow::Result<Archived<Self>>
     where
-        Self: WithAttrs,
+        Self: WithAttrs + Sized,
     {
         if self.status() != ContestStatus::Closed {
             return Err(anyhow::anyhow!("Contest status is not closed"));

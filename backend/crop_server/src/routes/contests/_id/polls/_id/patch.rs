@@ -3,14 +3,14 @@ use crate::{
     error::Error,
     filters::auth,
     response::{self, Response},
-    routes::ws::contests::_id::OutgoingMsg,
+    routes::ws::contests::_id::PollMsgSource,
 };
 use crop_domain::contest::poll::{ChoiceName, DetailedPoll, Poll, PollId, PollStatus};
 use crop_domain::contest::{Contest, ContestId, ContestRepository as _, DetailedContest};
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::Deserialize;
-use warp::{filters::ws::Message, reject::Rejection, Filter};
+use warp::{reject::Rejection, Filter};
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ReqBody {
@@ -51,9 +51,9 @@ async fn close_poll(
     poll_id: PollId,
     ctx: Context,
 ) -> Result<Response, Error> {
-    let msg = ctx
+    let msg_source = ctx
         .pg
-        .with_conn::<Result<Message, Error>, _>(move |conn| {
+        .with_conn::<Result<_, Error>, _>(move |conn| {
             // TODO: DetailedContestである必要ない。MinumumContestでいい。
             let contest = conn
                 .query_by_id::<DetailedContest<DetailedPoll>>(&contest_id)?
@@ -65,19 +65,19 @@ async fn close_poll(
                 return Err(Error::new(StatusCode::NOT_FOUND, "poll id mismatch"));
             }
 
-            let closed = poll.close().map_err(|e| {
+            let closed = poll.clone().close().map_err(|e| {
                 log::info!("Failed to close poll : {:?}", e);
                 Error::new(StatusCode::BAD_REQUEST, "Failed to close poll")
             })?;
             conn.save(&closed)?;
 
-            let msg = OutgoingMsg::from(&closed).into();
-
-            Ok(msg)
+            Ok(PollMsgSource::from(closed))
         })
         .await??;
 
-    ctx.contest_manager.broadcast_msg(contest_id, msg).await;
+    ctx.contest_manager
+        .broadcast_msg(contest_id, msg_source)
+        .await;
 
     Ok(response::new(StatusCode::OK, &"resolved"))
 }
@@ -88,13 +88,17 @@ async fn resolve_poll(
     ctx: Context,
     resolved_choice: ChoiceName,
 ) -> Result<Response, Error> {
-    let msg = ctx
+    let msg_source = ctx
         .pg
-        .with_conn::<Result<Message, Error>, _>(move |conn| {
+        .with_conn::<Result<_, Error>, _>(move |conn| {
             // TODO: DetailedContestである必要ない。MinumumContestでいい。
             let contest = conn
                 .query_by_id::<DetailedContest<DetailedPoll>>(&contest_id)?
                 .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
+            // TODO
+            // contest経由で、resolve_pollする
+            // その結果のPollResolvedで所有権を取ることにより、
+            // 無駄なcloneをなくす
             let poll = contest
                 .current_poll()
                 .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
@@ -102,19 +106,19 @@ async fn resolve_poll(
                 return Err(Error::new(StatusCode::NOT_FOUND, "poll id mismatch"));
             }
 
-            let resolved = poll.resolve(resolved_choice).map_err(|e| {
+            let resolved = poll.clone().resolve(resolved_choice).map_err(|e| {
                 log::info!("Failed to resolve poll : {:?}", e);
                 Error::new(StatusCode::BAD_REQUEST, "Failed to resolve poll")
             })?;
             conn.save(&resolved)?;
 
-            let msg = OutgoingMsg::from(&resolved).into();
-
-            Ok(msg)
+            Ok(PollMsgSource::from(resolved))
         })
         .await??;
 
-    ctx.contest_manager.broadcast_msg(contest_id, msg).await;
+    ctx.contest_manager
+        .broadcast_msg(contest_id, msg_source)
+        .await;
 
     Ok(response::new(StatusCode::OK, &"resolved"))
 }

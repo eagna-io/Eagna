@@ -6,7 +6,7 @@ use crop_infra::pg::comment::QueriedComment;
 use schemars::JsonSchema;
 use serde::Serialize;
 
-#[derive(Debug, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct BriefComment {
     pub(in crate::contest) id: CommentId,
     pub(in crate::contest) account_id: AccountId,

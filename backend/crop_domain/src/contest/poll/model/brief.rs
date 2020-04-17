@@ -4,7 +4,7 @@ use crop_infra::pg::{choice::QueriedChoice, poll::QueriedPoll};
 use schemars::JsonSchema;
 use serde::Serialize;
 
-#[derive(Debug, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct BriefPoll {
     pub(super) id: PollId,
     pub(super) status: PollStatus,

@@ -3,6 +3,7 @@ use crate::{
     error::Error,
     filters::auth,
     response::{self, Response},
+    routes::ws::contests::_id::CommentMsgSource,
 };
 use crop_domain::account::{Account as _, AccountRepository, Authenticated, BriefAccount};
 use crop_domain::contest::comment::{BriefComment, Comment as _, CommentId};
@@ -70,9 +71,12 @@ async fn inner(
         })
         .await??;
 
+    let comment_id = *comment.id();
+
+    let msg_source = CommentMsgSource::from((comment, brief_account));
     ctx.contest_manager
-        .notify_update(contest_id, (&comment, &brief_account))
+        .broadcast_msg(contest_id, msg_source)
         .await;
 
-    Ok(response::new(StatusCode::CREATED, &ResBody(*comment.id())))
+    Ok(response::new(StatusCode::CREATED, &ResBody(comment_id)))
 }

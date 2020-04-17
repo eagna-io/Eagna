@@ -1,12 +1,11 @@
-use crate::routes::ws::contests::_id::OutgoingMsg;
+use crate::routes::ws::contests::_id::OutgoingMsgSource;
 use crop_domain::contest::ContestId;
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::{broadcast, RwLock};
-use warp::filters::ws::Message;
 
 #[derive(Clone)]
 pub struct ContestManager {
-    senders: Arc<RwLock<HashMap<ContestId, broadcast::Sender<Message>>>>,
+    senders: Arc<RwLock<HashMap<ContestId, broadcast::Sender<Arc<dyn OutgoingMsgSource>>>>>,
 }
 
 impl ContestManager {
@@ -25,22 +24,20 @@ impl ContestManager {
         self.senders.write().await.remove(&contest_id);
     }
 
-    pub async fn notify_update<'a, U: 'a>(&self, contest_id: ContestId, update: U)
+    pub async fn broadcast_msg<S>(&self, contest_id: ContestId, msg: S)
     where
-        OutgoingMsg<'a>: From<U>,
+        S: OutgoingMsgSource + 'static,
     {
-        let msg = OutgoingMsg::from(update).into();
-        self.broadcast_msg(contest_id, msg).await
-    }
-
-    pub async fn broadcast_msg(&self, contest_id: ContestId, msg: Message) {
         if let Some(sender) = self.senders.read().await.get(&contest_id) {
             // receiver がいないことによるエラーは無視
-            let _ = sender.send(msg);
+            let _ = sender.send(Arc::new(msg));
         }
     }
 
-    pub async fn subscribe(&self, contest_id: &ContestId) -> Option<broadcast::Receiver<Message>> {
+    pub async fn subscribe(
+        &self,
+        contest_id: &ContestId,
+    ) -> Option<broadcast::Receiver<Arc<dyn OutgoingMsgSource>>> {
         self.senders
             .read()
             .await

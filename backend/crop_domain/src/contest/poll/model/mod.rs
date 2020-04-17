@@ -78,6 +78,13 @@ pub trait Poll {
         self._resolved_choice()
     }
 
+    fn user_choices(&self) -> &HashMap<AccountId, ChoiceName>
+    where
+        Self: WithUserChoices,
+    {
+        self._user_choices()
+    }
+
     fn correct_accounts<'a>(&'a self) -> Box<dyn Iterator<Item = AccountId> + 'a>
     where
         Self: WithAttrs + WithUserChoices,
@@ -99,78 +106,6 @@ pub trait Poll {
         Box::new(iter)
     }
 
-    #[must_use]
-    fn close(&self) -> anyhow::Result<Closed<&Self>>
-    where
-        Self: WithAttrs,
-    {
-        if self.status() != PollStatus::Open {
-            return Err(anyhow::anyhow!("Poll is not open"));
-        }
-
-        if let Some(duration) = self.duration() {
-            if Utc::now() < (*self.created_at() + *duration) {
-                // まだ開催期間が終わっていない
-                return Err(anyhow::anyhow!("Before closing time"));
-            }
-        }
-
-        Ok(Closed { poll: self })
-    }
-
-    #[must_use]
-    fn resolve(&self, choice: ChoiceName) -> anyhow::Result<Resolved<&Self>>
-    where
-        Self: WithAttrs,
-    {
-        if self.status() != PollStatus::Closed {
-            // CloseしてないPollはResolveできない
-            // まずCloseする必要がある
-            Err(anyhow::anyhow!("Poll is not closed"))
-        } else if self.resolved_choice().is_some() {
-            Err(anyhow::anyhow!("Poll is already resolved"))
-        } else if self.choices().iter().find(|c| c.name == choice).is_none() {
-            Err(anyhow::anyhow!("Given choice is not a part of this poll"))
-        } else {
-            Ok(Resolved {
-                poll: self,
-                resolved: choice,
-            })
-        }
-    }
-
-    fn user_choices(&self) -> &HashMap<AccountId, ChoiceName>
-    where
-        Self: WithUserChoices,
-    {
-        self._user_choices()
-    }
-
-    #[must_use]
-    fn update_account_choice<A>(
-        &self,
-        account: &A,
-        choice: ChoiceName,
-    ) -> anyhow::Result<ChoiceUpdated<&Self>>
-    where
-        Self: WithAttrs,
-        A: Account,
-    {
-        if self.status() != PollStatus::Open {
-            // OpenしていないPollで、選択を変更することはできない
-            Err(anyhow::anyhow!("Poll is already closed"))
-        } else if self.choices().iter().find(|c| c.name == choice).is_none() {
-            Err(anyhow::anyhow!("Given choice is not a part of this poll"))
-        } else {
-            Ok(ChoiceUpdated {
-                poll: self,
-                account_id: *account.id(),
-                choice,
-            })
-        }
-    }
-
-    #[must_use]
     fn compute_stats(&self) -> Stats
     where
         Self: WithAttrs + WithUserChoices,
@@ -200,9 +135,73 @@ pub trait Poll {
     }
 
     #[must_use]
-    fn add_comment<A>(&self, account: &A, comment_str: String) -> CommentAdded<&Self>
+    fn close(self) -> anyhow::Result<Closed<Self>>
     where
-        Self: WithAttrs + WithUserChoices,
+        Self: WithAttrs + Sized,
+    {
+        if self.status() != PollStatus::Open {
+            return Err(anyhow::anyhow!("Poll is not open"));
+        }
+
+        if let Some(duration) = self.duration() {
+            if Utc::now() < (*self.created_at() + *duration) {
+                // まだ開催期間が終わっていない
+                return Err(anyhow::anyhow!("Before closing time"));
+            }
+        }
+
+        Ok(Closed { poll: self })
+    }
+
+    #[must_use]
+    fn resolve(self, choice: ChoiceName) -> anyhow::Result<Resolved<Self>>
+    where
+        Self: WithAttrs + Sized,
+    {
+        if self.status() != PollStatus::Closed {
+            // CloseしてないPollはResolveできない
+            // まずCloseする必要がある
+            Err(anyhow::anyhow!("Poll is not closed"))
+        } else if self.resolved_choice().is_some() {
+            Err(anyhow::anyhow!("Poll is already resolved"))
+        } else if self.choices().iter().find(|c| c.name == choice).is_none() {
+            Err(anyhow::anyhow!("Given choice is not a part of this poll"))
+        } else {
+            Ok(Resolved {
+                poll: self,
+                resolved: choice,
+            })
+        }
+    }
+
+    #[must_use]
+    fn update_account_choice<A>(
+        self,
+        account: &A,
+        choice: ChoiceName,
+    ) -> anyhow::Result<ChoiceUpdated<Self>>
+    where
+        Self: WithAttrs + Sized,
+        A: Account,
+    {
+        if self.status() != PollStatus::Open {
+            // OpenしていないPollで、選択を変更することはできない
+            Err(anyhow::anyhow!("Poll is already closed"))
+        } else if self.choices().iter().find(|c| c.name == choice).is_none() {
+            Err(anyhow::anyhow!("Given choice is not a part of this poll"))
+        } else {
+            Ok(ChoiceUpdated {
+                poll: self,
+                account_id: *account.id(),
+                choice,
+            })
+        }
+    }
+
+    #[must_use]
+    fn add_comment<A>(self, account: &A, comment_str: String) -> CommentAdded<Self>
+    where
+        Self: WithAttrs + WithUserChoices + Sized,
         A: Account,
     {
         let choice = self.user_choices().get(account.id()).cloned();

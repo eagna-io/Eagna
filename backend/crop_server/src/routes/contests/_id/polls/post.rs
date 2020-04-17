@@ -3,6 +3,7 @@ use crate::{
     error::Error,
     filters::auth,
     response::{self, Response},
+    routes::ws::contests::_id::PollMsgSource,
 };
 use chrono::Duration;
 use crop_domain::contest::poll::{self, Choice, DetailedPoll, Poll, PollId};
@@ -50,7 +51,12 @@ async fn inner(ctx: Context, contest_id: ContestId, body: ReqBody) -> Result<Res
         })
         .await??;
 
-    ctx.contest_manager.notify_update(contest_id, &poll).await;
+    let poll_id = *poll.id();
 
-    Ok(response::new(StatusCode::CREATED, &ResBody(poll.id())))
+    let msg_source = PollMsgSource::from(poll);
+    ctx.contest_manager
+        .broadcast_msg(contest_id, msg_source)
+        .await;
+
+    Ok(response::new(StatusCode::CREATED, &ResBody(&poll_id)))
 }

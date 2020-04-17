@@ -6,6 +6,7 @@ use crop_infra::pg::{
     account_choice::AccountChoiceTable, choice::ChoiceTable, comment::CommentTable,
     contest::ContestTable, poll::PollTable, Connection,
 };
+use fallible_iterator::{convert, FallibleIterator as _};
 use schemars::JsonSchema;
 use serde::Serialize;
 
@@ -21,7 +22,7 @@ pub struct DetailedContest<P> {
     pub(super) title: String,
     pub(super) category: String,
     pub(super) event_start_at: Option<DateTime<Utc>>,
-    pub(super) poll: Option<P>,
+    pub(super) polls: Vec<P>,
 }
 
 impl<P> Contest for DetailedContest<P> {
@@ -55,7 +56,7 @@ where
     type Poll = P;
 
     fn _current_poll(&self) -> Option<&P> {
-        self.poll.as_ref()
+        self.polls.last()
     }
 }
 
@@ -66,12 +67,15 @@ impl Queryable for DetailedContest<BriefPoll> {
             None => return Ok(None),
         };
 
-        let poll = if let Some(poll) = PollTable::query_not_resolved_by_contest_id(conn, &id.0)? {
-            let choices = ChoiceTable::query_by_poll_id(conn, &poll.id)?;
-            Some(BriefPoll::from((poll, choices)))
-        } else {
-            None
-        };
+        let polls = convert(
+            PollTable::query_by_contest_id(conn, &id.0)?
+                .into_iter()
+                .map::<anyhow::Result<_>, _>(|poll| {
+                    let choices = ChoiceTable::query_by_poll_id(conn, &poll.id)?;
+                    Ok(BriefPoll::from((poll, choices)))
+                }),
+        )
+        .collect::<Vec<_>>()?;
 
         Ok(Some(DetailedContest {
             id: *id,
@@ -79,7 +83,7 @@ impl Queryable for DetailedContest<BriefPoll> {
             title: contest.title,
             category: contest.category,
             event_start_at: contest.event_start_at,
-            poll,
+            polls,
         }))
     }
 }
@@ -91,19 +95,22 @@ impl Queryable for DetailedContest<DetailedPoll> {
             None => return Ok(None),
         };
 
-        let poll = if let Some(poll) = PollTable::query_not_resolved_by_contest_id(conn, &id.0)? {
-            let choices = ChoiceTable::query_by_poll_id(conn, &poll.id)?;
-            let account_choices = AccountChoiceTable::query_by_poll_id(conn, &poll.id)?;
-            let comments = CommentTable::query_recent_by_poll_id(conn, &poll.id)?;
-            Some(DetailedPoll::from((
-                poll,
-                choices,
-                account_choices,
-                comments,
-            )))
-        } else {
-            None
-        };
+        let polls = convert(
+            PollTable::query_by_contest_id(conn, &id.0)?
+                .into_iter()
+                .map::<anyhow::Result<_>, _>(|poll| {
+                    let choices = ChoiceTable::query_by_poll_id(conn, &poll.id)?;
+                    let account_choices = AccountChoiceTable::query_by_poll_id(conn, &poll.id)?;
+                    let comments = CommentTable::query_recent_by_poll_id(conn, &poll.id)?;
+                    Ok(DetailedPoll::from((
+                        poll,
+                        choices,
+                        account_choices,
+                        comments,
+                    )))
+                }),
+        )
+        .collect::<Vec<_>>()?;
 
         Ok(Some(DetailedContest {
             id: *id,
@@ -111,7 +118,7 @@ impl Queryable for DetailedContest<DetailedPoll> {
             title: contest.title,
             category: contest.category,
             event_start_at: contest.event_start_at,
-            poll,
+            polls,
         }))
     }
 }

@@ -13,7 +13,7 @@ use schemars::JsonSchema;
 use serde::Serialize;
 use std::collections::HashMap;
 
-#[derive(Debug, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 pub struct DetailedPoll {
     #[serde(flatten)]
     inner: BriefPoll,
