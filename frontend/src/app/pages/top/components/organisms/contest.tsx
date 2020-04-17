@@ -21,7 +21,7 @@ export const ContestComponent: React.FC<Props> = ({ contest }) => {
           <Title>{contest.title}</Title>
           <StartAt>
             <Timer />
-            <Date>{contest.startAt}</Date>
+            <Date>{contest.startAt}OPEN</Date>
           </StartAt>
         </ContestDetail>
       </Container>
