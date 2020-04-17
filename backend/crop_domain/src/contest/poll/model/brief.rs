@@ -76,7 +76,7 @@ impl From<(QueriedPoll, Vec<QueriedChoice>)> for BriefPoll {
             created_at: poll.created_at,
             duration: poll.duration_sec.map(|s| Duration::seconds(s as i64)),
             idx: poll.idx as usize,
-            resolved_choice: poll.resolved_choice_name.map(|s| ChoiceName(s)),
+            resolved_choice: poll.resolved_choice_name.map(ChoiceName),
             choices: choices
                 .into_iter()
                 .map(|choice| Choice {

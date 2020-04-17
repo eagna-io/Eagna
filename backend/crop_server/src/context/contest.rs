@@ -3,9 +3,11 @@ use crop_domain::contest::ContestId;
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::{broadcast, RwLock};
 
+type MsgSource = Arc<dyn OutgoingMsgSource>;
+
 #[derive(Clone)]
 pub struct ContestManager {
-    senders: Arc<RwLock<HashMap<ContestId, broadcast::Sender<Arc<dyn OutgoingMsgSource>>>>>,
+    senders: Arc<RwLock<HashMap<ContestId, broadcast::Sender<MsgSource>>>>,
 }
 
 impl ContestManager {
@@ -37,7 +39,7 @@ impl ContestManager {
     pub async fn subscribe(
         &self,
         contest_id: &ContestId,
-    ) -> Option<broadcast::Receiver<Arc<dyn OutgoingMsgSource>>> {
+    ) -> Option<broadcast::Receiver<MsgSource>> {
         self.senders
             .read()
             .await

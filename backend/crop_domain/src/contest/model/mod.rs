@@ -89,7 +89,6 @@ pub trait Contest {
     ///
     /// ## TODO
     /// Contestで現在un-resolvedなPollが存在するときには追加できないようにする
-    #[must_use]
     fn add_poll(
         &self,
         title: String,
@@ -120,7 +119,6 @@ pub trait Contest {
         })
     }
 
-    #[must_use]
     fn close(self) -> anyhow::Result<Closed<Self>>
     where
         Self: WithAttrs + WithCurrentPoll + Sized,
@@ -139,7 +137,6 @@ pub trait Contest {
         Ok(Closed { contest: self })
     }
 
-    #[must_use]
     fn archive(self) -> anyhow::Result<Archived<Self>>
     where
         Self: WithAttrs + Sized,

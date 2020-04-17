@@ -45,7 +45,7 @@ async fn inner(ctx: Context, contest_id: ContestId, body: ReqBody) -> Result<Res
             let duration = body.duration_sec.map(|s| Duration::seconds(s as i64));
             let contest = conn
                 .query_by_id::<DetailedContest<DetailedPoll>>(&contest_id)?
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
             let added = contest.add_poll(body.title, duration, body.choices)?;
             conn.save(&added)?;
             Ok(added.poll)

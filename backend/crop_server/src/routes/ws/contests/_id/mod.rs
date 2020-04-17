@@ -28,7 +28,7 @@ async fn inner(
 ) -> Result<impl Reply, Rejection> {
     let contest = query_contest(ctx.clone(), contest_id)
         .await
-        .map_err(|e| Into::<Rejection>::into(e))?;
+        .map_err(Into::<Rejection>::into)?;
     Ok(ws.on_upgrade(move |ws| ws_handler(ws, ctx, contest, account)))
 }
 
@@ -39,7 +39,7 @@ async fn query_contest(
     ctx.pg
         .with_conn(move |conn| conn.query_by_id::<DetailedContest<DetailedPoll>>(&contest_id))
         .await??
-        .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))
+        .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest not found"))
 }
 
 // 1. 現在のPollを送信する
@@ -65,7 +65,7 @@ async fn send_initial_poll_msg(
     msg_sink: &mut (impl Sink<Message, Error = anyhow::Error> + Unpin),
 ) {
     if let Some(poll) = contest.current_poll() {
-        let msg = PollMsgSource::from(poll).into_msg(account.id());
+        let msg = PollMsgSource::from(poll).to_msg(account.id());
         msg_sink
             .send_all(&mut futures::stream::once(futures::future::ok(msg)))
             .await
@@ -84,7 +84,7 @@ async fn subscribe_msgs(
         let account_id = *account.id();
         let mut stream = subscriber
             .err_into::<anyhow::Error>()
-            .map_ok(move |msg_source| msg_source.into_msg(&account_id))
+            .map_ok(move |msg_source| msg_source.to_msg(&account_id))
             .boxed(); // このboxedをなくすと、なぜかコンパイルエラーが出る
                       // async環境でclosureを使うのまだ深く理解してない
                       // コンパイラもまだ未発達で、

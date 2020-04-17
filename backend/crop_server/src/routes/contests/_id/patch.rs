@@ -47,7 +47,7 @@ async fn close_contest(ctx: Context, contest_id: ContestId) -> Result<Response, 
         .with_conn::<Result<Response, Error>, _>(move |conn| {
             let contest =
                 ContestRepository::query_by_id::<DetailedContest<BriefPoll>>(&conn, &contest_id)?
-                    .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
+                    .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
             let closed = contest.close().map_err(|e| {
                 log::info!("Failed to close contest because of {:?}", e);
                 Error::new(StatusCode::BAD_REQUEST, "Failed to close contest")
@@ -64,7 +64,7 @@ async fn archive_contest(ctx: Context, contest_id: ContestId) -> Result<Response
     ctx.pg
         .with_conn::<Result<Response, Error>, _>(move |conn| {
             let contest = ContestRepository::query_by_id::<BriefContest>(&conn, &contest_id)?
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
             let archived = contest.archive().map_err(|e| {
                 log::info!("Failed to close contest because of {:?}", e);
                 Error::new(StatusCode::BAD_REQUEST, "Failed to close contest")

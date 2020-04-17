@@ -57,10 +57,10 @@ async fn close_poll(
             // TODO: DetailedContestである必要ない。MinumumContestでいい。
             let contest = conn
                 .query_by_id::<DetailedContest<DetailedPoll>>(&contest_id)?
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
             let poll = contest
                 .current_poll()
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
             if *poll.id() != poll_id {
                 return Err(Error::new(StatusCode::NOT_FOUND, "poll id mismatch"));
             }
@@ -94,14 +94,14 @@ async fn resolve_poll(
             // TODO: DetailedContestである必要ない。MinumumContestでいい。
             let contest = conn
                 .query_by_id::<DetailedContest<DetailedPoll>>(&contest_id)?
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
             // TODO
             // contest経由で、resolve_pollする
             // その結果のPollResolvedで所有権を取ることにより、
             // 無駄なcloneをなくす
             let poll = contest
                 .current_poll()
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
             if *poll.id() != poll_id {
                 return Err(Error::new(StatusCode::NOT_FOUND, "poll id mismatch"));
             }

@@ -46,14 +46,14 @@ pub struct ClosedMsg {
 }
 
 impl<'a> OutgoingMsg<'a> {
-    fn into_msg(&self) -> Message {
+    fn to_msg(&self) -> Message {
         Message::text(serde_json::to_string(self).unwrap())
     }
 }
 
 impl<'a> Into<Message> for OutgoingMsg<'a> {
     fn into(self) -> Message {
-        self.into_msg()
+        self.to_msg()
     }
 }
 
@@ -65,8 +65,8 @@ impl<'a> Into<Message> for OutgoingMsg<'a> {
 pub trait OutgoingMsgSource: Sync + Send {
     fn into_out_msg<'a>(&'a self, account_id: &'a AccountId) -> OutgoingMsg<'a>;
 
-    fn into_msg(&self, account_id: &AccountId) -> Message {
-        self.into_out_msg(account_id).into_msg()
+    fn to_msg(&self, account_id: &AccountId) -> Message {
+        self.into_out_msg(account_id).to_msg()
     }
 }
 
@@ -124,10 +124,7 @@ pub struct CommentMsgSource<C, A> {
 impl<C, A> From<(C, A)> for CommentMsgSource<C, A> {
     fn from(source: (C, A)) -> CommentMsgSource<C, A> {
         let (comment, account) = source;
-        CommentMsgSource {
-            comment: comment,
-            account: account,
-        }
+        CommentMsgSource { comment, account }
     }
 }
 

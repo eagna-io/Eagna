@@ -134,7 +134,6 @@ pub trait Poll {
         self._comments()
     }
 
-    #[must_use]
     fn close(self) -> anyhow::Result<Closed<Self>>
     where
         Self: WithAttrs + Sized,
@@ -153,7 +152,6 @@ pub trait Poll {
         Ok(Closed { poll: self })
     }
 
-    #[must_use]
     fn resolve(self, choice: ChoiceName) -> anyhow::Result<Resolved<Self>>
     where
         Self: WithAttrs + Sized,
@@ -174,7 +172,6 @@ pub trait Poll {
         }
     }
 
-    #[must_use]
     fn update_account_choice<A>(
         self,
         account: &A,
@@ -198,7 +195,6 @@ pub trait Poll {
         }
     }
 
-    #[must_use]
     fn add_comment<A>(self, account: &A, comment_str: String) -> CommentAdded<Self>
     where
         Self: WithAttrs + WithUserChoices + Sized,

@@ -41,10 +41,10 @@ async fn inner(
         .with_conn::<Result<Response, Error>, _>(move |conn| {
             let contest = conn
                 .query_by_id::<DetailedContest<BriefPoll>>(&contest_id)?
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
             let poll = contest
                 .current_poll()
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
             if *poll.id() == poll_id {
                 let updated = poll
                     .update_account_choice(&account, body.choice)

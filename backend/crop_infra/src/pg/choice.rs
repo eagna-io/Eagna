@@ -5,6 +5,7 @@ use uuid::Uuid;
 pub trait ChoiceTable {
     fn conn(&self) -> &Connection;
 
+    #[allow(clippy::ptr_arg)]
     fn save_all<'a>(&self, choices: &Vec<NewChoice<'a>>) -> anyhow::Result<()> {
         diesel::insert_into(choices::table)
             .values(choices)

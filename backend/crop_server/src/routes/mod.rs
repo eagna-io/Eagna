@@ -29,7 +29,7 @@ pub fn filter(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Reje
 
     let rest = rest_routes.with(cors_wrapper);
 
-    let ws = ws::contests::_id::route(ctx.clone());
+    let ws = ws::contests::_id::route(ctx);
 
     rest.or(ws)
 }

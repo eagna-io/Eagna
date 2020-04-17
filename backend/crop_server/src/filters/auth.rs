@@ -8,7 +8,7 @@ use warp::{filters, reject::Rejection, Filter};
 
 pub fn admin() -> impl Filter<Extract = (AuthenticatedAdmin,), Error = Rejection> + Clone {
     filters::header::header::<AccessToken>("Authorization")
-        .map(|token| AuthenticatedAdmin::from(token))
+        .map(AuthenticatedAdmin::from)
         .or_else(|r| {
             log::debug!("Admin authentication is rejected : {:?}", r);
             let err = Error::new(StatusCode::UNAUTHORIZED, "Unauthenticated");
@@ -18,7 +18,7 @@ pub fn admin() -> impl Filter<Extract = (AuthenticatedAdmin,), Error = Rejection
 
 pub fn account() -> impl Filter<Extract = (account::Authenticated,), Error = Rejection> + Clone {
     filters::header::header::<account::AccessToken>("Authorization")
-        .map(|token| account::Authenticated::from(token))
+        .map(account::Authenticated::from)
         .or_else(|r| {
             log::debug!("Account authentication is rejected : {:?}", r);
             let err = Error::new(StatusCode::UNAUTHORIZED, "Unauthenticated");

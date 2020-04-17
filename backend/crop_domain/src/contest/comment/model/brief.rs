@@ -42,7 +42,7 @@ impl From<QueriedComment> for BriefComment {
         BriefComment {
             id: CommentId(comment.id),
             account_id: AccountId(comment.account_id),
-            choice_name: comment.choice_name.map(|c| ChoiceName(c)),
+            choice_name: comment.choice_name.map(ChoiceName),
             created_at: comment.created_at,
             comment: comment.content,
         }

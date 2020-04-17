@@ -29,7 +29,7 @@ async fn inner(contest_id: ContestId, ctx: Context) -> Result<Response, Error> {
     ctx.pg
         .with_conn::<Result<Response, Error>, _>(move |conn| {
             conn.query_by_id::<DetailedContest<BriefPoll>>(&contest_id)?
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest not found"))
                 .map(|contest| response::new(StatusCode::OK, &ResBody(contest)))
         })
         .await?

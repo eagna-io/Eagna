@@ -13,6 +13,7 @@ impl<A> GenericString<A>
 where
     A: Array<Item = u8>,
 {
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Self {
         let inner = SmallVec::from_slice(s.as_bytes());
         GenericString(inner)

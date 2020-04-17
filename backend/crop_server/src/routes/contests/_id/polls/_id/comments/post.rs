@@ -49,11 +49,11 @@ async fn inner(
                 &conn,
                 &contest_id,
             )?
-            .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
+            .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest not found"))?;
 
             let poll = contest
                 .current_poll()
-                .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
+                .ok_or_else(|| Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
 
             if *poll.id() != poll_id {
                 return Err(Error::new(StatusCode::NOT_FOUND, "poll id mismatch"));
