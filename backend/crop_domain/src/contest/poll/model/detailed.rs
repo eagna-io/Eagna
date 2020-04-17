@@ -22,7 +22,7 @@ pub struct DetailedPoll {
 }
 
 impl Poll for DetailedPoll {
-    fn id(&self) -> PollId {
+    fn id(&self) -> &PollId {
         self.inner.id()
     }
 }

@@ -42,7 +42,7 @@ async fn inner(ctx: Context, body: ReqBody) -> Result<Response, Error> {
         .with_conn::<Result<ContestId, Error>, _>(move |conn| {
             let contest = contest::new(body.title, body.category, body.event_start_at);
             conn.save(&contest)?;
-            Ok(contest.id())
+            Ok(*contest.id())
         })
         .await??;
 

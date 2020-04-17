@@ -25,7 +25,7 @@ pub use resolved::Resolved;
 pub use crop_infra::pg::types::PollStatus;
 
 pub trait Poll {
-    fn id(&self) -> PollId;
+    fn id(&self) -> &PollId;
 
     fn status(&self) -> PollStatus
     where
@@ -271,7 +271,7 @@ impl<'a, P> Poll for &'a P
 where
     P: Poll,
 {
-    fn id(&self) -> PollId {
+    fn id(&self) -> &PollId {
         P::id(self)
     }
 }

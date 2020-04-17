@@ -25,8 +25,8 @@ pub struct DetailedContest<P> {
 }
 
 impl<P> Contest for DetailedContest<P> {
-    fn id(&self) -> ContestId {
-        self.id
+    fn id(&self) -> &ContestId {
+        &self.id
     }
 }
 

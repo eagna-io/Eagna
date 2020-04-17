@@ -31,8 +31,8 @@ where
 }
 
 impl Poll for BriefPoll {
-    fn id(&self) -> PollId {
-        self.id
+    fn id(&self) -> &PollId {
+        &self.id
     }
 }
 

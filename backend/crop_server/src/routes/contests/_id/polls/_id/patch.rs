@@ -61,7 +61,7 @@ async fn close_poll(
             let poll = contest
                 .current_poll()
                 .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
-            if poll.id() != poll_id {
+            if *poll.id() != poll_id {
                 return Err(Error::new(StatusCode::NOT_FOUND, "poll id mismatch"));
             }
 
@@ -98,7 +98,7 @@ async fn resolve_poll(
             let poll = contest
                 .current_poll()
                 .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
-            if poll.id() != poll_id {
+            if *poll.id() != poll_id {
                 return Err(Error::new(StatusCode::NOT_FOUND, "poll id mismatch"));
             }
 

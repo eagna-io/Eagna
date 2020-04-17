@@ -13,8 +13,8 @@ pub struct New {
 }
 
 impl Contest for New {
-    fn id(&self) -> ContestId {
-        self.id
+    fn id(&self) -> &ContestId {
+        &self.id
     }
 }
 
@@ -47,7 +47,7 @@ impl WithPoll for New {
 pub enum NeverPoll {}
 
 impl Poll for NeverPoll {
-    fn id(&self) -> PollId {
+    fn id(&self) -> &PollId {
         panic!("never call");
     }
 }

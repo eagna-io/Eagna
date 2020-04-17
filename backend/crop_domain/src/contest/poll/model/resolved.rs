@@ -26,7 +26,7 @@ impl<P> Poll for Resolved<P>
 where
     P: Poll,
 {
-    fn id(&self) -> PollId {
+    fn id(&self) -> &PollId {
         self.poll.id()
     }
 }

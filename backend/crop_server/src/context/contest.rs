@@ -40,11 +40,11 @@ impl ContestManager {
         }
     }
 
-    pub async fn subscribe(&self, contest_id: ContestId) -> Option<broadcast::Receiver<Message>> {
+    pub async fn subscribe(&self, contest_id: &ContestId) -> Option<broadcast::Receiver<Message>> {
         self.senders
             .read()
             .await
-            .get(&contest_id)
+            .get(contest_id)
             .map(|tx| tx.subscribe())
     }
 }

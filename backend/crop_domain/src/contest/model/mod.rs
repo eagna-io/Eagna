@@ -29,7 +29,7 @@ pub fn new(title: String, category: String, event_start_at: Option<DateTime<Utc>
 }
 
 pub trait Contest {
-    fn id(&self) -> ContestId;
+    fn id(&self) -> &ContestId;
 
     fn status(&self) -> ContestStatus
     where
@@ -172,7 +172,7 @@ impl<'a, C> Contest for &'a C
 where
     C: Contest,
 {
-    fn id(&self) -> ContestId {
+    fn id(&self) -> &ContestId {
         C::id(self)
     }
 }

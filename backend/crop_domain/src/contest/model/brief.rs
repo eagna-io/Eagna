@@ -27,8 +27,8 @@ pub struct BriefContest {
 }
 
 impl Contest for BriefContest {
-    fn id(&self) -> ContestId {
-        self.id
+    fn id(&self) -> &ContestId {
+        &self.id
     }
 }
 

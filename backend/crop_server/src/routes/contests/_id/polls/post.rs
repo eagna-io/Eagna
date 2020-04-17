@@ -21,7 +21,7 @@ pub struct ReqBody {
 
 #[derive(Debug, Serialize, JsonSchema)]
 #[serde(transparent)]
-pub struct ResBody(PollId);
+pub struct ResBody<'a>(&'a PollId);
 
 pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejection> + Clone {
     warp::path!("contests" / ContestId / "polls")

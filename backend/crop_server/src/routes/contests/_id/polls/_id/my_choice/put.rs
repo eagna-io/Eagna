@@ -45,7 +45,7 @@ async fn inner(
             let poll = contest
                 .current_poll()
                 .ok_or(Error::new(StatusCode::NOT_FOUND, "Contest has no poll"))?;
-            if poll.id() == poll_id {
+            if *poll.id() == poll_id {
                 let updated = poll
                     .update_account_choice(&account, body.choice)
                     .map_err(|e| {

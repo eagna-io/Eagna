@@ -13,8 +13,8 @@ pub struct New {
 }
 
 impl Poll for New {
-    fn id(&self) -> PollId {
-        self.id
+    fn id(&self) -> &PollId {
+        &self.id
     }
 }
 

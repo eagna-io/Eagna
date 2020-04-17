@@ -14,7 +14,7 @@ pub enum OutgoingMsg<'a> {
 
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct PollMsg<'a> {
-    id: PollId,
+    id: &'a PollId,
     title: &'a str,
     created_at: &'a DateTime<Utc>,
     duration_sec: Option<i64>,
