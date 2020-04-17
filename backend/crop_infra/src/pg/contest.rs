@@ -39,6 +39,13 @@ pub trait ContestTable {
             ))
             .load::<QueriedContest>(self.conn())?)
     }
+
+    fn update_status(&self, id: &Uuid, new_status: ContestStatus) -> anyhow::Result<()> {
+        diesel::update(contests::table.filter(contests::id.eq(id)))
+            .set(contests::status.eq(new_status))
+            .execute(self.conn())?;
+        Ok(())
+    }
 }
 
 impl ContestTable for Connection {
