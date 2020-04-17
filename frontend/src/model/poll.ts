@@ -2,6 +2,7 @@ import { Moment } from "moment";
 
 export interface Poll {
   id: string;
+  idx: number;
   title: string;
   endAt: Moment;
   status: "open" | "closed";
@@ -11,6 +12,7 @@ export interface Poll {
     totalVotes: number;
     votePerChoice: Record<string, number>;
   };
+  selected?: string;
 }
 
 export interface Comment {
@@ -19,4 +21,4 @@ export interface Comment {
   color: string;
 }
 
-export type Timer = number | "closed" | "correct" | "incorrect";
+export type Timer = number | "closed";
