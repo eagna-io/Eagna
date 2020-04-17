@@ -78,6 +78,27 @@ pub trait Poll {
         self._resolved_choice()
     }
 
+    fn correct_accounts<'a>(&'a self) -> Box<dyn Iterator<Item = AccountId> + 'a>
+    where
+        Self: WithAttrs + WithUserChoices,
+    {
+        let iter = self
+            .resolved_choice()
+            .into_iter()
+            .flat_map(move |resolved| {
+                self.user_choices()
+                    .iter()
+                    .filter_map(move |(account, choice)| {
+                        if choice == resolved {
+                            Some(*account)
+                        } else {
+                            None
+                        }
+                    })
+            });
+        Box::new(iter)
+    }
+
     #[must_use]
     fn close(&self) -> anyhow::Result<Closed<&Self>>
     where

@@ -1,7 +1,9 @@
+use crate::account::{Account, AccountId};
 use crate::contest::poll::{self, Choice, New as NewPoll, Poll, PollId};
 use chrono::{DateTime, Duration, Utc};
 use schemars::JsonSchema;
 use serde::Serialize;
+use std::collections::HashMap;
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -75,6 +77,13 @@ pub trait Contest {
         self.current_poll().map(|poll| poll.idx()).unwrap_or(0)
     }
 
+    fn polls(&self) -> &[Self::Poll]
+    where
+        Self: WithPolls,
+    {
+        self._polls()
+    }
+
     /// Contestに新しいPollを追加する。
     /// ContestがOpenのときのみ追加できる。
     ///
@@ -140,6 +149,21 @@ pub trait Contest {
         }
 
         Ok(Archived { contest: self })
+    }
+
+    /// 各アカウントの正解数を計算する
+    fn compute_account_scores(&self) -> HashMap<AccountId, usize>
+    where
+        Self: WithPolls,
+        <Self as WithPolls>::Poll: poll::WithAttrs + poll::WithUserChoices,
+    {
+        self.polls().iter().flat_map(Poll::correct_accounts).fold(
+            HashMap::new(),
+            |mut score_map, account| {
+                *score_map.entry(account).or_insert(0) += 1;
+                score_map
+            },
+        )
     }
 }
 
