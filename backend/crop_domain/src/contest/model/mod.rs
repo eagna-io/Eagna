@@ -61,9 +61,18 @@ pub trait Contest {
 
     fn current_poll(&self) -> Option<&Self::Poll>
     where
-        Self: WithPoll,
+        Self: WithCurrentPoll,
     {
         self._current_poll()
+    }
+
+    /// 何問のPollが出題されたか
+    fn num_polls(&self) -> usize
+    where
+        Self: WithCurrentPoll,
+        <Self as WithCurrentPoll>::Poll: poll::WithAttrs,
+    {
+        self.current_poll().map(|poll| poll.idx()).unwrap_or(0)
     }
 
     /// Contestに新しいPollを追加する。
@@ -79,14 +88,14 @@ pub trait Contest {
         choices: Vec<Choice>,
     ) -> anyhow::Result<PollAdded<&Self>>
     where
-        Self: WithAttrs + WithPoll,
-        <Self as WithPoll>::Poll: poll::WithAttrs,
+        Self: WithAttrs + WithCurrentPoll,
+        <Self as WithCurrentPoll>::Poll: poll::WithAttrs,
     {
         if self.status() != ContestStatus::Open {
             return Err(anyhow::anyhow!("You can't add a poll to non-open contest"));
         }
 
-        let idx = self.current_poll().map(|poll| poll.idx() + 1).unwrap_or(0);
+        let idx = self.num_polls() + 1;
 
         let new_poll = NewPoll {
             id: PollId::new(),
@@ -105,8 +114,8 @@ pub trait Contest {
     #[must_use]
     fn close(&self) -> anyhow::Result<Closed<&Self>>
     where
-        Self: WithAttrs + WithPoll,
-        <Self as WithPoll>::Poll: poll::WithAttrs,
+        Self: WithAttrs + WithCurrentPoll,
+        <Self as WithCurrentPoll>::Poll: poll::WithAttrs,
     {
         if self.status() != ContestStatus::Open {
             return Err(anyhow::anyhow!("Contest status is not open"));
@@ -121,6 +130,7 @@ pub trait Contest {
         Ok(Closed { contest: self })
     }
 
+    #[must_use]
     fn archive(&self) -> anyhow::Result<Archived<&Self>>
     where
         Self: WithAttrs,
@@ -143,7 +153,7 @@ pub trait WithAttrs: Contest {
     fn _event_start_at(&self) -> Option<&DateTime<Utc>>;
 }
 
-pub trait WithPoll: Contest {
+pub trait WithCurrentPoll: Contest {
     type Poll: Poll;
 
     fn _current_poll(&self) -> Option<&Self::Poll>;
@@ -198,9 +208,9 @@ where
     }
 }
 
-impl<'a, C> WithPoll for &'a C
+impl<'a, C> WithCurrentPoll for &'a C
 where
-    C: WithPoll,
+    C: WithCurrentPoll,
 {
     type Poll = C::Poll;
 

@@ -1,9 +1,8 @@
+use super::{Contest, ContestId, ContestStatus, WithAttrs, WithCurrentPoll};
 use crate::contest::poll::{Poll, PollId};
 use crate::contest::Updatable;
 use chrono::{DateTime, Utc};
 use crop_infra::pg::Connection;
-
-use super::{Contest, ContestId, ContestStatus, WithAttrs, WithPoll};
 
 pub struct New {
     pub(super) id: ContestId,
@@ -36,7 +35,7 @@ impl WithAttrs for New {
     }
 }
 
-impl WithPoll for New {
+impl WithCurrentPoll for New {
     type Poll = NeverPoll;
 
     fn _current_poll(&self) -> Option<&Self::Poll> {

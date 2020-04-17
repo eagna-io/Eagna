@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use crop_domain::account::{Account as _, BriefAccount};
 use crop_domain::contest::comment::{BriefComment, Comment as _};
 use crop_domain::contest::poll::{self, Choice, ChoiceName, Poll, PollId, PollStatus, Stats};
+use crop_domain::contest::{self, Contest};
 use schemars::JsonSchema;
 use serde::Serialize;
 use warp::filters::ws::Message;
@@ -10,6 +11,9 @@ use warp::filters::ws::Message;
 pub enum OutgoingMsg<'a> {
     Poll(PollMsg<'a>),
     Comment(CommentMsg<'a>),
+    /// Contestがcloseしたときに受け取るMsg
+    /// 自分のスコア情報が載っている
+    Closed(ClosedMsg),
 }
 
 #[derive(Debug, Serialize, JsonSchema)]
@@ -30,6 +34,14 @@ pub struct CommentMsg<'a> {
     account_name: &'a str,
     comment: &'a str,
     choice: Option<&'a ChoiceName>,
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct ClosedMsg {
+    /// 何問のPollが出題されたか
+    num_polls: usize,
+    /// 何問正解したか
+    account_score: Option<usize>,
 }
 
 impl<'a> Into<Message> for OutgoingMsg<'a> {
@@ -78,5 +90,23 @@ impl<'a> From<(&'a BriefComment, &'a BriefAccount)> for OutgoingMsg<'a> {
             comment: comment.comment(),
             choice: comment.choice_name(),
         })
+    }
+}
+
+/*
+ * ===========
+ * ClosedMsg
+ * ===========
+ */
+impl<'a, C> From<&'a C> for ClosedMsg
+where
+    C: Contest + contest::WithAttrs + contest::WithCurrentPoll,
+    <C as contest::WithCurrentPoll>::Poll: poll::WithAttrs,
+{
+    fn from(contest: &'a C) -> ClosedMsg {
+        ClosedMsg {
+            num_polls: contest.num_polls(),
+            account_score: None, // TODO
+        }
     }
 }

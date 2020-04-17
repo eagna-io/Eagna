@@ -1,4 +1,4 @@
-use super::{Contest, ContestId, ContestStatus, WithAttrs, WithPoll};
+use super::{Contest, ContestId, ContestStatus, WithAttrs, WithCurrentPoll};
 use crate::contest::poll::{BriefPoll, DetailedPoll, Poll};
 use crate::contest::Queryable;
 use chrono::{DateTime, Utc};
@@ -48,7 +48,7 @@ impl<P> WithAttrs for DetailedContest<P> {
     }
 }
 
-impl<P> WithPoll for DetailedContest<P>
+impl<P> WithCurrentPoll for DetailedContest<P>
 where
     P: Poll,
 {
