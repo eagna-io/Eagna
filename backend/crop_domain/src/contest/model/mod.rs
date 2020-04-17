@@ -159,6 +159,12 @@ pub trait WithCurrentPoll: Contest {
     fn _current_poll(&self) -> Option<&Self::Poll>;
 }
 
+pub trait WithPolls: Contest {
+    type Poll: Poll;
+
+    fn _polls(&self) -> &[Self::Poll];
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, JsonSchema)]
 pub struct ContestId(pub Uuid);
 
