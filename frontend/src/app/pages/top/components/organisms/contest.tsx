@@ -2,39 +2,37 @@ import React from "react";
 import styled from "styled-components";
 
 import * as color from "app/components/color";
+import { Contest } from "model/contest";
 
 import { ReactComponent as FireIcon } from "../atoms/images/fire.svg";
 import { ReactComponent as TimerBlackIcon } from "../atoms/images/clock-b.svg";
 
 interface Props {
-  category: string;
-  title: string;
-  startAt: string;
-  state: "upcoming" | "open" | "closed" | "archived";
+  contest: Contest;
 }
 
-export const Contest: React.FC<Props> = ({ category, title, startAt, state }) => {
-  if (state === "upcoming") {
+export const ContestComponent: React.FC<Props> = ({ contest }) => {
+  if (contest.status === "upcoming") {
     return (
       <Container>
         <ContestImage></ContestImage>
         <ContestDetail>
-          <Category>{category}</Category>
-          <Title>{title}</Title>
+          <Category>{contest.category}</Category>
+          <Title>{contest.title}</Title>
           <StartAt>
             <Timer />
-            <Date>{startAt}</Date>
+            <Date>{contest.startAt}</Date>
           </StartAt>
         </ContestDetail>
       </Container>
     );
-  } else if  (state === "open") { 
+  } else if  (contest.status === "open") { 
     return (
       <Container>
         <ContestImage></ContestImage>
         <ContestDetail>
-          <Category>{category}</Category>
-          <Title>{title}</Title>
+          <Category>{contest.category}</Category>
+          <Title>{contest.title}</Title>
           <OnGoing>
             <Fire />
             <OnGoingText>開催中！</OnGoingText>
