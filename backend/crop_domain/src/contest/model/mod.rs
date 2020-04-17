@@ -5,12 +5,14 @@ use serde::Serialize;
 use std::str::FromStr;
 use uuid::Uuid;
 
+mod archived;
 mod brief;
 mod closed;
 mod detailed;
 mod new;
 mod poll_added;
 
+pub use archived::Archived;
 pub use brief::BriefContest;
 pub use closed::Closed;
 pub use detailed::DetailedContest;
@@ -117,6 +119,17 @@ pub trait Contest {
         }
 
         Ok(Closed { contest: self })
+    }
+
+    fn archive(&self) -> anyhow::Result<Archived<&Self>>
+    where
+        Self: WithAttrs,
+    {
+        if self.status() != ContestStatus::Closed {
+            return Err(anyhow::anyhow!("Contest status is not closed"));
+        }
+
+        Ok(Archived { contest: self })
     }
 }
 
