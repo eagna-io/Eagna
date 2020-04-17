@@ -7,8 +7,9 @@ export const get = async (): Promise<GetRes> =>
   http.get({ path: "/contest/poll/current", decoder: GetResDecoder });
 
 interface GetRes {
-  title: string;
   id: string;
+  idx: number;
+  title: string;
   endAt: Moment;
   status: "open" | "closed";
   choices: Record<string, string>;
@@ -21,6 +22,7 @@ interface GetRes {
 
 const GetResDecoder: D.Decoder<GetRes> = D.object({
   id: D.string(),
+  idx: D.number(),
   title: D.string(),
   endAt: D.string().map(s => moment(s)),
   status: D.union(D.constant<"open">("open"), D.constant<"closed">("closed")),

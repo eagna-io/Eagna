@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { WhiteBaseColor, VoteRateBackGround } from "app/components/color";
 
 import { ReactComponent as CorrectIcon } from "../atoms/images/correct.svg";
+import { ReactComponent as WrongIcon } from "../atoms/images/wrong.svg";
 import { Poll } from "model/poll";
 
 interface Props {
@@ -42,7 +43,7 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
             disabled
             correct={poll.resolved === title}
             voteRate={
-              (poll.stats!.votePerChoice[title] / poll.stats!.totalVotes) * 100
+              Math.floor((poll.stats!.votePerChoice[title] / poll.stats!.totalVotes) * 100)
             }
           />
         ))}
@@ -53,7 +54,22 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
 
 const Container = styled.div`
   width: 100%;
-  overflow: scroll;
+  height: 127px;
+  overflow-y: scroll;
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 3px;
+  }
+  ::-webkit-scrollbar-thumb {
+      border-radius: 2px;
+      background-color: rgba(0,0,0,.5);
+      box-shadow: 0 0 1px rgba(255,255,255,.5);
+  }
+  ::-webkit-scrollbar-track
+  {
+    border-radius: 3px;
+    background-color: ${VoteRateBackGround.rgba(0.5)};
+  }
 `;
 
 interface ChoiceProps {
@@ -75,9 +91,16 @@ const Choice: React.FC<ChoiceProps> = ({
   voteRate,
   correct
 }) => {
+/* 
+【MEMO：正誤アイコン表示の方針】
+正解 => <Correct />
+不正解 && 自分が選んだ => <Wrong />
+不正解 && 自分が選んでいない => null
+*/
   return (
     <ChoiceContainer>
-      <OutcomeIcon correct={correct} />
+      { correct === true ? <Correct /> : null }
+      { correct === false && selected ? <Wrong /> : null }
       <ChoiceButton
         color={color}
         selected={selected}
@@ -104,24 +127,33 @@ const ChoiceContainer = styled.div`
   display: flex;
   position: relative;
   margin-bottom: 24px;
+  &:last-child {
+    margin-bottom: 0px;
+  }
 `;
 
-const OutcomeIcon = styled(CorrectIcon)<{ correct?: boolean }>`
+const Correct = styled(CorrectIcon)`
   position: absolute;
   left: 0;
-  width: 40px;
-  height: 48px;
-  display: ${props => (props.correct ? "block" : "none")};
+  width: 22px;
+  height: 50px;
+`;
+
+const Wrong = styled(WrongIcon)`
+  position: absolute;
+  left: 0;
+  width: 22px;
+  height: 50px;
 `;
 
 const ChoiceButton = styled.button<{ color: string; selected: boolean }>`
   position: relative;
-  width: 200px;
-  height: 48px;
+  width: 196px;
+  height: 50px;
   border-radius: 24px;
   margin: 0px auto;
   padding: 4px 8px;
-  border: solid 3px ${props => props.color};
+  border: solid 4px ${props => props.color};
   background-color: ${props =>
     props.selected ? props.color : WhiteBaseColor.hex};
   font-size: 14px;
@@ -139,7 +171,7 @@ const VoteRate = styled.div<{ voteRate: number }>`
   left: 0px;
   width: ${props => props.voteRate}%;
   height: 42px;
-  border-radius: 24px;
+  border-radius: 24px 0 0 24px;
   background-color: ${VoteRateBackGround.hexWithOpacity(0.5)};
 `;
 
@@ -150,8 +182,15 @@ const Choicetitle = styled.div<{ color: string; selected: boolean }>`
   transform: translateY(-50%) translateX(-50%);
   -webkit-transform: translateY(-50%) translateX(-50%);
   width: 180px;
+  padding: 0 40px 0 10px;
   text-align: left;
   color: ${props => (props.selected ? WhiteBaseColor.hex : props.color)};
+  overflow: hidden;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 `;
 
 const RateValue = styled.div<{ color: string; selected: boolean }>`
