@@ -4,9 +4,8 @@ import styled from "styled-components";
 import * as color from "app/components/color";
 import { Contest } from "model/contest";
 
-import { Schedule } from "../molecules/schedule";
-import { ReactComponent as FireIcon } from "../atoms/images/fire.svg";
-import { ReactComponent as TimerBlackIcon } from "../atoms/images/clock-b.svg";
+import { StartSchedule } from "../molecules/startSchedule";
+import { OnGoing } from "../molecules/onGoing";
 
 interface Props {
   contest: Contest;
@@ -20,7 +19,7 @@ export const ContestComponent: React.FC<Props> = ({ contest }) => {
         <ContestDetail>
           <Category>{contest.category}</Category>
           <Title>{contest.title}</Title>
-          <Schedule contest={contest}/>
+          { contest.status === "upcoming" ? <StartSchedule contest={contest} /> : contest.status === "open" ? <OnGoing /> : null }
         </ContestDetail>
       </Container>
     );
@@ -62,40 +61,3 @@ const Title = styled.div`
   margin-bottom: 12px;
 `;
 
-const StartAt = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-`;
-
-const Timer = styled(TimerBlackIcon)`
-  width: 14px;
-  height: 14px;
-  margin-right: 4px;
-`;
-
-const Date = styled.div`
-  font-size: 12px;
-  color: ${color.TextBaseColor.hex};
-`;
-
-const OnGoing = styled.div`
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  width: 71px;
-  height: 20px;
-  border-radius: 2px;
-  background-color: ${color.MainRed.hex};
-`;
-
-const Fire = styled(FireIcon)`
-  width: 14px;
-  height: 14px;
-  margin: 0 4px;
-`;
-
-const OnGoingText = styled.div`
-  font-size: 12px;
-  color: ${color.WhiteBaseColor.hex};
-`;

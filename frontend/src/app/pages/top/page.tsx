@@ -11,10 +11,10 @@ import { ReactComponent as FireIcon } from "./components/atoms/images/fire.svg";
 import { ReactComponent as TimerIcon } from "./components/atoms/images/clock-w.svg";
 
 interface Props {
-  contest: Contest;
+  contests: Contest[];
 }
 
-export const Page: React.FC<Props> = ({ contest }) => {
+export const Page: React.FC<Props> = ({ contests }) => {
   return (
     <Container>
         <Wrapper>
@@ -23,12 +23,16 @@ export const Page: React.FC<Props> = ({ contest }) => {
             <LargeFire />
             <SectionTitle>開催中のコンテスト</SectionTitle>
           </Openning>
-          { contest.status === "open" ? <ContestComponent contest={contest}/> : null }
+          {contests.map(contest => (
+            contest.status === "open" ? <ContestComponent contest={contest}/> : null
+          ))}
           <Upcoming>
             <LargeTimer />
             <SectionTitle>開催予定のコンテスト</SectionTitle>
           </Upcoming>
-          { contest.status === "upcoming" ? <ContestComponent contest={contest}/> : null }
+          {contests.map(contest => (
+            contest.status === "upcoming" ? <ContestComponent contest={contest}/> : null
+          ))}
         </Wrapper>
         <Footer>
           <LogoG />
