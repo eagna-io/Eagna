@@ -2,10 +2,15 @@ import React from "react";
 import styled from "styled-components";
 
 import * as color from "app/components/color";
+import { Contest } from "model/contest";
 
 import { AdminTemplate } from "./components/template/admin";
 
-export const CloseContest: React.FC = () => {
+interface Props {
+  contests: Contest[];
+}
+
+export const CloseContest: React.FC<Props> = ({ contests }) => {
   return (
     <AdminTemplate>
       <Table>
@@ -15,12 +20,16 @@ export const CloseContest: React.FC = () => {
           <Th align="center">開始時刻</Th>
           <Th align="center">CLOSE</Th>
         </Tr>
-        <Tr>
-          <Td align="left">NBA（バスケ</Td>
-          <Td align="left">Los Angels Lakers vs Golden State Warriors</Td>
-          <Td align="center">開始時刻</Td>
-          <Td align="center"><Submit>CLOSE</Submit></Td>
-        </Tr>
+        {contests.map(contest => (
+          <Tr>
+            <Td align="left">{contest.category}</Td>
+            <Td align="left">{contest.title}</Td>
+            <Td align="center">{contest.startAt}</Td>
+            <Td align="center">
+              <Submit disabled={contest.status === "closed" || contest.status === "archived"}>CLOSE</Submit>
+            </Td>
+          </Tr>
+        ))}
       </Table>
     </AdminTemplate>
   );
@@ -50,7 +59,7 @@ const Td = styled.td<{ align: string }>`
   text-align: ${props => props.align};
 `;
 
-const Submit = styled.button`
+const Submit = styled.button<{ disabled: boolean }>`
   width: 50px;
   height: 20px;
   padding: 4px 8px;
