@@ -1,6 +1,6 @@
 #![type_length_limit = "1342533"]
 
-use crop_infra::pg::Pool;
+use crop_infra::{jwt, pg::Pool};
 use crop_server::{context::Context, server};
 
 #[tokio::main]
@@ -9,7 +9,7 @@ async fn main() {
 
     // jwt secretの初期化
     // TODO
-    jwt::init("HOGEHOGE");
+    jwt::init(b"HOGEHOGE");
 
     // Contextの初期化
     let pg_pool = Pool::new(get_env_var_or_panic("DATABASE_URL"));
