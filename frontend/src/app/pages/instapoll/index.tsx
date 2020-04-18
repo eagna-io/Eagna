@@ -6,7 +6,11 @@ import * as websocket from "infra/ws/contest";
 import { Page, LoadingPage } from "./page";
 import { reducer, initialState } from "./reducer";
 
-export const InstapollPage: React.FC = () => {
+interface Props {
+  contestId: string;
+}
+
+export const InstapollPage: React.FC<Props> = ({ contestId }) => {
   const [account, setAccount] = React.useState("");
   const [ws, setWs] = React.useState<WebSocket | undefined>();
   const [state, dispatch] = React.useReducer(reducer, initialState);
@@ -43,25 +47,25 @@ export const InstapollPage: React.FC = () => {
       clearInterval(timer);
     };
   }, []);
-  
-  // if (poll !== undefined && timer !== undefined && ws !== undefined) {
-    return (
-      // <Page
-      //   account={account}
-      //   poll={poll}
-      //   comments={comments}
-      //   timer={timer}
-      //   ws={ws}
-      // />
 
-      <Page
-        account={testaccount}
-        poll={testpoll}
-        comments={testcomments}
-        timer={testtimer}
-        contest={"closed"}
-      />
-    );
+  // if (poll !== undefined && timer !== undefined && ws !== undefined) {
+  return (
+    // <Page
+    //   account={account}
+    //   poll={poll}
+    //   comments={comments}
+    //   timer={timer}
+    //   ws={ws}
+    // />
+
+    <Page
+      account={testaccount}
+      poll={testpoll}
+      comments={testcomments}
+      timer={testtimer}
+      contest={"closed"}
+    />
+  );
   // } else {
   //   return <LoadingPage />;
   // }
@@ -69,33 +73,34 @@ export const InstapollPage: React.FC = () => {
 
 const testaccount = "test-account";
 const testpoll = {
-  id: 'sssss',
+  id: "sssss",
   idx: 1,
-  title: '次にポイントを決めるのは誰？',
+  title: "次にポイントを決めるのは誰？",
   endAt: moment(),
   status: "open" as const,
   choices: {
     Lebron: "#4583e4",
     Lebron青年期: "#4583e4",
     Lebron完全体: "#4583e4",
-    KobeBeanBrsssssssssssssssssssssssssssssssssyant: "#e46345",
+    KobeBeanBrsssssssssssssssssssssssssssssssssyant: "#e46345"
   },
   // resolved: "Lebron青年期",
   stats: {
     totalVotes: 30,
     votePerChoice: {
-      'Lebron': 16,
-      'Lebron青年期': 6,
-      'Lebron完全体': 4,
-      'KobeBeanBrsssssssssssssssssssssssssssssssssyant': 4
+      Lebron: 16,
+      Lebron青年期: 6,
+      Lebron完全体: 4,
+      KobeBeanBrsssssssssssssssssssssssssssssssssyant: 4
     }
-  },
+  }
   // selected: "Lebron青年期"
 };
 const testcomments = [
   {
     account: "Yuya_FYuya_FYuya_F",
-    comment: "いけえええええええええええええええええええええええええええええええええええええいけええ!!!!",
+    comment:
+      "いけえええええええええええええええええええええええええええええええええええええいけええ!!!!",
     color: "#4583e4"
   },
   {
