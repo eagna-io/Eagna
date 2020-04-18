@@ -13,6 +13,7 @@ import { Admin } from "./pages/admin";
 import { CreatePoll } from "./pages/admin/createPoll";
 import { ResolvePoll } from "./pages/admin/resolvePoll";
 import { AdminLogin } from "./pages/admin/login";
+import { CreateContest } from "./pages/admin/createContest";
 
 const App: FC = () => {
   return (
@@ -49,14 +50,19 @@ const AppRouter: FC = () => (
         render={() => <AdminLogin />}
       />
       <Route
-        path="/admin/create"
+        path="/admin/poll/create"
         exact
         render={() => <CreatePoll />}
       />
       <Route
-        path="/admin/resolve"
+        path="/admin/poll/resolve"
         exact
         render={() => <ResolvePoll />}
+      />
+      <Route
+        path="/admin/contest/create"
+        exact
+        render={() => <CreateContest />}
       />
       <Redirect to="/instapoll" />
     </Switch>
