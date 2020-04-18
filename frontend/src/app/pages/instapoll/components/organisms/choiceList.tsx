@@ -14,39 +14,44 @@ interface Props {
 }
 
 export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
-  if (poll.status === "open") {
+  if (poll.status === "Open") {
     return (
       <Container>
-        {Object.entries(poll.choices).map(([title, color]) => (
-          <Choice
-            title={title}
-            color={color}
-            selected={selected === title}
-            onSelected={() => {
-              onSelected(title);
-            }}
-          />
-        ))}
+        {[...poll.choices]
+          .sort((a, b) => a.idx - b.idx)
+          .map(({ name, color }) => (
+            <Choice
+              title={name}
+              color={color}
+              selected={selected === name}
+              onSelected={() => {
+                onSelected(name);
+              }}
+            />
+          ))}
       </Container>
     );
   } else {
     return (
       <Container>
-        {Object.entries(poll.choices).map(([title, color]) => (
-          <Choice
-            title={title}
-            color={color}
-            selected={selected === title}
-            onSelected={() => {
-              onSelected(title);
-            }}
-            disabled
-            correct={poll.resolved === title}
-            voteRate={
-              Math.floor((poll.stats!.votePerChoice[title] / poll.stats!.totalVotes) * 100)
-            }
-          />
-        ))}
+        {[...poll.choices]
+          .sort((a, b) => a.idx - b.idx)
+          .map(({ name, color }) => (
+            <Choice
+              title={name}
+              color={color}
+              selected={selected === name}
+              onSelected={() => {
+                onSelected(name);
+              }}
+              disabled
+              correct={poll.resolved_choice === name}
+              voteRate={Math.floor(
+                (poll.stats!.votePerChoice[name] / poll.stats!.totalVotes) *
+                  100
+              )}
+            />
+          ))}
       </Container>
     );
   }
@@ -61,12 +66,11 @@ const Container = styled.div`
     width: 3px;
   }
   ::-webkit-scrollbar-thumb {
-      border-radius: 2px;
-      background-color: rgba(0,0,0,.5);
-      box-shadow: 0 0 1px rgba(255,255,255,.5);
+    border-radius: 2px;
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
   }
-  ::-webkit-scrollbar-track
-  {
+  ::-webkit-scrollbar-track {
     border-radius: 3px;
     background-color: ${VoteRateBackGround.rgba(0.5)};
   }
@@ -91,7 +95,7 @@ const Choice: React.FC<ChoiceProps> = ({
   voteRate,
   correct
 }) => {
-/* 
+  /* 
 【MEMO：正誤アイコン表示の方針】
 正解 => <Correct />
 不正解 && 自分が選んだ => <Wrong />
@@ -99,8 +103,8 @@ const Choice: React.FC<ChoiceProps> = ({
 */
   return (
     <ChoiceContainer>
-      { correct === true ? <Correct /> : null }
-      { correct === false && selected ? <Wrong /> : null }
+      {correct === true ? <Correct /> : null}
+      {correct === false && selected ? <Wrong /> : null}
       <ChoiceButton
         color={color}
         selected={selected}

@@ -15,7 +15,9 @@ export const ResolvePoll: React.FC = () => {
     pollApi.get().then(poll => setPoll(poll));
   }, []);
 
-  if (!poll || poll.status === "open" || poll.resolved) {
+  if (!poll) {
+    return <AdminTemplate>Pollが見つかりません</AdminTemplate>;
+  } else if (poll.status === "Open" || poll.resolved_choice) {
     return <AdminTemplate>Pollが見つかりません</AdminTemplate>;
   } else {
     return (

@@ -2,6 +2,8 @@ import React from "react";
 import moment from "moment";
 
 import * as websocket from "infra/ws/contest";
+import * as accountApi from "infra/http/account";
+import * as storage from "infra/storage";
 
 import { Page, LoadingPage } from "./page";
 import { reducer, initialState } from "./reducer";
@@ -11,31 +13,41 @@ interface Props {
 }
 
 export const InstapollPage: React.FC<Props> = ({ contestId }) => {
-  const [account, setAccount] = React.useState("");
+  const [accessToken, setAccessToken] = React.useState(storage.getAccessToken);
   const [ws, setWs] = React.useState<WebSocket | undefined>();
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { poll, comments, timer } = state;
 
   React.useEffect(() => {
-    if (account === "") {
+    if (!accessToken) {
       const accountName =
-        window.prompt("ユーザー名を入力してください") || "HOGEO";
-      setAccount(accountName);
+        window.prompt("ユーザー名を入力してください") || "Anonymous";
+      accountApi.post(accountName).then(res => {
+        storage.setAccessToken(res.access_token);
+        setAccessToken(res.access_token);
+      });
     }
-  }, [account]);
+  }, [accessToken]);
 
   // Websocketコネクションを確立する
   React.useEffect(() => {
-    const ws = websocket.open({
-      onComment: comment => {
-        dispatch({ type: "pushComment", comment });
-      },
-      onPoll: poll => {
-        dispatch({ type: "updatePoll", poll });
-      }
-    });
-    setWs(ws);
-  }, []);
+    if (accessToken) {
+      const ws = websocket.open({
+        contestId,
+        accessToken,
+        onComment: comment => {
+          dispatch({ type: "pushComment", comment });
+        },
+        onPoll: poll => {
+          dispatch({ type: "updatePoll", poll });
+        },
+        onClosed: closed => {
+          console.log(closed);
+        }
+      });
+      setWs(ws);
+    }
+  }, [accessToken]);
 
   // 一定間隔でtickアクションを送る
   React.useEffect(() => {
@@ -76,14 +88,19 @@ const testpoll = {
   id: "sssss",
   idx: 1,
   title: "次にポイントを決めるのは誰？",
-  endAt: moment(),
-  status: "open" as const,
-  choices: {
-    Lebron: "#4583e4",
-    Lebron青年期: "#4583e4",
-    Lebron完全体: "#4583e4",
-    KobeBeanBrsssssssssssssssssssssssssssssssssyant: "#e46345"
-  },
+  created_at: moment(),
+  duration_sec: 30,
+  status: "Open" as const,
+  choices: [
+    { name: "Lebron", color: "#4583e4", idx: 0 },
+    { name: "Lebron青年期", color: "#4583e4", idx: 1 },
+    { name: "Lebron完全体", color: "#4583e4", idx: 2 },
+    {
+      name: "KobeBeanBrsssssssssssssssssssssssssssssssssyant",
+      color: "#e46345",
+      idx: 3
+    }
+  ],
   // resolved: "Lebron青年期",
   stats: {
     totalVotes: 30,
@@ -98,38 +115,38 @@ const testpoll = {
 };
 const testcomments = [
   {
-    account: "Yuya_FYuya_FYuya_F",
+    account_name: "Yuya_FYuya_FYuya_F",
     comment:
       "いけえええええええええええええええええええええええええええええええええええええいけええ!!!!",
     color: "#4583e4"
   },
   {
-    account: "Atsuki",
+    account_name: "Atsuki",
     comment: "いや、いくだろこれは",
     color: "#4583e4"
   },
   {
-    account: "ふな",
+    account_name: "ふな",
     comment: "Lebron風引いてるらしいぞ",
     color: "#e46345"
   },
   {
-    account: "Yuya_F",
+    account_name: "Yuya_F",
     comment: "嘘やろ",
     color: "#4583e4"
   },
   {
-    account: "AtsukiAtsukiAtsukiAtsukiAtsukiAtsukiAtsuki",
+    account_name: "AtsukiAtsukiAtsukiAtsukiAtsukiAtsukiAtsuki",
     comment: "おわたおわたおわたおわた",
     color: "#c9c8c8"
   },
   {
-    account: "Atsuki",
+    account_name: "Atsuki",
     comment: "やってくれんだろ",
     color: "#4583e4"
   },
   {
-    account: "Yuya_F",
+    account_name: "Yuya_F",
     comment: "変えよう",
     color: "#e46345"
   }

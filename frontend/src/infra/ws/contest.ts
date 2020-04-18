@@ -2,62 +2,100 @@ import * as D from "@mojotech/json-type-validation";
 import moment, { Moment } from "moment";
 
 import * as ws from "infra/ws";
-import { Comment, Poll} from "model/poll";
+import { Comment, Poll } from "model/poll";
 
 export interface Params {
+  contestId: string;
+  accessToken: string;
   onComment: (comment: Comment) => void;
   onPoll: (poll: Poll) => void;
+  onClosed: (result: ClosedMsg) => void;
 }
 
-export const open = ({ onComment, onPoll}: Params): WebSocket => {
-  return ws.open({msgDecoder: IncomingMsgDecoder, onMsg: (msg) => {
-    if (msg.type === "comment") {
-      onComment(msg);
-    } else {
-      onPoll(msg);
+export const open = ({
+  contestId,
+  accessToken,
+  onComment,
+  onPoll,
+  onClosed
+}: Params): WebSocket => {
+  return ws.open({
+    path: `/contests/${contestId}/${accessToken}`,
+    msgDecoder: IncomingMsgDecoder,
+    onMsg: msg => {
+      switch (msg.type) {
+        case "Comment":
+          onComment(msg);
+          break;
+        case "Poll":
+          onPoll(msg);
+          break;
+        case "Closed":
+          onClosed(msg);
+          break;
+      }
     }
-  }});
+  });
 };
 
-type IncomingMsg = CommentMsg | PollMsg;
+type IncomingMsg = CommentMsg | PollMsg | ClosedMsg;
 
 interface CommentMsg {
-  type: "comment";
-  account: string;
-  color: string;
+  type: "Comment";
+  account_name: string;
+  choice?: string;
   comment: string;
 }
 
 interface PollMsg {
-  type: "poll";
-  title: string;
+  type: "Poll";
   id: string;
+  title: string;
+  status: "Open" | "Closed";
   idx: number;
-  endAt: Moment;
-  status: "open" | "closed";
-  choices: Record<string, string>;
-  resolved?: string;
+  created_at: Moment,
+  duration_sec: number;
+  choices: {
+    name: string;
+    color: string;
+    idx: number;
+  }[];
+  resolved_choice?: string;
   stats?: {
     totalVotes: number;
     votePerChoice: Record<string, number>;
   };
 }
 
+interface ClosedMsg {
+  type: "Closed";
+  num_polls: number;
+  account_score?: number;
+}
+
 const CommentMsgDecoder: D.Decoder<CommentMsg> = D.object({
-  type: D.constant<"comment">("comment"),
-  account: D.string(),
-  color: D.string(),
+  type: D.constant<"Comment">("Comment"),
+  account_name: D.string(),
+  choice: D.optional(D.string()),
   comment: D.string()
 });
 
 const PollMsgDecoder: D.Decoder<PollMsg> = D.object({
-  type: D.constant<"poll">("poll"),
+  type: D.constant<"Poll">("Poll"),
   id: D.string(),
-  idx: D.number(),
   title: D.string(),
-  endAt: D.string().map(s => moment(s)),
-  status: D.union(D.constant<"open">("open"), D.constant<"closed">("closed")),   choices: D.dict(D.string()),
-  resolved: D.optional(D.string()),
+  status: D.union(D.constant<"Open">("Open"), D.constant<"Closed">("Closed")),
+  idx: D.number(),
+  created_at: D.string().map(s => moment(s)),
+  duration_sec: D.number(),
+  choices: D.array(
+    D.object({
+      name: D.string(),
+      color: D.string(),
+      idx: D.number()
+    })
+  ),
+  resolved_choice: D.optional(D.string()),
   stats: D.optional(
     D.object({
       totalVotes: D.number(),
@@ -66,7 +104,14 @@ const PollMsgDecoder: D.Decoder<PollMsg> = D.object({
   )
 });
 
-const IncomingMsgDecoder: D.Decoder<IncomingMsg> = D.oneOf<IncomingMsg>(
+const ClosedMsgDecoder: D.Decoder<ClosedMsg> = D.object({
+  type: D.constant<"Closed">("Closed"),
+  num_polls: D.number(),
+  account_score: D.optional(D.number())
+});
+
+const IncomingMsgDecoder: D.Decoder<IncomingMsg> = D.union(
   CommentMsgDecoder,
-  PollMsgDecoder
+  PollMsgDecoder,
+  ClosedMsgDecoder
 );

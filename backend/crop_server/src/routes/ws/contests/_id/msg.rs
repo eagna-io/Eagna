@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use warp::filters::ws::Message;
 
 #[derive(Debug, Serialize, JsonSchema)]
+#[serde(tag = "type")]
 pub enum OutgoingMsg<'a> {
     Poll(PollMsg<'a>),
     Comment(CommentMsg<'a>),

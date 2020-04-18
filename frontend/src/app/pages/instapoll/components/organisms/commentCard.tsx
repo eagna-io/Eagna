@@ -8,7 +8,7 @@ import {
 import { Comment as CommentModel } from "model/poll";
 
 interface Props {
-  comment: CommentModel;
+  comment: CommentModel & { color: string };
 }
 
 export const CommentCard: React.FC<Props> = ({ comment }) => {
@@ -17,7 +17,7 @@ export const CommentCard: React.FC<Props> = ({ comment }) => {
       <FlagBlock>
         <ChoiceFlag flagColor={comment.color}></ChoiceFlag>
       </FlagBlock>  
-      <UserName>{comment.account}</UserName>
+      <UserName>{comment.account_name}</UserName>
       <Comment>{comment.comment}</Comment>
     </Container>
   );

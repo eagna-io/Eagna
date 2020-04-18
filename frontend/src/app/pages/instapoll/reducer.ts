@@ -5,7 +5,7 @@ import { Comment, Poll, Timer } from "model/poll";
 
 export type State = {
   poll?: Poll;
-  comments: Comment[];
+  comments: (Comment & { color: string })[];
   timer?: Timer;
 };
 
@@ -46,7 +46,10 @@ export const reducer = (state: State, action: Action): State => {
     switch (action.type) {
       case "tick":
         if (state.poll) {
-          state.timer = state.poll.endAt.unix() - action.time.unix();
+          state.timer =
+            state.poll.created_at.unix() +
+            state.poll.duration_sec -
+            action.time.unix();
           if (state.timer < 0) {
             state.timer = "closed";
           }
@@ -60,7 +63,11 @@ export const reducer = (state: State, action: Action): State => {
         state.poll = action.poll;
         break;
       case "pushComment":
-        state.comments = [action.comment, ...state.comments];
+        const color =
+          state.poll?.choices.find(({ name }) => name === action.comment.choice)
+            ?.color || "#888888";
+        const comment = { ...action.comment, color };
+        state.comments = [comment, ...state.comments];
         break;
     }
   });

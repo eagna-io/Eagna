@@ -21,7 +21,7 @@ import { ReactComponent as LogoIcon } from "./components/atoms/images/PlayPoll_l
 interface Props {
   account: string;
   poll?: Poll;
-  comments: Comment[];
+  comments: (Comment & { color: string})[];
   timer: Timer;
   ws?: WebSocket;
   contest: "upcoming" | "open" | "closed" | "archived";
@@ -90,15 +90,15 @@ pollがresolve && 不正解 => WrongModal
   } else {
     return (
       <Container>
-        { poll.resolved !== undefined && poll.selected === poll.resolved ? <ResultModal isCorrect={true} /> : null }
-        { poll.resolved !== undefined && poll.selected !== poll.resolved ?<ResultModal isCorrect={false} /> : null }
+        { poll.resolved_choice && poll.selected === poll.resolved_choice ? <ResultModal isCorrect={true} /> : null }
+        { poll.resolved_choice && poll.selected !== poll.resolved_choice ?<ResultModal isCorrect={false} /> : null }
         <Header>
           <Logo />
           <TimerComponent timer={timer} />
           <Score numer={2} denom={3} />
         </Header>
         <PollCard>
-          { poll.status === "open" ? 
+          { poll.status === "Open" ? 
             <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme> : null
           }
           <ChoiceList
