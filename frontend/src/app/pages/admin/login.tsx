@@ -2,21 +2,45 @@ import React from "react";
 import styled from "styled-components";
 
 import * as color from "app/components/color";
+import * as adminApi from "infra/http/admin";
+import * as storage from "infra/storage";
 
 import { AdminTemplate } from "./components/template/admin";
 
 export const AdminLogin: React.FC = () => {
+  const [email, setEmail] = React.useState("");
+  const [pass, setPass] = React.useState("");
+
   return (
     <AdminTemplate>
       <IdWrapper>
         <Tag>メールアドレス</Tag>
-        <MailAddress type="text" placeholder="email" />
+        <MailAddress
+          type="text"
+          placeholder="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
       </IdWrapper>
       <PassWrapper>
-         <Tag>パスワード</Tag>
-         <Password type="password" placeholder="password" />
+        <Tag>パスワード</Tag>
+        <Password
+          type="password"
+          placeholder="password"
+          value={pass}
+          onChange={e => setPass(e.target.value)}
+        />
       </PassWrapper>
-      <Submit>ログイン</Submit>
+      <Submit
+        onClick={() => {
+          adminApi.post(email, pass).then(res => {
+            storage.setAdminAccessToken(res.access_token);
+            alert("ログインしました");
+          });
+        }}
+      >
+        ログイン
+      </Submit>
     </AdminTemplate>
   );
 };

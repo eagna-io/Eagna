@@ -1,40 +1,53 @@
 import React from "react";
 import styled from "styled-components";
 
-import {
-  TextBaseColor
-} from "app/components/color";
+import { TextBaseColor } from "app/components/color";
+import { Contest } from "model/contest";
+
 import { ReactComponent as TimerIcon } from "../atoms/images/timer.svg";
 
 interface Props {
-  contest: "upcoming" | "open" | "closed" | "archived";
-  startAt?: string;
+  contest: Contest;
   numer?: number;
   denom?: number;
 }
 
-export const ContestBoard: React.FC<Props> = ({ contest, startAt, numer, denom }) => {
-    return (
-      <Container>
-        <StatusMessage noMargin={contest==="open"}>
-          {contest==="upcoming" ? message[0] : ""}
-          {contest==="open" ? message[1] : ""}
-          {contest==="closed" || contest==="archived" ? message[2] : ""}
-        </StatusMessage>
-        <Schedule>
-          {contest==="upcoming" ? <><Timer /><ScheduleDetail>{startAt}</ScheduleDetail></> : ""}
-          {contest==="closed" || contest==="archived" ? 
-            <ScoreBoard>あなたのスコア｜<Score>{numer}</Score><Slash>/</Slash><Score>{denom}</Score>問正解!!</ScoreBoard> : ""
-          }
-        </Schedule>
-      </Container>
-    )
+export const ContestBoard: React.FC<Props> = ({ contest, numer, denom }) => {
+  return (
+    <Container>
+      <StatusMessage noMargin={contest.status === "Open"}>
+        {contest.status === "Upcoming" ? message[0] : ""}
+        {contest.status === "Open" ? message[1] : ""}
+        {contest.status === "Closed" ? message[2] : ""}
+        {contest.status === "Archived" ? message[2] : ""}
+      </StatusMessage>
+      <Schedule>
+        {contest.status === "Upcoming" ? (
+          <>
+            <Timer />
+            <ScheduleDetail>{contest.event_start_at}</ScheduleDetail>
+          </>
+        ) : (
+          ""
+        )}
+        {contest.status === "Closed" || contest.status === "Archived" ? (
+          <ScoreBoard>
+            あなたのスコア｜<Score>{numer}</Score>
+            <Slash>/</Slash>
+            <Score>{denom}</Score>問正解!!
+          </ScoreBoard>
+        ) : (
+          ""
+        )}
+      </Schedule>
+    </Container>
+  );
 };
 
 const message = [
-  '試合開始までお待ち下さい。',
-  '予想クイズの作成中です。\nしばらくお待ち下さい。',
-  'コンテストは終了しました。'
+  "試合開始までお待ち下さい。",
+  "予想クイズの作成中です。\nしばらくお待ち下さい。",
+  "コンテストは終了しました。"
 ];
 
 const Container = styled.div`
@@ -43,7 +56,7 @@ const Container = styled.div`
 `;
 
 const StatusMessage = styled.div<{ noMargin: boolean }>`
-  margin-bottom: ${ props => props.noMargin ? "0" : "10px" };
+  margin-bottom: ${props => (props.noMargin ? "0" : "10px")};
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 1.56px;

@@ -3,18 +3,31 @@ import styled from "styled-components";
 import * as D from "@mojotech/json-type-validation";
 
 import * as color from "app/components/color";
-import * as http from "infra/http";
+import * as pollApi from "infra/http/poll";
+import * as storage from "infra/storage";
 
 import { AdminTemplate } from "./components/template/admin";
 
 export const CreatePoll: React.FC = () => {
+  const [accessToken] = React.useState(storage.getAdminAccessToken);
+  const [contestId, setContestId] = React.useState("");
   const [title, setTitle] = React.useState("");
-  const [choices, setChoices] = React.useState<[string, string][]>([
-    ["", colorOfIdx(0).hex]
-  ]);
+  const [durationSec, setDurationSec] = React.useState(30);
+  const [choices, setChoices] = React.useState<
+    { name: string; color: string; idx: number }[]
+  >([{ name: "", color: colorOfIdx(0).hex, idx: 0 }]);
 
   return (
     <AdminTemplate>
+      <QuestionContainer>
+        <QuestionTag>コンテストID</QuestionTag>
+        <QuestionInput
+          value={contestId}
+          onChange={e => {
+            setContestId(e.target.value);
+          }}
+        />
+      </QuestionContainer>
       <QuestionContainer>
         <QuestionTag>問題文</QuestionTag>
         <QuestionInput
@@ -23,17 +36,25 @@ export const CreatePoll: React.FC = () => {
           }}
         />
       </QuestionContainer>
+      <QuestionContainer>
+        <QuestionTag>期間（秒数）</QuestionTag>
+        <QuestionInput
+          onChange={e => {
+            setDurationSec(Number(e.target.value));
+          }}
+        />
+      </QuestionContainer>
       <ChoiceContainer>
         <ChoiceList>
           <ChoiceTag>選択肢</ChoiceTag>
           <ChoiceUl>
-            {choices.map(([choice, color], i) => (
+            {choices.map(({ name, color }, i) => (
               <Choiceitem key={i}>
                 <ChoiceInput
                   placeholder="選択肢名"
                   onChange={e => {
                     const newChoices = [...choices];
-                    newChoices[i][0] = e.target.value;
+                    newChoices[i].name = e.target.value;
                     setChoices(newChoices);
                   }}
                 />
@@ -44,7 +65,10 @@ export const CreatePoll: React.FC = () => {
         <AddChoice
           onClick={() => {
             const nextColor = colorOfIdx(choices.length);
-            setChoices([...choices, ["", nextColor.hex]]);
+            setChoices([
+              ...choices,
+              { name: "", color: nextColor.hex, idx: choices.length }
+            ]);
           }}
         >
           選択肢を追加
@@ -61,15 +85,20 @@ export const CreatePoll: React.FC = () => {
       </ChoiceContainer>
       <CreatePollButton
         onClick={async () => {
-          const res = await http.post({
-            path: "/contest/poll",
-            body: {
-              title,
-              choices: Object.fromEntries(choices)
-            },
-            decoder: D.anyJson()
+          if (!accessToken) {
+            alert("ログインが必要です");
+            return;
+          }
+          const res = await pollApi.post({
+            contestId,
+            title,
+            durationSec,
+            choices,
+            accessToken
           });
           alert(JSON.stringify(res));
+          setTitle("");
+          setChoices([{ name: "", color: colorOfIdx(0).hex, idx: 0 }]);
         }}
       >
         作成
@@ -97,7 +126,7 @@ const QuestionContainer = styled.div`
 `;
 
 const QuestionTag = styled.div`
-  width: 69px;
+  width: 150px;
   line-height: 30px;
   font-size: 14px;
   font-weight: 500;
@@ -190,7 +219,7 @@ const CreatePollButton = styled.button`
   -webkit-transform: translateY(0%) translateX(-50%);
   width: 250px;
   height: 40px;
-  background-color: ${color.MainRed.hex};  
+  background-color: ${color.MainRed.hex};
   font-size: 14px;
   color: ${color.WhiteBaseColor.hex};
 `;

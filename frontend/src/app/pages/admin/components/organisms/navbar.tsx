@@ -2,12 +2,14 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import {
-  WhiteBaseColor
-} from "app/components/color";
+import * as storage from "infra/storage";
+
+import { WhiteBaseColor } from "app/components/color";
 
 export const NavigationBar: React.FC = () => {
-  const isLoggedIn = true;
+  const [isLoggedIn, setIsLoggedIn] = React.useState(
+    storage.getAdminAccessToken
+  );
   if (!isLoggedIn) {
     return (
       <NavBar>
@@ -33,7 +35,7 @@ export const NavigationBar: React.FC = () => {
       </NavBarItem>
     </NavBar>
   );
-}
+};
 
 const NavBar = styled.ul`
   width: 100%;

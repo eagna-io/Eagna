@@ -40,10 +40,11 @@ impl ContestManager {
         &self,
         contest_id: &ContestId,
     ) -> Option<broadcast::Receiver<MsgSource>> {
-        self.senders
-            .read()
-            .await
-            .get(contest_id)
-            .map(|tx| tx.subscribe())
+        if let Some(sender) = self.senders.read().await.get(contest_id) {
+            return Some(sender.subscribe());
+        }
+        let (sender, receiver) = broadcast::channel(1);
+        self.senders.write().await.insert(*contest_id, sender);
+        Some(receiver)
     }
 }

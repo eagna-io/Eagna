@@ -8,6 +8,7 @@ import {
   BlackColor
 } from "app/components/color";
 import { Poll, Comment, Timer } from "model/poll";
+import { Contest } from "model/contest";
 
 import { Timer as TimerComponent } from "./components/organisms/timer";
 import { Score } from "./components/organisms/score";
@@ -19,31 +20,31 @@ import { ReactComponent as SubmitIcon } from "./components/atoms/images/send.svg
 import { ReactComponent as LogoIcon } from "./components/atoms/images/PlayPoll_logo_white.svg";
 
 interface Props {
-  account: string;
   poll?: Poll;
-  comments: Comment[];
+  comments: (Comment & { color: string })[];
   timer: Timer;
-  ws?: WebSocket;
-  contest: "upcoming" | "open" | "closed" | "archived";
+  contest: Contest;
+  sendComment: (comment: string) => void;
+  updateMyChoice: (choice: string) => void;
 }
 
 export const Page: React.FC<Props> = ({
-  account,
   poll,
   comments,
   timer,
-  ws,
-  contest
+  contest,
+  sendComment,
+  updateMyChoice
 }) => {
   const [commentInput, setCommentInput] = React.useState("");
   const [selected, setSelected] = React.useState<string | undefined>();
-/* 
+  /* 
 【MEMO：正誤モーダル表示の方針】
 pollがresolveされていない => null
 pollがresolve && 正解 => CorectModal
 pollがresolve && 不正解 => WrongModal
 */
-  if (poll === undefined || contest === "closed"){
+  if (poll === undefined || contest.status === "Closed") {
     return (
       <Container>
         <Header>
@@ -52,9 +53,7 @@ pollがresolve && 不正解 => WrongModal
           <Score numer={2} denom={3} />
         </Header>
         <PollCard>
-          { contest==="upcoming" ? <ContestBoard contest={"upcoming"} startAt={"06.01 11:00〜"} /> : null }
-          { contest==="open" ? <ContestBoard contest={"open"} /> : null }
-          { contest==="closed" || contest==="archived" ? <ContestBoard contest={contest} numer={2} denom={3} /> : null }
+          <ContestBoard contest={contest} />
         </PollCard>
         <CommentFeed small={false}>
           {comments.map(comment => (
@@ -62,59 +61,50 @@ pollがresolve && 不正解 => WrongModal
           ))}
         </CommentFeed>
         <CommentContainer>
-            <CommentInput
-              type="text"
-              placeholder="コメントする"
-              value={commentInput}
-              onChange={e => setCommentInput(e.target.value)}
-            />
-            <Submit
-              onClick={() => {
-                if (commentInput) {
-                  if (ws) {
-                    ws.send(
-                      JSON.stringify({
-                        type: "addComment",
-                        account,
-                        comment: commentInput
-                      })
-                    )
-                  }
-                  setCommentInput("");
-                }
-              }}
-            />
-          </CommentContainer>
+          <CommentInput
+            type="text"
+            placeholder="コメントする"
+            value={commentInput}
+            onChange={e => setCommentInput(e.target.value)}
+          />
+          <Submit
+            onClick={() => {
+              if (commentInput) {
+                sendComment(commentInput);
+                setCommentInput("");
+              }
+            }}
+          />
+        </CommentContainer>
       </Container>
     );
   } else {
     return (
       <Container>
-        { poll.resolved !== undefined && poll.selected === poll.resolved ? <ResultModal isCorrect={true} /> : null }
-        { poll.resolved !== undefined && poll.selected !== poll.resolved ?<ResultModal isCorrect={false} /> : null }
+        {poll.resolved_choice && selected === poll.resolved_choice ? (
+          <ResultModal isCorrect={true} />
+        ) : null}
+        {poll.resolved_choice && selected !== poll.resolved_choice ? (
+          <ResultModal isCorrect={false} />
+        ) : null}
         <Header>
           <Logo />
           <TimerComponent timer={timer} />
-          <Score numer={2} denom={3} />
+          { /* <Score numer={2} denom={3} /> */ }
         </Header>
         <PollCard>
-          { poll.status === "open" ? 
-            <Theme><PollIndex>Q{poll.idx}.</PollIndex>{poll.title}</Theme> : null
-          }
+          {poll.status === "Open" ? (
+            <Theme>
+              <PollIndex>Q{poll.idx}.</PollIndex>
+              {poll.title}
+            </Theme>
+          ) : null}
           <ChoiceList
             poll={poll}
-            selected={poll.selected}
+            selected={selected}
             onSelected={choice => {
-              if(ws) {
-                ws.send(
-                  JSON.stringify({
-                    type: "updateChoice",
-                    account,
-                    choice
-                  })
-                );
-                setSelected(choice);
-              }
+              updateMyChoice(choice);
+              setSelected(choice);
             }}
           />
         </PollCard>
@@ -124,29 +114,21 @@ pollがresolve && 不正解 => WrongModal
           ))}
         </CommentFeed>
         <CommentContainer>
-            <CommentInput
-              type="text"
-              placeholder="コメントする"
-              value={commentInput}
-              onChange={e => setCommentInput(e.target.value)}
-            />
-            <Submit
-              onClick={() => {
-                if (commentInput) {
-                  if (ws) {
-                    ws.send(
-                      JSON.stringify({
-                        type: "addComment",
-                        account,
-                        comment: commentInput
-                      })
-                    )
-                  }
-                  setCommentInput("");
-                }
-              }}
-            />
-          </CommentContainer>
+          <CommentInput
+            type="text"
+            placeholder="コメントする"
+            value={commentInput}
+            onChange={e => setCommentInput(e.target.value)}
+          />
+          <Submit
+            onClick={() => {
+              if (commentInput) {
+                sendComment(commentInput);
+                setCommentInput("");
+              }
+            }}
+          />
+        </CommentContainer>
       </Container>
     );
   }
@@ -161,7 +143,11 @@ const Container = styled.div`
   width: 100vw;
   height: calc(100vh - 75px);
   padding: 16px 28px;
-  background-image: linear-gradient(151deg, ${WildWatermelon.hex} 0%, ${ToreaBay.hex} 100%);
+  background-image: linear-gradient(
+    151deg,
+    ${WildWatermelon.hex} 0%,
+    ${ToreaBay.hex} 100%
+  );
   user-select: none;
 `;
 
@@ -184,7 +170,8 @@ const PollCard = styled.div`
   padding: 24px 14px;
   margin-bottom: 20px;
   background-color: ${WhiteBaseColor.hex};
-  box-shadow: 0 24px 24px 0 ${BlackColor.rgba(0.3)}, 0 0 24px 0 ${BlackColor.rgba(0.22)};
+  box-shadow: 0 24px 24px 0 ${BlackColor.rgba(0.3)},
+    0 0 24px 0 ${BlackColor.rgba(0.22)};
 `;
 
 const Theme = styled.div`
@@ -199,7 +186,7 @@ const PollIndex = styled.span`
 `;
 
 const CommentFeed = styled.div<{ small: boolean }>`
-  height: ${ props => props.small ? "208px" : "336px"};
+  height: ${props => (props.small ? "208px" : "336px")};
   margin: 0 14px 18px 14px;
   overflow: scroll;
 `;
@@ -221,7 +208,7 @@ const CommentInput = styled.input`
   font-size: 16px;
   line-height: 30px;
   transform: scale(0.95);
-  background-color:transparent;
+  background-color: transparent;
   ::placeholder {
     color: ${WhiteBaseColor.hex};
     font-size: 14px;

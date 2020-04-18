@@ -24,9 +24,9 @@ export const CloseContest: React.FC<Props> = ({ contests }) => {
           <Tr>
             <Td align="left">{contest.category}</Td>
             <Td align="left">{contest.title}</Td>
-            <Td align="center">{contest.startAt}</Td>
+            <Td align="center">{contest.event_start_at}</Td>
             <Td align="center">
-              <Submit disabled={contest.status === "closed" || contest.status === "archived"}>CLOSE</Submit>
+              <Submit disabled={contest.status !== "Open"}>CLOSE</Submit>
             </Td>
           </Tr>
         ))}
@@ -41,11 +41,10 @@ const Table = styled.table`
   margin: 0 auto;
   border: solid 1px ${color.AdminInputBorderColor.hex};
   font-size: 10px;
-  border-collapse:  collapse;
+  border-collapse: collapse;
 `;
 
-const Tr = styled.tr`
-`;
+const Tr = styled.tr``;
 
 const Th = styled.th<{ align: string }>`
   padding: 8px 12px;

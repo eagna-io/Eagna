@@ -21,6 +21,7 @@ pub struct DetailedContest<P> {
     pub(super) status: ContestStatus,
     pub(super) title: String,
     pub(super) category: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub(super) event_start_at: Option<DateTime<Utc>>,
     pub(super) polls: Vec<P>,
 }

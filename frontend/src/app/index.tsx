@@ -36,9 +36,9 @@ const AppRouter: FC = () => (
         render={() => <Top />}
       />
       <Route
-        path="/instapoll"
+        path="/contest/:id"
         exact
-        render={() => <InstapollPage />}
+        render={({ match }) => <InstapollPage contestId={ match.params.id } />}
       />
       <Route
         path="/admin"
@@ -68,9 +68,9 @@ const AppRouter: FC = () => (
       <Route
         path="/admin/contest/close"
         exact
-        render={() => <CloseContest contests={contests}/>}
+        render={() => <CloseContest contests={[]}/>}
       />
-      <Redirect to="/instapoll" />
+      <Redirect to="/" />
     </Switch>
   </Router>
 );

@@ -2,28 +2,59 @@ import React from "react";
 import styled from "styled-components";
 
 import * as color from "app/components/color";
+import * as contestApi from "infra/http/contest";
+import * as storage from "infra/storage";
 
 import { AdminTemplate } from "./components/template/admin";
 
 export const CreateContest: React.FC = () => {
+  const [accessToken] = React.useState(storage.getAdminAccessToken);
+  const [category, setCategory] = React.useState("");
+  const [title, setTitle] = React.useState("");
+  const [startAt, setStartAt] = React.useState("");
+
   return (
     <AdminTemplate>
       <TextInputWrapper>
         <Tag>カテゴリー</Tag>
-        <Input type="text" placeholder="例）NBA（バスケ）" />
-      </TextInputWrapper>
-      <TextInputWrapper>
-         <Tag>タイトル</Tag>
-         <Input type="text" placeholder="例）Los Angels Lakers vs Golden State Warriors" />
-      </TextInputWrapper>
-      <TextInputWrapper>
-         <Tag>開始時間</Tag>
-         <Input
-          type="datetime-local"
-          placeholder="開始時刻を入力してください。例）2020/04/18 19:00"
+        <Input
+          type="text"
+          placeholder="例）NBA（バスケ）"
+          value={category}
+          onChange={e => setCategory(e.target.value)}
         />
       </TextInputWrapper>
-      <Submit>作成</Submit>
+      <TextInputWrapper>
+        <Tag>タイトル</Tag>
+        <Input
+          type="text"
+          placeholder="例）Los Angels Lakers vs Golden State Warriors"
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+        />
+      </TextInputWrapper>
+      <TextInputWrapper>
+        <Tag>開始時間</Tag>
+        <Input
+          type="text"
+          placeholder="開始時刻を入力してください。例）2014-10-10T04:50:40Z"
+          value={startAt}
+          onChange={e => setStartAt(e.target.value)}
+        />
+      </TextInputWrapper>
+      <Submit
+        onClick={() => {
+          if (!accessToken) {
+            alert("ログインが必要です");
+            return;
+          }
+          contestApi
+            .post(accessToken, title, category, startAt)
+            .then(res => alert("コンテストが作成されました"));
+        }}
+      >
+        作成
+      </Submit>
     </AdminTemplate>
   );
 };

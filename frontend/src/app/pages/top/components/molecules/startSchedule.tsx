@@ -1,22 +1,27 @@
 import React from "react";
 import styled from "styled-components";
+import { Moment } from "moment";
 
 import * as color from "app/components/color";
 
 import { ReactComponent as TimerBlackIcon } from "../atoms/images/clock-b.svg";
 
 interface Props {
-  startAt: string;
+  startAt?: Moment;
 }
 
 export const StartSchedule: React.FC<Props> = ({ startAt }) => {
-    return (
-      <Container>
-        <TimerIcon />
-        <Date>{startAt} OPEN</Date>
-      </Container>
-    );
-}
+  return (
+    <Container>
+      <TimerIcon />
+      {startAt ? (
+        <Date>{startAt.format("YYYY.MM.DD | HH:mm")} OPEN</Date>
+      ) : (
+        <Date>開催日未定</Date>
+      )}
+    </Container>
+  );
+};
 
 const Container = styled.div`
   display: flex;

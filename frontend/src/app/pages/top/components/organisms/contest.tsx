@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 import * as color from "app/components/color";
 import { Contest } from "model/contest";
@@ -12,21 +13,27 @@ interface Props {
 }
 
 export const ContestComponent: React.FC<Props> = ({ contest }) => {
-  if (contest.status === "upcoming" || contest.status === "open") {
+  if (contest.status === "Upcoming" || contest.status === "Open") {
     return (
       <Container>
-        <ContestImage />
-        <ContestDetail>
-          <Category>{contest.category}</Category>
-          <Title>{contest.title}</Title>
-          { contest.status === "upcoming" ? <StartSchedule startAt={contest.startAt} /> : contest.status === "open" ? <OnGoing /> : null }
-        </ContestDetail>
+        <Link to={`/contest/${contest.id}`}>
+          <ContestImage />
+          <ContestDetail>
+            <Category>{contest.category}</Category>
+            <Title>{contest.title}</Title>
+            {contest.status === "Upcoming" ? (
+              <StartSchedule startAt={contest.event_start_at} />
+            ) : contest.status === "Open" ? (
+              <OnGoing />
+            ) : null}
+          </ContestDetail>
+        </Link>
       </Container>
     );
   } else {
-    return null
+    return null;
   }
-}
+};
 
 const Container = styled.div`
   width: 100%;
@@ -62,4 +69,3 @@ const Title = styled.div`
   color: ${color.TextBaseColor.hex};
   margin-bottom: 12px;
 `;
-

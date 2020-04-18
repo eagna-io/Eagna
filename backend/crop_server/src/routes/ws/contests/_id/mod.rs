@@ -1,11 +1,8 @@
-use crate::{context::Context, error::Error, filters::auth};
-use crop_domain::account::{self, Account};
+use crate::{context::Context, error::Error};
+use crop_domain::account::{self, AccessToken, Account};
 use crop_domain::contest::poll::DetailedPoll;
 use crop_domain::contest::{Contest, ContestId, ContestRepository as _, DetailedContest};
-use futures::{
-    sink::{Sink, SinkExt as _},
-    stream::{StreamExt as _, TryStreamExt as _},
-};
+use futures::prelude::*;
 use http::StatusCode;
 use warp::{filters::ws::Message, reject::Rejection, reply::Reply, Filter};
 
@@ -14,18 +11,20 @@ mod msg;
 pub use msg::*;
 
 pub fn route(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    warp::path!("contests" / ContestId)
-        .and(auth::account())
+    warp::path!("ws" / "contests" / ContestId / AccessToken)
         .and(warp::filters::ws::ws())
-        .and_then(move |contest_id, account, ws| inner(ws, ctx.clone(), contest_id, account))
+        .and_then(move |contest_id, access_token, ws| {
+            inner(ws, ctx.clone(), contest_id, access_token)
+        })
 }
 
 async fn inner(
     ws: warp::filters::ws::Ws,
     ctx: Context,
     contest_id: ContestId,
-    account: account::Authenticated,
+    access_token: AccessToken,
 ) -> Result<impl Reply, Rejection> {
+    let account = account::Authenticated::from(access_token);
     let contest = query_contest(ctx.clone(), contest_id)
         .await
         .map_err(Into::<Rejection>::into)?;
@@ -55,7 +54,14 @@ async fn ws_handler(
 
     send_initial_poll_msg(&contest, &account, &mut msg_sink).await;
 
-    subscribe_msgs(ctx, &contest, &account, &mut msg_sink).await;
+    let stream1 = subscribe_msgs_stream(&ctx, contest.id(), *account.id());
+    let stream2 = ping_stream();
+    let mut merged_stream = futures::stream::select(stream1, stream2);
+
+    msg_sink
+        .send_all(&mut merged_stream)
+        .await
+        .unwrap_or_else(|e| log::debug!("{:?}", e))
 }
 
 // Poll msgを送信する
@@ -73,26 +79,24 @@ async fn send_initial_poll_msg(
     }
 }
 
-// Pollの更新通知を受け取る
-async fn subscribe_msgs(
-    ctx: Context,
-    contest: &DetailedContest<DetailedPoll>,
-    account: &account::Authenticated,
-    msg_sink: &mut (impl Sink<Message, Error = anyhow::Error> + Unpin + Send),
-) {
-    if let Some(subscriber) = ctx.contest_manager.subscribe(contest.id()).await {
-        let account_id = *account.id();
-        let mut stream = subscriber
-            .err_into::<anyhow::Error>()
-            .map_ok(move |msg_source| msg_source.to_msg(&account_id))
-            .boxed(); // このboxedをなくすと、なぜかコンパイルエラーが出る
-                      // async環境でclosureを使うのまだ深く理解してない
-                      // コンパイラもまだ未発達で、
-                      // 有意なエラーを返してくれない
+// 定期的にPingを送信するStream
+fn ping_stream() -> impl Stream<Item = anyhow::Result<Message>> + Unpin {
+    tokio::time::interval(tokio::time::Duration::from_secs(5)).map(|_| Ok(Message::ping("hello")))
+}
 
-        msg_sink
-            .send_all(&mut stream)
-            .await
-            .unwrap_or_else(|e| log::debug!("{:?}", e))
-    }
+// Pollの更新通知を受け取るStream
+fn subscribe_msgs_stream<'a>(
+    ctx: &'a Context,
+    contest_id: &'a ContestId,
+    account_id: account::AccountId,
+) -> impl Stream<Item = anyhow::Result<Message>> + Unpin + 'a {
+    ctx.contest_manager
+        .subscribe(contest_id) // Future<Option<Stream<Result<MsgSource, _>>>>
+        .into_stream() // Stream<Option<Stream<_>>>
+        .map(futures::stream::iter) // Stream<Stream<Stream<_>>
+        .flatten() // Stream<Stream<Result<_, _>>>
+        .flatten() // Stream<Result<_, _>>
+        .err_into::<anyhow::Error>() // Stream<anyhow::Result<_>>
+        .map_ok(move |msg_source| msg_source.to_msg(&account_id))
+        .boxed()
 }

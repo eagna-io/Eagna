@@ -3,22 +3,27 @@ import { Moment } from "moment";
 export interface Poll {
   id: string;
   idx: number;
+  status: "Open" | "Closed";
   title: string;
-  endAt: Moment;
-  status: "open" | "closed";
-  choices: Record<string, string>;
-  resolved?: string;
+  choices: {
+    name: string;
+    color: string;
+    idx: number;
+  }[];
+  created_at: Moment,
+  duration_sec: number,
+  resolved_choice?: string;
   stats?: {
     totalVotes: number;
     votePerChoice: Record<string, number>;
   };
-  selected?: string;
+  selected?: string; // selected_choice
 }
 
 export interface Comment {
-  account: string;
+  account_name: string;
   comment: string;
-  color: string;
+  choice?: string;
 }
 
 export type Timer = number | "closed";

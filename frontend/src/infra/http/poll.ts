@@ -10,9 +10,14 @@ interface GetRes {
   id: string;
   idx: number;
   title: string;
-  endAt: Moment;
-  status: "open" | "closed";
-  choices: Record<string, string>;
+  status: "Open" | "Closed";
+  created_at: Moment;
+  duration_sec: number;
+  choices: {
+    name: string;
+    color: string;
+    idx: number;
+  }[];
   resolved?: string;
   stats?: {
     totalVotes: number;
@@ -24,9 +29,16 @@ const GetResDecoder: D.Decoder<GetRes> = D.object({
   id: D.string(),
   idx: D.number(),
   title: D.string(),
-  endAt: D.string().map(s => moment(s)),
-  status: D.union(D.constant<"open">("open"), D.constant<"closed">("closed")),
-  choices: D.dict(D.string()),
+  status: D.union(D.constant<"Open">("Open"), D.constant<"Closed">("Closed")),
+  created_at: D.string().map(s => moment(s)),
+  duration_sec: D.number(),
+  choices: D.array(
+    D.object({
+      name: D.string(),
+      color: D.string(),
+      idx: D.number()
+    })
+  ),
   resolved: D.optional(D.string()),
   stats: D.optional(
     D.object({
@@ -36,9 +48,33 @@ const GetResDecoder: D.Decoder<GetRes> = D.object({
   )
 });
 
-export const resolve = async (choice: string): Promise<void> =>
+export const post = async (args: {
+  contestId: string;
+  title: string;
+  durationSec: number;
+  choices: { name: string; color: string; idx: number }[];
+  accessToken: string;
+}): Promise<string> =>
+  http.post({
+    path: `/contests/${args.contestId}/polls`,
+    body: {
+      title: args.title,
+      duration_sec: args.durationSec,
+      choices: args.choices
+    },
+    accessToken: args.accessToken,
+    decoder: D.string()
+  });
+
+export const resolve = async (arg: {
+  contestId: string;
+  pollId: string;
+  choice: string;
+  accessToken: string;
+}): Promise<void> =>
   http.patch({
-    path: "/contest/poll",
-    body: { resolved: choice },
+    path: `/contests/${arg.contestId}/polls/${arg.pollId}`,
+    body: { resolved_choice: arg.choice },
+    accessToken: arg.accessToken,
     decoder: D.anyJson()
   });

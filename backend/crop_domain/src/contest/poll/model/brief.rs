@@ -12,11 +12,13 @@ pub struct BriefPoll {
     pub(super) created_at: DateTime<Utc>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(serialize_with = "serialize_duration")]
+    #[serde(rename = "duration_sec")]
     // https://github.com/GREsau/schemars/issues/15#issuecomment-593006526
     #[schemars(with = "Option<i64>")]
     pub(super) duration: Option<Duration>,
     pub(super) idx: usize,
     pub(super) choices: Vec<Choice>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub(super) resolved_choice: Option<ChoiceName>,
 }
 
