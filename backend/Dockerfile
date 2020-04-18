@@ -1,4 +1,4 @@
-FROM rust:1.40.0 as builder
+FROM rust:1.42.0 as builder
 ENV USER=root 
 # MODE *MUST* be one of "debug" or "release". Default is "debug"
 ARG BUILD_MODE="debug"
