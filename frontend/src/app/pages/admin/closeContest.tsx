@@ -8,57 +8,57 @@ import { AdminTemplate } from "./components/template/admin";
 export const CloseContest: React.FC = () => {
   return (
     <AdminTemplate>
-      <TextInputWrapper>
-        <Tag>カテゴリー</Tag>
-        <Input type="text" placeholder="例）NBA（バスケ）" />
-      </TextInputWrapper>
-      <TextInputWrapper>
-         <Tag>タイトル</Tag>
-         <Input type="text" placeholder="例）Los Angels Lakers vs Golden State Warriors" />
-      </TextInputWrapper>
-      <TextInputWrapper>
-         <Tag>開始時間</Tag>
-         <Input
-          type="datetime-local"
-          placeholder="開始時刻を入力してください。例）2020/04/18 19:00"
-        />
-      </TextInputWrapper>
-      <Submit>作成</Submit>
+      <Table>
+        <Tr>
+          <Th align="left">カテゴリー</Th>
+          <Th align="left">タイトル</Th>
+          <Th align="center">開始時刻</Th>
+          <Th align="center">CLOSE</Th>
+        </Tr>
+        <Tr>
+          <Td align="left">NBA（バスケ</Td>
+          <Td align="left">Los Angels Lakers vs Golden State Warriors</Td>
+          <Td align="center">開始時刻</Td>
+          <Td align="center"><Submit>CLOSE</Submit></Td>
+        </Tr>
+      </Table>
     </AdminTemplate>
   );
 };
 
-const TextInputWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin: 64px 40px 0 0;
-`;
-
-const Tag = styled.div`
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 30px;
-  color: ${color.AdminMainColor.hex};
-`;
-
-const Input = styled.input`
-  width: 526px;
-  height: 30px;
+const Table = styled.table`
+  width: 720px;
   padding: 10px 8px;
+  margin: 0 auto;
   border: solid 1px ${color.AdminInputBorderColor.hex};
   font-size: 10px;
+  border-collapse:  collapse;
+`;
+
+const Tr = styled.tr`
+`;
+
+const Th = styled.th<{ align: string }>`
+  padding: 8px 12px;
+  border: solid 1px ${color.AdminInputBorderColor.hex};
+  text-align: ${props => props.align};
+`;
+
+const Td = styled.td<{ align: string }>`
+  padding: 8px 12px;
+  border: solid 1px ${color.AdminInputBorderColor.hex};
+  text-align: ${props => props.align};
 `;
 
 const Submit = styled.button`
-  display: block;
-  position: absolute;
-  bottom: 31px;
-  left: 50%;
-  transform: translateY(0%) translateX(-50%);
-  -webkit-transform: translateY(0%) translateX(-50%);
-  width: 250px;
-  height: 40px;
+  width: 50px;
+  height: 20px;
+  padding: 4px 8px;
+  border-radius: 2px;
   background-color: ${color.MainRed.hex};
-  font-size: 14px;
   color: ${color.WhiteBaseColor.hex};
+  font-size: 10px;
+  &:disabled {
+    background-color: ${color.AdminInputBorderColor.hex};
+  }
 `;
