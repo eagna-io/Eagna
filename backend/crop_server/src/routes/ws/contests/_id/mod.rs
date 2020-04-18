@@ -1,5 +1,5 @@
-use crate::{context::Context, error::Error, filters::auth};
-use crop_domain::account::{self, Account};
+use crate::{context::Context, error::Error};
+use crop_domain::account::{self, AccessToken, Account};
 use crop_domain::contest::poll::DetailedPoll;
 use crop_domain::contest::{Contest, ContestId, ContestRepository as _, DetailedContest};
 use futures::{
@@ -14,18 +14,20 @@ mod msg;
 pub use msg::*;
 
 pub fn route(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
-    warp::path!("contests" / ContestId)
-        .and(auth::account())
+    warp::path!("contests" / ContestId / AccessToken)
         .and(warp::filters::ws::ws())
-        .and_then(move |contest_id, account, ws| inner(ws, ctx.clone(), contest_id, account))
+        .and_then(move |contest_id, access_token, ws| {
+            inner(ws, ctx.clone(), contest_id, access_token)
+        })
 }
 
 async fn inner(
     ws: warp::filters::ws::Ws,
     ctx: Context,
     contest_id: ContestId,
-    account: account::Authenticated,
+    access_token: AccessToken,
 ) -> Result<impl Reply, Rejection> {
+    let account = account::Authenticated::from(access_token);
     let contest = query_contest(ctx.clone(), contest_id)
         .await
         .map_err(Into::<Rejection>::into)?;
