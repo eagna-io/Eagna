@@ -28,6 +28,9 @@ export const NavigationBar: React.FC = () => {
       <NavBarItem>
         <Link to="/admin/contest/create">Contest作成フォーム</Link>
       </NavBarItem>
+      <NavBarItem>
+        <Link to="/admin/contest/close">Contest Close管理</Link>
+      </NavBarItem>
     </NavBar>
   );
 }

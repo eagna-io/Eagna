@@ -14,6 +14,7 @@ import { CreatePoll } from "./pages/admin/createPoll";
 import { ResolvePoll } from "./pages/admin/resolvePoll";
 import { AdminLogin } from "./pages/admin/login";
 import { CreateContest } from "./pages/admin/createContest";
+import { CloseContest } from "./pages/admin/closeContest";
 
 const App: FC = () => {
   return (
@@ -63,6 +64,11 @@ const AppRouter: FC = () => (
         path="/admin/contest/create"
         exact
         render={() => <CreateContest />}
+      />
+      <Route
+        path="/admin/contest/close"
+        exact
+        render={() => <CloseContest />}
       />
       <Redirect to="/instapoll" />
     </Switch>
