@@ -29,8 +29,6 @@ export const ContestComponent: React.FC<Props> = ({ contest }) => {
   }
 }
 
-console.log(ContestBackGroundImage);
-
 const Container = styled.div`
   width: 100%;
   margin-bottom: 26px;
@@ -40,7 +38,9 @@ const Container = styled.div`
 
 const ContestImage = styled.div`
   height: 132px;
-  backgroundImage: url(${ContestBackGroundImage});
+  background-image: url(${ContestBackGroundImage});
+  background-position: right 50% bottom 50%;
+  background-size: cover;
   border-radius: 4px 4px 0 0;
 `;
 
