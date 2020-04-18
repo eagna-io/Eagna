@@ -16,7 +16,7 @@ export const Top: React.FC = () => {
   return <Page contests={contests} />;
 };
 
-const contests = [
+const demoContests = [
   {
     id: "1",
     title: "Los Angels Lakers vs Golden State Warriors",
