@@ -3,7 +3,7 @@ use crate::{
     error::Error,
     response::{self, Response},
 };
-use crop_domain::account::{self, AccessToken, Account, AccountRepository};
+use crop_domain::account::{self, Account, AccountRepository};
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -16,7 +16,9 @@ pub struct ReqBody {
 
 #[derive(Debug, Serialize, JsonSchema)]
 #[serde(transparent)]
-pub struct ResBody(AccessToken);
+pub struct ResBody {
+    access_token: String,
+}
 
 pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejection> + Clone {
     warp::path!("accounts")
@@ -32,8 +34,8 @@ async fn inner(ctx: Context, body: ReqBody) -> Result<Response, Error> {
         .with_conn::<Result<Response, Error>, _>(move |conn| {
             let account = account::new(body.name);
             conn.save(&account)?;
-            let token = account.gen_access_token();
-            Ok(response::new(StatusCode::OK, &ResBody(token)))
+            let access_token = account.gen_access_token().encode();
+            Ok(response::new(StatusCode::OK, &ResBody { access_token }))
         })
         .await?
 }

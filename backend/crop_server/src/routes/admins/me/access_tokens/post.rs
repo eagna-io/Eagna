@@ -3,10 +3,7 @@ use crate::{
     error::Error,
     response::{self, Response},
 };
-use crop_domain::admin::{
-    self,
-    model::{AccessToken, Admin as _},
-};
+use crop_domain::admin::{self, model::Admin as _};
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -24,7 +21,9 @@ pub struct ReqBody {
 
 #[derive(Debug, Serialize, JsonSchema)]
 #[serde(transparent)]
-pub struct ResBody(AccessToken);
+pub struct ResBody {
+    access_token: String,
+}
 
 pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejection> + Clone {
     warp::path!("admins" / "me" / "access_tokens")
@@ -49,8 +48,8 @@ async fn inner(ctx: Context, body: ReqBody) -> Result<Response, Error> {
                     Error::new(StatusCode::UNAUTHORIZED, "Unauthorized")
                 })
                 .map(|admin| {
-                    let token = admin.gen_access_token();
-                    response::new(StatusCode::CREATED, &ResBody(token))
+                    let access_token = admin.gen_access_token().encode();
+                    response::new(StatusCode::CREATED, &ResBody { access_token })
                 })
         })
         .await?
