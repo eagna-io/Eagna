@@ -44,7 +44,9 @@ const Container = styled.div`
 
 const ContestImage = styled.div`
   height: 132px;
-  background: ${color.TextBaseColor.hex};
+  background-image: url("/img/top/contest-image.png");
+  background-position: right 50% bottom 50%;
+  background-size: cover;
   border-radius: 4px 4px 0 0;
 `;
 
