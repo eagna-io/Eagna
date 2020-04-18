@@ -6,6 +6,7 @@ import { Contest } from "model/contest";
 
 import { StartSchedule } from "../molecules/startSchedule";
 import { OnGoing } from "../molecules/onGoing";
+import ContestBackGroundImage from "../atoms/images/contest-image.png";
 
 interface Props {
   contest: Contest;
@@ -28,6 +29,8 @@ export const ContestComponent: React.FC<Props> = ({ contest }) => {
   }
 }
 
+console.log(ContestBackGroundImage);
+
 const Container = styled.div`
   width: 100%;
   margin-bottom: 26px;
@@ -37,7 +40,7 @@ const Container = styled.div`
 
 const ContestImage = styled.div`
   height: 132px;
-  background: ${color.TextBaseColor.hex};
+  backgroundImage: url(${ContestBackGroundImage});
   border-radius: 4px 4px 0 0;
 `;
 
