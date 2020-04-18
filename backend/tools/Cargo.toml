@@ -1,0 +1,14 @@
+[package]
+name = "tools"
+version = "0.1.0"
+authors = ["AtsukiTak <takatomgoo@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+crop_primitive = { path = "../crop_primitive" }
+crop_infra = { path = "../crop_infra" }
+crop_domain = { path = "../crop_domain" }
+
+env_logger = "0.7"
+log = "~0.4"
+structopt = "~0.3"
