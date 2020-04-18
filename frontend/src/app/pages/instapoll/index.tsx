@@ -3,7 +3,11 @@ import moment from "moment";
 
 import * as websocket from "infra/ws/contest";
 import * as accountApi from "infra/http/account";
+import * as contestApi from "infra/http/contest";
+import * as commentApi from "infra/http/comment";
+import * as myChoiceApi from "infra/http/my_choice";
 import * as storage from "infra/storage";
+import { Contest } from "model/contest";
 
 import { Page, LoadingPage } from "./page";
 import { reducer, initialState } from "./reducer";
@@ -14,6 +18,7 @@ interface Props {
 
 export const InstapollPage: React.FC<Props> = ({ contestId }) => {
   const [accessToken, setAccessToken] = React.useState(storage.getAccessToken);
+  const [contest, setContest] = React.useState<Contest | undefined>();
   const [ws, setWs] = React.useState<WebSocket | undefined>();
   const [state, dispatch] = React.useReducer(reducer, initialState);
   const { poll, comments, timer } = state;
@@ -29,6 +34,10 @@ export const InstapollPage: React.FC<Props> = ({ contestId }) => {
     }
   }, [accessToken]);
 
+  React.useEffect(() => {
+    contestApi.get(contestId).then(res => setContest(res));
+  }, [contestId]);
+
   // Websocketコネクションを確立する
   React.useEffect(() => {
     if (accessToken) {
@@ -39,6 +48,7 @@ export const InstapollPage: React.FC<Props> = ({ contestId }) => {
           dispatch({ type: "pushComment", comment });
         },
         onPoll: poll => {
+          console.warn(`Receive poll msg`);
           dispatch({ type: "updatePoll", poll });
         },
         onClosed: closed => {
@@ -60,27 +70,42 @@ export const InstapollPage: React.FC<Props> = ({ contestId }) => {
     };
   }, []);
 
-  // if (poll !== undefined && timer !== undefined && ws !== undefined) {
-  return (
-    // <Page
-    //   account={account}
-    //   poll={poll}
-    //   comments={comments}
-    //   timer={timer}
-    //   ws={ws}
-    // />
+  const sendComment = (comment: string) => {
+    if (accessToken && poll) {
+      commentApi.post({
+        contestId,
+        pollId: poll.id,
+        comment,
+        accessToken
+      });
+    }
+  };
 
-    <Page
-      account={testaccount}
-      poll={testpoll}
-      comments={testcomments}
-      timer={testtimer}
-      contest={"closed"}
-    />
-  );
-  // } else {
-  //   return <LoadingPage />;
-  // }
+  const updateMyChoice = (choice: string) => {
+    if (accessToken && poll) {
+      myChoiceApi.put({
+        contestId,
+        pollId: poll.id,
+        choice,
+        accessToken
+      });
+    }
+  };
+
+  if (contest && timer !== undefined) {
+    return (
+      <Page
+        poll={poll}
+        comments={comments}
+        timer={timer}
+        contest={contest}
+        sendComment={sendComment}
+        updateMyChoice={updateMyChoice}
+      />
+    );
+  } else {
+    return null;
+  }
 };
 
 const testaccount = "test-account";

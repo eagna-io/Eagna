@@ -45,10 +45,11 @@ export const ChoiceList: React.FC<Props> = ({ poll, selected, onSelected }) => {
                 onSelected(name);
               }}
               disabled
-              correct={poll.resolved_choice === name}
+              correct={
+                poll.resolved_choice ? poll.resolved_choice === name : undefined
+              }
               voteRate={Math.floor(
-                (poll.stats!.votePerChoice[name] / poll.stats!.totalVotes) *
-                  100
+                (poll.stats!.votePerChoice[name] / poll.stats!.totalVotes) * 100
               )}
             />
           ))}

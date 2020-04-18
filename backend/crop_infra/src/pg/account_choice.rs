@@ -8,7 +8,7 @@ pub trait AccountChoiceTable {
     fn upsert<'a>(&self, account_choice: NewAccountChoice<'a>) -> anyhow::Result<()> {
         diesel::insert_into(account_choices::table)
             .values(account_choice)
-            .on_conflict((account_choices::account_id, account_choices::choice_name))
+            .on_conflict((account_choices::account_id, account_choices::poll_id))
             .do_update()
             .set(account_choices::choice_name.eq(account_choice.choice_name))
             .execute(self.conn())?;

@@ -1,4 +1,4 @@
-#![type_length_limit = "1342533"]
+#![type_length_limit = "1349733"]
 
 use crop_infra::{jwt, pg::Pool};
 use crop_server::{context::Context, server};

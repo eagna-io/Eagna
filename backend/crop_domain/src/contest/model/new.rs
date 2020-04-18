@@ -58,6 +58,9 @@ impl Updatable for New {
         let new_contest = NewContest {
             id: &self.id().0,
             title: self.title(),
+            // TODO
+            // 初期値をUpcomingにして、open処理を追加する
+            status: ContestStatus::Open,
             category: self.category(),
             event_start_at: self.event_start_at(),
         };

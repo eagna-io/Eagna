@@ -22,12 +22,16 @@ pub enum OutgoingMsg<'a> {
 pub struct PollMsg<'a> {
     id: &'a PollId,
     title: &'a str,
+    status: PollStatus,
     created_at: &'a DateTime<Utc>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     duration_sec: Option<i64>,
     idx: usize,
     #[schemars(with = "Vec<Choice>")]
     choices: &'a [Choice],
+    #[serde(skip_serializing_if = "Option::is_none")]
     resolved_choice: Option<&'a ChoiceName>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     stats: Option<&'a Stats>,
 }
 
@@ -35,6 +39,7 @@ pub struct PollMsg<'a> {
 pub struct CommentMsg<'a> {
     account_name: &'a str,
     comment: &'a str,
+    #[serde(skip_serializing_if = "Option::is_none")]
     choice: Option<&'a ChoiceName>,
 }
 
@@ -102,6 +107,7 @@ where
         OutgoingMsg::Poll(PollMsg {
             id: self.poll.id(),
             title: self.poll.title(),
+            status: self.poll.status(),
             created_at: self.poll.created_at(),
             duration_sec: self.poll.duration().map(|d| d.num_seconds()),
             idx: self.poll.idx(),

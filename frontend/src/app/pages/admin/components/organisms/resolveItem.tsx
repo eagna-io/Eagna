@@ -6,26 +6,18 @@ import * as pollApi from "infra/http/poll";
 
 interface Props {
   choiceItem: string;
-  pollTitle: string;
 }
 
 export const ResolveItem: React.FC<{
   choiceItem: string;
-  pollTitle: string;
-}> = ({ choiceItem, pollTitle }) => {
-  const handleResolve = () => {
-    const confirmed = window.confirm(
-      `「 ${pollTitle} 」を「${choiceItem}」でResoveします、よろしいですか？`
-    );
-    if (confirmed) {
-      pollApi.resolve(choiceItem).then(res => alert(JSON.stringify(res)));
-    }
-  };
-
+  onResolve: (choice: string) => void;
+}> = ({ choiceItem, onResolve }) => {
   return (
     <Container>
       <ChoiceItem>{choiceItem}</ChoiceItem>
-      <ResolveButton onClick={handleResolve}>Resolve</ResolveButton>
+      <ResolveButton onClick={() => onResolve(choiceItem)}>
+        Resolve
+      </ResolveButton>
     </Container>
   );
 };

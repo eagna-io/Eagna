@@ -38,10 +38,10 @@ export type Action =
  * =============
  */
 export const reducer = (state: State, action: Action): State => {
-  console.log("======== State =======");
-  console.dir(state);
-  console.log("======== Action =======");
-  console.dir(action);
+  // console.log("======== State =======");
+  // console.dir(state);
+  // console.log("======== Action =======");
+  // console.dir(action);
   return produce(state, state => {
     switch (action.type) {
       case "tick":

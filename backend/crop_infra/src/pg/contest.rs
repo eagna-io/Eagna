@@ -58,6 +58,7 @@ impl ContestTable for Connection {
 #[table_name = "contests"]
 pub struct NewContest<'a> {
     pub id: &'a Uuid,
+    pub status: ContestStatus,
     pub title: &'a str,
     pub category: &'a str,
     pub event_start_at: Option<&'a DateTime<Utc>>,

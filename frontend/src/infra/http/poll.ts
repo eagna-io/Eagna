@@ -11,7 +11,7 @@ interface GetRes {
   idx: number;
   title: string;
   status: "Open" | "Closed";
-  created_at: Moment,
+  created_at: Moment;
   duration_sec: number;
   choices: {
     name: string;
@@ -48,9 +48,33 @@ const GetResDecoder: D.Decoder<GetRes> = D.object({
   )
 });
 
-export const resolve = async (choice: string): Promise<void> =>
+export const post = async (args: {
+  contestId: string;
+  title: string;
+  durationSec: number;
+  choices: { name: string; color: string; idx: number }[];
+  accessToken: string;
+}): Promise<string> =>
+  http.post({
+    path: `/contests/${args.contestId}/polls`,
+    body: {
+      title: args.title,
+      duration_sec: args.durationSec,
+      choices: args.choices
+    },
+    accessToken: args.accessToken,
+    decoder: D.string()
+  });
+
+export const resolve = async (arg: {
+  contestId: string;
+  pollId: string;
+  choice: string;
+  accessToken: string;
+}): Promise<void> =>
   http.patch({
-    path: "/contest/poll",
-    body: { resolved: choice },
+    path: `/contests/${arg.contestId}/polls/${arg.pollId}`,
+    body: { resolved_choice: arg.choice },
+    accessToken: arg.accessToken,
     decoder: D.anyJson()
   });

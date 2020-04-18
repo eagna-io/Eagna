@@ -15,7 +15,6 @@ pub struct ReqBody {
 }
 
 #[derive(Debug, Serialize, JsonSchema)]
-#[serde(transparent)]
 pub struct ResBody {
     access_token: String,
 }

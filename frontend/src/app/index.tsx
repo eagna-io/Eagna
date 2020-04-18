@@ -68,7 +68,7 @@ const AppRouter: FC = () => (
       <Route
         path="/admin/contest/close"
         exact
-        render={() => <CloseContest contests={contests}/>}
+        render={() => <CloseContest contests={[]}/>}
       />
       <Redirect to="/" />
     </Switch>
