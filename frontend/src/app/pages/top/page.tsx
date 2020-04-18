@@ -24,14 +24,14 @@ export const Page: React.FC<Props> = ({ contests }) => {
             <SectionTitle>開催中のコンテスト</SectionTitle>
           </Openning>
           {contests.map(contest => (
-            contest.status === "open" ? <ContestComponent contest={contest}/> : null
+            contest.status === "Open" ? <ContestComponent contest={contest}/> : null
           ))}
           <Upcoming>
             <LargeTimer />
             <SectionTitle>開催予定のコンテスト</SectionTitle>
           </Upcoming>
           {contests.map(contest => (
-            contest.status === "upcoming" ? <ContestComponent contest={contest}/> : null
+            contest.status === "Upcoming" ? <ContestComponent contest={contest}/> : null
           ))}
         </Wrapper>
         <Footer>

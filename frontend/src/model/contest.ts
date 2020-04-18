@@ -1,6 +1,9 @@
+import { Moment } from "moment";
+
 export interface Contest {
-  category: string;
+  id: string;
   title: string;
-  startAt: string;
-  status: "upcoming" | "open" | "closed" | "archived";
+  status: "Upcoming" | "Open" | "Closed" | "Archived";
+  category: string;
+  event_start_at?: Moment;
 }
