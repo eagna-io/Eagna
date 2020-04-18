@@ -20,10 +20,13 @@ export const NavigationBar: React.FC = () => {
   return (
     <NavBar>
       <NavBarItem>
-        <Link to="/admin/create">Poll作成フォーム</Link>
+        <Link to="/admin/poll/create">Poll作成フォーム</Link>
       </NavBarItem>
       <NavBarItem>
-        <Link to="/admin/resolve">PollResolveフォーム</Link>
+        <Link to="/admin/poll/resolve">PollResolveフォーム</Link>
+      </NavBarItem>
+      <NavBarItem>
+        <Link to="/admin/contest/create">Contest作成フォーム</Link>
       </NavBarItem>
     </NavBar>
   );
