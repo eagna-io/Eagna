@@ -8,23 +8,30 @@ import { AdminTemplate } from "./components/template/admin";
 export const CreateContest: React.FC = () => {
   return (
     <AdminTemplate>
-      <IdWrapper>
-        <Tag>メールアドレス</Tag>
-        <MailAddress type="text" placeholder="email" />
-      </IdWrapper>
-      <PassWrapper>
-         <Tag>パスワード</Tag>
-         <Password type="password" placeholder="password" />
-      </PassWrapper>
-      <Submit>ログイン</Submit>
+      <TextInputWrapper>
+        <Tag>カテゴリー</Tag>
+        <Input type="text" placeholder="例）NBA（バスケ）" />
+      </TextInputWrapper>
+      <TextInputWrapper>
+         <Tag>タイトル</Tag>
+         <Input type="text" placeholder="例）Los Angels Lakers vs Golden State Warriors" />
+      </TextInputWrapper>
+      <TextInputWrapper>
+         <Tag>開始時間</Tag>
+         <Input
+          type="datetime-local"
+          placeholder="開始時刻を入力してください。例）2020/04/18 19:00"
+        />
+      </TextInputWrapper>
+      <Submit>作成</Submit>
     </AdminTemplate>
   );
 };
 
-const IdWrapper = styled.div`
+const TextInputWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  margin: 100px 40px 0 0;
+  margin: 64px 40px 0 0;
 `;
 
 const Tag = styled.div`
@@ -34,21 +41,7 @@ const Tag = styled.div`
   color: ${color.AdminMainColor.hex};
 `;
 
-const MailAddress = styled.input`
-  width: 526px;
-  height: 30px;
-  padding: 10px 8px;
-  border: solid 1px ${color.AdminInputBorderColor.hex};
-  font-size: 10px;
-`;
-
-const PassWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin: 56px 40px 0 0;
-`;
-
-const Password = styled.input`
+const Input = styled.input`
   width: 526px;
   height: 30px;
   padding: 10px 8px;
@@ -65,7 +58,7 @@ const Submit = styled.button`
   -webkit-transform: translateY(0%) translateX(-50%);
   width: 250px;
   height: 40px;
-  background-color: ${color.Correct.hex};
+  background-color: ${color.MainRed.hex};
   font-size: 14px;
   color: ${color.WhiteBaseColor.hex};
 `;
