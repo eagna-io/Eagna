@@ -141,7 +141,7 @@ export const LoadingPage: React.FC = () => {
 const Container = styled.div`
   position: relative;
   width: 100vw;
-  height: calc(100vh - 75px);
+  height: 100vh;
   padding: 16px 28px;
   background-image: linear-gradient(
     151deg,
@@ -209,6 +209,7 @@ const CommentInput = styled.input`
   line-height: 30px;
   transform: scale(0.95);
   background-color: transparent;
+  color: ${WhiteBaseColor.hex};
   ::placeholder {
     color: ${WhiteBaseColor.hex};
     font-size: 14px;
