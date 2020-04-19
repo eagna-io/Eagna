@@ -141,7 +141,7 @@ export const LoadingPage: React.FC = () => {
 const Container = styled.div`
   position: relative;
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - 75px);
   padding: 16px 28px;
   background-image: linear-gradient(
     151deg,
