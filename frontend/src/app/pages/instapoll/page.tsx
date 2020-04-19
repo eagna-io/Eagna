@@ -92,12 +92,10 @@ pollがresolve && 不正解 => WrongModal
           {/* <Score numer={2} denom={3} /> */}
         </Header>
         <PollCard>
-          {poll.status === "Open" ? (
-            <Theme>
-              <PollIndex>Q{poll.idx}.</PollIndex>
-              {poll.title}
-            </Theme>
-          ) : null}
+          <Theme>
+            <PollIndex>Q{poll.idx}.</PollIndex>
+            {poll.title}
+          </Theme>
           <ChoiceList
             poll={poll}
             selected={selected}
