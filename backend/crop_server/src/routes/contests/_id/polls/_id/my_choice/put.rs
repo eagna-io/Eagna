@@ -10,14 +10,14 @@ use crop_domain::contest::{Contest, ContestId, ContestRepository as _, DetailedC
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::Deserialize;
-use warp::{reject::Rejection, Filter};
+use warp::Filter as _;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ReqBody {
     choice: ChoiceName,
 }
 
-pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejection> + Clone {
+pub fn route(ctx: Context) -> warp::filters::BoxedFilter<(Response,)> {
     warp::path!("contests" / ContestId / "polls" / PollId / "my_choice")
         .and(warp::filters::method::put())
         .and(auth::account())
@@ -28,6 +28,7 @@ pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejecti
         })
         .recover(Error::recover)
         .unify()
+        .boxed()
 }
 
 async fn inner(

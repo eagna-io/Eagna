@@ -7,7 +7,7 @@ use crop_domain::account::{self, Account, AccountRepository};
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use warp::{reject::Rejection, Filter};
+use warp::Filter as _;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ReqBody {
@@ -19,13 +19,14 @@ pub struct ResBody {
     access_token: String,
 }
 
-pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejection> + Clone {
+pub fn route(ctx: Context) -> warp::filters::BoxedFilter<(Response,)> {
     warp::path!("accounts")
         .and(warp::filters::method::post())
         .and(warp::filters::body::json::<ReqBody>())
         .and_then(move |body| ctx.clone().handle_request(move |ctx| inner(ctx, body)))
         .recover(Error::recover)
         .unify()
+        .boxed()
 }
 
 async fn inner(ctx: Context, body: ReqBody) -> Result<Response, Error> {

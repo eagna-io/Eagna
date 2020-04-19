@@ -8,13 +8,13 @@ use crop_domain::contest::{ContestId, ContestRepository as _, DetailedContest};
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::Serialize;
-use warp::{reject::Rejection, Filter};
+use warp::Filter as _;
 
 #[derive(Debug, Serialize, JsonSchema)]
 #[serde(transparent)]
 pub struct ResBody(DetailedContest<BriefPoll>);
 
-pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejection> + Clone {
+pub fn route(ctx: Context) -> warp::filters::BoxedFilter<(Response,)> {
     warp::path!("contests" / ContestId)
         .and(warp::filters::method::get())
         .and_then(move |contest_id| {
@@ -23,6 +23,7 @@ pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejecti
         })
         .recover(Error::recover)
         .unify()
+        .boxed()
 }
 
 async fn inner(contest_id: ContestId, ctx: Context) -> Result<Response, Error> {

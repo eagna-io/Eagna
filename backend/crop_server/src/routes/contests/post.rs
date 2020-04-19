@@ -13,7 +13,7 @@ use crop_domain::contest::{
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use warp::{reject::Rejection, Filter};
+use warp::Filter as _;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ReqBody {
@@ -26,7 +26,7 @@ pub struct ReqBody {
 #[serde(transparent)]
 pub struct ResBody(ContestId);
 
-pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejection> + Clone {
+pub fn route(ctx: Context) -> warp::filters::BoxedFilter<(Response,)> {
     warp::path!("contests")
         .and(warp::filters::method::post())
         .and(auth::admin())
@@ -34,6 +34,7 @@ pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejecti
         .and_then(move |_admin, body| ctx.clone().handle_request(move |ctx| inner(ctx, body)))
         .recover(Error::recover)
         .unify()
+        .boxed()
 }
 
 async fn inner(ctx: Context, body: ReqBody) -> Result<Response, Error> {

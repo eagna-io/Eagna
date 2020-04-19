@@ -11,14 +11,14 @@ use crop_domain::contest::{
 use http::StatusCode;
 use schemars::JsonSchema;
 use serde::Deserialize;
-use warp::{reject::Rejection, Filter};
+use warp::Filter as _;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct ReqBody {
     status: ContestStatus,
 }
 
-pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejection> + Clone {
+pub fn route(ctx: Context) -> warp::filters::BoxedFilter<(Response,)> {
     warp::path!("contests" / ContestId)
         .and(warp::filters::method::patch())
         .and(auth::admin())
@@ -29,6 +29,7 @@ pub fn route(ctx: Context) -> impl Filter<Extract = (Response,), Error = Rejecti
         })
         .recover(Error::recover)
         .unify()
+        .boxed()
 }
 
 async fn inner(ctx: Context, body: ReqBody, contest_id: ContestId) -> Result<Response, Error> {

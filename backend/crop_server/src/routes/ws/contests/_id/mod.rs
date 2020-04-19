@@ -10,12 +10,13 @@ mod msg;
 
 pub use msg::*;
 
-pub fn route(ctx: Context) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
+pub fn route(ctx: Context) -> warp::filters::BoxedFilter<(impl Reply,)> {
     warp::path!("ws" / "contests" / ContestId / AccessToken)
         .and(warp::filters::ws::ws())
         .and_then(move |contest_id, access_token, ws| {
             inner(ws, ctx.clone(), contest_id, access_token)
         })
+        .boxed()
 }
 
 async fn inner(
