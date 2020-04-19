@@ -79,18 +79,17 @@ pollがresolve && 不正解 => WrongModal
       </Container>
     );
   } else {
+    const isCorrect =
+      poll.resolved_choice && selected
+        ? selected === poll.resolved_choice
+        : undefined;
     return (
       <Container>
-        {poll.resolved_choice && selected === poll.resolved_choice ? (
-          <ResultModal isCorrect={true} />
-        ) : null}
-        {poll.resolved_choice && selected !== poll.resolved_choice ? (
-          <ResultModal isCorrect={false} />
-        ) : null}
+        {isCorrect !== undefined ? <ResultModal isCorrect={isCorrect} /> : null}
         <Header>
           <Logo />
           <TimerComponent timer={timer} />
-          { /* <Score numer={2} denom={3} /> */ }
+          {/* <Score numer={2} denom={3} /> */}
         </Header>
         <PollCard>
           {poll.status === "Open" ? (
