@@ -206,6 +206,7 @@ const CommentInput = styled.input`
   line-height: 30px;
   transform: scale(0.95);
   background-color: transparent;
+  color: ${WhiteBaseColor.hex};
   ::placeholder {
     color: ${WhiteBaseColor.hex};
     font-size: 14px;
