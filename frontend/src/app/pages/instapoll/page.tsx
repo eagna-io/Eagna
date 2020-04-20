@@ -182,8 +182,20 @@ const PollIndex = styled.span`
   margin-right: 4px;
 `;
 
+/*
+CommentFeedの高さの計算
+{
+  header（余白含む）: 16px + 45px + 16px,
+  PollCard（余白含む）: (229px｜111px) + 20px
+  CommentInput（余白含む）: 16px + 30px
+  CommentFeedの余白 : 13px
+  ios tool bar考慮 : 75px 
+}
+...CommentFeedの高さ => 100vh - (460px｜342px)
+*/
+
 const CommentFeed = styled.div<{ small: boolean }>`
-  height: ${props => (props.small ? "208px" : "336px")};
+  height: calc(100vh - ${ props => props.small ? "460px" : "342px" });
   margin: 0 14px 18px 14px;
   overflow: scroll;
 `;
