@@ -183,9 +183,17 @@ const PollIndex = styled.span`
 `;
 
 const CommentFeed = styled.div<{ small: boolean }>`
-  height: ${props => (props.small ? "208px" : "336px")};
+  height: ${props => (props.small ? "30vh" : "48vh")};
   margin: 0 14px 18px 14px;
   overflow: scroll;
+  width: 78%;
+  @media (min-height: 736px) {
+    height: ${props => (props.small ? "36vh" : "50vh")};
+  }
+  @media (min-height: 812px) {
+    height: 42vh;
+    height: ${props => (props.small ? "36vh" : "56vh")};
+  }
 `;
 
 const CommentContainer = styled.div`
