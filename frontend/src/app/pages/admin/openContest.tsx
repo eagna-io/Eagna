@@ -26,7 +26,7 @@ export const OpenContest: React.FC<Props> = ({ contests }) => {
             <Td align="left">{contest.title}</Td>
             <Td align="center">{contest.event_start_at}</Td>
             <Td align="center">
-              <Submit disabled={contest.status === "Upcoming"}>OPEN</Submit>
+              <Submit disabled={contest.status !== "Upcoming"}>OPEN</Submit>
             </Td>
           </Tr>
         ))}
