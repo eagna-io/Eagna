@@ -9,16 +9,20 @@ pub struct Contest {
     pub status: ContestStatus,
     pub title: String,
     pub category: String,
-    pub event_start_at: DateTime<Utc>,
+    pub event_start_at: Option<DateTime<Utc>>,
     pub current_poll: Option<Poll>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct ContestId(Uuid);
+pub struct ContestId(pub Uuid);
 
 impl ContestId {
     fn new() -> ContestId {
         ContestId(Uuid::new_v4())
+    }
+
+    pub fn as_ref(&self) -> &Uuid {
+        &self.0
     }
 }
 
@@ -34,7 +38,7 @@ impl Contest {
     pub fn new(
         title: String,
         category: String,
-        event_start_at: DateTime<Utc>,
+        event_start_at: Option<DateTime<Utc>>,
     ) -> anyhow::Result<Contest> {
         if title.is_empty() {
             return Err(anyhow::anyhow!("title is empty"));
@@ -92,7 +96,7 @@ impl Contest {
             .map(|poll| poll.idx + 1)
             .unwrap_or(0);
 
-        let poll = Poll::new(idx, title, duration, choices)?;
+        let poll = Poll::new(self.id, idx, title, duration, choices)?;
 
         self.current_poll = Some(poll);
         Ok(())

@@ -1,3 +1,4 @@
+use super::ContestId;
 use crate::account::AccountId;
 use chrono::Duration;
 use std::collections::HashMap;
@@ -6,6 +7,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Poll {
     pub id: PollId,
+    pub contest_id: ContestId,
     pub status: PollStatus,
     pub idx: usize,
     pub title: String,
@@ -16,7 +18,7 @@ pub struct Poll {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct PollId(Uuid);
+pub struct PollId(pub Uuid);
 
 impl PollId {
     fn new() -> Self {
@@ -37,13 +39,14 @@ pub struct Choice {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ChoiceName(String);
+pub struct ChoiceName(pub String);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ChoiceColor(String);
+pub struct ChoiceColor(pub String);
 
 impl Poll {
     pub(crate) fn new(
+        contest_id: ContestId,
         idx: usize,
         title: String,
         duration: Duration,
@@ -57,6 +60,7 @@ impl Poll {
 
         Ok(Poll {
             id: PollId::new(),
+            contest_id,
             status: PollStatus::Open,
             idx,
             title,
