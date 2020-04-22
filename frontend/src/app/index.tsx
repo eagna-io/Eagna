@@ -15,6 +15,7 @@ import { ResolvePoll } from "./pages/admin/resolvePoll";
 import { AdminLogin } from "./pages/admin/login";
 import { CreateContest } from "./pages/admin/createContest";
 import { CloseContest } from "./pages/admin/closeContest";
+import { OpenContest } from "./pages/admin/openContest";
 
 const App: FC = () => {
   return (
@@ -69,6 +70,11 @@ const AppRouter: FC = () => (
         path="/admin/contest/close"
         exact
         render={() => <CloseContest contests={[]}/>}
+      />
+      <Route
+        path="/admin/contest/open"
+        exact
+        render={() => <OpenContest contests={[]}/>}
       />
       <Redirect to="/" />
     </Switch>
