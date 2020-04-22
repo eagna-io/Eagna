@@ -7,16 +7,26 @@ pub struct Account {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct AccountId(Uuid);
+pub struct AccountId(pub Uuid);
 
 impl AccountId {
     fn new() -> Self {
         AccountId(Uuid::new_v4())
     }
+
+    pub fn as_ref(&self) -> &Uuid {
+        &self.0
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AccountName(String);
+pub struct AccountName(pub String);
+
+impl AccountName {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
 
 impl Account {
     pub fn new(name: String) -> anyhow::Result<Account> {
