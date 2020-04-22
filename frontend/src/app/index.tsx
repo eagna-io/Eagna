@@ -16,7 +16,6 @@ import { AdminLogin } from "./pages/admin/login";
 import { CreateContest } from "./pages/admin/createContest";
 import { CloseContest } from "./pages/admin/closeContest";
 import { OpenContest } from "./pages/admin/openContest";
-import moment from "moment";
 
 const App: FC = () => {
   return (
