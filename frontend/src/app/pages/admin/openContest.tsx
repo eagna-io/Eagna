@@ -5,6 +5,7 @@ import * as color from "app/components/color";
 import { Contest } from "model/contest";
 
 import { AdminTemplate } from "./components/template/admin";
+import { ContestIdInput } from "./components/organisms/contestIdInput";
 
 interface Props {
   contests: Contest[];
@@ -13,6 +14,7 @@ interface Props {
 export const OpenContest: React.FC<Props> = ({ contests }) => {
   return (
     <AdminTemplate>
+      <ContestIdInput />
       <Table>
         <Tr>
           <Th align="left">カテゴリー</Th>
