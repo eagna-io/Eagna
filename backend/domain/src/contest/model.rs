@@ -108,7 +108,7 @@ impl Contest {
         choice: ChoiceName,
     ) -> anyhow::Result<()> {
         self.current_poll_mut_or_err()?
-            .update_account_choice(account_id, choice)
+            .update_final_answer(account_id, choice)
     }
 
     pub fn resolve_poll(&mut self, resolved_choice_name: ChoiceName) -> anyhow::Result<()> {

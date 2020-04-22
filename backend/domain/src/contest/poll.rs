@@ -1,4 +1,4 @@
-use super::ContestId;
+use super::{Answer, ContestId};
 use crate::account::AccountId;
 use chrono::Duration;
 use std::collections::HashMap;
@@ -14,7 +14,7 @@ pub struct Poll {
     pub duration: Duration,
     pub choices: Vec<Choice>,
     pub resolved_choice_name: Option<ChoiceName>,
-    pub account_choices: HashMap<AccountId, ChoiceName>,
+    pub final_answers: HashMap<AccountId, Answer>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -67,7 +67,7 @@ impl Poll {
             duration,
             choices,
             resolved_choice_name: None,
-            account_choices: HashMap::new(),
+            final_answers: HashMap::new(),
         })
     }
 
@@ -75,23 +75,33 @@ impl Poll {
         self.resolved_choice_name.is_some()
     }
 
-    pub(crate) fn contains_choice(&self, target: &ChoiceName) -> bool {
-        self.choices
+    pub(crate) fn check_contains_choice(&self, target: &ChoiceName) -> anyhow::Result<()> {
+        if self
+            .choices
             .iter()
             .find(|choice| &choice.name == target)
             .is_some()
+        {
+            Ok(())
+        } else {
+            Err(anyhow::anyhow!("Invalid choice name"))
+        }
     }
 
-    pub(crate) fn update_account_choice(
+    pub(crate) fn update_final_answer(
         &mut self,
         account_id: AccountId,
         choice: ChoiceName,
     ) -> anyhow::Result<()> {
-        if !self.contains_choice(&choice) {
-            return Err(anyhow::anyhow!("Invalid choice name"));
+        if self.status != PollStatus::Open {
+            return Err(anyhow::anyhow!("Poll is not open"));
         }
 
-        self.account_choices.insert(account_id, choice);
+        self.check_contains_choice(&choice)?;
+
+        let answer = Answer::new(&account_id, &self.id, choice);
+        self.final_answers.insert(account_id, answer);
+
         Ok(())
     }
 
@@ -100,9 +110,7 @@ impl Poll {
             return Err(anyhow::anyhow!("Poll is already resolved"));
         }
 
-        if !self.contains_choice(&resolved_choice_name) {
-            return Err(anyhow::anyhow!("Invalid resolved_choice_name"));
-        }
+        self.check_contains_choice(&resolved_choice_name)?;
 
         self.resolved_choice_name = Some(resolved_choice_name);
         Ok(())
