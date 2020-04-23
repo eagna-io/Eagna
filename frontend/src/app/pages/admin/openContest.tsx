@@ -12,9 +12,14 @@ interface Props {
 }
 
 export const OpenContest: React.FC<Props> = ({ contests }) => {
+  const [contest, setContest] = React.useState<Contest | undefined>();
   return (
     <AdminTemplate>
-      <ContestIdInput />
+      <ContestIdInput
+          onFetchContest={contest => {
+          setContest(contest);
+        }}
+      />
       <Table>
         <Tr>
           <Th align="left">カテゴリー</Th>

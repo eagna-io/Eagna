@@ -3,13 +3,14 @@ import styled from "styled-components";
 
 import * as color from "app/components/color";
 import * as contestApi from "infra/http/contest";
-import { Poll } from "model/poll";
 import { Contest } from "model/contest";
 
-export const ContestIdInput: React.FC = () => {
+interface Props {
+  onFetchContest: (contest: Contest) => void;
+}
+
+export const ContestIdInput: React.FC<Props> = ({ onFetchContest }) => {
   const [contestId, setContestId] = React.useState("");
-  const [contest, setContest] = React.useState<Contest | undefined>();
-  const [poll, setPoll] = React.useState<Poll | undefined>();
   return (
     <Container>
       <IdTag>コンテストId</IdTag>
@@ -20,17 +21,18 @@ export const ContestIdInput: React.FC = () => {
             contestApi
               .get(contestId)
               .then(res => {
-                setContest(res);
-                const poll = [...res.polls]
-                  .sort((a, b) => b.idx - a.idx) // DESC
-                  .find(
-                    poll =>
-                      poll.status === "Closed" &&
-                      poll.resolved_choice === undefined
-                  );
-                if (poll) {
-                  setPoll(poll);
-                }
+                onFetchContest(res)
+                // setContest(res);
+                // const poll = [...res.polls]
+                //   .sort((a, b) => b.idx - a.idx) // DESC
+                //   .find(
+                //     poll =>
+                //       poll.status === "Closed" &&
+                //       poll.resolved_choice === undefined
+                //   );
+                // if (poll) {
+                //   setPoll(poll);
+                // }
               })
               .catch(e => {
                 console.error(e);
