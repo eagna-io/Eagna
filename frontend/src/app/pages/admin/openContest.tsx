@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 import * as color from "app/components/color";
 import { Contest } from "model/contest";
+import { Poll } from "model/poll";
 
 import { AdminTemplate } from "./components/template/admin";
 import { ContestIdInput } from "./components/organisms/contestIdInput";
@@ -13,11 +14,15 @@ interface Props {
 
 export const OpenContest: React.FC<Props> = ({ contests }) => {
   const [contest, setContest] = React.useState<Contest | undefined>();
+  const [poll, setPoll] = React.useState<Poll | undefined>();
   return (
     <AdminTemplate>
       <ContestIdInput
-          onFetchContest={contest => {
+        onFetched={(contest, poll) => {
           setContest(contest);
+          if (poll) {
+            setPoll(poll);
+          }
         }}
       />
       <Table>
