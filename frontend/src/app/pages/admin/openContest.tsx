@@ -8,24 +8,13 @@ import { Poll } from "model/poll";
 import { AdminTemplate } from "./components/template/admin";
 import { ContestIdInput } from "./components/organisms/contestIdInput";
 
-interface Props {
-  contests: Contest[];
-}
-
-export const OpenContest: React.FC<Props> = ({ contests }) => {
+export const OpenContest: React.FC = () => {
   const [contest, setContest] = React.useState<Contest | undefined>();
-  const [poll, setPoll] = React.useState<Poll | undefined>();
   return (
     <AdminTemplate>
       <ContestIdInput
-        onFetched={(contest, polls) => {
+        onFetched={contest => {
           setContest(contest);
-          // if (polls) {
-          //   const poll = [...polls]
-          //   if (poll) {
-          //     setPoll(poll);
-          //   } 
-          // }
         }}
       />
       <Table>
@@ -35,7 +24,7 @@ export const OpenContest: React.FC<Props> = ({ contests }) => {
           <Th align="center">開始時刻</Th>
           <Th align="center">OPEN</Th>
         </Tr>
-        {contests.map(contest => (
+        { contest ? 
           <Tr>
             <Td align="left">{contest.category}</Td>
             <Td align="left">{contest.title}</Td>
@@ -43,8 +32,8 @@ export const OpenContest: React.FC<Props> = ({ contests }) => {
             <Td align="center">
               <Submit disabled={contest.status !== "Upcoming"}>OPEN</Submit>
             </Td>
-          </Tr>
-        ))}
+          </Tr> : null
+        }
       </Table>
     </AdminTemplate>
   );
@@ -73,7 +62,7 @@ const Td = styled.td<{ align: string }>`
   text-align: ${props => props.align};
 `;
 
-const Submit = styled.button<{ disabled: boolean }>`
+const Submit = styled.button`
   width: 50px;
   height: 20px;
   padding: 4px 8px;

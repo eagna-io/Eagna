@@ -7,7 +7,7 @@ import { Contest } from "model/contest";
 import { Poll } from "model/poll";
 
 interface Props {
-  onFetched: (contest: Contest, poll: Poll[] | undefined) => void;
+  onFetched: (contest: Contest, poll: Poll[]) => void;
 }
 
 export const ContestIdInput: React.FC<Props> = ({ onFetched }) => {
