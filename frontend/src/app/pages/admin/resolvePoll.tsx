@@ -41,17 +41,19 @@ export const ResolvePoll: React.FC = () => {
   return (
     <AdminTemplate>
       <ContestIdInput
-        onFetchContest={(contest) => {
+        onFetched={(contest, polls) => {
           setContest(contest);
-          const poll = [...contest.polls]
-          .sort((a, b) => b.idx - a.idx) // DESC
-          .find(
-            poll =>
-              poll.status === "Closed" &&
-              poll.resolved_choice === undefined
-          );
-          if (poll) {
-            setPoll(poll);
+          if (polls) {
+            const poll = [...polls]
+            .sort((a, b) => b.idx - a.idx) // DESC
+            .find(
+              poll =>
+                poll.status === "Closed" &&
+                poll.resolved_choice === undefined
+            );
+            if (poll) {
+              setPoll(poll);
+            }
           }
         }}
       />
