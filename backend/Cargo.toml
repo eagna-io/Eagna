@@ -4,6 +4,7 @@ members = [
   "crop_domain",
   "domain",
   "infra",
+  "primitive",
   "crop_infra",
   "crop_primitive",
   "tools"
