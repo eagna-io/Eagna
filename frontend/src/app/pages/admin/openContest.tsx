@@ -24,7 +24,7 @@ export const OpenContest: React.FC = () => {
           <Th align="center">開始時刻</Th>
           <Th align="center">OPEN</Th>
         </Tr>
-        { contest ? 
+        {contest ?
           <Tr>
             <Td align="left">{contest.category}</Td>
             <Td align="left">{contest.title}</Td>
