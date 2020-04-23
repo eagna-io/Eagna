@@ -4,13 +4,12 @@ import styled from "styled-components";
 import * as color from "app/components/color";
 import * as contestApi from "infra/http/contest";
 import { Contest } from "model/contest";
-import { Poll } from "model/poll";
 
 interface Props {
-  onFetched: (contest: Contest, poll: Poll | undefined) => void;
+  onFetchContest: (contest: Contest) => void;
 }
 
-export const ContestIdInput: React.FC<Props> = ({ onFetched }) => {
+export const ContestIdInput: React.FC<Props> = ({ onFetchContest }) => {
   const [contestId, setContestId] = React.useState("");
   return (
     <Container>
@@ -22,15 +21,18 @@ export const ContestIdInput: React.FC<Props> = ({ onFetched }) => {
             contestApi
               .get(contestId)
               .then(res => {
+                onFetchContest(res)
                 // setContest(res);
-                const poll = [...res.polls]
-                  .sort((a, b) => b.idx - a.idx) // DESC
-                  .find(
-                    poll =>
-                      poll.status === "Closed" &&
-                      poll.resolved_choice === undefined
-                  );
-                onFetched(res, poll)
+                // const poll = [...res.polls]
+                //   .sort((a, b) => b.idx - a.idx) // DESC
+                //   .find(
+                //     poll =>
+                //       poll.status === "Closed" &&
+                //       poll.resolved_choice === undefined
+                //   );
+                // if (poll) {
+                //   setPoll(poll);
+                // }
               })
               .catch(e => {
                 console.error(e);
