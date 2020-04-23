@@ -15,6 +15,7 @@ import { ResolvePoll } from "./pages/admin/resolvePoll";
 import { AdminLogin } from "./pages/admin/login";
 import { CreateContest } from "./pages/admin/createContest";
 import { CloseContest } from "./pages/admin/closeContest";
+import { OpenContest } from "./pages/admin/openContest";
 
 const App: FC = () => {
   return (
@@ -70,6 +71,11 @@ const AppRouter: FC = () => (
         exact
         render={() => <CloseContest contests={[]}/>}
       />
+      <Route
+        path="/admin/contest/open"
+        exact
+        render={() => <OpenContest />}
+      />
       <Redirect to="/" />
     </Switch>
   </Router>
@@ -77,23 +83,23 @@ const AppRouter: FC = () => (
 
 const contests = [
   {
+    id: "1",
     category: "NBA（バスケ）",
     title: "Los Angels Lakers vs Golden State Warriors",
-    startAt: "2020.06.01｜11:00",
-    status: "upcoming" as const
+    status: "Upcoming" as const
   },
   {
+    id: "2",
     category: "NBA（バスケ）",
     title: "Los Angels Lakers vs Golden State Warriors",
-    startAt: "2020.06.01｜11:00",
-    status: "open" as const
+    status: "Open" as const
   },
   {
+    id: "3",
     category: "NBA（バスケ）",
     title: "Los Angels Lakers vs Golden State Warriors",
-    startAt: "2020.06.01｜11:00",
-    status: "closed" as const
-  },
+    status: "Closed" as const
+  }
 ];
 
 const GlobalStyle = createGlobalStyle`
