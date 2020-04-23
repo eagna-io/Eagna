@@ -1,15 +1,43 @@
 use super::{
     schema::{answers, choices, contests, polls},
     types::{ContestStatus, PollStatus},
-    Connection,
+    {Connection, Postgres, GLOBAL_PG},
 };
+use async_trait::async_trait;
 use chrono::{DateTime, Duration, Utc};
 use diesel::prelude::*;
 use domain::{account::*, contest::*};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-pub fn find_contest_by_id(conn: &Connection, id: ContestId) -> anyhow::Result<Option<Contest>> {
+pub struct ContestRepository {
+    pg: Postgres,
+}
+
+impl ContestRepository {
+    pub fn new() -> Self {
+        ContestRepository {
+            pg: GLOBAL_PG.as_ref().clone(),
+        }
+    }
+}
+
+#[async_trait]
+impl domain::contest::ContestRepository for ContestRepository {
+    async fn find_by_id(&mut self, id: ContestId) -> anyhow::Result<Option<Contest>> {
+        self.pg
+            .try_with_conn(move |conn| find_by_id(&conn, id))
+            .await
+    }
+
+    async fn save(&mut self, contest: Contest) -> anyhow::Result<()> {
+        self.pg
+            .try_with_conn(move |conn| save(&conn, &contest))
+            .await
+    }
+}
+
+fn find_by_id(conn: &Connection, id: ContestId) -> anyhow::Result<Option<Contest>> {
     let queried_contest = match contests::table
         .left_join(polls::table)
         .filter(contests::id.eq(id.as_ref()))
@@ -117,7 +145,7 @@ struct QueriedContest {
  * Save
  * ==========
  */
-pub fn save_contest(conn: &Connection, contest: &Contest) -> anyhow::Result<()> {
+fn save(conn: &Connection, contest: &Contest) -> anyhow::Result<()> {
     // Contest
     let new_contest = NewContest {
         id: contest.id.as_ref(),

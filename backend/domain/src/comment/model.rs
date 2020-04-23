@@ -1,15 +1,26 @@
 use crate::account::AccountId;
 use crate::contest::{AnswerId, Contest, ContestId, ContestStatus};
 use chrono::{DateTime, Utc};
+use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Comment {
-    contest_id: ContestId,
-    account_id: AccountId,
-    comment: String,
+    pub id: CommentId,
+    pub contest_id: ContestId,
+    pub account_id: AccountId,
+    pub comment: String,
     /// Comment作成時のAccountの回答
-    answer_id: Option<AnswerId>,
-    created_at: DateTime<Utc>,
+    pub answer_id: Option<AnswerId>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CommentId(pub Uuid);
+
+impl CommentId {
+    fn new() -> Self {
+        CommentId(Uuid::new_v4())
+    }
 }
 
 impl Comment {
@@ -35,6 +46,7 @@ impl Comment {
             .map(|answer| answer.id);
 
         Ok(Comment {
+            id: CommentId::new(),
             contest_id: contest.id,
             account_id,
             comment,

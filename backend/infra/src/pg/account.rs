@@ -1,9 +1,34 @@
-use super::{schema::accounts, Connection};
+use super::{
+    schema::accounts,
+    {Connection, Postgres, GLOBAL_PG},
+};
+use async_trait::async_trait;
 use diesel::prelude::*;
 use domain::account::Account;
 use uuid::Uuid;
 
-pub(crate) fn save_account(conn: &Connection, account: &Account) -> anyhow::Result<()> {
+pub struct AccountRepository {
+    pg: Postgres,
+}
+
+impl AccountRepository {
+    pub fn new() -> Self {
+        AccountRepository {
+            pg: GLOBAL_PG.as_ref().clone(),
+        }
+    }
+}
+
+#[async_trait]
+impl domain::account::AccountRepository for AccountRepository {
+    async fn save(&mut self, account: Account) -> anyhow::Result<()> {
+        self.pg
+            .try_with_conn(move |conn| save(&conn, &account))
+            .await
+    }
+}
+
+fn save(conn: &Connection, account: &Account) -> anyhow::Result<()> {
     let new = NewAccount {
         id: account.id.as_ref(),
         name: account.name.as_str(),

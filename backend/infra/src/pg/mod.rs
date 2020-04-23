@@ -1,24 +1,53 @@
-use async_trait::async_trait;
-use domain::account::{Account, AccountRepository};
-use domain::contest::{Contest, ContestId, ContestRepository};
+use lazycell::AtomicLazyCell;
 
 mod account;
+mod comment;
 mod contest;
 #[allow(unused_imports)]
 mod schema;
 pub mod types;
 
-use account::save_account;
-use contest::{find_contest_by_id, save_contest};
+pub use account::AccountRepository;
+pub use comment::CommentRepository;
+pub use contest::ContestRepository;
 
 use diesel::{
     pg::PgConnection,
     r2d2::{ConnectionManager, Pool as PgPool, PooledConnection},
 };
 
+pub fn initialize_global_pg(url: impl Into<String>) {
+    let pg = Postgres::new(url);
+    GLOBAL_PG
+        .inner
+        .fill(pg)
+        .map_err(drop)
+        .expect("Already initialized")
+}
+
+pub static GLOBAL_PG: GlobalPostgres = GlobalPostgres {
+    inner: AtomicLazyCell::NONE,
+};
+
+pub struct GlobalPostgres {
+    inner: AtomicLazyCell<Postgres>,
+}
+
+impl AsRef<Postgres> for GlobalPostgres {
+    fn as_ref(&self) -> &Postgres {
+        self.inner.borrow().unwrap()
+    }
+}
+
+/*
+ * =========
+ * Internals
+ * =========
+ */
 type Connection = PooledConnection<ConnectionManager<PgConnection>>;
 
-pub struct Postgres {
+#[derive(Clone)]
+struct Postgres {
     pool: PgPool<ConnectionManager<PgConnection>>,
 }
 
@@ -44,26 +73,5 @@ impl Postgres {
         T: Send + 'static,
     {
         self.with_conn(func).await?
-    }
-}
-
-#[async_trait]
-impl AccountRepository for Postgres {
-    async fn save(&mut self, account: Account) -> anyhow::Result<()> {
-        self.try_with_conn(move |conn| save_account(&conn, &account))
-            .await
-    }
-}
-
-#[async_trait]
-impl ContestRepository for Postgres {
-    async fn find_by_id(&mut self, id: ContestId) -> anyhow::Result<Option<Contest>> {
-        self.try_with_conn(move |conn| find_contest_by_id(&conn, id))
-            .await
-    }
-
-    async fn save(&mut self, contest: Contest) -> anyhow::Result<()> {
-        self.try_with_conn(move |conn| save_contest(&conn, &contest))
-            .await
     }
 }

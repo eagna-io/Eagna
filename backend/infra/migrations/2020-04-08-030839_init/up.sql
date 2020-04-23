@@ -76,8 +76,7 @@ CREATE TABLE answers (
 
 CREATE TABLE comments (
   id          UUID PRIMARY KEY,
-  contest_id  UUID, /* Contestに紐づくCommentの場合 */
-  poll_id     UUID, /* Pollに紐づくCommentの場合 */
+  contest_id  UUID,
   account_id  UUID NOT NULL,
   answer_id   UUID, /* コメントをしたときのAnswer */
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -85,8 +84,6 @@ CREATE TABLE comments (
 
   CONSTRAINT comment_contest_fkey FOREIGN KEY (contest_id)
     REFERENCES contests (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT comment_poll_fkey FOREIGN KEY (poll_id)
-    REFERENCES polls (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT comment_account_fkey FOREIGN KEY (account_id)
     REFERENCES accounts (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT comment_answer_fkey FOREIGN KEY (answer_id)
