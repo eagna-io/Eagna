@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
 import {
   WildWatermelon,
@@ -48,7 +49,7 @@ pollがresolve && 不正解 => WrongModal
     return (
       <Container>
         <Header>
-          <Logo />
+          <Link to="/"><Logo /></Link>
           <TimerComponent timer={undefined} />
           <Score numer={2} denom={3} />
         </Header>
