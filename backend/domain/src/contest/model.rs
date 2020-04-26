@@ -1,19 +1,25 @@
 use super::poll::{Choice, ChoiceName, Poll};
 use crate::account::AccountId;
 use chrono::{DateTime, Duration, Utc};
+use schemars::JsonSchema;
+use serde::Serialize;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Contest {
     pub id: ContestId,
     pub status: ContestStatus,
     pub title: String,
     pub category: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub event_start_at: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub current_poll: Option<Poll>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, JsonSchema)]
+#[serde(transparent)]
 pub struct ContestId(pub Uuid);
 
 impl ContestId {
@@ -26,7 +32,8 @@ impl ContestId {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub enum ContestStatus {
     Upcoming,
     Open,
@@ -109,6 +116,10 @@ impl Contest {
     ) -> anyhow::Result<()> {
         self.current_poll_mut_or_err()?
             .update_final_answer(account_id, choice)
+    }
+
+    pub fn close_poll(&mut self) -> anyhow::Result<()> {
+        self.current_poll_mut_or_err()?.close()
     }
 
     pub fn resolve_poll(&mut self, resolved_choice_name: ChoiceName) -> anyhow::Result<()> {

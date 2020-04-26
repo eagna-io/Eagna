@@ -1,23 +1,38 @@
 use super::{Answer, ContestId};
 use crate::account::AccountId;
 use chrono::Duration;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Poll {
     pub id: PollId,
     pub contest_id: ContestId,
     pub status: PollStatus,
     pub idx: usize,
     pub title: String,
+    #[serde(serialize_with = "serialize_duration")]
+    #[serde(rename = "duration_sec")]
+    #[schemars(with = "i64")]
     pub duration: Duration,
     pub choices: Vec<Choice>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub resolved_choice_name: Option<ChoiceName>,
     pub final_answers: HashMap<AccountId, Answer>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+fn serialize_duration<S>(value: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::ser::Serializer,
+{
+    value.num_seconds().serialize(serializer)
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, JsonSchema)]
+#[serde(transparent)]
 pub struct PollId(pub Uuid);
 
 impl PollId {
@@ -26,22 +41,26 @@ impl PollId {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub enum PollStatus {
     Open,
     Closed,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Choice {
     pub name: ChoiceName,
     pub color: ChoiceColor,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(transparent)]
 pub struct ChoiceName(pub String);
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(transparent)]
 pub struct ChoiceColor(pub String);
 
 impl Poll {
@@ -102,6 +121,17 @@ impl Poll {
         let answer = Answer::new(&account_id, &self.id, choice);
         self.final_answers.insert(account_id, answer);
 
+        Ok(())
+    }
+
+    pub(crate) fn close(&mut self) -> anyhow::Result<()> {
+        if self.status != PollStatus::Open {
+            return Err(anyhow::anyhow!("Poll is not open"));
+        }
+
+        // TODO
+        // 制限時間がまだ経過していなかったらcloseしない
+        self.status = PollStatus::Closed;
         Ok(())
     }
 

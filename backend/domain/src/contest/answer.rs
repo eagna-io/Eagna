@@ -3,11 +3,14 @@ use crate::{
     contest::{ChoiceName, PollId},
 };
 use chrono::{DateTime, Utc};
+use schemars::JsonSchema;
+use serde::Serialize;
 use uuid::Uuid;
 
 /// アカウントのPollに対する一回の回答アクションを表現するモデル
 /// 同一アカウントが同一Pollに対して複数作成することもある。
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Answer {
     pub id: AnswerId,
     pub account_id: AccountId,
@@ -16,7 +19,8 @@ pub struct Answer {
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, JsonSchema)]
+#[serde(transparent)]
 pub struct AnswerId(pub Uuid);
 
 impl AnswerId {
