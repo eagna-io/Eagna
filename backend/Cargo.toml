@@ -2,6 +2,10 @@
 members = [
   "crop_server",
   "crop_domain",
+  "primitive",
+  "domain",
+  "app",
+  "infra",
   "crop_infra",
   "crop_primitive",
   "tools"
