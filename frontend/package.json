@@ -13,7 +13,7 @@
     "@types/styled-components": "^5.0.1",
     "apexcharts": "^3.16.0",
     "immer": "^6.0.2",
-    "moment": "^2.24.0",
+    "moment": "^2.25.3",
     "react": "^16.13.1",
     "react-dom": "^16.8.6",
     "react-redux": "^7.1.1",
